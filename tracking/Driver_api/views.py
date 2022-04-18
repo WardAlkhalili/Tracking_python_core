@@ -18,8 +18,9 @@ from itertools import chain
 def driver_login(request,pincode):
 
     if request.method == 'GET':
-        
+
         school_name = Manager.pincode(pincode)
+        
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  driver_id,bus_no  from fleet_vehicle WHERE bus_pin = %s",[pincode])
             columns = (x.name for x in cursor.description)
@@ -34,7 +35,17 @@ def driver_login(request,pincode):
             cursor.execute("select id,name from transport_round WHERE driver_id = %s",[data_id_bus[0][0]])    
             columns2 = (x.name for x in cursor.description)        
             rounds_name = cursor.fetchall()
-
+            
+            # *------------------------------------------------------------------------------------------------*
+            # Details for login setting
+            
+            cursor.execute("""
+            
+            select nearby_distance,lat,lng,battery_low,location_refresh_rate,timezone,utc_offset,speed_limit_watch,standstill_watch,notify_if_driver_check_in_out_geo_fence from transport_setting ORDER BY ID DESC LIMIT 1
+            
+            """)    
+            columns2 = (x.name for x in cursor.description)        
+            login_details = cursor.fetchall()
 
             # *------------------------------------------------------------------------------------------------*
             cursor.execute("select id,round_id,day_id from round_schedule WHERE round_id = %s",[rounds_name[0][0]])    
@@ -55,13 +66,13 @@ def driver_login(request,pincode):
                 day_list.append(list(day_name))
            
 
-            result = {
-                'driver_ID Bus_no' : str(data_id_bus)[1:-1],
-                'driver_name' : str(driver_name)[1:-1],
-                'list_days': str(day_list)[1:-1],
-                'rounds_name':str(rounds_name)[1:-1]
+            # result = {
+            #     'driver_ID Bus_no' : str(data_id_bus)[1:-1],
+            #     'driver_name' : str(driver_name)[1:-1],
+            #     'list_days': str(day_list)[1:-1],
+            #     'rounds_name':str(rounds_name)[1:-1]
 
-            }        
+            # }        
 
 
             # *------------------------------------------------------------------------------------------------*
@@ -89,6 +100,49 @@ def driver_login(request,pincode):
             
             student_name_transferred_list = str(student_name_transferred)[1:-1]
 
-        return Response(student_transferred_list)
+
+
+
+            result = {
+                    'nearby_distance ' : login_details[0][0],
+                    'lat' : login_details[0][1],
+                    'lng': login_details[0][2],
+                    'battery_low':login_details[0][3],
+                    'location_refresh_rate':login_details[0][4],
+                    'timezone':login_details[0][5],
+                    'utc_offset':login_details[0][6],
+                    'speed_limit_watch':login_details[0][7],
+                    'standstill_watch': login_details[0][8],
+                    'notify_if_driver_check_in_out_geo_fence':login_details[0][9]
+            }
+
+
+        return Response(result)
+
 
 # cursor.execute("select id,name from transport_round WHERE id = %s",[y])
+
+
+# def login_settings(self,pincode):
+        
+#     if request.method == 'GET':
+
+#         school_name = Manager.pincode(pincode)
+#         with connections[school_name].cursor() as cursor:
+#             cursor.execute("select nearby_distance,lat,lng,battery_low,location_refresh_rate,timezone,utc_offset from transport_setting ORDER BY ID DESC LIMIT 1")    
+#             columns2 = (x.name for x in cursor.description)        
+#             login_details = cursor.fetchall()
+#             login_details=str(login_details)[1:-1]
+                
+#             result = {
+#                     'nearby_distance ' : str(nearby_distance)[1:-1],
+#                     'lat' : str(lat)[1:-1],
+#                     'lng': str(lng)[1:-1],
+#                     'battery_low':str(battery_low)[1:-1],
+#                     'location_refresh_rate':str(location_refresh_rate)[1:-1],
+#                     'timezone':str(timezone)[1:-1],
+#                     'utc_offset':str(utc_offset)[1:-1]
+#                 }
+
+#         return Response(login_details)
+    
