@@ -21,8 +21,7 @@ def driver_login(request):
     if request.method == 'POST':
         pincode = request.data.get('pincode')
         school_name = Manager.pincode(pincode)
-        print(request.data.get('pincode'))
-        print(school_name,'school')
+
         
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  driver_id,bus_no,id  from fleet_vehicle WHERE bus_pin = %s",[pincode])
