@@ -5,5 +5,5 @@ from Driver_api import views
 
 urlpatterns = [
     path('generate-api-token/', obtain_auth_token),
-    path('rest/driver/<str:pincode>', views.driver_login),
+    path('login/', views.driver_login),
 ]

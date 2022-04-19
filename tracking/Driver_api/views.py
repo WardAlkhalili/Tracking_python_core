@@ -10,19 +10,22 @@ from django.core.serializers import serialize
 from collections import ChainMap
 from rest_framework import status
 from itertools import chain
+import jwt
 
 # Create your views here.
 
 
-@api_view(['GET'])
-def driver_login(request,pincode):
+@api_view(['POST'])
+def driver_login(request):
 
-    if request.method == 'GET':
-
+    if request.method == 'POST':
+        pincode = request.data.get('pincode')
         school_name = Manager.pincode(pincode)
+        print(request.data.get('pincode'))
+        print(school_name,'school')
         
         with connections[school_name].cursor() as cursor:
-            cursor.execute("select  driver_id,bus_no  from fleet_vehicle WHERE bus_pin = %s",[pincode])
+            cursor.execute("select  driver_id,bus_no,id  from fleet_vehicle WHERE bus_pin = %s",[pincode])
             columns = (x.name for x in cursor.description)
             data_id_bus = cursor.fetchall()
 
@@ -41,11 +44,15 @@ def driver_login(request,pincode):
             
             cursor.execute("""
             
-            select nearby_distance,lat,lng,battery_low,location_refresh_rate,timezone,utc_offset,speed_limit_watch,standstill_watch,notify_if_driver_check_in_out_geo_fence from transport_setting ORDER BY ID DESC LIMIT 1
+            select nearby_distance,lat,lng,battery_low,location_refresh_rate,timezone,utc_offset,speed_limit_watch,standstill_watch,notify_if_driver_check_in_out_geo_fence,notify_on_battery_low_of_drivers_app,notify_it_driver_turns_off_gps,user_speed_exceeded,user_no_move_time_exceeded from transport_setting ORDER BY ID DESC LIMIT 1
             
             """)    
-            columns2 = (x.name for x in cursor.description)        
+            columns = (x.name for x in cursor.description)        
             login_details = cursor.fetchall()
+
+            cursor.execute('select name,phone  from  res_company')
+            columns_login = (x.name for x in cursor.description)
+            company_login_info = cursor.fetchall()
 
             # *------------------------------------------------------------------------------------------------*
             cursor.execute("select id,round_id,day_id from round_schedule WHERE round_id = %s",[rounds_name[0][0]])    
@@ -65,16 +72,6 @@ def driver_login(request,pincode):
                 day_name = cursor.fetchall()
                 day_list.append(list(day_name))
            
-
-            # result = {
-            #     'driver_ID Bus_no' : str(data_id_bus)[1:-1],
-            #     'driver_name' : str(driver_name)[1:-1],
-            #     'list_days': str(day_list)[1:-1],
-            #     'rounds_name':str(rounds_name)[1:-1]
-
-            # }        
-
-
             # *------------------------------------------------------------------------------------------------*
             # 1-List of active round
         
@@ -100,22 +97,124 @@ def driver_login(request,pincode):
             
             student_name_transferred_list = str(student_name_transferred)[1:-1]
 
-
-
-
             result = {
+                    'status':'ok',
+                    'school_phone': company_login_info[0][1],
+                    'school_name': company_login_info[0][0],
+                    'school_db': school_name,
+                    'school_id': None,
                     'nearby_distance ' : login_details[0][0],
-                    'lat' : login_details[0][1],
-                    'lng': login_details[0][2],
-                    'battery_low':login_details[0][3],
+                    'school_lat' : login_details[0][1],
+                    'school_lng': login_details[0][2],
                     'location_refresh_rate':login_details[0][4],
                     'timezone':login_details[0][5],
                     'utc_offset':login_details[0][6],
+                    'bus_id':data_id_bus[0][2],
+                    'bus_number': [1][0],
+                    'driver_id': data_id_bus[0][0],
+                    
+                    'notifications_settings':
+                    {
                     'speed_limit_watch':login_details[0][7],
                     'standstill_watch': login_details[0][8],
-                    'notify_if_driver_check_in_out_geo_fence':login_details[0][9]
-            }
+                    'notify_if_driver_check_in_out_geo_fence':login_details[0][9],
+                    'notify_on_battery_low_of_drivers_app': login_details[0][10],
+                    'notify_it_driver_turns_off_gps':login_details[0][11]},
 
+                    'notifications_thresholds':{
+                        'battery_low':login_details[0][3],
+                        'user_speed_exceeded':login_details[0][12],
+                        'user_no_move_time_exceeded':login_details[0][13]
+                    },
+
+                    "notifications_text":[
+                        {
+                        "type": "drop-off",
+                        "actions": {
+                            "near_by_ar": " @student_name على وصول الى المنزل",
+                            "no-show_ar": "الطالب @student_name لم يصعد للحافلة في الجولة @rounds_name ",
+                            "check_in_ar": " @student_name صعد الى الحافلة",
+                            "check_out_ar": " @student_name وصل الى المنزل",
+                            "near_by_en": " @student_name  is about to arrive home.",
+                            "no-show_en": " @student_name  did not show today in  @round_name ",
+                            "check_in_en": " @student_name  just entered the bus.",
+                            "check_out_en": " @student_name   just reached home."
+                            }
+                        },
+
+
+                        {
+                            "type": "pick-up",
+                            "actions": {
+                                "near_by_ar": "انت التالي، الحافلة اقتربت منك، الرجاء أن يكون @student_name مستعداَ",
+                                "absent_ar": "الطالب @student_name غائب اليوم",
+                                "check_in_ar": "  @student_name صعد الى الحافلة",
+                                "check_out_ar": "  @student_name وصل الى المدرسة",
+                                "near_by_en": "You are next in route. Please have  @student_name ready",
+                                "absent_en": " @student_name  is absent today",
+                                "check_in_en": " @student_name  has entered the bus",
+                                "check_out_en": " @student_name  just reached the school"
+                            }
+                            }
+
+                    ],
+                    "round_cancellation_messages": [
+                            {
+                            "type": "cancel",
+                            "actions": [
+                                "Round cancellation- Round time changed.",
+                                "Round cancelled by the school administrator.",
+                                "Malfunction in the bus."
+                            ]
+                            },
+                            {
+                            "type": "absent",
+                            "actions": [
+                                "Absent- We have been informed verbally by the parent.",
+                                "We waited for long time with no show."
+                            ]
+                            },
+                            {
+                            "type": "no_show",
+                            "actions": [
+                                "No show:- Picked up by parent.",
+                                "Left in other round",
+                                "Absent the whole day",
+                                "We waited for long time with no show."
+                            ]
+                            }
+                        ],
+
+                        "round_cancellation_messages": [
+                                {
+                                "type": "cancel",
+                                "actions": [
+                                    "Round cancellation- Round time changed.",
+                                    "Round cancelled by the school administrator.",
+                                    "Malfunction in the bus."
+                                ]
+                                },
+                                {
+                                "type": "absent",
+                                "actions": [
+                                    "Absent- We have been informed verbally by the parent.",
+                                    "We waited for long time with no show."
+                                ]
+                                },
+                                {
+                                "type": "no_show",
+                                "actions": [
+                                    "No show:- Picked up by parent.",
+                                    "Left in other round",
+                                    "Absent the whole day",
+                                    "We waited for long time with no show."
+                                ]
+                                }
+                            ],
+
+                            "geofenses": [],
+
+            }
 
         return Response(result)
 
