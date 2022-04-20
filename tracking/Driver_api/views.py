@@ -10,8 +10,8 @@ from django.core.serializers import serialize
 from collections import ChainMap
 from rest_framework import status
 from itertools import chain
-import jwt
-
+from rest_framework.authtoken.models import Token
+from django.contrib.auth.models import User
 # Create your views here.
 
 
@@ -21,9 +21,7 @@ def driver_login(request):
     if request.method == 'POST':
         pincode = request.data.get('pincode')
         school_name = Manager.pincode(pincode)
-        print(request.data.get('pincode'))
-        print(school_name,'school')
-        
+    
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  driver_id,bus_no,id  from fleet_vehicle WHERE bus_pin = %s",[pincode])
             columns = (x.name for x in cursor.description)
@@ -38,7 +36,14 @@ def driver_login(request):
             cursor.execute("select id,name from transport_round WHERE driver_id = %s",[data_id_bus[0][0]])    
             columns2 = (x.name for x in cursor.description)        
             rounds_name = cursor.fetchall()
-            
+
+
+            # Authentication
+            user = User.objects.all().first()
+            token_auth, created = Token.objects.get_or_create(user=user)
+            manager = Manager(token=token_auth,db_name=school_name,driver_id=data_id_bus[0][0])
+            manager.save()
+
             # *------------------------------------------------------------------------------------------------*
             # Details for login setting
             
@@ -53,6 +58,9 @@ def driver_login(request):
             cursor.execute('select name,phone  from  res_company')
             columns_login = (x.name for x in cursor.description)
             company_login_info = cursor.fetchall()
+
+
+
 
             # *------------------------------------------------------------------------------------------------*
             cursor.execute("select id,round_id,day_id from round_schedule WHERE round_id = %s",[rounds_name[0][0]])    
@@ -214,6 +222,9 @@ def driver_login(request):
 
                             "geofenses": [],
 
+                            'token': token_auth.key,
+
+
             }
 
         return Response(result)
@@ -245,3 +256,6 @@ def driver_login(request):
 
 #         return Response(login_details)
     
+{
+"pincode":"iksW6O4MR"
+}    
