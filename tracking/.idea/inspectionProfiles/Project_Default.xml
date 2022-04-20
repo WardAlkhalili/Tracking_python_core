@@ -1,0 +1,13 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="school_tracking.models.transport_round" />
+          <option value="school_transport.model.tracking_history.bus_Num" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
