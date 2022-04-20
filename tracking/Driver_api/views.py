@@ -22,6 +22,8 @@ def driver_login(request):
         pincode = request.data.get('pincode')
         school_name = Manager.pincode(pincode)
     
+
+        
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  driver_id,bus_no,id  from fleet_vehicle WHERE bus_pin = %s",[pincode])
             columns = (x.name for x in cursor.description)
