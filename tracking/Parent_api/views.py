@@ -57,7 +57,6 @@ def settings(request):
     elif  request.method == 'GET':
         school_name = Manager.pincode('iks')
         with connections[school_name].cursor() as cursor:
-
             cursor.execute("select  settings from school_parent WHERE id = %s", [2])
             columns = (x.name for x in cursor.description)
             data_id_bus = cursor.fetchall()
@@ -68,3 +67,35 @@ def settings(request):
             return Response(result)
 
 
+@api_view(['POST', 'GET'])
+def student_served(request):
+    if request.method == 'POST':
+        round_id = request.data.get('round_id')
+        student_id = request.data.get('student_id')
+        school_name = Manager.pincode('iks')
+        with connections[school_name].cursor() as cursor:
+            cursor.execute("select  settings from school_parent WHERE id = %s", [2])
+            columns = (x.name for x in cursor.description)
+            student_served = cursor.fetchall()
+            result = {'result': student_served}
+            return Response(result)
+    elif request.method == 'GET':
+            # import hashlib
+            #
+            # plaintext = 9872058209
+            # from hashlib import pbkdf2_hmac
+            # dk = pbkdf2_hmac('sha512', b'password', b'bad salt' * 2, plaintext)
+            #
+            # dk.hex()
+            # # instantiate sha3_256 object
+            # # d = hashlib.sha3_256(plaintext)
+            #
+            # # generate binary bash of "hello" string
+            # # hash = d.digest()
+            # print(dk.hex())
+
+            # # generate human readably hash of "hello" string
+            # hash = d.hexdigest()
+            # print(hash)
+            result = {'status': 'error'}
+            return Response(result)
