@@ -46,12 +46,11 @@ def settings(request):
 
         school_name = Manager.pincode('iks')
         with connections[school_name].cursor() as cursor:
-            settings = {
-                'notifications':notifications
-            }
+            y = json.dumps(notifications)
+            settings = "{\"notifications\":"+y+"}"
             cursor.execute(
                 "UPDATE public.school_parent SET settings=%s WHERE id=%s;",
-                [str(settings), 1])
+                [settings, 1])
             result = {
                 'status': 'ok', }
             return Response(result)
@@ -59,14 +58,13 @@ def settings(request):
         school_name = Manager.pincode('iks')
         with connections[school_name].cursor() as cursor:
 
-            cursor.execute("select  settings from school_parent WHERE id = %s", [1])
+            cursor.execute("select  settings from school_parent WHERE id = %s", [2])
             columns = (x.name for x in cursor.description)
             data_id_bus = cursor.fetchall()
+            if data_id_bus[0][0]:
+                data=json.loads(data_id_bus[0][0])
+                return Response(data)
+            result = {'status':'Empty'}
+            return Response(result)
 
-            print("ssssssssssssssssssssssss",data_id_bus[0][0])
-            print(type(data_id_bus))
-            # data=json.loads(data_id_bus[0][0])
-            # print(data)
-            result = {data_id_bus[0][0]}
-        return Response(result)
 
