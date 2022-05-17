@@ -16,7 +16,7 @@ from itertools import chain
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 import json
-
+import datetime
 # from ..Driver_api.models import *
 
 
@@ -72,12 +72,17 @@ def student_served(request):
     if request.method == 'POST':
         round_id = request.data.get('round_id')
         student_id = request.data.get('student_id')
+        datetime_c = datetime.datetime.now()
         school_name = Manager.pincode('iks')
         with connections[school_name].cursor() as cursor:
-            cursor.execute("select  settings from school_parent WHERE id = %s", [2])
+            cursor.execute("select  activity_type from student_history WHERE round_id = %s AND student_id = %s AND datetime = %s ", [round_id,student_id,datetime_c])
             columns = (x.name for x in cursor.description)
             student_served = cursor.fetchall()
-            result = {'result': student_served}
+            if student_served:
+                if student_served[0][0]=="out-school" or student_served[0][0]=="out":
+                    result = {'result': True}
+                    return Response(result)
+            result = {'result': False}
             return Response(result)
     elif request.method == 'GET':
             # import hashlib
