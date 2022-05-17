@@ -103,9 +103,12 @@ def student_pick_up(request):
                 date_t = cursor.fetchall()
                 if date_t:
                     if not (date_t[0][1].strftime('%Y-%m-%d') == datetime.datetime.now().strftime('%Y-%m-%d')):
+                        date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+
                         cursor.execute(
-                            "INSERT INTO  pickup_request (name, parent_id,date,source,state) VALUES (%s, %s,%s, %s,%s); ",
-                            [student_name[0][0],'1',datetime.datetime.now(),'app','draft'])
+                            "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id) VALUES (%s,%s,%s,%s,%s,%s); ",
+                            [r, student_name[0][0], 'family_member', 'app', 'draft', 1])
                         result = {'result': True}
                         return Response(result)
                     else:
@@ -123,13 +126,13 @@ def student_pick_up(request):
                             return Response(result)
                 else:
                     q="INSERT INTO  pickup_request (name,pick_up_by, parent_id,date,source,state) VALUES (%s, %s,%s, %s,%s); ",[student_name[0][0],'family_member', '1', datetime.datetime.now(), 'app', 'draft']
-                    print("qqqqqqqqqq",q)
+
                     date_string=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     r=datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
-                    print(r,type(date_string))
-                    cursor.execute(
-                        "INSERT INTO  pickup_request (name,pick_up_by, parent_id,date,source,state) VALUES (%s, %s,%s, %s,%s); ",
-                        [student_name[0][0],'family_member', 1, r, 'app', 'draft'])
+
+                    cursor.execute( "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id) VALUES (%s,%s,%s,%s,%s,%s); ",
+                        [r,student_name[0][0],'family_member','app','draft',1])
+
                     result = {'result': True}
                     return Response(result)
 

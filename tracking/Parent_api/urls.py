@@ -8,5 +8,6 @@ urlpatterns = [
     path('parents/feed-back/', views.feed_back),
     path('parents/settings/', views.settings),
     path('parents/is-student-served/', views.student_served),
+    path('parents/student-pick-up-status/', views.student_pick_up),
     # path('round-students-list/<int:round_id>', views.student_list),
 ]
