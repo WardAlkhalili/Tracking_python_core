@@ -85,22 +85,76 @@ def student_served(request):
             result = {'result': False}
             return Response(result)
     elif request.method == 'GET':
-            # import hashlib
-            #
-            # plaintext = 9872058209
-            # from hashlib import pbkdf2_hmac
-            # dk = pbkdf2_hmac('sha512', b'password', b'bad salt' * 2, plaintext)
-            #
-            # dk.hex()
-            # # instantiate sha3_256 object
-            # # d = hashlib.sha3_256(plaintext)
-            #
-            # # generate binary bash of "hello" string
-            # # hash = d.digest()
-            # print(dk.hex())
+            result = {'status': 'error'}
+            return Response(result)
 
-            # # generate human readably hash of "hello" string
-            # hash = d.hexdigest()
-            # print(hash)
+@api_view(['POST', 'GET'])
+def student_pick_up(request):
+        if request.method == 'POST':
+            status = request.data.get('status')
+            student_id = request.data.get('student_id')
+            school_name = Manager.pincode('iks')
+            with connections[school_name].cursor() as cursor:
+                cursor.execute("select  display_name_search from student_student WHERE id = %s", [student_id])
+                columns = (x.name for x in cursor.description)
+                student_name = cursor.fetchall()
+                cursor.execute("select  id,date,state from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1", [student_name[0][0],94])
+                columns = (x.name for x in cursor.description)
+                date_t = cursor.fetchall()
+                if date_t:
+                    if not (date_t[0][1].strftime('%Y-%m-%d') == datetime.datetime.now().strftime('%Y-%m-%d')):
+                        cursor.execute(
+                            "INSERT INTO  pickup_request (name, parent_id,date,source,state) VALUES (%s, %s,%s, %s,%s); ",
+                            [student_name[0][0],'1',datetime.datetime.now(),'app','draft'])
+                        result = {'result': True}
+                        return Response(result)
+                    else:
+                        if date_t[0][2]== 'waiting':
+                            cursor.execute(
+                                "UPDATE public.pickup_request SET state=%s WHERE id=%s;",
+                                ['done', date_t[0][0]])
+                            result = {'result': True}
+                            return Response(result)
+                        elif date_t[0][2]== 'draft':
+                            result = {'status': 'error'}
+                            return Response(result)
+                        elif date_t[0][2]== 'done':
+                            result = {'status': 'error'}
+                            return Response(result)
+                else:
+                    q="INSERT INTO  pickup_request (name,pick_up_by, parent_id,date,source,state) VALUES (%s, %s,%s, %s,%s); ",[student_name[0][0],'family_member', '1', datetime.datetime.now(), 'app', 'draft']
+                    print("qqqqqqqqqq",q)
+                    date_string=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    r=datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+                    print(r,type(date_string))
+                    cursor.execute(
+                        "INSERT INTO  pickup_request (name,pick_up_by, parent_id,date,source,state) VALUES (%s, %s,%s, %s,%s); ",
+                        [student_name[0][0],'family_member', 1, r, 'app', 'draft'])
+                    result = {'result': True}
+                    return Response(result)
+
+
+        elif request.method == 'GET':
+            # if request.headers:
+            #     if request.headers.get('Authorization'):
+            #         if 'Bearer' in request.headers.get('Authorization'):
+            #             au = request.headers.get('Authorization').replace('Bearer', '').strip()
+            #             db_name = Manager.objects.filter(token=au).values_list('db_name')
+            #             if db_name:
+            #                 for e in db_name:
+            #                     school_name = e[0]
+            d=datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')
+            school_name = Manager.pincode('iks')
+            result={}
+            with connections[school_name].cursor() as cursor:
+                cursor.execute(
+                    "select  name,state from pickup_request WHERE parent_id = %s AND date <= %s AND date >= %s",
+                    [1,datetime.datetime.now() ,datetime.datetime.strptime(d, '%Y-%m-%d %H:%M:%S')])
+                columns = (x.name for x in cursor.description)
+                date_t = cursor.fetchall()
+                studen_state = [dict(zip(columns, row)) for row in date_t]
+                for rec in range(len(date_t)):
+                    result[studen_state[rec]['name']] = {'status': studen_state[rec]['state']}
+                return Response(result)
             result = {'status': 'error'}
             return Response(result)
