@@ -66,7 +66,7 @@ def parent_login(request):
             }
 
         return Response(result)
-
+import datetime
 
 # from ..Driver_api.models import *
 
@@ -391,10 +391,9 @@ def kids_list(request):
                             return Response(result)
                     result = {'status': 'error'}
                     return Response(result)
-                result = {'status': 'error'}
-                return Response(result)
         result = {'status': 'error'}
         return Response(result)
     elif request.method == 'GET':
         result = {'status': 'error'}
         return Response(result)
+
