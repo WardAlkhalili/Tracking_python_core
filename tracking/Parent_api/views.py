@@ -64,7 +64,7 @@ def parent_login(request):
 
             }
     
-        return Response(response)
+        return Response(result)
 import datetime
 # from ..Driver_api.models import *
 
