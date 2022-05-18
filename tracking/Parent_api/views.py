@@ -16,8 +16,55 @@ from itertools import chain
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 import json
+import requests
 
-# from ..Driver_api.models import *
+@api_view(['POST'])
+def parent_login(request):
+    
+    if request.method == 'POST':
+        
+        password = request.data.get('password')
+        user_name = request.data.get('login')
+        school_name = request.data.get('school_name')
+        url="http://localhost:8888/web/session/authenticate"
+         
+        body=json.dumps({
+        "jsonrpc": "2.0",
+        "params": {
+            "db": school_name,
+            "login": user_name,
+            "password": password
+        }
+        })
+       
+        headers = {
+        'Content-Type': 'application/json',
+        }
+        response = requests.request("POST", url, headers=headers, data=body).json()
+        uid=response['result']['uid']
+        company_id = response['result']['company_id']
+        
+        with connections[response['result']['db']].cursor() as cursor:
+            
+            cursor.execute("select id from school_parent WHERE user_id = %s",[response['result']['uid']])    
+            columns2 = (x.name for x in cursor.description)        
+            parent_id = cursor.fetchall()
+
+            user = User.objects.all().first()
+            token_auth, created = Token.objects.get_or_create(user=user)
+            manager_parent = ManagerParent(token=token_auth,db_name=school_name,user_id=uid,parent_id=parent_id,school_id=company_id)
+            manager_parent.save()
+        
+            result = {
+                'db_name' : school_name,
+                'user_id': uid,
+                'parent_id':parent_id,
+                'token': token_auth.key,
+                'school_id' :company_id
+
+            }
+    
+        return Response(response)
 
 
 @api_view(['POST', 'GET'])

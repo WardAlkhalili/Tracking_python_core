@@ -6,10 +6,13 @@ from django.conf import settings
 import re
 
 
-class Manager(models.Model):
+class ManagerParent(models.Model):
+
     token = models.CharField(max_length=5000)
     db_name = models.CharField(max_length=5000)
-    driver_id = models.IntegerField()
+    user_id = models.CharField(max_length=5000)
+    parent_id = models.CharField(max_length=5000)
+    school_id = models.CharField(max_length=5000)
 
     def pincode(pin):
         p = re.sub(r'\d+', '', pin)

@@ -3,9 +3,9 @@ from rest_framework.authtoken.views import obtain_auth_token
 from Parent_api import views
 
 urlpatterns = [
-    # path('generate-api-token/', obtain_auth_token),
-    # path('login/', views.driver_login),
+    path('parents/login/', views.parent_login),
     path('parents/feed-back/', views.feed_back),
     path('parents/settings/', views.settings),
-    # path('round-students-list/<int:round_id>', views.student_list),
 ]
+
+# https://iks.staging.trackware.com/web/session/authenticate
