@@ -413,7 +413,7 @@ def student_list(request,round_id):
                             s=[ dict(zip(columns4, row))for row in student_student]
                             student_info = {}
                             for std in range(len(s)):
-                                print("pppppp",std)
+
                                 if s[std]:
                                     cursor.execute("select * from school_parent WHERE id = %s",
                                                    [s[std]['father_id']])
