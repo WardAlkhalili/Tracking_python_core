@@ -9,6 +9,7 @@ urlpatterns = [
     path('parents/is-student-served/', views.student_served),
     path('parents/student-pick-up-status/', views.student_pick_up),
     path('parents/kids_list', views.kids_list),
+    path('parents/kids_hstory', views.kids_hstory),
 ]
 
 # https://iks.staging.trackware.com/web/session/authenticate
