@@ -620,3 +620,69 @@ def student_list(request,round_id):
                       }
 
             return Response(result)
+
+
+@api_view(['POST'])
+def recent_notifications(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = Manager.objects.filter(token=au).values_list('db_name')
+                    driver_id = Manager.objects.filter(token=au).values_list('driver_id')
+                    notifications = []
+                    for e in driver_id:
+                        driver_id = e[0]
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                            school_name = Manager.pincode(school_name)
+                            day_count = request.data.get('day_count')
+                            with connections[school_name].cursor() as cursor:
+                                cursor.execute(
+                                    "select  name from res_partner WHERE id = %s",
+                                    [driver_id])
+                                driver_name = cursor.fetchall()
+                                cursor.execute(
+                                    "select  id from transport_round WHERE id = %s",
+                                    [driver_id])
+                                transport_round = cursor.fetchall()
+                                transport_rounds = []
+                                for rec in transport_round:
+                                    transport_rounds.append(rec[0])
+                                cursor.execute(
+                                    "select  round_id from round_schedule WHERE round_id in %s AND day_id =%s ",
+                                    [tuple(transport_rounds),day_count])
+                                round_schedule = cursor.fetchall()
+                                round_schedules = []
+                                for rec in round_schedule:
+                                    round_schedules.append(rec[0])
+
+                                if round_schedules:
+                                    cursor.execute(
+                                        "select  message_ar,create_date,type from sh_message_wizard WHERE round_id in %s AND sender_name = %s AND from_type='App\Model\Driver' ",
+                                        [tuple(round_schedules),driver_name[0][0]])
+                                    sh_message_wizard = cursor.fetchall()
+                                    for rec in range(len(sh_message_wizard)):
+                                        notifications.append({
+                                            "message": sh_message_wizard[rec][0],
+                                            "date": sh_message_wizard[rec][1],
+                                            "image": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                        })
+                                    result = {"notifications": notifications}
+                                    return Response(result)
+                                else:
+                                    result = {'status': 'error'}
+                                    return Response(result)
+                        else:
+                            result = {'status': 'error'}
+                            return Response(result)
+                    else:
+                        result = {'status': 'error'}
+                        return Response(result)
+                else:
+                    result = {'status': 'error'}
+                    return Response(result)
+
+
