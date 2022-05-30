@@ -21,4 +21,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('',include('Driver_api.urls')),
     path('', include('Parent_api.urls')),
+    path('', include('fireapp.urls')),
+
 ]
