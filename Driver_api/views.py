@@ -218,7 +218,7 @@ def round_list(request):
 
         return Response(result)
     if request.method == 'POST':
-        print(request.data)
+
         if request.headers:
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
@@ -681,6 +681,53 @@ def set_round_status(request):
                                 cursor.execute(
                                     "UPDATE public.transport_round SET is_active= not(is_active), pick_up_lat=%s ,pick_up_lng=%s ,drop_off_lat=%s ,drop_off_lng=%s WHERE id=%s",
                                     [lat, long, lat, long, round_id])
+                                result = {'status': 'OK'}
+                                return Response(result)
+                    else:
+                        result = {'status': 'error'}
+                        return Response(result)
+                else:
+                    result = {'status': 'error'}
+                    return Response(result)
+            else:
+                result = {'status': 'error'}
+                return Response(result)
+        else:
+            result = {'status': 'error'}
+            return Response(result)
+
+@api_view(['POST'])
+def students_bus_checks(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = Manager.objects.filter(token=au).values_list('db_name')
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                            school_name = Manager.pincode(school_name)
+                            with connections[school_name].cursor() as cursor:
+                                students =request.data.get('students')
+                                round_id = students[0]['round_id']
+                                status = students[0]['status']
+                                day_count = students[0]['day_count']
+                                lat = students[0]['lat']
+                                long = students[0]['long']
+                                student_id = students[0]['student_id']
+                                curr_date = date.today()
+                                cursor.execute(
+                                    "select  id  from school_day where name = %s",
+                                    [calendar.day_name[curr_date.weekday()]])
+                                day_id = cursor.fetchall()
+                                cursor.execute(
+                                    "select  id from round_schedule WHERE round_id = %s AND day_id =%s ",
+                                    [round_id, day_id[0][0]])
+                                round_schedule = cursor.fetchall()
+                                cursor.execute(
+                                    "UPDATE public.transport_participant SET transport_state = %s WHERE student_id =%s AND round_schedule_id= %s",
+                                    [status,student_id,round_schedule[0][0]])
                                 result = {'status': 'OK'}
                                 return Response(result)
                     else:
