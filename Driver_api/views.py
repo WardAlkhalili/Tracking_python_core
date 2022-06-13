@@ -12,7 +12,7 @@ from rest_framework import status
 from itertools import chain
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
-
+import datetime
 from datetime import date
 import calendar
 
@@ -210,15 +210,9 @@ def driver_login(request):
 }
 
 
-@api_view(['GET', 'POST'])
+@api_view(['POST'])
 def round_list(request):
-    if request.method == 'GET':
-        result = {"status": "error"
-                  }
-
-        return Response(result)
     if request.method == 'POST':
-
         if request.headers:
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
@@ -271,10 +265,40 @@ def round_list(request):
                                         student_name = []
                                         for name in student_student:
                                             student_name.append(name[0])
-
                                         day_list[day_name] = student_name
-                                    result1[rec] = {
+                                    end=False
+                                    start=False
+                                    cancel=False
 
+                                    cursor.execute(
+                                        "select  name,vehicle_id,driver_id from transport_round WHERE id = %s  ",
+                                        [list_round[rec][9]])
+                                    round_info = cursor.fetchall()
+                                    cursor.execute(
+                                        "select  id,round_start,round_end,na from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
+                                        [list_round[rec][9], round_info[0][2], round_info[0][1], list_round[rec][9]])
+                                    round_history = cursor.fetchall()
+                                    if round_history:
+                                        now = datetime.date.today()
+                                        if round_history[0][2]:
+                                            if round_history[0][2].strftime('%Y-%m-%d') == str(now):
+                                                start = False
+                                                cancel = False
+                                                end=True
+                                        if (round_history[0][1].strftime('%Y-%m-%d')  == str(now)) and not (round_history[0][2].strftime('%Y-%m-%d') if round_history[0][2] else round_history[0][2] == str(now)) and (round_history[0][3] !='cancel'):
+                                            start=True
+                                            cancel = False
+                                            end = False
+                                        if  round_history[0][3] =='cancel':
+                                            end = False
+                                            start = False
+                                            cancel = True
+                                    else:
+                                        end = False
+                                        start=False
+                                        cancel=False
+
+                                    result1[rec] = {
                                         "round_time": str(list_round[rec][1]),
                                         "name": str(list_round[rec][0]),
                                         "date": None,
@@ -285,9 +309,9 @@ def round_list(request):
                                         "drop_off_lat": list_round[rec][6] if list_round[rec][6] else 0,
                                         "drop_off_lng": list_round[rec][7] if list_round[rec][7] else 0,
                                         "route_id": list_round[rec][8],
-                                        "round_canceled": list_round[rec][10],
-                                        "round_ended": list_round[rec][10],
-                                        "round_started": list_round[rec][10],
+                                        "round_canceled": cancel,
+                                        "round_ended": end,
+                                            "round_started": start,
                                         "geofenses": {
                                             "id": 1,
                                             "name": 1,
@@ -664,6 +688,7 @@ def recent_notifications(request):
 
 @api_view(['POST'])
 def set_round_status(request):
+
     if request.method == 'POST':
         if request.headers:
             if request.headers.get('Authorization'):
@@ -678,6 +703,44 @@ def set_round_status(request):
                                 round_id = request.data.get('round_id')
                                 lat = request.data.get('lat')
                                 long = request.data.get('long')
+                                distance = request.data.get('distance')
+                                status = request.data.get('status')
+                                assistant_id= request.data.get('assistant_id')
+                                print(status)
+                                cursor.execute(
+                                    "select  name,vehicle_id,driver_id from transport_round WHERE id = %s  ",
+                                    [round_id])
+                                round_info = cursor.fetchall()
+                                if status =='start':
+                                        cursor.execute(
+                                            "INSERT INTO  round_history (round_name,round_id,distance,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
+                                            [round_id, round_id, distance, round_info[0][1], round_info[0][2], datetime.datetime.now(),assistant_id])
+                                elif status =='end' or status == 'force_end':
+                                    cursor.execute(
+                                        "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
+                                        [round_id,round_info[0][2],round_info[0][1],round_id])
+                                    round_history = cursor.fetchall()
+                                    if round_history:
+
+                                        now = datetime.date.today()
+                                        if round_history[0][0].strftime('%Y-%m-%d')==str(now):
+                                            cursor.execute(
+                                                "UPDATE public.round_history SET round_end= %s WHERE id=%s",
+                                                [datetime.datetime.now(),round_history[0][1]])
+                                elif status == 'cancel':
+                                    cursor.execute(
+                                        "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
+                                        [round_id, round_info[0][2], round_info[0][1], round_id])
+                                    round_history = cursor.fetchall()
+                                    if round_history:
+                                        now = datetime.date.today()
+                                        if round_history[0][0].strftime('%Y-%m-%d') == str(now):
+                                            cursor.execute(
+                                                "UPDATE public.round_history SET na= %s WHERE id=%s",
+                                                ['cancel', round_history[0][1]])
+
+
+
                                 cursor.execute(
                                     "UPDATE public.transport_round SET is_active= not(is_active), pick_up_lat=%s ,pick_up_lng=%s ,drop_off_lat=%s ,drop_off_lng=%s WHERE id=%s",
                                     [lat, long, lat, long, round_id])
