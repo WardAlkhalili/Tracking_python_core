@@ -757,8 +757,19 @@ def set_round_status(request):
                                 round_info = cursor.fetchall()
                                 if status =='start':
                                         cursor.execute(
-                                            "INSERT INTO  round_history (round_name,round_id,distance,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
-                                            [round_id, round_id, distance, round_info[0][1], round_info[0][2], datetime.datetime.now(),assistant_id])
+                                            "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
+                                            [round_id, round_info[0][2], round_info[0][1], round_id])
+                                        round_history = cursor.fetchall()
+                                        if round_history:
+                                            now = datetime.date.today()
+                                            if round_history[0][0].strftime('%Y-%m-%d') == str(now):
+                                                cursor.execute(
+                                                    "UPDATE public.round_history SET na= %s WHERE id=%s",
+                                                    ['cancel', round_history[0][1]])
+                                        else:
+                                            cursor.execute(
+                                                "INSERT INTO  round_history (round_name,round_id,distance,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
+                                                [round_id, round_id, distance, round_info[0][1], round_info[0][2], datetime.datetime.now(),assistant_id])
                                 elif status =='end' or status == 'force_end':
                                     cursor.execute(
                                         "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
