@@ -872,8 +872,6 @@ def students_bus_checks(request):
                                 student_id = students[0]['student_id']
                                 waiting_minutes = students[0]['waiting_minutes']
                                 curr_date = date.today()
-                                print("yousef ahmad",status)
-
                                 cursor.execute(
                                     "select  name,vehicle_id,driver_id from transport_round WHERE id = %s  ",
                                     [round_id])
