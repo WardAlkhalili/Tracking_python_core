@@ -754,7 +754,7 @@ def set_round_status(request):
                                 status = request.data.get('status')
                                 assistant_id= request.data.get('assistant_id')
                                 cursor.execute(
-                                    "select  name,vehicle_id,driver_id from transport_round WHERE id = %s  ",
+                                    "select  name,vehicle_id,driver_id ,type from transport_round WHERE id = %s  ",
                                     [round_id])
                                 round_info = cursor.fetchall()
                                 if status =='start':
@@ -769,7 +769,7 @@ def set_round_status(request):
                                                     "UPDATE public.round_history SET na= %s WHERE id=%s",
                                                     ['cancel', round_history[0][1]])
                                             else:
-
+                                                #
                                                 curr_date = date.today()
                                                 day_name = calendar.day_name[curr_date.weekday()]
                                                 cursor.execute(
@@ -788,6 +788,16 @@ def set_round_status(request):
                                                     [rounds_details[0][0]])
                                                 columns4 = (x.name for x in cursor.description)
                                                 rounds_count_student = cursor.fetchall()
+                                                ch_in=0
+                                                ch_out=0
+                                                if round_info[0][3]=='pick_up':
+                                                    ch_in=len(rounds_count_student)
+                                                else:
+                                                    ch_out = len(rounds_count_student)
+
+                                                cursor.execute(
+                                                    "UPDATE public.transport_round SET total_checkedout_students= %s , total_checkedin_students= %s WHERE id=%s",
+                                                    [ch_out,ch_in, round_id])
                                                 stds = []
                                                 for rec in rounds_count_student:
                                                     stds.append(rec[0])
@@ -873,7 +883,7 @@ def students_bus_checks(request):
                                 waiting_minutes = students[0]['waiting_minutes']
                                 curr_date = date.today()
                                 cursor.execute(
-                                    "select  name,vehicle_id,driver_id from transport_round WHERE id = %s  ",
+                                    "select  name,vehicle_id,driver_id,type,total_checkedout_students,total_checkedin_students from transport_round WHERE id = %s  ",
                                     [round_id])
                                 round_info = cursor.fetchall()
                                 cursor.execute(
@@ -896,13 +906,43 @@ def students_bus_checks(request):
                                                 cursor.execute(
                                                     "UPDATE public.round_student_history SET bus_check_in = %s WHERE id =%s ",
                                                     [datetime.datetime.now(), student_history[0][0]])
+                                                if round_info[0][3] == 'pick_up':
+                                                    ch_in = round_info[0][5]+1
+                                                    ch_out = round_info[0][5] - 1
+                                                else:
+                                                    ch_in = round_info[0][5] -1
+                                                    ch_out = round_info[0][5] + 1
+
+                                                cursor.execute(
+                                                    "UPDATE public.transport_round SET total_checkedout_students= %s , total_checkedin_students= %s WHERE id=%s",
+                                                    [ch_out, ch_in, round_id])
 
                                             elif status=='out':
                                                 cursor.execute(
                                                     "UPDATE public.round_student_history SET time_out = %s WHERE id =%s ",
                                                     [datetime.datetime.now(), student_id])
+                                                if round_info[0][3] == 'pick_up':
+                                                    ch_in = round_info[0][5] + 1
+                                                    ch_out = round_info[0][5] - 1
+                                                else:
+                                                    ch_in = round_info[0][5] - 1
+                                                    ch_out = round_info[0][5] + 1
+
+                                                cursor.execute(
+                                                    "UPDATE public.transport_round SET total_checkedout_students= %s , total_checkedin_students= %s WHERE id=%s",
+                                                    [ch_out, ch_in, round_id])
 
                                         else:
+                                            if round_info[0][3] == 'pick_up':
+                                                ch_in = round_info[0][5] + 1
+                                                ch_out = round_info[0][5] - 1
+                                            else:
+                                                ch_in = round_info[0][5] - 1
+                                                ch_out = round_info[0][5] + 1
+
+                                            cursor.execute(
+                                                "UPDATE public.transport_round SET total_checkedout_students= %s , total_checkedin_students= %s WHERE id=%s",
+                                                [ch_out, ch_in, round_id])
                                             cursor.execute(
                                                 "INSERT INTO  round_student_history (round_id,student_id,driver_waiting,bus_check_in,datetime,history_id) VALUES (%s,%s,%s,%s,%s,%s); ",
                                                 [round_id, student_id, waiting_minutes, datetime.datetime.now(),
