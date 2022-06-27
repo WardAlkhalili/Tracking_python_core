@@ -146,7 +146,7 @@ def send_school_message(request):
             school_message_student_student = cursor.fetchall()
             r_id=[]
             for id in school_message_student_student:
-                r_id.append(id[9])
+                r_id.append(id[0])
             cursor.execute(
                 "select  mother_id,father_id,responsible_id_value from student_student WHERE id in %s ",
                 [tuple(r_id)])
@@ -170,15 +170,18 @@ def send_school_message(request):
                     parent_id.append(rec[0])
             mobile_token = ManagerParent.objects.filter(Q(user_id=parent_id) and Q(db_name=school_name)).values_list(
                 'mobile_token').order_by('-pk')[0]
+            token=[]
+            for tok in mobile_token:
+                token.append(tok)
+
             push_service = FCMNotification(
                 api_key="AAAAsVxm2cY:APA91bGJ4jG6by56tl1z2HKmiTynaz6BXLmFaPwuk5NdytixIyxTS11iTPaXywVsQxnwmhSZRvUO5SsIioULD9qHCFK_6rVtnE5yQeIs7G3LzvDYUNd7jVEjJqvfnZbTspTE_xXWCSnO")
-            registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
+            registration_id = ["fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"]
             message_title = school_message[0][1]
             message_body = school_message[0][0]
-            result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
-                                                       message_body=message_body)
+            result = push_service.notify_multiple_devices\
+                (message_title=message_title, message_body=message_body, registration_ids=registration_id, data_message={})
             #
-            print(result)
             result1 = {
                 "route": 'Ok'
             }
