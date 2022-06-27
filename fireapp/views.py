@@ -144,6 +144,32 @@ def send_school_message(request):
                 "select  student_student_id  from school_message_student_student where school_message_id = %s",
                 [message_id])
             school_message_student_student = cursor.fetchall()
+            r_id=[]
+            for id in school_message_student_student:
+                r_id.append(id[9])
+            cursor.execute(
+                "select  mother_id,father_id,responsible_id_value from student_student WHERE id in %s ",
+                [tuple(r_id)])
+            columns = (x.name for x in cursor.description)
+            student = cursor.fetchall()
+            id=[]
+            for rec in student:
+                if rec[0]:
+                    id.append(rec[0])
+                if rec[1]:
+                    id.append(rec[1])
+                if rec[2]:
+                    id.append(rec[2])
+            cursor.execute(
+                "select  id from school_parent WHERE id in %s ",
+                [tuple(id)])
+            columns = (x.name for x in cursor.description)
+            parent = cursor.fetchall()
+            parent_id=[]
+            for rec in student:
+                    parent_id.append(rec[0])
+            mobile_token = ManagerParent.objects.filter(Q(user_id=parent_id) and Q(db_name=school_name)).values_list(
+                'mobile_token').order_by('-pk')[0]
             push_service = FCMNotification(
                 api_key="AAAAsVxm2cY:APA91bGJ4jG6by56tl1z2HKmiTynaz6BXLmFaPwuk5NdytixIyxTS11iTPaXywVsQxnwmhSZRvUO5SsIioULD9qHCFK_6rVtnE5yQeIs7G3LzvDYUNd7jVEjJqvfnZbTspTE_xXWCSnO")
             registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
@@ -174,7 +200,7 @@ def send_confirmation_message_to_parent(request):
         # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
         registration_id=mobile_token
         message_title = "Uber update"
-        message_body = student_name+" has picked up by parents"
+        message_body = "please confirm that you have picked up"+ student_name +"from the school"
         result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
                                                    message_body=message_body)
         #
