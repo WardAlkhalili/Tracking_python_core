@@ -164,11 +164,16 @@ def send_confirmation_message_to_parent(request):
         school_name = request.data.get('school_name')
         student_name = request.data.get('student_name')
         parent_id=request.data.get('parent_id')
-        mobile_token = ManagerParent.objects.filter(parent_id=parent_id).values_list('mobile_token')
-        print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token[len(mobile_token)-1])
+        mobile_token = ManagerParent.objects.filter(user_id=parent_id).values_list('mobile_token')
+        print("ss")
+        for e in mobile_token:
+            print("aaaaaaaaa",e[0])
+            mobile_token = e[0]
+        # print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token)
         push_service = FCMNotification(
             api_key="AAAAsVxm2cY:APA91bGJ4jG6by56tl1z2HKmiTynaz6BXLmFaPwuk5NdytixIyxTS11iTPaXywVsQxnwmhSZRvUO5SsIioULD9qHCFK_6rVtnE5yQeIs7G3LzvDYUNd7jVEjJqvfnZbTspTE_xXWCSnO")
-        registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
+        # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
+        registration_id=mobile_token
         message_title = "Uber update"
         message_body = "Hi Yousef, your customized news for today is ready"
         result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
