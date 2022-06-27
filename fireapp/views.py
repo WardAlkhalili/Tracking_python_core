@@ -6,6 +6,7 @@ from datetime import date
 from pyfcm import FCMNotification
 from django.db import connections
 from  Parent_api.models import ManagerParent
+from django.db.models import Q
 # Remember the code we copied from Firebase.
 # This can be copied by clicking on the settings icon > project settings, then scroll down in your firebase dashboard
 
@@ -164,10 +165,8 @@ def send_confirmation_message_to_parent(request):
         school_name = request.data.get('school_name')
         student_name = request.data.get('student_name')
         parent_id=request.data.get('parent_id')
-        mobile_token = ManagerParent.objects.filter(user_id=parent_id).values_list('mobile_token')
-        print("ss")
+        mobile_token = ManagerParent.objects.filter(Q(user_id=parent_id) and Q(db_name=school_name)).values_list('mobile_token').order_by('-pk')[0]
         for e in mobile_token:
-            print("aaaaaaaaa",e[0])
             mobile_token = e[0]
         # print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token)
         push_service = FCMNotification(
@@ -175,7 +174,7 @@ def send_confirmation_message_to_parent(request):
         # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
         registration_id=mobile_token
         message_title = "Uber update"
-        message_body = "Hi Yousef, your customized news for today is ready"
+        message_body = student_name+" has picked up by parents"
         result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
                                                    message_body=message_body)
         #
