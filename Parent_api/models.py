@@ -7,12 +7,12 @@ import re
 
 
 class ManagerParent(models.Model):
-
     token = models.CharField(max_length=5000)
     db_name = models.CharField(max_length=5000)
     user_id = models.CharField(max_length=5000)
     parent_id = models.CharField(max_length=5000)
     school_id = models.CharField(max_length=5000)
+    mobile_token = models.CharField(max_length=5000, default="sadf")
 
     def pincode(pin):
         p = re.sub(r'\d+', '', pin)

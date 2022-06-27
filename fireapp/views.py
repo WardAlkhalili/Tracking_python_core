@@ -5,6 +5,7 @@ import pyrebase
 from datetime import date
 from pyfcm import FCMNotification
 from django.db import connections
+from  Parent_api.models import ManagerParent
 # Remember the code we copied from Firebase.
 # This can be copied by clicking on the settings icon > project settings, then scroll down in your firebase dashboard
 
@@ -48,7 +49,7 @@ def Get_last_bus_location(request, bus_id, school_name):
         # from firebase_admin.messaging import Message, Notification
         # from fcm_django.models import FCMDevice
         # message = Message(
-        #     notification=Notification(
+        #     notification=Notification(2
         #         title="title",
         #         body="sentence",
         #     ),
@@ -163,6 +164,8 @@ def send_confirmation_message_to_parent(request):
         school_name = request.data.get('school_name')
         student_name = request.data.get('student_name')
         parent_id=request.data.get('parent_id')
+        mobile_token = ManagerParent.objects.filter(parent_id=parent_id).values_list('mobile_token')
+        print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token[len(mobile_token)-1])
         push_service = FCMNotification(
             api_key="AAAAsVxm2cY:APA91bGJ4jG6by56tl1z2HKmiTynaz6BXLmFaPwuk5NdytixIyxTS11iTPaXywVsQxnwmhSZRvUO5SsIioULD9qHCFK_6rVtnE5yQeIs7G3LzvDYUNd7jVEjJqvfnZbTspTE_xXWCSnO")
         registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"

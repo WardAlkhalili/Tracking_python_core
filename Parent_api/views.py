@@ -27,6 +27,7 @@ def parent_login(request):
         password = request.data.get('password')
         user_name = request.data.get('user_name')
         school_name = request.data.get('school_name')
+        mobile_token = request.data.get('mobile_token')
         # url = "http://localhost:9098/web/session/authenticate"
         # url = 'http://192.168.1.127:9098/web/session/authenticate'
         url = 'http://127.0.0.1:9098/web/session/authenticate'
@@ -47,7 +48,7 @@ def parent_login(request):
             token_auth, created = Token.objects.get_or_create(user=user)
             manager_parent = ManagerParent(token=token_auth, db_name=school_name, user_id=uid,
                                            parent_id=parent_id[0][0],
-                                           school_id=company_id)
+                                           school_id=company_id,mobile_token=mobile_token)
 
             manager_parent.save()
 
