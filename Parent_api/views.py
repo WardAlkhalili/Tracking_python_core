@@ -29,17 +29,17 @@ def parent_login(request):
         school_name = request.data.get('school_name')
         mobile_token = request.data.get('mobile_token')
         # url = "http://localhost:9098/web/session/authenticate"
-        # url = 'http://192.168.1.127:9098/web/session/authenticate'
-        url = 'http://127.0.0.1:9098/web/session/authenticate'
-        body = json.dumps( {"jsonrpc": "2.0", "params": {"db": school_name, "login": user_name, "password": password}})
-
+        url = 'http://192.168.1.127:9098/web/session/authenticate'
+        # url = 'http://127.0.0.1:9098/web/session/authenticate'
+        body = json.dumps( {"jsonrpc": "2.0", "params": {"db": 'iks', "login": user_name, "password": password}})
         headers = {
             'Content-Type': 'application/json',
         }
         response = requests.request("POST", url, headers=headers, data=body).json()
+        response = requests.request("POST", url, headers=headers, data=body).json()
         uid = response['result']['uid']
         company_id = response['result']['company_id']
-        with connections[response['result']['db']].cursor() as cursor:
+        with connections[school_name].cursor() as cursor:
             cursor.execute("select id from school_parent WHERE user_id = %s", [response['result']['uid']])
             columns2 = (x.name for x in cursor.description)
             parent_id = cursor.fetchall()
@@ -302,12 +302,17 @@ def student_pick_up(request):
                                         '%Y-%m-%d')):
                                     date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                     r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
-
                                     cursor.execute(
-                                        "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id) VALUES (%s,%s,%s,%s,%s,%s); ",
-                                        [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id])
+                                        "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
+                                        [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id,r])
+                                    cursor.execute(
+                                        "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
+                                        [student_name[0][0], parent_id])
+                                    pickup_id = cursor.fetchall()
+                                    cursor.execute(
+                                        "INSERT INTO  pickup_request_student_student_rel (pickup_request_id,student_student_id) VALUES (%s,%s); ",
+                                        [pickup_id[0][0], student_id])
                                     result = {'result': True}
-
                                     return Response(result)
                                 else:
                                     if date_t[0][2] == 'waiting':
@@ -330,8 +335,15 @@ def student_pick_up(request):
                                 r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
 
                                 cursor.execute(
-                                    "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id) VALUES (%s,%s,%s,%s,%s,%s); ",
-                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id])
+                                    "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
+                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id,r])
+                                cursor.execute(
+                                    "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
+                                    [student_name[0][0], parent_id])
+                                pickup_id = cursor.fetchall()
+                                cursor.execute(
+                                    "INSERT INTO  pickup_request_student_student_rel (pickup_request_id,student_student_id) VALUES (%s,%s); ",
+                                    [pickup_id[0][0], student_id])
 
                                 result = {'result': True}
                                 return Response(result)
