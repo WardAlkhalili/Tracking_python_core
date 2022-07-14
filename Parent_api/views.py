@@ -427,7 +427,7 @@ def kids_list(request):
                         with connections[school_name].cursor() as cursor:
 
                             cursor.execute(
-                                "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,grade_name,father_id,mother_id from student_student WHERE father_id = %s OR mother_id = %s OR responsible_id_value = %s  And state = 'done'",
+                                "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,academic_grade_name1,father_id,mother_id from student_student WHERE father_id = %s OR mother_id = %s OR responsible_id_value = %s  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
                             columns = (x.name for x in cursor.description)
                             student = cursor.fetchall()
@@ -594,7 +594,7 @@ def kids_list(request):
                                     drop = True
                                 else:
                                     drop = False
-
+                                print(student[rec][6])
                                 studen_list.append({
                                     'id': student[rec][0],
                                     'user_id': student[rec][2],
