@@ -594,7 +594,6 @@ def kids_list(request):
                                     drop = True
                                 else:
                                     drop = False
-                                print(student[rec][6])
                                 studen_list.append({
                                     'id': student[rec][0],
                                     'user_id': student[rec][2],

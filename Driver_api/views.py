@@ -1,4 +1,5 @@
 from django.conf import settings
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
@@ -217,6 +218,7 @@ def round_list(request):
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    # print("sssssssssssssssssssssss",au)
                     db_name = Manager.objects.filter(token=au).values_list('db_name')
                     if db_name:
                         for e in db_name:

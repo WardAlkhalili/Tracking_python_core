@@ -43,7 +43,7 @@ def Get_last_bus_location(request, bus_id, school_name):
         fullRound = school_name + "-round-" + str(bus_id)
         curr_date = date.today()
         #     # here we are doing firebase authentication
-        print("name sssssssssss11", request.build_absolute_uri())
+        # print("name sssssssssss11", request.build_absolute_uri())
         route = []
 
         # from firebase_admin.messaging import Message, Notification
@@ -97,7 +97,7 @@ def Get_round_locations(request):
         fullRound = school_name + "-round-" + str(round_id)
         date = request.data.get('date')
         #     # here we are doing firebase authentication
-        print("name sssssssssss11", request.build_absolute_uri())
+        # print("name sssssssssss11", request.build_absolute_uri())
         route = []
         try:
             for key, value in database.child('ghs-round-10').child('2022-02-22').get().val().items():
@@ -206,7 +206,7 @@ def send_confirmation_message_to_parent(request):
         result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
                                                    message_body=message_body)
         #
-        print(result)
+        # print(result)
         result1 = {
             "route": 'Ok'
         }
