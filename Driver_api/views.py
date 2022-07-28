@@ -25,11 +25,9 @@ def driver_login(request):
     if request.method == 'POST':
         pincode = request.data.get('bus_pin')
         school_name = Manager.pincode(pincode)
-
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  driver_id,bus_no,id  from fleet_vehicle WHERE bus_pin = %s", [pincode])
             data_id_bus = cursor.fetchall()
-
             cursor.execute("select name from res_partner WHERE id = %s", [data_id_bus[0][0]])
             driver_name = cursor.fetchall()
 
@@ -218,7 +216,6 @@ def round_list(request):
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
-                    # print("sssssssssssssssssssssss",au)
                     db_name = Manager.objects.filter(token=au).values_list('db_name')
                     if db_name:
                         for e in db_name:
@@ -470,7 +467,7 @@ def student_list(request, round_id):
                                             "color": student_student[std][5],
                                             "email": student_student[std][6],
                                             "mobile": student_student[std][7],
-                                            "name": student_student[std][8],
+                                            "name": student_student[std][3],
                                             "contact_phone1": student_student[std][9],
                                             "contact_mobile1": student_student[std][10],
                                             "nationality_id": student_student[std][11],
@@ -831,6 +828,7 @@ def set_round_status(request):
                                                 "UPDATE public.round_history SET round_end= %s WHERE id=%s",
                                                 [datetime.datetime.now(),round_history[0][1]])
                                 elif status == 'cancel':
+
                                     cursor.execute(
                                         "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
                                         [round_id, round_info[0][2], round_info[0][1], round_id])
@@ -841,9 +839,6 @@ def set_round_status(request):
                                             cursor.execute(
                                                 "UPDATE public.round_history SET na= %s WHERE id=%s",
                                                 ['cancel', round_history[0][1]])
-
-
-
                                 cursor.execute(
                                     "UPDATE public.transport_round SET is_active= not(is_active), pick_up_lat=%s ,pick_up_lng=%s ,drop_off_lat=%s ,drop_off_lng=%s WHERE id=%s",
                                     [lat, long, lat, long, round_id])
