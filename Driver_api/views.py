@@ -28,6 +28,7 @@ def driver_login(request):
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  driver_id,bus_no,id  from fleet_vehicle WHERE bus_pin = %s", [pincode])
             data_id_bus = cursor.fetchall()
+
             cursor.execute("select name from res_partner WHERE id = %s", [data_id_bus[0][0]])
             driver_name = cursor.fetchall()
 
@@ -457,7 +458,6 @@ def student_list(request, round_id):
                                         columns_m = (x.name for x in cursor.description)
                                         mother = cursor.fetchall()
                                         mother_inf = [dict(zip(columns_m, row)) for row in mother]
-
                                         student_info[std] = {
                                             "id": student_student[std][0],
                                             "year_id": student_student[std][1],
@@ -589,7 +589,7 @@ def student_list(request, round_id):
                                             "is_suspended": student_student[std][128],
                                             "sequence": student_student[std][129],
                                             "password": student_student[std][130],
-                                            "image_url": student_student[std][131],
+                                            "image_url":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + student_student[std][131] if student_student[std][131] else student_student[std][131],
                                             "round_id": student_student[std][132],
                                             "responsible_id_value": student_student[std][133],
                                             "first_mandatory": student_student[std][134],
