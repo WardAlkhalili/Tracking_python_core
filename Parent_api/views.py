@@ -29,14 +29,15 @@ def parent_login(request):
         school_name = request.data.get('school_name')
         mobile_token = request.data.get('mobile_token')
         # url = "http://localhost:9098/web/session/authenticate"
-        url = 'http://192.168.1.127:9098/web/session/authenticate'
+        url = 'https://' + school_name + '.staging.trackware.com/web/session/authenticate'
         # url = 'http://127.0.0.1:9098/web/session/authenticate'
-        body = json.dumps( {"jsonrpc": "2.0", "params": {"db": 'iks', "login": user_name, "password": password}})
+        body = json.dumps({"jsonrpc": "2.0", "params": {"db": school_name, "login": user_name, "password": password}})
         headers = {
             'Content-Type': 'application/json',
         }
-        response = requests.request("POST", url, headers=headers, data=body).json()
-        response = requests.request("POST", url, headers=headers, data=body).json()
+        response1 = requests.request("POST", url, headers=headers, data=body)
+        response = response1.json()
+        session = response1.cookies
         uid = response['result']['uid']
         company_id = response['result']['company_id']
         with connections[school_name].cursor() as cursor:
@@ -48,7 +49,7 @@ def parent_login(request):
             token_auth, created = Token.objects.get_or_create(user=user)
             manager_parent = ManagerParent(token=token_auth, db_name=school_name, user_id=uid,
                                            parent_id=parent_id[0][0],
-                                           school_id=company_id,mobile_token=mobile_token)
+                                           school_id=company_id, mobile_token=mobile_token)
 
             manager_parent.save()
 
@@ -87,7 +88,7 @@ def parent_login(request):
                     }
                 ],
                 "uid": uid,
-                "session_id": "f29679e7256bbda0ea318b92c0089b339c2c03a4",
+                "session_id": session.get_dict()['session_id'],
                 "web_base_url": response['result']['web_base_url'],
                 "Authorization": "Bearer " + token_auth.key}
         return Response(result)
@@ -304,7 +305,7 @@ def student_pick_up(request):
                                     r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
                                     cursor.execute(
                                         "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
-                                        [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id,r])
+                                        [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r])
                                     cursor.execute(
                                         "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                         [student_name[0][0], parent_id])
@@ -336,7 +337,7 @@ def student_pick_up(request):
 
                                 cursor.execute(
                                     "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
-                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id,r])
+                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r])
                                 cursor.execute(
                                     "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                     [student_name[0][0], parent_id])
@@ -411,10 +412,13 @@ def kids_list(request):
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
 
+                    l = []
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
-                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
-                    parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
-                    school_id = ManagerParent.objects.filter(token=au).values_list('school_id')
+                    l.append(au.split(","))
+
+                    db_name = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('db_name')
+                    parent_id = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('parent_id')
+                    school_id = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('school_id')
                     for e in parent_id:
                         parent_id = e[0]
                     for e in school_id:
@@ -425,15 +429,21 @@ def kids_list(request):
 
                         school_name = ManagerParent.pincode(school_name)
                         with connections[school_name].cursor() as cursor:
+                            #
+                            # cursor.execute(
+                            #     "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,academic_grade_name1,father_id,mother_id,state from student_student WHERE father_id = %s OR mother_id = %s OR responsible_id_value = %s  And state = 'done'",
+                            #     [parent_id, parent_id, parent_id])
+                            # columns = (x.name for x in cursor.description)
+                            # student = cursor.fetchall()
 
                             cursor.execute(
-                                "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,academic_grade_name1,father_id,mother_id from student_student WHERE father_id = %s OR mother_id = %s OR responsible_id_value = %s  And state = 'done'",
+                                "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state from student_student WHERE father_id = %s OR mother_id = %s OR responsible_id_value = %s  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
                             columns = (x.name for x in cursor.description)
                             student = cursor.fetchall()
                             studen_list = []
                             cursor.execute(
-                                "select  lat,lng,pickup_request_distance from transport_setting  ORDER BY ID DESC LIMIT 1")
+                                "select  lat,lng,pickup_request_distance,change_location from transport_setting  ORDER BY ID DESC LIMIT 1")
                             columns = (x.name for x in cursor.description)
                             setting = cursor.fetchall()
                             cursor.execute(
@@ -443,66 +453,66 @@ def kids_list(request):
                             school = cursor.fetchall()
                             for rec in range(len(student)):
                                 x = {
-                                        "Badges": {
-                                            "url": "http://127.0.0.1:9098/my/Badges/",
-                                            "arabic_url": "http://127.0.0.1:9098/ar_SY/my/Badges/",
-                                            "name": "Badges",
-                                            "name_ar": "الشارات",
-                                            "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Badge.png"
+                                    "Badges": {
+                                        "url": "https://" + school_name + ".staging.trackware.com/my/Badges/",
+                                        "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Badges/",
+                                        "name": "Badges",
+                                        "name_ar": "الشارات",
+                                        "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Badge.png"
+                                    },
+                                    "Weeklyplans":
+                                        {
+                                            "url": "https://" + school_name + ".staging.trackware.com/my/Weekly-plans/",
+                                            "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Weekly-plans/",
+                                            "name": "Weeklyplans",
+                                            "name_ar": "الخطط الأسبوعية",
+                                            "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Weekly+Plans.png"
                                         },
-                                        "Weeklyplans":
-                                            {
-                                                "url": "http://192.168.1.127:9098/my/Weekly-plans/",
-                                                "arabic_url": "https://192.168.1.127:9098/ar_SY/my/Weekly-plans/",
-                                                "name": "Weeklyplans",
-                                                "name_ar": "الخطط الأسبوعية",
-                                                "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Weekly+Plans.png"
-                                            },
-                                        "Assignments": {
-                                            "url": "http://192.168.1.127:9098/my/Assignments/",
-                                            "arabic_url": "http://192.168.1.127:9098/ar_SY/my/Assignments/",
-                                            "name": "Assignments",
-                                            "name_ar": "الواجبات الالكترونية",
-                                            "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png"
-                                        },
-                                        # "Exam": {
-                                        #     "url": "my/exam/",
-                                        #     "arabic_url": "ar_SY/my/exam",
-                                        #     "arabic_name": "امتحانات",
-                                        #     "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png"
-                                        # },
-                                        "Events":
-                                            {"name": "Events",
-                                             "name_ar": "Events",
-                                             "url": "http://192.168.1.127:9098/my/Events/",
-                                             "arabic_url": "http://192.168.1.127:9098/ar_SY/my/Events/",
-                                             "arabic_name": "الفعاليات و الانشطة",
-                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Events.png"
-                                             },
-                                        "Homeworks":
-                                            {"name": "Homeworks",
-                                             "url": "http://192.168.1.127:9098/my/Homeworks/",
-                                             "arabic_url": "http://192.168.1.127:9098/ar_SY/my/Homeworks/",
-                                             "name_ar": "الواجبات المنزلية",
-                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/worksheets.png"
-                                             },
-                                        "Calendar":
-                                            {"name": "Calendar",
-                                             "url": "https://iks.staging.trackware.com/my/Calendar/",
-                                             "arabic_url": "https://iks.staging.trackware.com/ar_SY/my/Calendar/",
-                                             "name_ar": "التقويم",
-                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/School+Calendar.png"
-                                             },
+                                    "Assignments": {
+                                        "url": "https://" + school_name + ".staging.trackware.com/my/Assignments/",
+                                        "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Assignments/",
+                                        "name": "Assignments",
+                                        "name_ar": "الواجبات الالكترونية",
+                                        "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png"
+                                    },
+                                    # "Exam": {
+                                    #     "url": "my/exam/",
+                                    #     "arabic_url": "ar_SY/my/exam",
+                                    #     "arabic_name": "امتحانات",
+                                    #     "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png"
+                                    # },
+                                    "Events":
+                                        {"name": "Events",
+                                         "name_ar": "Events",
+                                         "url": "https://" + school_name + ".staging.trackware.com/my/Events/",
+                                         "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Events/",
+                                         "arabic_name": "الفعاليات و الانشطة",
+                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Events.png"
+                                         },
+                                    "Homeworks":
+                                        {"name": "Homeworks",
+                                         "url": "https://" + school_name + ".staging.trackware.com/my/Homeworks/",
+                                         "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Homeworks/",
+                                         "name_ar": "الواجبات المنزلية",
+                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/worksheets.png"
+                                         },
+                                    "Calendar":
+                                        {"name": "Calendar",
+                                         "url": "https://iks.staging.trackware.com/my/Calendar/",
+                                         "arabic_url": "https://iks.staging.trackware.com/ar_SY/my/Calendar/",
+                                         "name_ar": "التقويم",
+                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/School+Calendar.png"
+                                         },
 
-                                        "Clinic":
-                                            {"name": "Clinic",
-                                             "name_ar": "Clinic",
-                                             "url": "http://192.168.1.127:9098/my/Clinic/",
-                                             "arabic_url": "http://192.168.1.127:9098/ar_SY/my/Clinic/",
-                                             "arabic_name": "العيادة",
-                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png"
-                                             }
-                                    }
+                                    "Clinic":
+                                        {"name": "Clinic",
+                                         "name_ar": "Clinic",
+                                         "url": "https://" + school_name + ".staging.trackware.com/my/Clinic/",
+                                         "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Clinic/",
+                                         "arabic_name": "العيادة",
+                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png"
+                                         }
+                                }
                                 url_m = {}
                                 model_list = (
                                     "Badges", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
@@ -515,7 +525,8 @@ def kids_list(request):
 
                                 for rec1 in res:
                                     if 'Weekly Plans' == rec1:
-                                        x['Weeklyplans']['arabic_url']=x['Weeklyplans']['arabic_url']+str(student[rec][2])
+                                        x['Weeklyplans']['arabic_url'] = x['Weeklyplans']['arabic_url'] + str(
+                                            student[rec][2])
                                         x['Weeklyplans']['url'] = x['Weeklyplans']['url'] + str(
                                             student[rec][2])
                                         model.append(x['Weeklyplans'])
@@ -526,13 +537,15 @@ def kids_list(request):
                                         model.append(x['Events'])
 
                                     if 'Online Assignments' == rec1:
-                                        x['Assignments']['arabic_url'] = x['Assignments']['arabic_url'] + str(student[rec][2])
+                                        x['Assignments']['arabic_url'] = x['Assignments']['arabic_url'] + str(
+                                            student[rec][2])
                                         x['Assignments']['url'] = x['Assignments']['url'] + str(
                                             student[rec][2])
                                         model.append(x['Assignments'])
 
                                     if 'Homework' == rec1:
-                                        x['Homeworks']['arabic_url'] = x['Homeworks']['arabic_url'] + str(student[rec][2])
+                                        x['Homeworks']['arabic_url'] = x['Homeworks']['arabic_url'] + str(
+                                            student[rec][2])
                                         x['Homeworks']['url'] = x['Homeworks']['url'] + str(
                                             student[rec][2])
                                         model.append(x['Homeworks'])
@@ -552,15 +565,16 @@ def kids_list(request):
                                         x['Clinic']['url'] = x['Clinic']['url'] + str(student[rec][2])
                                         model.append(x['Clinic'])
 
-
                                 cursor.execute(
                                     "select name from ir_ui_menu where name ='Tracking'")
                                 tracking = cursor.fetchall()
 
                                 if len(tracking) > 0:
                                     model.append({
-                                        "url": "http://192.168.1.127:9098/my/Absence/"+str(student[rec][2]),
-                                        "arabic_url": "http://192.168.1.127:9098/ar_SY/my/Absence/"+str(student[rec][2]),
+                                        "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(
+                                            student[rec][2]),
+                                        "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Absence/" + str(
+                                            student[rec][2]),
                                         "name": "Absence",
                                         "name_ar": "الغياب",
                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png"
@@ -576,15 +590,16 @@ def kids_list(request):
                                     model = {
                                         "Absence":
                                             {
-                                                "url": "http://192.168.1.127:9098/my/Absence/"+str(student[rec][2]),
-                                                "arabic_url": "http://192.168.1.127:9098/ar_SY/my/Absence/"+str(student[rec][2]),
+                                                "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(
+                                                    student[rec][2]),
+                                                "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Absence/" + str(
+                                                    student[rec][2]),
                                                 "name": "Absence",
                                                 "name_ar": "الغياب",
                                                 "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png"
                                             }
 
                                     }
-
 
                                 if 'by_parents' in student[rec][3]:
                                     pick = True
@@ -599,13 +614,16 @@ def kids_list(request):
                                     'user_id': student[rec][2],
                                     'father_id': student[rec][7],
                                     'mother_id': student[rec][8],
+                                    "change_location": setting[0][3],
                                     'name': student[rec][1],
-                                    'grade_name': student[rec][6],
+                                    'grade_name': '',
                                     'drop_off_by_parent': drop,
                                     'pickup_by_parent': pick,
-                                    "is_active": False,
-                                    'avatar': student[rec][5] if student[rec][
-                                        5] else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
+                                    "is_active": True if str(student[rec][9]) == 'done' else False,
+                                    'avatar': 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
+                                        student[rec][5]) if student[rec][
+                                        5] else str(
+                                        'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png'),
                                     "school_name": school[0][0],
                                     "school_mobile_number": school[0][1],
                                     "school_lat": setting[0][0],
@@ -618,6 +636,7 @@ def kids_list(request):
                                     },
                                     "features": model,
                                 })
+
                             result = {'students': studen_list}
                             return Response(result)
                     result = {'status': 'error'}
@@ -631,7 +650,6 @@ def kids_list(request):
 
 @api_view(['POST'])
 def kids_hstory(request):
-
     if request.method == 'POST':
         if request.headers:
             if request.headers.get('Authorization'):
@@ -759,6 +777,7 @@ def kids_hstory(request):
             result = {'status': 'error'}
             return Response(result)
 
+
 @api_view(['POST'])
 def pre_arrive(request):
     if request.method == 'POST':
@@ -796,8 +815,8 @@ def pre_arrive(request):
                                     r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
 
                                     cursor.execute(
-                                    "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,create_date,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
-                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id,r,r])
+                                        "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,create_date,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
+                                        [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r, r])
                                     cursor.execute(
                                         "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                         [student_name[0][0], parent_id])
@@ -828,7 +847,7 @@ def pre_arrive(request):
 
                                 cursor.execute(
                                     "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,create_date,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
-                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id,r,r])
+                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r, r])
                                 cursor.execute(
                                     "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                     [student_name[0][0], parent_id])
@@ -851,4 +870,3 @@ def pre_arrive(request):
         else:
             result = {'status': 'error'}
             return Response(result)
-
