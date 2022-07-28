@@ -612,14 +612,14 @@ def kids_list(request):
                                 studen_list.append({
                                     'id': student[rec][0],
                                     'user_id': student[rec][2],
-                                    'father_id': student[rec][7],
-                                    'mother_id': student[rec][8],
+                                    'father_id': student[rec][6],
+                                    'mother_id': student[rec][7],
                                     "change_location": setting[0][3],
                                     'name': student[rec][1],
                                     'grade_name': '',
                                     'drop_off_by_parent': drop,
                                     'pickup_by_parent': pick,
-                                    "is_active": str(student[rec][8]) == 'done',
+                                    "is_active": True if str(student[rec][8]) == 'done' else False,
                                     'avatar': 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
                                         student[rec][5]) if student[rec][
                                         5] else str(
@@ -638,6 +638,7 @@ def kids_list(request):
                                 })
 
                             result = {'students': studen_list}
+
                             return Response(result)
                     result = {'status': 'error'}
                     return Response(result)
