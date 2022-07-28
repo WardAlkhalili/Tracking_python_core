@@ -619,7 +619,7 @@ def kids_list(request):
                                     'grade_name': '',
                                     'drop_off_by_parent': drop,
                                     'pickup_by_parent': pick,
-                                    "is_active": True if str(student[rec][9]) == 'done' else False,
+                                    "is_active": str(student[rec][8]) == 'done',
                                     'avatar': 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
                                         student[rec][5]) if student[rec][
                                         5] else str(
