@@ -901,7 +901,7 @@ def notify(request):
                                            [sender_id])
 
                             sender_name = cursor.fetchall()
-                            message_en="	My child  "+student_name[0][0]+" will be absent on "+date+" .So please do not pass by my home for pickup"
+                            message_en="	My child  "+student_name[0][0]+" will be absent on "+str(date)+" .So please do not pass by my home for pickup"
                             date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                             r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
                             cursor.execute(
