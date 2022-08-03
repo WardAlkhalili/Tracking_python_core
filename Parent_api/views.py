@@ -609,6 +609,7 @@ def kids_list(request):
                                     drop = True
                                 else:
                                     drop = False
+
                                 studen_list.append({
                                     'id': student[rec][0],
                                     'user_id': student[rec][2],
@@ -871,3 +872,42 @@ def pre_arrive(request):
         else:
             result = {'status': 'error'}
             return Response(result)
+@api_view(['POST'])
+def notify(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+                    parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+                    for e in parent_id:
+                        parent_id = e[0]
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+
+                        school_name = ManagerParent.pincode(school_name)
+                        type=request.data.get('type')
+                        sender_id=request.data.get('sender_id')
+                        date = request.data.get('date')
+                        student_id = request.data.get('student_id')
+                        with connections[school_name].cursor() as cursor:
+                            cursor.execute("select  display_name_search from student_student WHERE id = %s",
+                                           [student_id])
+
+                            student_name = cursor.fetchall()
+                            cursor.execute("select  display_name_search from school_parent WHERE id = %s",
+                                           [sender_id])
+
+                            sender_name = cursor.fetchall()
+                            message_en="	My child  "+student_name[0][0]+" will be absent on "+date+" .So please do not pass by my home for pickup"
+                            date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+                            cursor.execute(
+                                "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
+                                [r, 'App\Model\Parents', type, message_en,sender_name[0][0]])
+                            result = {'result': True}
+                            return Response(result)
+
+
