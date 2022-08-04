@@ -889,7 +889,7 @@ def notify(request):
 
                         school_name = ManagerParent.pincode(school_name)
                         type=request.data.get('type')
-                        sender_id=request.data.get('sender_id')
+                        sender_id=parent_id
                         date = request.data.get('date')
                         student_id = request.data.get('student_id')
                         with connections[school_name].cursor() as cursor:
