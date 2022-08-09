@@ -402,6 +402,7 @@ def student_list(request, round_id):
                                 s = [dict(zip(columns4, row)) for row in student_student]
                                 student_info = {}
                                 for std in range(len(student_student)):
+
                                     if student_student[std]:
                                         in_round = False
                                         out_round = False
@@ -597,6 +598,7 @@ def student_list(request, round_id):
                                             "third_mandatory": student_student[std][136],
                                             "last_mandatory": student_student[std][137],
                                             "section_id_value": student_student[std][138],
+                                            "grade":student_student[std][148],
                                             # "laravel_through_key": s[std]['laravel_through_key'],
                                             "parents_info": [
                                                 {
