@@ -598,7 +598,7 @@ def student_list(request, round_id):
                                             "third_mandatory": student_student[std][136],
                                             "last_mandatory": student_student[std][137],
                                             "section_id_value": student_student[std][138],
-                                            "grade":student_student[std][147],
+                                            # "grade":student_student[std][147],
                                             # "laravel_through_key": s[std]['laravel_through_key'],
                                             "parents_info": [
                                                 {
