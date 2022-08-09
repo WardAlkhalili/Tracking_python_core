@@ -590,7 +590,7 @@ def student_list(request, round_id):
                                             "is_suspended": student_student[std][128],
                                             "sequence": student_student[std][129],
                                             "password": student_student[std][130],
-                                            "image_url":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + student_student[std][131] if student_student[std][131] else student_student[std][131],
+                                            "image_url":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + student_student[std][135] if student_student[std][131] else student_student[std][131],
                                             "round_id": student_student[std][132],
                                             "responsible_id_value": student_student[std][133],
                                             "first_mandatory": student_student[std][134],
@@ -598,7 +598,7 @@ def student_list(request, round_id):
                                             "third_mandatory": student_student[std][136],
                                             "last_mandatory": student_student[std][137],
                                             "section_id_value": student_student[std][138],
-                                            "grade":student_student[std][148],
+                                            "grade":student_student[std][147],
                                             # "laravel_through_key": s[std]['laravel_through_key'],
                                             "parents_info": [
                                                 {
