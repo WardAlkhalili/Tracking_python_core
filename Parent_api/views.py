@@ -16,6 +16,8 @@ from itertools import chain
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 import json
+import calendar
+from datetime import date
 import requests
 import datetime
 from rest_framework import status
@@ -429,12 +431,7 @@ def kids_list(request):
 
                         school_name = ManagerParent.pincode(school_name)
                         with connections[school_name].cursor() as cursor:
-                            #
-                            # cursor.execute(
-                            #     "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,academic_grade_name1,father_id,mother_id,state from student_student WHERE father_id = %s OR mother_id = %s OR responsible_id_value = %s  And state = 'done'",
-                            #     [parent_id, parent_id, parent_id])
-                            # columns = (x.name for x in cursor.description)
-                            # student = cursor.fetchall()
+
 
                             cursor.execute(
                                 "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state from student_student WHERE father_id = %s OR mother_id = %s OR responsible_id_value = %s  And state = 'done'",
@@ -443,7 +440,7 @@ def kids_list(request):
                             student = cursor.fetchall()
                             studen_list = []
                             cursor.execute(
-                                "select  lat,lng,pickup_request_distance,change_location from transport_setting  ORDER BY ID DESC LIMIT 1")
+                                "select  lat,lng,pickup_request_distance,change_location,show_map,enable_parents_to_confirm_student_pickup from transport_setting  ORDER BY ID DESC LIMIT 1")
                             columns = (x.name for x in cursor.description)
                             setting = cursor.fetchall()
                             cursor.execute(
@@ -452,6 +449,41 @@ def kids_list(request):
                             columns = (x.name for x in cursor.description)
                             school = cursor.fetchall()
                             for rec in range(len(student)):
+                                # round = self.env["round.schedule"].search([('student_id', '=', self.id)])
+                                is_active_round=False
+                                student_round_id=0
+                                curr_date = date.today()
+
+                                cursor.execute(
+                                    "select  id  from school_day where name = %s",
+                                    [calendar.day_name[curr_date.weekday()]])
+                                day_name = cursor.fetchall()
+                                cursor.execute(
+                                    "select id from round_schedule WHERE  day_id = %s",
+                                    [day_name[0][0]])
+                                columns3 = (x.name for x in cursor.description)
+                                rounds_details = cursor.fetchall()
+                                for rou in range(len(rounds_details)):
+                                    cursor.execute(
+                                        "select round_schedule_id from transport_participant WHERE round_schedule_id = %s and student_id = %s",
+                                        [rounds_details[rou][0],student[rec][0]])
+                                    columns4 = (x.name for x in cursor.description)
+                                    rounds_count_student = cursor.fetchall()
+                                    if rounds_count_student:
+                                        cursor.execute(
+                                            "select round_id from round_schedule WHERE  id = %s",
+                                            [rounds_count_student[0][0]])
+                                        columns3 = (x.name for x in cursor.description)
+                                        rounds = cursor.fetchall()
+                                        cursor.execute(
+                                            "select is_active from transport_round WHERE  id = %s",
+                                            [rounds[0][0]])
+                                        columns3 = (x.name for x in cursor.description)
+                                        is_active = cursor.fetchall()
+                                        if is_active[0][0]:
+                                            student_round_id=rounds[0][0]
+                                            is_active_round=is_active[0][0]
+
                                 x = {
                                     "Badges": {
                                         "url": "https://" + school_name + ".staging.trackware.com/my/Badges/",
@@ -620,7 +652,8 @@ def kids_list(request):
                                     'grade_name': '',
                                     'drop_off_by_parent': drop,
                                     'pickup_by_parent': pick,
-                                    "is_active": True if str(student[rec][8]) == 'done' else False,
+                                    "is_active": is_active_round,
+                                    "round_id": student_round_id,
                                     'avatar': 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
                                         student[rec][5]) if student[rec][
                                         5] else str(
@@ -630,6 +663,9 @@ def kids_list(request):
                                     "school_lat": setting[0][0],
                                     "school_lng": setting[0][1],
                                     'pickup_request_distance': setting[0][2],
+                                    "show_map":  setting[0][4],
+                                    "show_absence": True,
+                                    "show_pickup_request": setting[0][5],
                                     "student_status": {
                                         "activity_type": "",
                                         "round_id": 0,
@@ -637,9 +673,8 @@ def kids_list(request):
                                     },
                                     "features": model,
                                 })
-
                             result = {'students': studen_list}
-
+                            # print(result)
                             return Response(result)
                     result = {'status': 'error'}
                     return Response(result)
@@ -674,7 +709,6 @@ def kids_hstory(request):
                                     "select  id  from school_message WHERE create_date >= %s AND create_date <= %s",
                                     [start_date, end_date])
                                 school_message = cursor.fetchall()
-
                             elif start_date and not end_date:
                                 cursor.execute(
                                     "select  id  from school_message WHERE create_date >= %s ",
@@ -690,7 +724,6 @@ def kids_hstory(request):
                             elif not start_date and not end_date:
                                 cursor.execute("select  id  from school_message ")
                                 school_message = cursor.fetchall()
-
                             cursor.execute(
                                 "select  id,display_name_search,image_url from student_student WHERE father_id = %s OR mother_id = %s OR responsible_id_value = %s  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
@@ -748,22 +781,23 @@ def kids_hstory(request):
                                             "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_msg_admin.png",
                                             "date_time": "2022-03-14 18:22:28",
                                             "notifications_text": school_message1[rec][3],
-                                            "date_time": school_message1[rec][5],
+                                            "create_date": school_message1[rec][5],
                                             "notifications_title": school_message1[rec][2],
 
                                         })
 
                                     result = {"notifications": notifications}
+
                                     return Response(result)
                             notifications = []
-                            notifications.append({
-
-                                "notifications_text": 'school_message1[rec][3]',
-                                "date_time": 'school_message1[rec][5]',
-                                "create_date": 'school_message1[rec][4]',
-                                "notifications_title": 'school_message1[rec][2]',
-                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                            })
+                            # notifications.append({
+                            #
+                            #     "notifications_text": 'school_message1[rec][3]',
+                            #     "date_time": 'school_message1[rec][5]',
+                            #     "create_date": 'school_message1[rec][4]',
+                            #     "notifications_title": 'school_message1[rec][2]',
+                            #     "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                            # })
                             result = {"notifications": notifications}
                             return Response(result)
                     else:
