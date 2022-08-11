@@ -53,6 +53,10 @@ def driver_login(request):
             """)
             login_details = cursor.fetchall()
 
+            login_details1 = []
+            columnNames = [column[0] for column in cursor.description]
+            for record in login_details:
+                login_details1.append(dict(zip(columnNames, record)))
             cursor.execute('select name,phone,id  from  res_company')
             company_login_info = cursor.fetchall()
 
@@ -94,18 +98,18 @@ def driver_login(request):
             result = {
                 "status": "ok",
                 "school_phone": company_login_info[0][1],
-                "location_refresh_rate": login_details[0][4],
+                "location_refresh_rate": login_details1[0]['location_refresh_rate'],
                 "school_name": company_login_info[0][0],
                 "school_db": school_name,
-                "school_lng": login_details[0][2],
-                "school_lat": login_details[0][1],
+                "school_lng": login_details1[0]['lng'],
+                "school_lat": login_details1[0]['lat'],
                 "school_id": company_login_info[0][2],
-                "utc_offset": login_details[0][6],
-                "timezone": login_details[0][5],
+                "utc_offset": login_details1[0]['utc_offset'],
+                "timezone": login_details1[0]['timezone'],
                 "bus_id": data_id_bus[0][2],
                 "bus_number": data_id_bus[0][1],
                 "driver_id": data_id_bus[0][0],
-                "nearby_distance": login_details[0][0],
+                "nearby_distance": login_details1[0]['nearby_distance'],
                 "notifications_text": [
                     {
                         "type": "drop-off",
@@ -162,18 +166,18 @@ def driver_login(request):
                 ],
                 "notifications_thresholds": [
                     {
-                        "battery_low": login_details[0][3],
-                        "user_speed_exceeded": login_details[0][12],
-                        "user_no_move_time_exceeded": login_details[0][13]
+                        "battery_low": login_details1[0]['battery_low'],
+                        "user_speed_exceeded": login_details1[0]['user_speed_exceeded'],
+                        "user_no_move_time_exceeded": login_details1[0]['user_no_move_time_exceeded']
                     }
                 ],
                 "notifications_settings": [
                     {
-                        "speed_limit_watch": login_details[0][7],
-                        "standstill_watch": login_details[0][8],
-                        "notify_if_driver_check_in_out_geo_fence": login_details[0][9],
-                        "notify_on_battery_low_of_drivers_app": login_details[0][10],
-                        "notify_it_driver_turns_off_gps": login_details[0][11]
+                        "speed_limit_watch": login_details1[0]['speed_limit_watch'],
+                        "standstill_watch": login_details1[0]['standstill_watch'],
+                        "notify_if_driver_check_in_out_geo_fence": login_details1[0]['notify_if_driver_check_in_out_geo_fence'],
+                        "notify_on_battery_low_of_drivers_app": login_details1[0]['notify_on_battery_low_of_drivers_app'],
+                        "notify_it_driver_turns_off_gps": login_details1[0]['notify_it_driver_turns_off_gps']
                     }
                 ],
                 "geofenses": [],
