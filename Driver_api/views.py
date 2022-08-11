@@ -231,26 +231,37 @@ def round_list(request):
                             day_id = cursor.fetchall()
                             result = {}
                             cursor.execute(
-                                "select name,start_time,pick_up_address,drop_off_address,pick_up_lat,pick_up_lng,drop_off_lat,drop_off_lng,route_id,id from transport_round WHERE vehicle_id = %s and  type = %s",
+                                "select name,start_time,pick_up_address,drop_off_address,pick_up_lat,pick_up_lng,drop_off_lat,drop_off_lng,route_id,id,is_active from transport_round WHERE vehicle_id = %s and  type = %s",
                                 [request.data.get('bus_id'),
                                  'drop_off' if 'drop' in request.data.get('round_type') else 'pick_up'])
+                            columns = (x.name for x in cursor.description)
                             list_round = cursor.fetchall()
+
+                            list_round1 = []
+                            columnNames = [column[0] for column in cursor.description]
+
+                            for record in list_round:
+                                list_round1.append(dict(zip(columnNames, record)))
+                            # list_round = cursor.fetchall()
+                            # print("dddddddddddddddddddddddddddddddddddddddddddddddd",list_round1)
                             result1 = {}
                             round = []
                             r_id=[]
                             l_round=[]
-                            for id in list_round:
-                                r_id.append(id[9])
+                            for id in list_round1:
+                                r_id.append(id['id'])
                             if r_id:
                                 cursor.execute("select id,day_id,round_id from round_schedule WHERE round_id in %s and day_id =%s",
                                                [tuple(r_id), day_id[0][0]])
                                 rounds_details = cursor.fetchall()
                                 for id in rounds_details:
                                     l_round.append(id[2])
-                                cursor.execute(
-                                    "select name,start_time,pick_up_address,drop_off_address,pick_up_lat,pick_up_lng,drop_off_lat,drop_off_lng,route_id,id,is_active from transport_round WHERE id in %s",
-                                    [tuple(l_round)])
-                                list_round = cursor.fetchall()
+
+                                # cursor.execute(
+                                #     "select name,start_time,pick_up_address,drop_off_address,pick_up_lat,pick_up_lng,drop_off_lat,drop_off_lng,route_id,id,is_active from transport_round WHERE id in %s",
+                                #     [tuple(l_round)])
+                                # list_round = cursor.fetchall()
+
                                 for rec in range(len(rounds_details)):
                                         day_list = {}
                                         day_name = calendar.day_name[curr_date.weekday()]
@@ -275,11 +286,11 @@ def round_list(request):
 
                                         cursor.execute(
                                             "select  name,vehicle_id,driver_id from transport_round WHERE id = %s  ",
-                                            [list_round[rec][9]])
+                                            [list_round1[rec]['id']])
                                         round_info = cursor.fetchall()
                                         cursor.execute(
                                             "select  id,round_start,round_end,na from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
-                                            [list_round[rec][9], round_info[0][2], round_info[0][1], list_round[rec][9]])
+                                            [list_round1[rec]['id'], round_info[0][2], round_info[0][1], list_round1[rec]['id']])
                                         round_history = cursor.fetchall()
                                         if round_history:
 
@@ -301,18 +312,17 @@ def round_list(request):
                                             end = False
                                             start=False
                                             cancel=False
-
                                         result1[rec] = {
-                                            "round_time": str(list_round[rec][1]),
-                                            "name": str(list_round[rec][0]),
+                                            "round_time": str(list_round1[rec]['start_time']),
+                                            "name": str(list_round1[rec]['name']),
                                             "date": None,
-                                            "pick_up_address": list_round[rec][2],
-                                            "drop_off_address": list_round[rec][3],
-                                            "pick_up_lat": list_round[rec][4] if list_round[rec][4] else 0,
-                                            "pick_up_lng": list_round[rec][5] if list_round[rec][5] else 0,
-                                            "drop_off_lat": list_round[rec][6] if list_round[rec][6] else 0,
-                                            "drop_off_lng": list_round[rec][7] if list_round[rec][7] else 0,
-                                            "route_id": list_round[rec][8],
+                                            "pick_up_address": list_round1[rec]['pick_up_address'],
+                                            "drop_off_address": list_round1[rec]['drop_off_address'],
+                                            "pick_up_lat": list_round1[rec]['pick_up_lat'] if list_round1[rec]['pick_up_lat'] else 0,
+                                            "pick_up_lng": list_round1[rec]['pick_up_lng'] if list_round1[rec]['pick_up_lng'] else 0,
+                                            "drop_off_lat": list_round1[rec]['drop_off_lat'] if list_round1[rec]['drop_off_lat'] else 0,
+                                            "drop_off_lng": list_round1[rec]['drop_off_lng'] if list_round1[rec]['drop_off_lng'] else 0,
+                                            "route_id": list_round1[rec]['route_id'],
                                             "round_canceled": cancel,
                                             "round_ended": end,
                                                 "round_started": start,
@@ -324,7 +334,7 @@ def round_list(request):
                                                     "vertices": []
                                                 }
                                             },
-                                            "round_id": list_round[rec][9],
+                                            "round_id": list_round1[rec]['id'],
                                             "moved_students": [],
                                             "students_list": [day_list]
 
@@ -401,7 +411,12 @@ def student_list(request, round_id):
                                                [tuple(st_id)])
                                 columns4 = (x.name for x in cursor.description)
                                 student_student = cursor.fetchall()
-                                s = [dict(zip(columns4, row)) for row in student_student]
+                                # s = [dict(zip(columns4, row)) for row in student_student]
+                                student_student1 = []
+                                columnNames = [column[0] for column in cursor.description]
+
+                                for record in student_student:
+                                    student_student1.append(dict(zip(columnNames, record)))
                                 student_info = {}
                                 for std in range(len(student_student)):
 
@@ -426,7 +441,7 @@ def student_list(request, round_id):
                                             if round_history[0][1].strftime('%Y-%m-%d') == str(now):
                                                 cursor.execute(
                                                     "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
-                                                    [round_id, student_student[std][0], round_history[0][0]])
+                                                    [round_id, student_student1[std]['id'], round_history[0][0]])
                                                 student_history = cursor.fetchall()
                                                 if student_history:
                                                     lat=student_history[0][1]
@@ -452,154 +467,154 @@ def student_list(request, round_id):
                                                         abs = True
                                                         no_show = False
                                         cursor.execute("select * from school_parent WHERE id = %s",
-                                                       [student_student[std][49]])
+                                                       [student_student1[std]['father_id']])
                                         columns_f = (x.name for x in cursor.description)
                                         father = cursor.fetchall()
                                         father_inf = [dict(zip(columns_f, row)) for row in father]
                                         cursor.execute("select * from school_parent WHERE id = %s",
-                                                       [student_student[std][50]])
+                                                       [student_student1[std]['mother_id']])
                                         columns_m = (x.name for x in cursor.description)
                                         mother = cursor.fetchall()
                                         mother_inf = [dict(zip(columns_m, row)) for row in mother]
                                         student_info[std] = {
-                                            "id": student_student[std][0],
-                                            "year_id": student_student[std][1],
-                                            "emergency_call": student_student[std][2],
-                                            "display_name_search": student_student[std][3],
-                                            "user_id": student_student[std][4],
-                                            "color": student_student[std][5],
-                                            "email": student_student[std][6],
-                                            "mobile": student_student[std][7],
-                                            "name": student_student[std][3],
-                                            "contact_phone1": student_student[std][9],
-                                            "contact_mobile1": student_student[std][10],
-                                            "nationality_id": student_student[std][11],
-                                            "admission_date": student_student[std][12],
-                                            "second_name": student_student[std][13],
-                                            "third_name": student_student[std][14],
-                                            "last_name": student_student[std][15],
-                                            "mother_tongue": student_student[std][17],
-                                            "blood_group": student_student[std][18],
-                                            "date_of_birth": student_student[std][19],
-                                            "building_number": student_student[std][20],
-                                            "building_name": student_student[std][21],
-                                            "street": student_student[std][22],
-                                            "flat_number": student_student[std][23],
-                                            "area_id": student_student[std][24],
-                                            "state_id": student_student[std][25],
-                                            "address_note": student_student[std][26],
-                                            "terminate_reason": student_student[std][27],
-                                            "terminate_date": student_student[std][28],
-                                            "alumni_date": student_student[std][29],
-                                            "national_id": student_student[std][30],
-                                            "passport_number": student_student[std][31],
-                                            "religion_id": student_student[std][32],
-                                            "country_id": student_student[std][33],
-                                            "id_number": student_student[std][34],
-                                            "is_demo": student_student[std][35],
-                                            "birth_certificate_no": student_student[std][36],
-                                            "issued_at": student_student[std][37],
-                                            "issue_date": student_student[std][38],
-                                            "previous_year_avg": student_student[std][39],
-                                            "learning_disabilities": student_student[std][40],
-                                            "need_attention": student_student[std][41],
-                                            "attention_follow_up_notes": student_student[std][42],
-                                            "special_needs": student_student[std][43],
-                                            "health_condition_notes": student_student[std][44],
-                                            "allergies": student_student[std][45],
-                                            "allergies_desc": student_student[std][46],
-                                            "bus_number": student_student[std][47],
-                                            "state": student_student[std][48],
-                                            "father_id": student_student[std][49],
-                                            "mother_id": student_student[std][50],
-                                            "family_relation_id":student_student[std][51],
-                                            "message_main_attachment_id": student_student[std][52],
-                                            "create_uid": student_student[std][53],
-                                            "create_date": student_student[std][54],
-                                            "write_uid": student_student[std][55],
-                                            "write_date": student_student[std][56],
-                                            "is_banned": student_student[std][57],
-                                            "currency_id": student_student[std][58],
-                                            "name_ar": student_student[std][59],
-                                            "second_name_ar": student_student[std][60],
-                                            "third_name_ar": student_student[std][61],
-                                            "last_name_ar": student_student[std][62],
-                                            "display_name_ar": student_student[std][63],
-                                            "moe_grace_period": student_student[std][64],
-                                            "deadline_date": student_student[std][65],
-                                            "neighborhood_id":student_student[std][66],
-                                            "assembly_id": student_student[std][67],
-                                            "ministry_state_id": student_student[std][68],
-                                            "student_emis_no": student_student[std][69],
-                                            "family_members": student_student[std][70],
-                                            "borthers": student_student[std][71],
-                                            "sisters": student_student[std][72],
-                                            "soas": student_student[std][73],
-                                            "marital_state": student_student[std][74],
-                                            "education": student_student[std][75],
-                                            "external_financial_aid":student_student[std][76],
-                                            "aid_type": student_student[std][77],
-                                            "international_refugee_card_status": student_student[std][78],
-                                            "district_id": student_student[std][79],
-                                            "province_id": student_student[std][80],
-                                            "partner_id": student_student[std][81],
-                                            "book_requests": student_student[std][82],
-                                            "country_of_birth": student_student[std][83],
-                                            "city_of_birth": student_student[std][84],
-                                            "file_name": student_student[std][85],
-                                            "pickup_by_parent": student_student[std][86],
-                                            "dropoff_by_parent": student_student[std][87],
-                                            "area_ids": student_student[std][88],
-                                            "round_type": student_student[std][89],
-                                            "contact_person": student_student[std][90],
-                                            "family_relation": student_student[std][91],
-                                            "contact_person_number": student_student[std][92],
-                                            "round_address_type": student_student[std][93],
-                                            "pick_up_type": student_student[std][94],
-                                            "drop_off_type": student_student[std][95],
-                                            "second_pickup_address": student_student[std][96],
-                                            "second_dropoff_address": student_student[std][97],
-                                            "dropoff_as_pickup": student_student[std][98],
-                                            "same_as_address": student_student[std][99],
-                                            "pickup_building_number": student_student[std][100],
-                                            "pickup_building_name": student_student[std][101],
-                                            "pickup_street": student_student[std][102],
-                                            "pickup_flat_number": student_student[std][103],
-                                            "pickup_area_id": student_student[std][104],
-                                            "pickup_state_id": student_student[std][105],
-                                            "pickup_address_note": student_student[std][106],
-                                            "sec_pickup_building_number": student_student[std][107],
-                                            "sec_pickup_building_name": student_student[std][108],
-                                            "sec_pickup_street": student_student[std][109],
-                                            "sec_pickup_flat_number": student_student[std][110],
-                                            "sec_pickup_area_id": student_student[std][111],
-                                            "sec_pickup_state_id": student_student[std][112],
-                                            "sec_pickup_address_note": student_student[std][113],
-                                            "dropoff_building_number": student_student[std][114],
-                                            "dropoff_building_name": student_student[std][115],
-                                            "dropoff_street": student_student[std][116],
-                                            "dropoff_flat_number": student_student[std][117],
-                                            "dropoff_area_id": student_student[std][118],
-                                            "dropoff_state_id": student_student[std][119],
-                                            "dropoff_address_note": student_student[std][120],
-                                            "sec_dropoff_building_number": student_student[std][121],
-                                            "sec_dropoff_building_name": student_student[std][122],
-                                            "sec_dropoff_street": student_student[std][123],
-                                            "sec_dropoff_flat_number": student_student[std][124],
-                                            "sec_dropoff_area_id": student_student[std][125],
-                                            "sec_dropoff_state_id": student_student[std][126],
-                                            "sec_dropoff_address_note": student_student[std][127],
-                                            "is_suspended": student_student[std][128],
-                                            "sequence": student_student[std][129],
-                                            "password": student_student[std][130],
-                                            "image_url":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + student_student[std][135] if student_student[std][131] else student_student[std][131],
-                                            "round_id": student_student[std][132],
-                                            "responsible_id_value": student_student[std][133],
-                                            "first_mandatory": student_student[std][134],
-                                            "second_mandatory": student_student[std][135],
-                                            "third_mandatory": student_student[std][136],
-                                            "last_mandatory": student_student[std][137],
-                                            "section_id_value": student_student[std][138],
+                                            "id": student_student1[std]['id'],
+                                            "year_id": student_student1[std]['year_id'],
+                                            "emergency_call": student_student1[std]['emergency_call'],
+                                            "display_name_search": student_student1[std]['display_name_search'],
+                                            "user_id": student_student1[std]['user_id'],
+                                            "color": student_student1[std]['color'],
+                                            "email": student_student1[std]['email'],
+                                            "mobile": student_student1[std]['mobile'],
+                                            "name": student_student1[std]['name'],
+                                            "contact_phone1": student_student1[std]['contact_phone1'],
+                                            "contact_mobile1": student_student1[std]['contact_mobile1'],
+                                            "nationality_id": student_student1[std]['nationality_id'],
+                                            "admission_date": student_student1[std]['admission_date'],
+                                            "second_name": student_student1[std]['second_name'],
+                                            "third_name": student_student1[std]['third_name'],
+                                            "last_name": student_student1[std]['last_name'],
+                                            "mother_tongue": student_student1[std]['mother_tongue'],
+                                            "blood_group": student_student1[std]['blood_group'],
+                                            "date_of_birth": student_student1[std]['date_of_birth'],
+                                            "building_number": student_student1[std]['building_number'],
+                                            "building_name": student_student1[std]['building_name'],
+                                            "street": student_student1[std]['street'],
+                                            "flat_number": student_student1[std]['flat_number'],
+                                            "area_id": student_student1[std]['area_id'],
+                                            "state_id": student_student1[std]['state_id'],
+                                            "address_note": student_student1[std]['address_note'],
+                                            "terminate_reason": student_student1[std]['terminate_reason'],
+                                            "terminate_date": student_student1[std]['terminate_date'],
+                                            "alumni_date": student_student1[std]['alumni_date'],
+                                            "national_id": student_student1[std]['national_id'],
+                                            "passport_number": student_student1[std]['passport_number'],
+                                            "religion_id": student_student1[std]['religion_id'],
+                                            "country_id": student_student1[std]['country_id'],
+                                            "id_number": student_student1[std]['id_number'],
+                                            "is_demo": student_student1[std]['is_demo'],
+                                            "birth_certificate_no": student_student1[std]['birth_certificate_no'],
+                                            "issued_at": student_student1[std]['issued_at'],
+                                            "issue_date": student_student1[std]['issue_date'],
+                                            "previous_year_avg": student_student1[std]['previous_year_avg'],
+                                            "learning_disabilities": student_student1[std]['learning_disabilities'],
+                                            "need_attention": student_student1[std]['need_attention'],
+                                            "attention_follow_up_notes": student_student1[std]['attention_follow_up_notes'],
+                                            "special_needs": student_student1[std]['special_needs'],
+                                            "health_condition_notes": student_student1[std]['health_condition_notes'],
+                                            "allergies": student_student1[std]['allergies'],
+                                            "allergies_desc": student_student1[std]['allergies_desc'],
+                                            "bus_number": student_student1[std]['bus_number'],
+                                            "state": student_student1[std]['state'],
+                                            "father_id": student_student1[std]['father_id'],
+                                            "mother_id": student_student1[std]['mother_id'],
+                                            "family_relation_id":student_student1[std]['family_relation_id'],
+                                            "message_main_attachment_id": student_student1[std]['message_main_attachment_id'],
+                                            "create_uid": student_student1[std]['create_uid'],
+                                            "create_date": student_student1[std]['create_date'],
+                                            "write_uid": student_student1[std]['write_uid'],
+                                            "write_date": student_student1[std]['write_date'],
+                                            "is_banned": student_student1[std]['is_banned'],
+                                            "currency_id": student_student1[std]['currency_id'],
+                                            "name_ar": student_student1[std]['name_ar'],
+                                            "second_name_ar": student_student1[std]['second_name_ar'],
+                                            "third_name_ar": student_student1[std]['third_name_ar'],
+                                            "last_name_ar": student_student1[std]['last_name_ar'],
+                                            "display_name_ar": student_student1[std]['display_name_ar'],
+                                            "moe_grace_period": student_student1[std]['moe_grace_period'],
+                                            "deadline_date": student_student1[std]['deadline_date'],
+                                            "neighborhood_id":student_student1[std]['neighborhood_id'],
+                                            "assembly_id": student_student1[std]['assembly_id'],
+                                            "ministry_state_id": student_student1[std]['ministry_state_id'],
+                                            "student_emis_no": student_student1[std]['student_emis_no'],
+                                            "family_members": student_student1[std]['family_members'],
+                                            "borthers": student_student1[std]['borthers'],
+                                            "sisters": student_student1[std]['sisters'],
+                                            "soas": student_student1[std]['soas'],
+                                            "marital_state": student_student1[std]['marital_state'],
+                                            "education": student_student1[std]['education'],
+                                            "external_financial_aid":student_student1[std]['external_financial_aid'],
+                                            "aid_type": student_student1[std]['aid_type'],
+                                            "international_refugee_card_status": student_student1[std]['international_refugee_card_status'],
+                                            "district_id": student_student1[std]['district_id'],
+                                            "province_id": student_student1[std]['province_id'],
+                                            "partner_id": student_student1[std]['partner_id'],
+                                            "book_requests": student_student1[std]['book_requests'],
+                                            "country_of_birth": student_student1[std]['country_of_birth'],
+                                            "city_of_birth": student_student1[std]['city_of_birth'],
+                                            "file_name": student_student1[std]['file_name'],
+                                            "pickup_by_parent": student_student1[std]['pickup_by_parent'],
+                                            "dropoff_by_parent": student_student1[std]['dropoff_by_parent'],
+                                            "area_ids": student_student1[std]['area_ids'],
+                                            "round_type": student_student1[std]['round_type'],
+                                            "contact_person": student_student1[std]['contact_person'],
+                                            "family_relation": student_student1[std]['family_relation'],
+                                            "contact_person_number": student_student1[std]['contact_person_number'],
+                                            "round_address_type": student_student1[std]['round_address_type'],
+                                            "pick_up_type": student_student1[std]['pick_up_type'],
+                                            "drop_off_type": student_student1[std]['drop_off_type'],
+                                            "second_pickup_address": student_student1[std]['second_pickup_address'],
+                                            "second_dropoff_address": student_student1[std]['second_dropoff_address'],
+                                            "dropoff_as_pickup": student_student1[std]['dropoff_as_pickup'],
+                                            "same_as_address": student_student1[std]['same_as_address'],
+                                            "pickup_building_number": student_student1[std]['pickup_building_number'],
+                                            "pickup_building_name": student_student1[std]['pickup_building_name'],
+                                            "pickup_street": student_student1[std]['pickup_street'],
+                                            "pickup_flat_number": student_student1[std]['pickup_flat_number'],
+                                            "pickup_area_id": student_student1[std]['pickup_area_id'],
+                                            "pickup_state_id": student_student1[std]['pickup_state_id'],
+                                            "pickup_address_note": student_student1[std]['pickup_address_note'],
+                                            "sec_pickup_building_number": student_student1[std]['sec_pickup_building_number'],
+                                            "sec_pickup_building_name": student_student1[std]['sec_pickup_building_name'],
+                                            "sec_pickup_street": student_student1[std]['sec_pickup_street'],
+                                            "sec_pickup_flat_number": student_student1[std]['sec_pickup_flat_number'],
+                                            "sec_pickup_area_id": student_student1[std]['sec_pickup_area_id'],
+                                            "sec_pickup_state_id": student_student1[std]['sec_pickup_state_id'],
+                                            "sec_pickup_address_note": student_student1[std]['sec_pickup_address_note'],
+                                            "dropoff_building_number": student_student1[std]['dropoff_building_number'],
+                                            "dropoff_building_name": student_student1[std]['dropoff_building_name'],
+                                            "dropoff_street": student_student1[std]['dropoff_street'],
+                                            "dropoff_flat_number": student_student1[std]['dropoff_flat_number'],
+                                            "dropoff_area_id": student_student1[std]['dropoff_area_id'],
+                                            "dropoff_state_id": student_student1[std]['dropoff_state_id'],
+                                            "dropoff_address_note": student_student1[std]['dropoff_address_note'],
+                                            "sec_dropoff_building_number": student_student1[std]['sec_dropoff_building_number'],
+                                            "sec_dropoff_building_name": student_student1[std]['sec_dropoff_building_name'],
+                                            "sec_dropoff_street": student_student1[std]['sec_dropoff_street'],
+                                            "sec_dropoff_flat_number": student_student1[std]['sec_dropoff_flat_number'],
+                                            "sec_dropoff_area_id": student_student1[std]['sec_dropoff_area_id'],
+                                            "sec_dropoff_state_id": student_student1[std]['sec_dropoff_state_id'],
+                                            "sec_dropoff_address_note": student_student1[std]['sec_dropoff_address_note'],
+                                            "is_suspended": student_student1[std]['is_suspended'],
+                                            "sequence": student_student1[std]['sequence'],
+                                            "password": student_student1[std]['password'],
+                                            "image_url":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + student_student1[std]['image_url'] if student_student1[std]['image_url'] else student_student[std][131],
+                                            "round_id": student_student1[std]['round_id'],
+                                            "responsible_id_value": student_student1[std]['responsible_id_value'],
+                                            # "first_mandatory": student_student[std][134],
+                                            # "second_mandatory": student_student[std][135],
+                                            # "third_mandatory": student_student[std][136],
+                                            # "last_mandatory": student_student[std][137],
+                                            "section_id_value": student_student1[std]['section_id_value'],
                                             # "grade":student_student[std][147],
                                             # "laravel_through_key": s[std]['laravel_through_key'],
                                             "parents_info": [
@@ -631,7 +646,7 @@ def student_list(request, round_id):
                                                     }
                                                 }
                                             ],
-                                            "avatar": student_student[std][131] if student_student[std][131] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png",
+                                            "avatar": student_student1[std]['image_url'] if student_student1[std]['image_url'] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png",
                                             "check_in": in_round,
                                             "check_out": out_round,
                                             "absent": abs,
