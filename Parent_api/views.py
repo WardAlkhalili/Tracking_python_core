@@ -30,6 +30,7 @@ def parent_login(request):
         user_name = request.data.get('user_name')
         school_name = request.data.get('school_name')
         mobile_token = request.data.get('mobile_token')
+
         # url = "http://localhost:9098/web/session/authenticate"
         url = 'https://' + school_name + '.staging.trackware.com/web/session/authenticate'
         # url = 'http://127.0.0.1:9098/web/session/authenticate'
@@ -204,6 +205,7 @@ def settings(request):
                             cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                             columns = (x.name for x in cursor.description)
                             data_id_bus = cursor.fetchall()
+
                             if data_id_bus[0][0]:
                                 data = json.loads(data_id_bus[0][0])
                                 return Response(data)
@@ -438,6 +440,11 @@ def kids_list(request):
                                 [parent_id, parent_id, parent_id])
                             columns = (x.name for x in cursor.description)
                             student = cursor.fetchall()
+                            student1 = []
+                            columnNames = [column[0] for column in cursor.description]
+                            for record in student:
+                                student1.append(dict(zip(columnNames, record)))
+                                print(student1)
                             studen_list = []
                             cursor.execute(
                                 "select  lat,lng,pickup_request_distance,change_location,show_map,enable_parents_to_confirm_student_pickup from transport_setting  ORDER BY ID DESC LIMIT 1")
@@ -466,7 +473,7 @@ def kids_list(request):
                                 for rou in range(len(rounds_details)):
                                     cursor.execute(
                                         "select round_schedule_id from transport_participant WHERE round_schedule_id = %s and student_id = %s",
-                                        [rounds_details[rou][0],student[rec][0]])
+                                        [rounds_details[rou][0],student1[rec]['id']])
                                     columns4 = (x.name for x in cursor.description)
                                     rounds_count_student = cursor.fetchall()
                                     if rounds_count_student:
@@ -558,43 +565,39 @@ def kids_list(request):
                                 for rec1 in res:
                                     if 'Weekly Plans' == rec1:
                                         x['Weeklyplans']['arabic_url'] = x['Weeklyplans']['arabic_url'] + str(
-                                            student[rec][2])
+                                            student1[rec]['user_id'])
                                         x['Weeklyplans']['url'] = x['Weeklyplans']['url'] + str(
-                                            student[rec][2])
+                                            student1[rec]['user_id'])
                                         model.append(x['Weeklyplans'])
 
                                     if 'Events' == rec1:
-                                        x['Events']['arabic_url'] = x['Events']['arabic_url'] + str(student[rec][2])
-                                        x['Events']['url'] = x['Events']['url'] + str(student[rec][2])
+                                        x['Events']['arabic_url'] = x['Events']['arabic_url'] + str(student1[rec]['user_id'])
+                                        x['Events']['url'] = x['Events']['url'] + str(student1[rec]['user_id'])
                                         model.append(x['Events'])
 
                                     if 'Online Assignments' == rec1:
-                                        x['Assignments']['arabic_url'] = x['Assignments']['arabic_url'] + str(
-                                            student[rec][2])
-                                        x['Assignments']['url'] = x['Assignments']['url'] + str(
-                                            student[rec][2])
+                                        x['Assignments']['arabic_url'] = x['Assignments']['arabic_url'] + str(student1[rec]['user_id'])
+                                        x['Assignments']['url'] = x['Assignments']['url'] + str(student1[rec]['user_id'])
                                         model.append(x['Assignments'])
 
                                     if 'Homework' == rec1:
-                                        x['Homeworks']['arabic_url'] = x['Homeworks']['arabic_url'] + str(
-                                            student[rec][2])
-                                        x['Homeworks']['url'] = x['Homeworks']['url'] + str(
-                                            student[rec][2])
+                                        x['Homeworks']['arabic_url'] = x['Homeworks']['arabic_url'] + str(student1[rec]['user_id'])
+                                        x['Homeworks']['url'] = x['Homeworks']['url'] + str(student1[rec]['user_id'])
                                         model.append(x['Homeworks'])
 
                                     if 'Badges' == rec1:
-                                        x['Badges']['arabic_url'] = x['Badges']['arabic_url'] + str(student[rec][2])
-                                        x['Badges']['url'] = x['Badges']['url'] + str(student[rec][2])
+                                        x['Badges']['arabic_url'] = x['Badges']['arabic_url'] + str(student1[rec]['user_id'])
+                                        x['Badges']['url'] = x['Badges']['url'] + str(student1[rec]['user_id'])
                                         model.append(x['Badges'])
 
                                     if 'Calendar' == rec1:
-                                        x['Calendar']['url'] = x['Calendar']['url'] + str(student[rec][2])
-                                        x['Calendar']['arabic_url'] = x['Calendar']['arabic_url'] + str(student[rec][2])
+                                        x['Calendar']['url'] = x['Calendar']['url'] + str(student1[rec]['user_id'])
+                                        x['Calendar']['arabic_url'] = x['Calendar']['arabic_url'] + str(student1[rec]['user_id'])
                                         model.append(x['Calendar'])
 
                                     if 'Clinic' == rec1:
-                                        x['Clinic']['arabic_url'] = x['Clinic']['arabic_url'] + str(student[rec][2])
-                                        x['Clinic']['url'] = x['Clinic']['url'] + str(student[rec][2])
+                                        x['Clinic']['arabic_url'] = x['Clinic']['arabic_url'] + str(student1[rec]['user_id'])
+                                        x['Clinic']['url'] = x['Clinic']['url'] + str(student1[rec]['user_id'])
                                         model.append(x['Clinic'])
 
                                 cursor.execute(
@@ -603,10 +606,8 @@ def kids_list(request):
 
                                 if len(tracking) > 0:
                                     model.append({
-                                        "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(
-                                            student[rec][2]),
-                                        "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Absence/" + str(
-                                            student[rec][2]),
+                                        "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(student1[rec]['user_id']),
+                                        "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Absence/" + str(student1[rec]['user_id']),
                                         "name": "Absence",
                                         "name_ar": "الغياب",
                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png"
@@ -622,10 +623,8 @@ def kids_list(request):
                                     model = {
                                         "Absence":
                                             {
-                                                "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(
-                                                    student[rec][2]),
-                                                "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Absence/" + str(
-                                                    student[rec][2]),
+                                                "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(student1[rec]['user_id']),
+                                                "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Absence/" + str(student1[rec]['user_id']),
                                                 "name": "Absence",
                                                 "name_ar": "الغياب",
                                                 "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png"
@@ -643,20 +642,20 @@ def kids_list(request):
                                     drop = False
 
                                 studen_list.append({
-                                    'id': student[rec][0],
-                                    'user_id': student[rec][2],
-                                    'father_id': student[rec][6],
-                                    'mother_id': student[rec][7],
+                                    'id': student1[rec]['id'],
+                                    'user_id': student1[rec]['user_id'],
+                                    'father_id': student1[rec]['father_id'],
+                                    'mother_id': student1[rec]['mother_id'],
                                     "change_location": setting[0][3],
-                                    'name': student[rec][1],
+                                    'name': student1[rec]['display_name_search'],
                                     'grade_name': '',
                                     'drop_off_by_parent': drop,
                                     'pickup_by_parent': pick,
                                     "is_active": is_active_round,
                                     "round_id": student_round_id,
                                     'avatar': 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
-                                        student[rec][5]) if student[rec][
-                                        5] else str(
+                                        student1[rec]['image_url']) if student1[rec][
+                                        'image_url'] else str(
                                         'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png'),
                                     "school_name": school[0][0],
                                     "school_mobile_number": school[0][1],
