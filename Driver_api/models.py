@@ -11,7 +11,8 @@ class Manager(models.Model):
     token = models.CharField(max_length=5000)
     db_name = models.CharField(max_length=5000)
     driver_id = models.IntegerField()
-        
+    mobile_token = models.CharField(max_length=5000, default="sadf")
+
     def pincode(pin):
         p=re.sub(r'\d+','',pin)
         database_name = re.sub('[QWERTYUIOPASDFGHJKLZXCVBNM]', '', p)

@@ -24,7 +24,9 @@ import calendar
 def driver_login(request):
     if request.method == 'POST':
         pincode = request.data.get('bus_pin')
+        mobile_token = request.data.get('mobile_token')
         school_name = Manager.pincode(pincode)
+        # print(request.data.get('platform'),mobile_token)
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  driver_id,bus_no,id  from fleet_vehicle WHERE bus_pin = %s", [pincode])
             data_id_bus = cursor.fetchall()
@@ -38,7 +40,7 @@ def driver_login(request):
             # Authentication
             user = User.objects.all().first()
             token_auth, created = Token.objects.get_or_create(user=user)
-            manager = Manager(token=token_auth, db_name=school_name, driver_id=data_id_bus[0][0])
+            manager = Manager(token=token_auth, db_name=school_name, driver_id=data_id_bus[0][0], mobile_token=mobile_token)
             manager.save()
 
             # *------------------------------------------------------------------------------------------------*
