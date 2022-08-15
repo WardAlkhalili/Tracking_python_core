@@ -7,30 +7,31 @@ from pyfcm import FCMNotification
 from django.db import connections
 from Parent_api.models import ManagerParent
 from django.db.models import Q
+from datetime import datetime
+import calendar
 
 # Remember the code we copied from Firebase.
 # This can be copied by clicking on the settings icon > project settings, then scroll down in your firebase dashboard
 
-# config = {
-#     "apiKey": "AIzaSyBVlQbdFekQRIEQcfNkXQYcuIabxTJr7YE",
-#     "authDomain": "trackware-auth0.firebaseapp.com",
-#     "databaseURL": "https://trackware-auth0.firebaseio.com",
-#     "projectId": "trackware-auth0",
-#     "storageBucket": "trackware-auth0.appspot.com",
-#     "messagingSenderId": "404758940845",
-#     "appId": "1:404758940845:web:19c2ebf3323760ff"
-# }
-
-
 config = {
-    "apiKey": "AIzaSyBs2DgXkohpuWM0htNuAPHnk6_5yz5IOdo",
-    "authDomain": "odoo-test1-6d92c.firebaseapp.com",
-    "databaseURL": "https://odoo-test1-6d92c-default-rtdb.firebaseio.com",
-    "projectId": "odoo-test1-6d92c",
-    "storageBucket": "odoo-test1-6d92c.appspot.com",
-    "messagingSenderId": "761759455686",
-    "appId": "1:761759455686:web:9621a5608d0f564ab47ac7"
+    "apiKey": "AIzaSyBVlQbdFekQRIEQcfNkXQYcuIabxTJr7YE",
+    "authDomain": "trackware-auth0.firebaseapp.com",
+    "databaseURL": "https://trackware-auth0.firebaseio.com",
+    "projectId": "trackware-auth0",
+    "storageBucket": "trackware-auth0.appspot.com",
+    "messagingSenderId": "404758940845",
+    "appId": "1:404758940845:web:19c2ebf3323760ff"
 }
+
+# config = {
+#     "apiKey": "AIzaSyBs2DgXkohpuWM0htNuAPHnk6_5yz5IOdo",
+#     "authDomain": "odoo-test1-6d92c.firebaseapp.com",
+#     "databaseURL": "https://odoo-test1-6d92c-default-rtdb.firebaseio.com",
+#     "projectId": "odoo-test1-6d92c",
+#     "storageBucket": "odoo-test1-6d92c.appspot.com",
+#     "messagingSenderId": "761759455686",
+#     "appId": "1:761759455686:web:9621a5608d0f564ab47ac7"
+# }
 
 firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()
@@ -70,16 +71,26 @@ def Get_last_bus_location(request, bus_id, school_name):
         #                                            message_body=message_body)
         # #
         # print(result)
-
+        # print(database.child(fullRound).get().val().items())
         try:
-            for key, value in database.child('ghs-round-10').child('2022-02-22').get().val().items():
-                route.append(value)
-            lat = route[-1][0]
-            long = route[-1][1]
+
+            d = datetime.utcnow()
+            unixtime = calendar.timegm(d.utctimetuple())
+
+            now = datetime.today()
+
+            # print(str(now.date()))
+            # print(database.child(fullRound).child('2022-08-14').child('1660461821').get().val())
+            location = database.child(fullRound).child(str(now)).child(str(unixtime)).get().val()
+            # for key, value in database.child(fullRound).child('2022-08-14').child('1660461821').get().val():
+            #     route.append(value)
+            lat = location[0]
+            long = location[1]
             result = {
                 "lat": float(lat) if lat else 0,
                 "long": float(long) if long else 0
             }
+
         except:
             result = {
                 "lat": 1,
@@ -94,13 +105,15 @@ def Get_round_locations(request):
     if request.method == 'POST':
         school_name = request.data.get('school_name')
         round_id = request.data.get('round_id')
+        start_unix_time = request.data.get('start_unix_time')
         fullRound = school_name + "-round-" + str(round_id)
-        date = request.data.get('date')
-        #     # here we are doing firebase authentication
-        # print("name sssssssssss11", request.build_absolute_uri())
+        date = request.data.get('date').split('-')
+        currentDate = datetime.strptime(date[0] + "/" + date[1] + "/" + date[2], '%d/%m/%Y').date()
+
         route = []
         try:
-            for key, value in database.child('ghs-round-10').child('2022-02-22').get().val().items():
+
+            for key, value in database.child(fullRound).child(str(currentDate)).get().val().items():
                 route.append(value)
             result = {
                 "route": route
@@ -168,17 +181,16 @@ def send_school_message(request):
             token = []
             for tok in mobile_token:
                 token.append(tok)
-
+            # print(token)
             push_service = FCMNotification(
                 api_key="AAAAsVxm2cY:APA91bGJ4jG6by56tl1z2HKmiTynaz6BXLmFaPwuk5NdytixIyxTS11iTPaXywVsQxnwmhSZRvUO5SsIioULD9qHCFK_6rVtnE5yQeIs7G3LzvDYUNd7jVEjJqvfnZbTspTE_xXWCSnO")
-            registration_id = [
-                "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"]
+            registration_id = token
             message_title = school_message[0][1]
             message_body = school_message[0][0]
             result = push_service.notify_multiple_devices \
                 (message_title=message_title, message_body=message_body, registration_ids=registration_id,
                  data_message={})
-            #
+            # print(result)
             result1 = {
                 "route": 'Ok'
             }
@@ -201,7 +213,7 @@ def send_confirmation_message_to_parent(request):
             api_key="AAAAsVxm2cY:APA91bGJ4jG6by56tl1z2HKmiTynaz6BXLmFaPwuk5NdytixIyxTS11iTPaXywVsQxnwmhSZRvUO5SsIioULD9qHCFK_6rVtnE5yQeIs7G3LzvDYUNd7jVEjJqvfnZbTspTE_xXWCSnO")
         # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
         registration_id = mobile_token
-        message_title = "Uber update"
+        message_title = "picked up"
         message_body = "please confirm that you have picked up" + student_name + "from the school"
         result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
                                                    message_body=message_body)
@@ -227,7 +239,7 @@ def push_notification(request):
         title = request.data.get('title')
         user_id = request.data.get('user_id')
         user_ids = request.data.get('user_ids')
-        mobile_token=[]
+        mobile_token = []
         for rec in user_ids:
             mobile_token1 = ManagerParent.objects.filter(Q(user_id=rec) and Q(db_name=school_id)).values_list(
                 'mobile_token').order_by('-pk')[0]
