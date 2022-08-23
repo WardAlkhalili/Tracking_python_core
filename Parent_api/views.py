@@ -540,8 +540,8 @@ def kids_list(request):
                                          },
                                     "Calendar":
                                         {"name": "Calendar",
-                                         "url": "https://iks.staging.trackware.com/my/Calendar/",
-                                         "arabic_url": "https://iks.staging.trackware.com/ar_SY/my/Calendar/",
+                                         "url": "https://"+ school_name +".staging.trackware.com/my/Calendar/",
+                                         "arabic_url": "https://"+ school_name +".staging.trackware.com/ar_SY/my/Calendar/",
                                          "name_ar": "التقويم",
                                          "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/School+Calendar.png"
                                          },
