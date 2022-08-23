@@ -50,10 +50,17 @@ def parent_login(request):
             parent_id = cursor.fetchall()
             user = User.objects.all().first()
             user = User.objects.all().first()
+            # print(user)
             token_auth, created = Token.objects.get_or_create(user=user)
-            manager_parent = ManagerParent(token=token_auth, db_name=school_name, user_id=uid,
+            from django.utils.crypto import get_random_string
+            unique_id = get_random_string(length=32)
+            # print(unique_id)
+            manager_parent = ManagerParent(token=unique_id, db_name=school_name, user_id=uid,
                                            parent_id=parent_id[0][0],
                                            school_id=company_id, mobile_token=mobile_token)
+            # manager_parent = ManagerParent(token=token_auth, db_name=school_name, user_id=uid,
+            #                                parent_id=parent_id[0][0],
+            #                                school_id=company_id, mobile_token=mobile_token)
 
             manager_parent.save()
 
@@ -94,7 +101,7 @@ def parent_login(request):
                 "uid": uid,
                 "session_id": session.get_dict()['session_id'],
                 "web_base_url": response['result']['web_base_url'],
-                "Authorization": "Bearer " + token_auth.key}
+                "Authorization": "Bearer " + unique_id}
         return Response(result)
 
 
@@ -419,11 +426,13 @@ def kids_list(request):
 
                     l = []
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    # print(au)
                     l.append(au.split(","))
 
                     db_name = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('db_name')
                     parent_id = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('parent_id')
                     school_id = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('school_id')
+                    # print(parent_id)
                     for e in parent_id:
                         parent_id = e[0]
                     for e in school_id:
@@ -564,7 +573,7 @@ def kids_list(request):
                                 res = []
                                 [res.append(x[0]) for x in list if x[0] not in res]
                                 model = []
-
+                                show_absence = False
                                 for rec1 in res:
                                     if 'Weekly Plans' == rec1:
                                         x['Weeklyplans']['arabic_url'] = x['Weeklyplans']['arabic_url'] + str(
@@ -616,7 +625,7 @@ def kids_list(request):
                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png"
                                     }
                                     )
-
+                                    show_absence = True
                                 try:
                                     cursor.execute(
                                         "select is_portal_exist from school_parent")
@@ -634,6 +643,7 @@ def kids_list(request):
                                             }
 
                                     }
+                                    show_absence=True
 
                                 if 'by_parents' in student[rec][3]:
                                     pick = True
@@ -666,7 +676,7 @@ def kids_list(request):
                                     "school_lng": setting[0][1],
                                     'pickup_request_distance': setting[0][2],
                                     "show_map":  setting[0][4],
-                                    "show_absence": True,
+                                    "show_absence": show_absence,
                                     "show_pickup_request": setting[0][5],
                                     "student_status": {
                                         "activity_type": "",
@@ -705,12 +715,14 @@ def kids_hstory(request):
                         school_name = ManagerParent.pincode(school_name)
                         start_date = request.data.get('start_date')
                         end_date = request.data.get('end_date')
+                        # print(start_date,end_date)
                         with connections[school_name].cursor() as cursor:
                             if start_date and end_date:
                                 cursor.execute(
                                     "select  id  from school_message WHERE create_date >= %s AND create_date <= %s",
                                     [start_date, end_date])
                                 school_message = cursor.fetchall()
+                                # print(school_message)
                             elif start_date and not end_date:
                                 cursor.execute(
                                     "select  id  from school_message WHERE create_date >= %s ",
@@ -727,9 +739,10 @@ def kids_hstory(request):
                                 cursor.execute("select  id  from school_message ")
                                 school_message = cursor.fetchall()
                             cursor.execute(
-                                "select  id,display_name_search,image_url from student_student WHERE father_id = %s OR mother_id = %s OR responsible_id_value = %s  And state = 'done'",
+                                "select  id,display_name_search,image_url from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
                             student = cursor.fetchall()
+                            # print(student)
                             student_id = []
                             for rec in student:
                                 student_id.append(rec[0])
@@ -765,11 +778,18 @@ def kids_hstory(request):
                             message_ids = []
                             for rec in school_message:
                                 message_ids.append(rec[0])
+                            # print(student_id)
                             if message_ids:
+                                cursor.execute(
+                                    "select  student_student_id  from school_message_student_student where school_message_id in %s",
+                                    [tuple(message_ids)])
+                                school_message_student_student = cursor.fetchall()
+                                print(school_message_student_student)
                                 cursor.execute(
                                     "select  school_message_id from school_message_student_student WHERE school_message_id in %s AND student_student_id in %s",
                                     [tuple(message_ids), tuple(student_id)])
                                 message_student = cursor.fetchall()
+                                # print(message_student)
                                 message_id = []
                                 for rec in message_student:
                                     message_id.append(rec[0])
