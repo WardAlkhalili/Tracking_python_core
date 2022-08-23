@@ -13,6 +13,7 @@ import calendar
 # Remember the code we copied from Firebase.
 # This can be copied by clicking on the settings icon > project settings, then scroll down in your firebase dashboard
 
+
 config = {
     "apiKey": "AIzaSyBVlQbdFekQRIEQcfNkXQYcuIabxTJr7YE",
     "authDomain": "trackware-auth0.firebaseapp.com",
@@ -22,7 +23,15 @@ config = {
     "messagingSenderId": "404758940845",
     "appId": "1:404758940845:web:19c2ebf3323760ff"
 }
-
+# config = {
+#     "apiKey": "AIzaSyCYVFzNlEcAP7mBstY59zB9CIEsa5W2bgc",
+#     "authDomain": "field-service-management-da2ca.firebaseio.com",
+#     "databaseURL": "https://field-service-management-da2ca.firebaseio.com",
+#     "projectId": "field-service-management-da2ca",
+#     "storageBucket": "field-service-management-da2ca.appspot.com",
+#     "messagingSenderId": "132137361303",
+#     "appId": "1:132137361303:android:ee543bda9568756c"
+# }
 # config = {
 #     "apiKey": "AIzaSyBs2DgXkohpuWM0htNuAPHnk6_5yz5IOdo",
 #     "authDomain": "odoo-test1-6d92c.firebaseapp.com",
@@ -112,7 +121,6 @@ def Get_round_locations(request):
 
         route = []
         try:
-
             for key, value in database.child(fullRound).child(str(currentDate)).get().val().items():
                 route.append(value)
             result = {
@@ -169,28 +177,32 @@ def send_school_message(request):
                 if rec[2]:
                     id.append(rec[2])
             cursor.execute(
-                "select  id from school_parent WHERE id in %s ",
+                "select  user_id from school_parent WHERE id in %s ",
                 [tuple(id)])
             columns = (x.name for x in cursor.description)
             parent = cursor.fetchall()
             parent_id = []
-            for rec in student:
+            for rec in parent:
                 parent_id.append(rec[0])
+            # print(parent_id)
+
             mobile_token = ManagerParent.objects.filter(Q(user_id=parent_id) and Q(db_name=school_name)).values_list(
-                'mobile_token').order_by('-pk')[0]
+                'mobile_token').order_by('-pk')
             token = []
+            # print(mobile_token)
             for tok in mobile_token:
-                token.append(tok)
+                token.append(tok[0])
+
             # print(token)
             push_service = FCMNotification(
-                api_key="AAAAsVxm2cY:APA91bGJ4jG6by56tl1z2HKmiTynaz6BXLmFaPwuk5NdytixIyxTS11iTPaXywVsQxnwmhSZRvUO5SsIioULD9qHCFK_6rVtnE5yQeIs7G3LzvDYUNd7jVEjJqvfnZbTspTE_xXWCSnO")
+                api_key="AAAAHsQAH5c:APA91bHWCcnal6mjBxwAODprATUgGX8pQKIkeBC_GA29fM29YHKXPYmRd7g_Ve1odxo1o_wOAYSkWMUVEh52HAQWPt_zFkM1fx7YVor6xaYYc8bWwKPbuLRy5fS_RBcLsqbeOa5RB0EV")
             registration_id = token
+            # print(mobile_token)
             message_title = school_message[0][1]
             message_body = school_message[0][0]
             result = push_service.notify_multiple_devices \
                 (message_title=message_title, message_body=message_body, registration_ids=registration_id,
                  data_message={})
-            # print(result)
             result1 = {
                 "route": 'Ok'
             }
@@ -210,7 +222,7 @@ def send_confirmation_message_to_parent(request):
             mobile_token = e[0]
         # print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token)
         push_service = FCMNotification(
-            api_key="AAAAsVxm2cY:APA91bGJ4jG6by56tl1z2HKmiTynaz6BXLmFaPwuk5NdytixIyxTS11iTPaXywVsQxnwmhSZRvUO5SsIioULD9qHCFK_6rVtnE5yQeIs7G3LzvDYUNd7jVEjJqvfnZbTspTE_xXWCSnO")
+            api_key="AAAAHsQAH5c:APA91bHWCcnal6mjBxwAODprATUgGX8pQKIkeBC_GA29fM29YHKXPYmRd7g_Ve1odxo1o_wOAYSkWMUVEh52HAQWPt_zFkM1fx7YVor6xaYYc8bWwKPbuLRy5fS_RBcLsqbeOa5RB0EV")
         # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
         registration_id = mobile_token
         message_title = "picked up"
@@ -250,7 +262,7 @@ def push_notification(request):
         #     mobile_token = e[0]
         # print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token)
         push_service = FCMNotification(
-            api_key="AAAAsVxm2cY:APA91bGJ4jG6by56tl1z2HKmiTynaz6BXLmFaPwuk5NdytixIyxTS11iTPaXywVsQxnwmhSZRvUO5SsIioULD9qHCFK_6rVtnE5yQeIs7G3LzvDYUNd7jVEjJqvfnZbTspTE_xXWCSnO")
+            api_key="AAAAHsQAH5c:APA91bHWCcnal6mjBxwAODprATUgGX8pQKIkeBC_GA29fM29YHKXPYmRd7g_Ve1odxo1o_wOAYSkWMUVEh52HAQWPt_zFkM1fx7YVor6xaYYc8bWwKPbuLRy5fS_RBcLsqbeOa5RB0EV")
         # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
         registration_id = mobile_token
         message_title = title

@@ -30,6 +30,7 @@ def parent_login(request):
         user_name = request.data.get('user_name')
         school_name = request.data.get('school_name')
         mobile_token = request.data.get('mobile_token')
+        # print("jjjjjjjjjjjjjjjjjjjjjjjjjjjj ",mobile_token)
 
         # url = "http://localhost:9098/web/session/authenticate"
         url = 'https://' + school_name + '.staging.trackware.com/web/session/authenticate'
@@ -436,7 +437,7 @@ def kids_list(request):
 
 
                             cursor.execute(
-                                "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state from student_student WHERE father_id = %s OR mother_id = %s OR responsible_id_value = %s  And state = 'done'",
+                                "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
                             columns = (x.name for x in cursor.description)
                             student = cursor.fetchall()
@@ -444,7 +445,6 @@ def kids_list(request):
                             columnNames = [column[0] for column in cursor.description]
                             for record in student:
                                 student1.append(dict(zip(columnNames, record)))
-                                print(student1)
                             studen_list = []
                             cursor.execute(
                                 "select  lat,lng,pickup_request_distance,change_location,show_map,enable_parents_to_confirm_student_pickup from transport_setting  ORDER BY ID DESC LIMIT 1")
@@ -490,6 +490,9 @@ def kids_list(request):
                                         if is_active[0][0]:
                                             student_round_id=rounds[0][0]
                                             is_active_round=is_active[0][0]
+                                        else:
+                                            student_round_id = rounds[0][0]
+                                            is_active_round = is_active[0][0]
 
                                 x = {
                                     "Badges": {
@@ -778,7 +781,7 @@ def kids_hstory(request):
                                     for rec in range(len(school_message1)):
                                         notifications.append({
                                             "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_msg_admin.png",
-                                            "date_time": "2022-03-14 18:22:28",
+                                            "date_time": str(school_message1[rec][4].year)+"-"+str(school_message1[rec][4].month)+"-"+str(school_message1[rec][4].day)+" "+str(school_message1[rec][4].hour)+":"+str(school_message1[rec][4].hour)+":"+str(school_message1[rec][4].minute)+":"+str(school_message1[rec][4].second),
                                             "notifications_text": school_message1[rec][3],
                                             "create_date": school_message1[rec][5],
                                             "notifications_title": school_message1[rec][2],
