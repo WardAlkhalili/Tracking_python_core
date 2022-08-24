@@ -447,7 +447,7 @@ def kids_list(request):
 
 
                             cursor.execute(
-                                "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
+                                "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1 from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
                             columns = (x.name for x in cursor.description)
                             student = cursor.fetchall()
@@ -660,6 +660,7 @@ def kids_list(request):
                                     'user_id': student1[rec]['user_id'],
                                     'father_id': student1[rec]['father_id'],
                                     'mother_id': student1[rec]['mother_id'],
+                                    'student_grade': student1[rec]['academic_grade_name1'],
                                     "change_location": setting[0][3],
                                     'name': student1[rec]['display_name_search'],
                                     'grade_name': '',
