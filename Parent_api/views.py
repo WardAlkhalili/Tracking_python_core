@@ -785,7 +785,7 @@ def kids_hstory(request):
                                     "select  student_student_id  from school_message_student_student where school_message_id in %s",
                                     [tuple(message_ids)])
                                 school_message_student_student = cursor.fetchall()
-                                print(school_message_student_student)
+                                # print(school_message_student_student)
                                 cursor.execute(
                                     "select  school_message_id from school_message_student_student WHERE school_message_id in %s AND student_student_id in %s",
                                     [tuple(message_ids), tuple(student_id)])
