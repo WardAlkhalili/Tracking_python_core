@@ -685,10 +685,27 @@ def kids_list(request):
                                         "round_id": 0,
                                         "datetime": ""
                                     },
+                                    "mobile_numbers": [
+                                        {
+                                            "mobile": school[0][1],
+                                            "name": school[0][0],
+                                            "type": "school"
+                                        },
+                                        {
+                                            "mobile": "",
+                                            "name": "My Company (San Francisco)",
+                                            "type": "school"
+                                        },
+                                        {
+                                            "mobile": "",
+                                            "name": "My Company (San Francisco)",
+                                            "type": "school"
+                                        }
+                                    ],
                                     "features": model,
                                 })
                             result = {'students': studen_list}
-                            # print(result)
+                            print(result)
                             return Response(result)
                     result = {'status': 'error'}
                     return Response(result)
