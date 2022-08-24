@@ -55,6 +55,7 @@ def parent_login(request):
             from django.utils.crypto import get_random_string
             unique_id = get_random_string(length=32)
             # print(unique_id)
+            ManagerParent.objects.filter(parent_id=parent_id[0][0],db_name=school_name,user_id=uid).update(is_active=False)
             manager_parent = ManagerParent(token=unique_id, db_name=school_name, user_id=uid,
                                            parent_id=parent_id[0][0],
                                            school_id=company_id, mobile_token=mobile_token)

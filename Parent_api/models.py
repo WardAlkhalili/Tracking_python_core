@@ -13,6 +13,7 @@ class ManagerParent(models.Model):
     parent_id = models.CharField(max_length=5000)
     school_id = models.CharField(max_length=5000)
     mobile_token = models.CharField(max_length=5000, default="sadf")
+    is_active = models.BooleanField(default=True)
 
     def pincode(pin):
         p = re.sub(r'\d+', '', pin)

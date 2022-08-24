@@ -151,6 +151,7 @@ def send_school_message(request):
     if request.method == 'POST':
         school_name = request.data.get('school_name')
         message_id = request.data.get('message_id')
+
         with connections[school_name].cursor() as cursor:
             cursor.execute(
                 "select  message,title  from school_message where id = %s",
@@ -176,24 +177,25 @@ def send_school_message(request):
                     id.append(rec[1])
                 if rec[2]:
                     id.append(rec[2])
-            cursor.execute(
-                "select  user_id from school_parent WHERE id in %s ",
-                [tuple(id)])
-            columns = (x.name for x in cursor.description)
-            parent = cursor.fetchall()
-            parent_id = []
-            for rec in parent:
-                parent_id.append(rec[0])
-            # print(parent_id)
-
-            mobile_token = ManagerParent.objects.filter(Q(user_id=parent_id) and Q(db_name=school_name)).values_list(
+            id = list(dict.fromkeys(id))
+            # cursor.execute(
+            #     "select  user_id from school_parent WHERE id in %s ",
+            #     [tuple(id)])
+            # columns = (x.name for x in cursor.description)
+            # parent = cursor.fetchall()
+            # parent_id = []
+            # for rec in parent:
+            #     parent_id.append(rec[0])
+            #
+            mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id),Q(db_name=school_name),Q(is_active=True)).values_list(
                 'mobile_token').order_by('-pk')
             token = []
-            # print(mobile_token)
+            # print(len(mobile_token))
             for tok in mobile_token:
                 token.append(tok[0])
 
             # print(token)
+
             push_service = FCMNotification(
                 api_key="AAAAHsQAH5c:APA91bHWCcnal6mjBxwAODprATUgGX8pQKIkeBC_GA29fM29YHKXPYmRd7g_Ve1odxo1o_wOAYSkWMUVEh52HAQWPt_zFkM1fx7YVor6xaYYc8bWwKPbuLRy5fS_RBcLsqbeOa5RB0EV")
             registration_id = token
@@ -203,6 +205,7 @@ def send_school_message(request):
             result = push_service.notify_multiple_devices \
                 (message_title=message_title, message_body=message_body, registration_ids=registration_id,
                  data_message={})
+            # print(result)
             result1 = {
                 "route": 'Ok'
             }
@@ -216,8 +219,8 @@ def send_confirmation_message_to_parent(request):
         school_name = request.data.get('school_name')
         student_name = request.data.get('student_name')
         parent_id = request.data.get('parent_id')
-        mobile_token = ManagerParent.objects.filter(Q(user_id=parent_id) and Q(db_name=school_name)).values_list(
-            'mobile_token').order_by('-pk')[0]
+        mobile_token = ManagerParent.objects.filter(Q(user_id=parent_id) , Q(db_name=school_name),Q(is_active=True)).values_list(
+            'mobile_token').order_by('-pk')
         for e in mobile_token:
             mobile_token = e[0]
         # print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token)
@@ -253,8 +256,8 @@ def push_notification(request):
         user_ids = request.data.get('user_ids')
         mobile_token = []
         for rec in user_ids:
-            mobile_token1 = ManagerParent.objects.filter(Q(user_id=rec) and Q(db_name=school_id)).values_list(
-                'mobile_token').order_by('-pk')[0]
+            mobile_token1 = ManagerParent.objects.filter(Q(user_id=rec) , Q(db_name=school_id),Q(is_active=True)).values_list(
+                'mobile_token').order_by('-pk')
             for e in mobile_token1:
                 mobile_token.append(e[0])
 
