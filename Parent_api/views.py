@@ -312,22 +312,26 @@ def student_pick_up(request):
                                 [student_name[0][0], parent_id])
                             columns = (x.name for x in cursor.description)
                             date_t = cursor.fetchall()
+
                             if date_t:
                                 if not (date_t[0][1].strftime('%Y-%m-%d') == datetime.datetime.now().strftime(
                                         '%Y-%m-%d')):
                                     date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                     r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+
                                     cursor.execute(
-                                        "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
-                                        [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r])
+                                        "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,create_date,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
+                                        [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r, r])
                                     cursor.execute(
                                         "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                         [student_name[0][0], parent_id])
+                                    columns = (x.name for x in cursor.description)
                                     pickup_id = cursor.fetchall()
                                     cursor.execute(
                                         "INSERT INTO  pickup_request_student_student_rel (pickup_request_id,student_student_id) VALUES (%s,%s); ",
                                         [pickup_id[0][0], student_id])
                                     result = {'result': True}
+
                                     return Response(result)
                                 else:
                                     if date_t[0][2] == 'waiting':
@@ -343,23 +347,20 @@ def student_pick_up(request):
                                         result = {'status': 'error'}
                                         return Response(result)
                             else:
-                                q = "INSERT INTO  pickup_request (name,pick_up_by, parent_id,date,source,state) VALUES (%s, %s,%s, %s,%s); ", [
-                                    student_name[0][0], 'family_member', '1', datetime.datetime.now(), 'app', 'draft']
-
                                 date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
 
                                 cursor.execute(
-                                    "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
-                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r])
+                                    "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,create_date,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
+                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r, r])
                                 cursor.execute(
                                     "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                     [student_name[0][0], parent_id])
+                                columns = (x.name for x in cursor.description)
                                 pickup_id = cursor.fetchall()
                                 cursor.execute(
                                     "INSERT INTO  pickup_request_student_student_rel (pickup_request_id,student_student_id) VALUES (%s,%s); ",
                                     [pickup_id[0][0], student_id])
-
                                 result = {'result': True}
                                 return Response(result)
                     else:
@@ -374,7 +375,6 @@ def student_pick_up(request):
         else:
             result = {'status': 'error'}
             return Response(result)
-
 
     elif request.method == 'GET':
         if request.headers:
@@ -457,7 +457,7 @@ def kids_list(request):
                                 student1.append(dict(zip(columnNames, record)))
                             studen_list = []
                             cursor.execute(
-                                "select  lat,lng,pickup_request_distance,change_location,show_map,enable_parents_to_confirm_student_pickup from transport_setting  ORDER BY ID DESC LIMIT 1")
+                                "select  lat,lng,pickup_request_distance,change_location,show_map,enable_parents_to_confirm_student_pickup,pickup_request_distance from transport_setting  ORDER BY ID DESC LIMIT 1")
                             columns = (x.name for x in cursor.description)
                             setting = cursor.fetchall()
                             cursor.execute(
@@ -690,6 +690,7 @@ def kids_list(request):
                                     'pickup_request_distance': setting[0][2],
                                     "show_map": setting[0][4],
                                     "show_absence": show_absence,
+                                    'pickup_request_distance':setting[0][5],
                                     "show_pickup_request": True if student1[rec]['pick_up_type']=='by_school' else False,
                                     "student_status": {
                                         "activity_type": "",
@@ -901,26 +902,22 @@ def pre_arrive(request):
                                 [student_name[0][0], parent_id])
                             columns = (x.name for x in cursor.description)
                             date_t = cursor.fetchall()
-
                             if date_t:
                                 if not (date_t[0][1].strftime('%Y-%m-%d') == datetime.datetime.now().strftime(
                                         '%Y-%m-%d')):
                                     date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                     r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
-
                                     cursor.execute(
-                                        "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,create_date,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
-                                        [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r, r])
+                                        "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
+                                        [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r])
                                     cursor.execute(
                                         "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                         [student_name[0][0], parent_id])
-                                    columns = (x.name for x in cursor.description)
                                     pickup_id = cursor.fetchall()
                                     cursor.execute(
                                         "INSERT INTO  pickup_request_student_student_rel (pickup_request_id,student_student_id) VALUES (%s,%s); ",
                                         [pickup_id[0][0], student_id])
                                     result = {'result': True}
-
                                     return Response(result)
                                 else:
                                     if date_t[0][2] == 'waiting':
@@ -936,20 +933,23 @@ def pre_arrive(request):
                                         result = {'status': 'error'}
                                         return Response(result)
                             else:
+                                q = "INSERT INTO  pickup_request (name,pick_up_by, parent_id,date,source,state) VALUES (%s, %s,%s, %s,%s); ", [
+                                    student_name[0][0], 'family_member', '1', datetime.datetime.now(), 'app', 'draft']
+
                                 date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
 
                                 cursor.execute(
-                                    "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,create_date,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
-                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r, r])
+                                    "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
+                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r])
                                 cursor.execute(
                                     "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                     [student_name[0][0], parent_id])
-                                columns = (x.name for x in cursor.description)
                                 pickup_id = cursor.fetchall()
                                 cursor.execute(
                                     "INSERT INTO  pickup_request_student_student_rel (pickup_request_id,student_student_id) VALUES (%s,%s); ",
                                     [pickup_id[0][0], student_id])
+
                                 result = {'result': True}
                                 return Response(result)
                     else:
