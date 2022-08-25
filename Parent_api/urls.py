@@ -11,7 +11,7 @@ urlpatterns = [
     path('parents/kids_list', views.kids_list),
     path('parents/kids-history', views.kids_hstory),
     path('parents/pre-arrive', views.pre_arrive),
-    path('parents/notify', views.notify),
+    path('notify', views.notify),
 ]
 
 # https://iks.staging.trackware.com/web/session/authenticate
