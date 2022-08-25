@@ -447,7 +447,7 @@ def kids_list(request):
                         with connections[school_name].cursor() as cursor:
 
                             cursor.execute(
-                                "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1 from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
+                                "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
                             columns = (x.name for x in cursor.description)
                             student = cursor.fetchall()
@@ -690,7 +690,7 @@ def kids_list(request):
                                     'pickup_request_distance': setting[0][2],
                                     "show_map": setting[0][4],
                                     "show_absence": show_absence,
-                                    "show_pickup_request": setting[0][5],
+                                    "show_pickup_request": True if student1[rec]['pick_up_type']=='by_school' else False,
                                     "student_status": {
                                         "activity_type": "",
                                         "round_id": 0,
@@ -716,7 +716,7 @@ def kids_list(request):
                                     "features": model,
                                 })
                             result = {'students': studen_list}
-                            print(result)
+                            # print(result)
                             return Response(result)
                     result = {'status': 'error'}
                     return Response(result)
