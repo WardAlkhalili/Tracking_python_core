@@ -87,14 +87,13 @@ def Get_last_bus_location(request, bus_id, school_name):
             unixtime = calendar.timegm(d.utctimetuple())
 
             now = datetime.today()
-
-            # print(str(now.date()))
             # print(database.child(fullRound).child('2022-08-14').child('1660461821').get().val())
-            location = database.child(fullRound).child(str(now)).child(str(unixtime)).get().val()
+            location = database.child(fullRound).child(str(now.date())).get().val()
+
             # for key, value in database.child(fullRound).child('2022-08-14').child('1660461821').get().val():
             #     route.append(value)
-            lat = location[0]
-            long = location[1]
+            lat = list(location.items())[-1][1][0]
+            long = list(location.items())[-1][1][1]
             result = {
                 "lat": float(lat) if lat else 0,
                 "long": float(long) if long else 0
@@ -105,6 +104,7 @@ def Get_last_bus_location(request, bus_id, school_name):
                 "lat": 1,
                 "long": 0
             }
+        # print(fullRound,result)
 
         return Response(result)
 
@@ -152,7 +152,7 @@ def send_school_message(request):
         school_name = request.data.get('school_name')
         message_id = request.data.get('message_id')
 
-        with connections[school_name].cursor() as cursor:
+        with connections['iks'].cursor() as cursor:
             cursor.execute(
                 "select  message,title  from school_message where id = %s",
                 [message_id])
@@ -187,7 +187,7 @@ def send_school_message(request):
             # for rec in parent:
             #     parent_id.append(rec[0])
             #
-            mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id),Q(db_name=school_name),Q(is_active=True)).values_list(
+            mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id),Q(db_name='iks'),Q(is_active=True)).values_list(
                 'mobile_token').order_by('-pk')
             token = []
             # print(len(mobile_token))
