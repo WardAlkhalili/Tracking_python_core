@@ -107,6 +107,7 @@ def driver_login(request):
                 "school_id": company_login_info[0][2],
                 "utc_offset": login_details1[0]['utc_offset'],
                 "timezone": login_details1[0]['timezone'],
+                "tracklink":True,
                 "bus_id": data_id_bus[0][2],
                 "bus_number": data_id_bus[0][1],
                 "driver_id": data_id_bus[0][0],
@@ -999,3 +1000,58 @@ def students_bus_checks(request):
         else:
             result = {'status': 'error'}
             return Response(result)
+
+
+@api_view(['POST'])
+def reordered_students(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    ordered_students_ids=request.data.get('ordered_students_ids')
+                    round_id = request.data.get('round_id')
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = Manager.objects.filter(token=au).values_list('db_name')
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                            school_name = Manager.pincode(school_name)
+                            with connections[school_name].cursor() as cursor:
+                                cursor.execute(
+                                    "select  name,driver_id,type  from transport_round WHERE id = %s  ",
+                                    [round_id])
+                                round_info = cursor.fetchall()
+                                cursor.execute(
+                                    "select  name  from res_partner WHERE id = %s  ",
+                                    [round_info[0][1]])
+                                driver_id = cursor.fetchall()
+                                for rec in range(len(ordered_students_ids)-1):
+                                    # print(ordered_students_ids[rec],ordered_students_ids[rec+1])
+                                    student_ids=[]
+                                    student_ids.append(ordered_students_ids[rec])
+                                    student_ids.append(ordered_students_ids[rec+1])
+                                    cursor.execute("select display_name_search from student_student WHERE id in %s",
+                                                   [tuple(student_ids)])
+                                    student_transferred = cursor.fetchall()
+
+                                    message_en='The driver '+driver_id[0][0]+' has changed the planed route of the round '+round_info[0][0]+'.The driver' +round_info[0][2]+' the student '+student_transferred[0][0]+' before the student'+student_transferred[1][0]+' .'
+                                    date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                    r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+                                    cursor.execute(
+                                        "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
+                                        [r, 'App\Model\Driver', 'route_changed', message_en, driver_id[0][0]])
+
+                                result = {"status": "ok"}
+                                return Response(result)
+                    else:
+                        result = {'status': 'error'}
+                        return Response(result)
+                else:
+                    result = {'status': 'error'}
+                    return Response(result)
+            else:
+                result = {'status': 'error'}
+                return Response(result)
+        else:
+                result = {'status': 'error'}
+                return Response(result)
