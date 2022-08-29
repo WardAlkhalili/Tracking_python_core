@@ -26,11 +26,10 @@ def driver_login(request):
         pincode = request.data.get('bus_pin')
         mobile_token = request.data.get('mobile_token')
         school_name = Manager.pincode(pincode)
-        # print(request.data.get('platform'),mobile_token)
+        # print("ssssssssssssssssssssssssssssssSS",pincode,request.data.get('platform'),mobile_token)
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  driver_id,bus_no,id  from fleet_vehicle WHERE bus_pin = %s", [pincode])
             data_id_bus = cursor.fetchall()
-
             cursor.execute("select name from res_partner WHERE id = %s", [data_id_bus[0][0]])
             driver_name = cursor.fetchall()
 
@@ -40,7 +39,9 @@ def driver_login(request):
             # Authentication
             user = User.objects.all().first()
             token_auth, created = Token.objects.get_or_create(user=user)
-            manager = Manager(token=token_auth, db_name=school_name, driver_id=data_id_bus[0][0], mobile_token=mobile_token)
+            from django.utils.crypto import get_random_string
+            unique_id = get_random_string(length=32)
+            manager = Manager(token=unique_id, db_name=school_name, driver_id=data_id_bus[0][0], mobile_token=mobile_token)
             manager.save()
 
             # *------------------------------------------------------------------------------------------------*
@@ -181,7 +182,7 @@ def driver_login(request):
                     }
                 ],
                 "geofenses": [],
-                "Authorization": "Bearer " + token_auth.key, }
+                "Authorization": "Bearer " + unique_id, }
         return Response(result)
 
 
@@ -240,10 +241,8 @@ def round_list(request):
                                  'drop_off' if 'drop' in request.data.get('round_type') else 'pick_up'])
                             columns = (x.name for x in cursor.description)
                             list_round = cursor.fetchall()
-
                             list_round1 = []
                             columnNames = [column[0] for column in cursor.description]
-
                             for record in list_round:
                                 list_round1.append(dict(zip(columnNames, record)))
                             # list_round = cursor.fetchall()
@@ -395,14 +394,16 @@ def student_list(request, round_id):
                                 "select  id  from school_day where name = %s",
                                 [calendar.day_name[curr_date.weekday()]])
                             day_name = cursor.fetchall()
+                            # print(day_name,round_id)
                             cursor.execute("select id,day_id from round_schedule WHERE round_id = %s and day_id = %s",
                                            [round_id, day_name[0][0]])
                             columns3 = (x.name for x in cursor.description)
                             rounds_details = cursor.fetchall()
+                            # print("ddddddddddddddddddddddd",rounds_details)
                             day_list = {}
                             # for z in rounds_details:
                             cursor.execute(
-                                "select student_id from transport_participant WHERE round_schedule_id = %s",
+                                "select student_id from transport_participant WHERE round_schedule_id = %s ORDER BY sequence ASC",
                                 [rounds_details[0][0]])
                             columns4 = (x.name for x in cursor.description)
                             rounds_count_student = cursor.fetchall()
@@ -411,7 +412,7 @@ def student_list(request, round_id):
                             for k in rounds_count_student:
                                 st_id.append(k[0])
                             if st_id:
-                                cursor.execute("select * from student_student WHERE id in %s",
+                                cursor.execute("select * from student_student WHERE id in %s ",
                                                [tuple(st_id)])
                                 columns4 = (x.name for x in cursor.description)
                                 student_student = cursor.fetchall()
@@ -614,6 +615,7 @@ def student_list(request, round_id):
                                             "image_url":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + student_student1[std]['image_url'] if student_student1[std]['image_url'] else student_student[std][131],
                                             "round_id": student_student1[std]['round_id'],
                                             "responsible_id_value": student_student1[std]['responsible_id_value'],
+                                            "grade":student_student1[std]['academic_grade_name1'],
                                             # "first_mandatory": student_student[std][134],
                                             # "second_mandatory": student_student[std][135],
                                             # "third_mandatory": student_student[std][136],
