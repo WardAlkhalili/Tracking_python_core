@@ -17,6 +17,7 @@ import datetime
 from datetime import date
 import calendar
 
+
 # Create your views here.
 
 
@@ -41,7 +42,8 @@ def driver_login(request):
             token_auth, created = Token.objects.get_or_create(user=user)
             from django.utils.crypto import get_random_string
             unique_id = get_random_string(length=32)
-            manager = Manager(token=unique_id, db_name=school_name, driver_id=data_id_bus[0][0], mobile_token=mobile_token)
+            manager = Manager(token=unique_id, db_name=school_name, driver_id=data_id_bus[0][0],
+                              mobile_token=mobile_token)
             manager.save()
 
             # *------------------------------------------------------------------------------------------------*
@@ -107,7 +109,7 @@ def driver_login(request):
                 "school_id": company_login_info[0][2],
                 "utc_offset": login_details1[0]['utc_offset'],
                 "timezone": login_details1[0]['timezone'],
-                "tracklink":True,
+                "tracklink": True,
                 "bus_id": data_id_bus[0][2],
                 "bus_number": data_id_bus[0][1],
                 "driver_id": data_id_bus[0][0],
@@ -177,8 +179,10 @@ def driver_login(request):
                     {
                         "speed_limit_watch": login_details1[0]['speed_limit_watch'],
                         "standstill_watch": login_details1[0]['standstill_watch'],
-                        "notify_if_driver_check_in_out_geo_fence": login_details1[0]['notify_if_driver_check_in_out_geo_fence'],
-                        "notify_on_battery_low_of_drivers_app": login_details1[0]['notify_on_battery_low_of_drivers_app'],
+                        "notify_if_driver_check_in_out_geo_fence": login_details1[0][
+                            'notify_if_driver_check_in_out_geo_fence'],
+                        "notify_on_battery_low_of_drivers_app": login_details1[0][
+                            'notify_on_battery_low_of_drivers_app'],
                         "notify_it_driver_turns_off_gps": login_details1[0]['notify_it_driver_turns_off_gps']
                     }
                 ],
@@ -250,13 +254,14 @@ def round_list(request):
                             # print("dddddddddddddddddddddddddddddddddddddddddddddddd",list_round1)
                             result1 = {}
                             round = []
-                            r_id=[]
-                            l_round=[]
+                            r_id = []
+                            l_round = []
                             for id in list_round1:
                                 r_id.append(id['id'])
                             if r_id:
-                                cursor.execute("select id,day_id,round_id from round_schedule WHERE round_id in %s and day_id =%s",
-                                               [tuple(r_id), day_id[0][0]])
+                                cursor.execute(
+                                    "select id,day_id,round_id from round_schedule WHERE round_id in %s and day_id =%s",
+                                    [tuple(r_id), day_id[0][0]])
                                 rounds_details = cursor.fetchall()
                                 for id in rounds_details:
                                     l_round.append(id[2])
@@ -267,82 +272,90 @@ def round_list(request):
                                 # list_round = cursor.fetchall()
 
                                 for rec in range(len(rounds_details)):
-                                        day_list = {}
-                                        day_name = calendar.day_name[curr_date.weekday()]
-                                        cursor.execute(
-                                            "select student_id from transport_participant WHERE round_schedule_id = %s",
-                                            [rounds_details[rec][0]])
-                                        rounds_count_student = cursor.fetchall()
-                                        st_id = []
-                                        if rounds_count_student:
-                                            for k in rounds_count_student:
-                                                st_id.append(k[0])
-                                            cursor.execute("select display_name_search from student_student WHERE id in %s",
-                                                           [tuple(st_id)])
-                                            student_student = cursor.fetchall()
-                                            student_name = []
-                                            for name in student_student:
-                                                student_name.append(name[0])
-                                            day_list[day_name] = student_name
-                                        end=False
-                                        start=False
-                                        cancel=False
+                                    day_list = {}
+                                    day_name = calendar.day_name[curr_date.weekday()]
+                                    cursor.execute(
+                                        "select student_id from transport_participant WHERE round_schedule_id = %s",
+                                        [rounds_details[rec][0]])
+                                    rounds_count_student = cursor.fetchall()
+                                    st_id = []
+                                    if rounds_count_student:
+                                        for k in rounds_count_student:
+                                            st_id.append(k[0])
+                                        cursor.execute("select display_name_search from student_student WHERE id in %s",
+                                                       [tuple(st_id)])
+                                        student_student = cursor.fetchall()
+                                        student_name = []
+                                        for name in student_student:
+                                            student_name.append(name[0])
+                                        day_list[day_name] = student_name
+                                    end = False
+                                    start = False
+                                    cancel = False
 
-                                        cursor.execute(
-                                            "select  name,vehicle_id,driver_id from transport_round WHERE id = %s  ",
-                                            [list_round1[rec]['id']])
-                                        round_info = cursor.fetchall()
-                                        cursor.execute(
-                                            "select  id,round_start,round_end,na from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
-                                            [list_round1[rec]['id'], round_info[0][2], round_info[0][1], list_round1[rec]['id']])
-                                        round_history = cursor.fetchall()
-                                        if round_history:
+                                    cursor.execute(
+                                        "select  name,vehicle_id,driver_id from transport_round WHERE id = %s  ",
+                                        [list_round1[rec]['id']])
+                                    round_info = cursor.fetchall()
+                                    cursor.execute(
+                                        "select  id,round_start,round_end,na from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
+                                        [list_round1[rec]['id'], round_info[0][2], round_info[0][1],
+                                         list_round1[rec]['id']])
+                                    round_history = cursor.fetchall()
+                                    if round_history:
 
-                                            now = datetime.date.today()
-                                            if round_history[0][2]:
-                                                if round_history[0][2].strftime('%Y-%m-%d') == str(now):
-                                                    start = False
-                                                    cancel = False
-                                                    end=True
-                                            if (round_history[0][1].strftime('%Y-%m-%d')  == str(now)) and not (round_history[0][2].strftime('%Y-%m-%d') if round_history[0][2] else round_history[0][2] == str(now)) and (round_history[0][3] !='cancel'):
-                                                start=True
-                                                cancel = False
-                                                end = False
-                                            if  (round_history[0][1].strftime('%Y-%m-%d')  == str(now)) and round_history[0][3] =='cancel':
-                                                end = False
+                                        now = datetime.date.today()
+                                        if round_history[0][2]:
+                                            if round_history[0][2].strftime('%Y-%m-%d') == str(now):
                                                 start = False
-                                                cancel = True
-                                        else:
+                                                cancel = False
+                                                end = True
+                                        if (round_history[0][1].strftime('%Y-%m-%d') == str(now)) and not (
+                                        round_history[0][2].strftime('%Y-%m-%d') if round_history[0][2] else
+                                        round_history[0][2] == str(now)) and (round_history[0][3] != 'cancel'):
+                                            start = True
+                                            cancel = False
                                             end = False
-                                            start=False
-                                            cancel=False
-                                        result1[rec] = {
-                                            "round_time": str(list_round1[rec]['start_time']),
-                                            "name": str(list_round1[rec]['name']),
-                                            "date": None,
-                                            "pick_up_address": list_round1[rec]['pick_up_address'],
-                                            "drop_off_address": list_round1[rec]['drop_off_address'],
-                                            "pick_up_lat": list_round1[rec]['pick_up_lat'] if list_round1[rec]['pick_up_lat'] else 0,
-                                            "pick_up_lng": list_round1[rec]['pick_up_lng'] if list_round1[rec]['pick_up_lng'] else 0,
-                                            "drop_off_lat": list_round1[rec]['drop_off_lat'] if list_round1[rec]['drop_off_lat'] else 0,
-                                            "drop_off_lng": list_round1[rec]['drop_off_lng'] if list_round1[rec]['drop_off_lng'] else 0,
-                                            "route_id": list_round1[rec]['route_id'],
-                                            "round_canceled": cancel,
-                                            "round_ended": end,
-                                                "round_started": start,
-                                            "geofenses": {
-                                                "id": 1,
-                                                "name": 1,
-                                                "shape_type": "polygon",
-                                                "shape_attrs": {
-                                                    "vertices": []
-                                                }
-                                            },
-                                            "round_id": list_round1[rec]['id'],
-                                            "moved_students": [],
-                                            "students_list": [day_list]
+                                        if (round_history[0][1].strftime('%Y-%m-%d') == str(now)) and round_history[0][
+                                            3] == 'cancel':
+                                            end = False
+                                            start = False
+                                            cancel = True
+                                    else:
+                                        end = False
+                                        start = False
+                                        cancel = False
+                                    result1[rec] = {
+                                        "round_time": str(list_round1[rec]['start_time']),
+                                        "name": str(list_round1[rec]['name']),
+                                        "date": None,
+                                        "pick_up_address": list_round1[rec]['pick_up_address'],
+                                        "drop_off_address": list_round1[rec]['drop_off_address'],
+                                        "pick_up_lat": list_round1[rec]['pick_up_lat'] if list_round1[rec][
+                                            'pick_up_lat'] else 0,
+                                        "pick_up_lng": list_round1[rec]['pick_up_lng'] if list_round1[rec][
+                                            'pick_up_lng'] else 0,
+                                        "drop_off_lat": list_round1[rec]['drop_off_lat'] if list_round1[rec][
+                                            'drop_off_lat'] else 0,
+                                        "drop_off_lng": list_round1[rec]['drop_off_lng'] if list_round1[rec][
+                                            'drop_off_lng'] else 0,
+                                        "route_id": list_round1[rec]['route_id'],
+                                        "round_canceled": cancel,
+                                        "round_ended": end,
+                                        "round_started": start,
+                                        "geofenses": {
+                                            "id": 1,
+                                            "name": 1,
+                                            "shape_type": "polygon",
+                                            "shape_attrs": {
+                                                "vertices": []
+                                            }
+                                        },
+                                        "round_id": list_round1[rec]['id'],
+                                        "moved_students": [],
+                                        "students_list": [day_list]
 
-                                        }
+                                    }
                             cursor.execute(
                                 """ select 	allow_driver_change_students_location,allow_driver_to_use_beacon from transport_setting ORDER BY ID DESC LIMIT 1""")
                             login_details = cursor.fetchall()
@@ -407,7 +420,7 @@ def student_list(request, round_id):
                                 "select  write_date,type,id from transport_round WHERE id = %s  ",
                                 [round_id])
                             round_info1 = cursor.fetchall()
-                
+
                             cursor.execute(
                                 "select student_id from transport_participant WHERE round_schedule_id = %s ORDER BY sequence ASC",
                                 [rounds_details[0][0]])
@@ -419,7 +432,6 @@ def student_list(request, round_id):
                                 ch_out = len(rounds_count_student)
                             else:
                                 ch_in = len(rounds_count_student)
-
 
                             st_id = []
 
@@ -444,8 +456,8 @@ def student_list(request, round_id):
                                         out_round = False
                                         abs = False
                                         no_show = False
-                                        lat=0
-                                        long=0
+                                        lat = 0
+                                        long = 0
                                         cursor.execute(
                                             "select  name,vehicle_id,driver_id from transport_round WHERE id = %s  ",
                                             [round_id])
@@ -463,15 +475,15 @@ def student_list(request, round_id):
                                                     [round_id, student_student1[std]['id'], round_history[0][0]])
                                                 student_history = cursor.fetchall()
                                                 if student_history:
-                                                    lat=student_history[0][1]
-                                                    long=student_history[0][2]
+                                                    lat = student_history[0][1]
+                                                    long = student_history[0][2]
 
-                                                    if student_history[0][0]=='in':
+                                                    if student_history[0][0] == 'in':
 
-                                                        in_round=True
-                                                        out_round =False
-                                                        abs=False
-                                                        no_show=False
+                                                        in_round = True
+                                                        out_round = False
+                                                        abs = False
+                                                        no_show = False
                                                         cursor.execute(
                                                             "UPDATE public.transport_participant SET transport_state = %s WHERE student_id =%s AND round_schedule_id= %s",
                                                             ['in', student_student1[std]['id'],
@@ -485,7 +497,7 @@ def student_list(request, round_id):
                                                             ch_in = ch_in - 1
                                                             ch_out = ch_out + 1
 
-                                                    elif student_history[0][0]=='out':
+                                                    elif student_history[0][0] == 'out':
                                                         in_round = False
                                                         out_round = True
                                                         abs = False
@@ -501,7 +513,7 @@ def student_list(request, round_id):
 
                                                             ch_in = ch_in - 1
                                                             ch_out = ch_out + 1
-                                                    elif student_history[0][0]=='no-show':
+                                                    elif student_history[0][0] == 'no-show':
                                                         in_round = False
                                                         out_round = False
                                                         abs = False
@@ -510,20 +522,20 @@ def student_list(request, round_id):
                                                             "UPDATE public.transport_participant SET transport_state = %s WHERE student_id =%s AND round_schedule_id= %s",
                                                             ['no_show', student_student1[std]['id'],
                                                              rounds_details[0][0]])
-                                                    elif student_history[0][0]=='absent':
+                                                    elif student_history[0][0] == 'absent':
                                                         in_round = False
                                                         out_round = False
                                                         abs = True
                                                         no_show = False
                                                         cursor.execute(
                                                             "UPDATE public.transport_participant SET transport_state = %s WHERE student_id =%s AND round_schedule_id= %s",
-                                                            ['absent', student_student1[std]['id'], rounds_details[0][0]])
+                                                            ['absent', student_student1[std]['id'],
+                                                             rounds_details[0][0]])
                                                     elif student_history[0][0] == 'absent_all':
                                                         in_round = False
                                                         out_round = False
                                                         abs = True
                                                         no_show = False
-
 
                                                         cursor.execute(
                                                             "UPDATE public.transport_participant SET transport_state = %s WHERE student_id =%s AND round_schedule_id= %s",
@@ -597,7 +609,8 @@ def student_list(request, round_id):
                                             "previous_year_avg": student_student1[std]['previous_year_avg'],
                                             "learning_disabilities": student_student1[std]['learning_disabilities'],
                                             "need_attention": student_student1[std]['need_attention'],
-                                            "attention_follow_up_notes": student_student1[std]['attention_follow_up_notes'],
+                                            "attention_follow_up_notes": student_student1[std][
+                                                'attention_follow_up_notes'],
                                             "special_needs": student_student1[std]['special_needs'],
                                             "health_condition_notes": student_student1[std]['health_condition_notes'],
                                             "allergies": student_student1[std]['allergies'],
@@ -606,8 +619,9 @@ def student_list(request, round_id):
                                             "state": student_student1[std]['state'],
                                             "father_id": student_student1[std]['father_id'],
                                             "mother_id": student_student1[std]['mother_id'],
-                                            "family_relation_id":student_student1[std]['family_relation_id'],
-                                            "message_main_attachment_id": student_student1[std]['message_main_attachment_id'],
+                                            "family_relation_id": student_student1[std]['family_relation_id'],
+                                            "message_main_attachment_id": student_student1[std][
+                                                'message_main_attachment_id'],
                                             "create_uid": student_student1[std]['create_uid'],
                                             "create_date": student_student1[std]['create_date'],
                                             "write_uid": student_student1[std]['write_uid'],
@@ -621,7 +635,7 @@ def student_list(request, round_id):
                                             "display_name_ar": student_student1[std]['display_name_ar'],
                                             "moe_grace_period": student_student1[std]['moe_grace_period'],
                                             "deadline_date": student_student1[std]['deadline_date'],
-                                            "neighborhood_id":student_student1[std]['neighborhood_id'],
+                                            "neighborhood_id": student_student1[std]['neighborhood_id'],
                                             "assembly_id": student_student1[std]['assembly_id'],
                                             "ministry_state_id": student_student1[std]['ministry_state_id'],
                                             "student_emis_no": student_student1[std]['student_emis_no'],
@@ -631,9 +645,10 @@ def student_list(request, round_id):
                                             "soas": student_student1[std]['soas'],
                                             "marital_state": student_student1[std]['marital_state'],
                                             "education": student_student1[std]['education'],
-                                            "external_financial_aid":student_student1[std]['external_financial_aid'],
+                                            "external_financial_aid": student_student1[std]['external_financial_aid'],
                                             "aid_type": student_student1[std]['aid_type'],
-                                            "international_refugee_card_status": student_student1[std]['international_refugee_card_status'],
+                                            "international_refugee_card_status": student_student1[std][
+                                                'international_refugee_card_status'],
                                             "district_id": student_student1[std]['district_id'],
                                             "province_id": student_student1[std]['province_id'],
                                             "partner_id": student_student1[std]['partner_id'],
@@ -662,8 +677,10 @@ def student_list(request, round_id):
                                             "pickup_area_id": student_student1[std]['pickup_area_id'],
                                             "pickup_state_id": student_student1[std]['pickup_state_id'],
                                             "pickup_address_note": student_student1[std]['pickup_address_note'],
-                                            "sec_pickup_building_number": student_student1[std]['sec_pickup_building_number'],
-                                            "sec_pickup_building_name": student_student1[std]['sec_pickup_building_name'],
+                                            "sec_pickup_building_number": student_student1[std][
+                                                'sec_pickup_building_number'],
+                                            "sec_pickup_building_name": student_student1[std][
+                                                'sec_pickup_building_name'],
                                             "sec_pickup_street": student_student1[std]['sec_pickup_street'],
                                             "sec_pickup_flat_number": student_student1[std]['sec_pickup_flat_number'],
                                             "sec_pickup_area_id": student_student1[std]['sec_pickup_area_id'],
@@ -676,20 +693,25 @@ def student_list(request, round_id):
                                             "dropoff_area_id": student_student1[std]['dropoff_area_id'],
                                             "dropoff_state_id": student_student1[std]['dropoff_state_id'],
                                             "dropoff_address_note": student_student1[std]['dropoff_address_note'],
-                                            "sec_dropoff_building_number": student_student1[std]['sec_dropoff_building_number'],
-                                            "sec_dropoff_building_name": student_student1[std]['sec_dropoff_building_name'],
+                                            "sec_dropoff_building_number": student_student1[std][
+                                                'sec_dropoff_building_number'],
+                                            "sec_dropoff_building_name": student_student1[std][
+                                                'sec_dropoff_building_name'],
                                             "sec_dropoff_street": student_student1[std]['sec_dropoff_street'],
                                             "sec_dropoff_flat_number": student_student1[std]['sec_dropoff_flat_number'],
                                             "sec_dropoff_area_id": student_student1[std]['sec_dropoff_area_id'],
                                             "sec_dropoff_state_id": student_student1[std]['sec_dropoff_state_id'],
-                                            "sec_dropoff_address_note": student_student1[std]['sec_dropoff_address_note'],
+                                            "sec_dropoff_address_note": student_student1[std][
+                                                'sec_dropoff_address_note'],
                                             "is_suspended": student_student1[std]['is_suspended'],
                                             "sequence": student_student1[std]['sequence'],
                                             "password": student_student1[std]['password'],
-                                            "image_url":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + student_student1[std]['image_url'] if student_student1[std]['image_url'] else student_student[std][131],
+                                            "image_url": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +
+                                                         student_student1[std]['image_url'] if student_student1[std][
+                                                'image_url'] else student_student[std][131],
                                             "round_id": student_student1[std]['round_id'],
                                             "responsible_id_value": student_student1[std]['responsible_id_value'],
-                                            "grade":student_student1[std]['academic_grade_name1'],
+                                            "grade": student_student1[std]['academic_grade_name1'],
                                             # "first_mandatory": student_student[std][134],
                                             # "second_mandatory": student_student[std][135],
                                             # "third_mandatory": student_student[std][136],
@@ -700,7 +722,8 @@ def student_list(request, round_id):
                                             "parents_info": [
                                                 {
                                                     "father": {
-                                                        "mobile_token": father_inf[0]['mobile_token'] if father_inf else "",
+                                                        "mobile_token": father_inf[0][
+                                                            'mobile_token'] if father_inf else "",
                                                         # "mobile_pn_registration_id": father_inf[0]['mobile_pn_registration_id']if father_inf else "",
                                                         # "invite_count": father_inf[0]['invite_count']if father_inf else "",
                                                         "settings": father_inf[0]['settings'] if father_inf else "",
@@ -709,7 +732,8 @@ def student_list(request, round_id):
 
                                                     },
                                                     "mother": {
-                                                        "mobile_token": mother_inf[0]['mobile_token'] if mother_inf else "",
+                                                        "mobile_token": mother_inf[0][
+                                                            'mobile_token'] if mother_inf else "",
                                                         # "mobile_pn_registration_id": mother_inf[0]['mobile_pn_registration_id']if mother_inf else"",
                                                         # "invite_count": mother_inf[0]['invite_count']if mother_inf else"",
                                                         "settings": mother_inf[0]['settings'] if mother_inf else "",
@@ -726,7 +750,8 @@ def student_list(request, round_id):
                                                     }
                                                 }
                                             ],
-                                            "avatar": student_student1[std]['image_url'] if student_student1[std]['image_url'] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png",
+                                            "avatar": student_student1[std]['image_url'] if student_student1[std][
+                                                'image_url'] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png",
                                             "check_in": in_round,
                                             "check_out": out_round,
                                             "absent": abs,
@@ -734,7 +759,7 @@ def student_list(request, round_id):
                                             "lng": long,
                                             "no_show": no_show,
                                         }
-                                student=[]
+                                student = []
                                 for std_inf in range(len(student_info)):
                                     student.append(student_info[std_inf])
                                 cursor.execute(
@@ -853,82 +878,81 @@ def set_round_status(request):
                                 long = request.data.get('long')
                                 distance = request.data.get('distance')
                                 status = request.data.get('status')
-                                assistant_id= request.data.get('assistant_id')
+                                assistant_id = request.data.get('assistant_id')
                                 cursor.execute(
                                     "select  name,vehicle_id,driver_id ,type from transport_round WHERE id = %s  ",
                                     [round_id])
                                 round_info = cursor.fetchall()
-                                if status =='start':
-                                        cursor.execute(
-                                            "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
-                                            [round_id, round_info[0][2], round_info[0][1], round_id])
-                                        round_history = cursor.fetchall()
-                                        if round_history:
-                                            now = datetime.date.today()
-                                            if round_history[0][0].strftime('%Y-%m-%d') == str(now):
-                                                cursor.execute(
-                                                    "UPDATE public.round_history SET na= %s WHERE id=%s",
-                                                    ['cancel', round_history[0][1]])
-                                            else:
-                                                #
-                                                curr_date = date.today()
-                                                day_name = calendar.day_name[curr_date.weekday()]
-                                                cursor.execute(
-                                                    "select  id  from school_day where name = %s",
-                                                    [calendar.day_name[curr_date.weekday()]])
-                                                day_name = cursor.fetchall()
-                                                cursor.execute(
-                                                    "select id,day_id from round_schedule WHERE round_id = %s and day_id = %s",
-                                                    [round_id, day_name[0][0]])
-                                                columns3 = (x.name for x in cursor.description)
-                                                rounds_details = cursor.fetchall()
-                                                day_list = {}
-                                                # for z in rounds_details:
-                                                cursor.execute(
-                                                    "select student_id from transport_participant WHERE round_schedule_id = %s",
-                                                    [rounds_details[0][0]])
-                                                columns4 = (x.name for x in cursor.description)
-                                                rounds_count_student = cursor.fetchall()
-                                                ch_in=0
-                                                ch_out=0
-                                                if round_info[0][3]=='pick_up':
-                                                    ch_in=len(rounds_count_student)
-                                                else:
-                                                    ch_out = len(rounds_count_student)
-
-                                                cursor.execute(
-                                                    "UPDATE public.transport_round SET total_checkedout_students= %s , total_checkedin_students= %s WHERE id=%s",
-                                                    [ch_out,ch_in, round_id])
-                                                stds = []
-                                                for rec in rounds_count_student:
-                                                    stds.append(rec[0])
-
-                                                cursor.execute(
-                                                    "UPDATE public.transport_participant SET transport_state = %s WHERE student_id in %s AND round_schedule_id= %s",
-                                                    ["", tuple(stds), rounds_details[0][0]])
-
-
-                                                cursor.execute(
-                                                    "INSERT INTO  round_history (round_name,round_id,distance,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
-                                                    [round_id, round_id, distance, round_info[0][1], round_info[0][2],
-                                                     datetime.datetime.now(), assistant_id])
-                                        else:
-                                            cursor.execute(
-                                                "INSERT INTO  round_history (round_name,round_id,distance,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
-                                                [round_id, round_id, distance, round_info[0][1], round_info[0][2], datetime.datetime.now(),assistant_id])
-                                elif status =='end' or status == 'force_end':
-
-
+                                if status == 'start':
                                     cursor.execute(
                                         "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
-                                        [round_id,round_info[0][2],round_info[0][1],round_id])
+                                        [round_id, round_info[0][2], round_info[0][1], round_id])
                                     round_history = cursor.fetchall()
                                     if round_history:
                                         now = datetime.date.today()
-                                        if round_history[0][0].strftime('%Y-%m-%d')==str(now):
+                                        if round_history[0][0].strftime('%Y-%m-%d') == str(now):
+                                            cursor.execute(
+                                                "UPDATE public.round_history SET na= %s WHERE id=%s",
+                                                ['cancel', round_history[0][1]])
+                                        else:
+                                            #
+                                            curr_date = date.today()
+                                            day_name = calendar.day_name[curr_date.weekday()]
+                                            cursor.execute(
+                                                "select  id  from school_day where name = %s",
+                                                [calendar.day_name[curr_date.weekday()]])
+                                            day_name = cursor.fetchall()
+                                            cursor.execute(
+                                                "select id,day_id from round_schedule WHERE round_id = %s and day_id = %s",
+                                                [round_id, day_name[0][0]])
+                                            columns3 = (x.name for x in cursor.description)
+                                            rounds_details = cursor.fetchall()
+                                            day_list = {}
+                                            # for z in rounds_details:
+                                            cursor.execute(
+                                                "select student_id from transport_participant WHERE round_schedule_id = %s",
+                                                [rounds_details[0][0]])
+                                            columns4 = (x.name for x in cursor.description)
+                                            rounds_count_student = cursor.fetchall()
+                                            ch_in = 0
+                                            ch_out = 0
+                                            if round_info[0][3] == 'pick_up':
+                                                ch_in = len(rounds_count_student)
+                                            else:
+                                                ch_out = len(rounds_count_student)
+
+                                            cursor.execute(
+                                                "UPDATE public.transport_round SET total_checkedout_students= %s , total_checkedin_students= %s WHERE id=%s",
+                                                [ch_out, ch_in, round_id])
+                                            stds = []
+                                            for rec in rounds_count_student:
+                                                stds.append(rec[0])
+
+                                            cursor.execute(
+                                                "UPDATE public.transport_participant SET transport_state = %s WHERE student_id in %s AND round_schedule_id= %s",
+                                                ["", tuple(stds), rounds_details[0][0]])
+
+                                            cursor.execute(
+                                                "INSERT INTO  round_history (round_name,round_id,distance,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
+                                                [round_id, round_id, distance, round_info[0][1], round_info[0][2],
+                                                 datetime.datetime.now(), assistant_id])
+                                    else:
+                                        cursor.execute(
+                                            "INSERT INTO  round_history (round_name,round_id,distance,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
+                                            [round_id, round_id, distance, round_info[0][1], round_info[0][2],
+                                             datetime.datetime.now(), assistant_id])
+                                elif status == 'end' or status == 'force_end':
+
+                                    cursor.execute(
+                                        "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
+                                        [round_id, round_info[0][2], round_info[0][1], round_id])
+                                    round_history = cursor.fetchall()
+                                    if round_history:
+                                        now = datetime.date.today()
+                                        if round_history[0][0].strftime('%Y-%m-%d') == str(now):
                                             cursor.execute(
                                                 "UPDATE public.round_history SET round_end= %s WHERE id=%s",
-                                                [datetime.datetime.now(),round_history[0][1]])
+                                                [datetime.datetime.now(), round_history[0][1]])
                                 elif status == 'cancel':
 
                                     cursor.execute(
@@ -959,6 +983,7 @@ def set_round_status(request):
             result = {'status': 'error'}
             return Response(result)
 
+
 @api_view(['POST'])
 def students_bus_checks(request):
     if request.method == 'POST':
@@ -972,7 +997,7 @@ def students_bus_checks(request):
                             school_name = e[0]
                             school_name = Manager.pincode(school_name)
                             with connections[school_name].cursor() as cursor:
-                                students =request.data.get('students')
+                                students = request.data.get('students')
                                 round_id = students[0]['round_id']
                                 status = students[0]['status']
                                 day_count = students[0]['day_count']
@@ -1001,23 +1026,23 @@ def students_bus_checks(request):
                                                 "INSERT INTO  student_history (round_id,student_id,bus_check_in,datetime,history_id,lat,long,activity_type) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
                                                 [round_id, student_id, datetime.datetime.now(),
                                                  datetime.datetime.now(), round_history[0][0], lat, long, status])
-                                            if status=='in':
+                                            if status == 'in':
 
                                                 cursor.execute(
                                                     "UPDATE public.round_student_history SET bus_check_in = %s WHERE id =%s ",
                                                     [datetime.datetime.now(), student_history[0][0]])
                                                 if round_info[0][3] == 'pick_up':
-                                                    ch_in = round_info[0][5]+1
+                                                    ch_in = round_info[0][5] + 1
                                                     ch_out = round_info[0][4] - 1
                                                 else:
-                                                    ch_in = round_info[0][5] -1
+                                                    ch_in = round_info[0][5] - 1
                                                     ch_out = round_info[0][4] + 1
 
                                                 cursor.execute(
                                                     "UPDATE public.transport_round SET total_checkedout_students= %s , total_checkedin_students= %s WHERE id=%s",
                                                     [ch_out, ch_in, round_id])
 
-                                            elif status=='out':
+                                            elif status == 'out':
 
                                                 cursor.execute(
                                                     "UPDATE public.round_student_history SET time_out = %s WHERE id =%s ",
@@ -1052,7 +1077,7 @@ def students_bus_checks(request):
                                             cursor.execute(
                                                 "INSERT INTO  student_history (round_id,student_id,bus_check_in,datetime,history_id,lat,long,activity_type) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
                                                 [round_id, student_id, datetime.datetime.now(),
-                                                 datetime.datetime.now(), round_history[0][0],lat,long,status])
+                                                 datetime.datetime.now(), round_history[0][0], lat, long, status])
 
                                 cursor.execute(
                                     "select  id  from school_day where name = %s",
@@ -1064,7 +1089,7 @@ def students_bus_checks(request):
                                 round_schedule = cursor.fetchall()
                                 cursor.execute(
                                     "UPDATE public.transport_participant SET transport_state = %s WHERE student_id =%s AND round_schedule_id= %s",
-                                    [status,student_id,round_schedule[0][0]])
+                                    [status, student_id, round_schedule[0][0]])
                                 result = {'status': 'OK'}
                                 return Response(result)
                     else:
@@ -1087,7 +1112,7 @@ def reordered_students(request):
         if request.headers:
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
-                    ordered_students_ids=request.data.get('ordered_students_ids')
+                    ordered_students_ids = request.data.get('ordered_students_ids')
                     round_id = request.data.get('round_id')
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
                     db_name = Manager.objects.filter(token=au).values_list('db_name')
@@ -1104,15 +1129,19 @@ def reordered_students(request):
                                     "select  name  from res_partner WHERE id = %s  ",
                                     [round_info[0][1]])
                                 driver_id = cursor.fetchall()
-                                for rec in range(len(ordered_students_ids)-1):
-                                    student_ids=[]
+                                for rec in range(len(ordered_students_ids) - 1):
+                                    student_ids = []
                                     student_ids.append(ordered_students_ids[rec])
-                                    student_ids.append(ordered_students_ids[rec+1])
+                                    student_ids.append(ordered_students_ids[rec + 1])
                                     cursor.execute("select display_name_search from student_student WHERE id in %s",
                                                    [tuple(student_ids)])
                                     student_transferred = cursor.fetchall()
 
-                                    message_en='The driver '+driver_id[0][0]+' has changed the planed route of the round '+round_info[0][0]+'.The driver' +round_info[0][2]+' the student '+student_transferred[0][0]+' before the student'+student_transferred[1][0]+' .'
+                                    message_en = 'The driver ' + driver_id[0][
+                                        0] + ' has changed the planed route of the round ' + round_info[0][
+                                                     0] + '.The driver' + round_info[0][2] + ' the student ' + \
+                                                 student_transferred[0][0] + ' before the student' + \
+                                                 student_transferred[1][0] + ' .'
                                     date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                     r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
                                     cursor.execute(
@@ -1131,5 +1160,5 @@ def reordered_students(request):
                 result = {'status': 'error'}
                 return Response(result)
         else:
-                result = {'status': 'error'}
-                return Response(result)
+            result = {'status': 'error'}
+            return Response(result)
