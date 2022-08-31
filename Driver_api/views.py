@@ -1162,3 +1162,128 @@ def reordered_students(request):
         else:
             result = {'status': 'error'}
             return Response(result)
+@api_view(['POST'])
+def notify(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = Manager.objects.filter(token=au).values_list('db_name')
+
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+
+                        school_name = Manager.pincode(school_name)
+                        type = request.data.get('location_type')
+
+                        date = request.data.get('date')
+                        student_id = request.data.get('student_id')
+                        name = request.data.get('name')
+                        lat = request.data.get('lat')
+                        long = request.data.get('long')
+                        if name == 'battery_low':
+                            with connections[school_name].cursor() as cursor:
+                                driver_id = Manager.objects.filter(token=au).values_list('driver_id')
+                                for e in driver_id:
+                                    driver_id = e[0]
+                                date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+                                cursor.execute(
+                                    "select  bus_num  from fleet_vehicle WHERE driver_id = %s  ",
+                                    [driver_id])
+                                bus_num = cursor.fetchall()
+                                cursor.execute(
+                                    "select  name  from res_partner WHERE id = %s  ",
+                                    [driver_id])
+                                driver_id = cursor.fetchall()
+
+
+                                message_en="The battery of the tracking device in the bus "+bus_num+" is running out of charge"
+                                cursor.execute(
+                                        "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
+                                        [r, 'App\Model\Driver', 'battery_low', message_en, driver_id[0][0]])
+                        elif name == 'network':
+                            with connections[school_name].cursor() as cursor:
+                                driver_id = Manager.objects.filter(token=au).values_list('driver_id')
+                                for e in driver_id:
+                                    driver_id = e[0]
+                                date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+                                cursor.execute(
+                                    "select  bus_num  from fleet_vehicle WHERE driver_id = %s  ",
+                                    [driver_id])
+                                bus_num = cursor.fetchall()
+                                cursor.execute(
+                                    "select  name  from res_partner WHERE id = %s  ",
+                                    [driver_id])
+                                driver_id = cursor.fetchall()
+
+                                message_en = "The battery of the tracking device in the bus " + bus_num + " is running out of charge"
+                                cursor.execute(
+                                    "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
+                                    [r, 'App\Model\Driver', 'network', message_en, driver_id[0][0]])
+                        elif name == 'user_no_move_time_exceeded':
+                                with connections[school_name].cursor() as cursor:
+                                    driver_id = Manager.objects.filter(token=au).values_list('driver_id')
+                                    for e in driver_id:
+                                        driver_id = e[0]
+                                    date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                    r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+                                    cursor.execute(
+                                        "select  name  from res_partner WHERE id = %s  ",
+                                        [driver_id])
+                                    driver_id = cursor.fetchall()
+
+                                    message_en = "	The driver "+driver_id[0][0]+" has stopped in . The allowed time is 1 minute(s)"
+                                    cursor.execute(
+                                        "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
+                                        [r, 'App\Model\Driver', 'network', message_en, driver_id[0][0]])
+
+                        elif name == 'emergency':
+                                emergency_text = request.data.get('emergency_text')
+                                students_ids = request.data.get('students_ids')
+                                with connections[school_name].cursor() as cursor:
+                                    driver_id = Manager.objects.filter(token=au).values_list('driver_id')
+                                    for e in driver_id:
+                                        driver_id = e[0]
+                                    date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                    r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+                                    cursor.execute(
+                                        "select  name  from res_partner WHERE id = %s  ",
+                                        [driver_id])
+                                    driver_id = cursor.fetchall()
+                                    cursor.execute(
+                                        "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
+                                        [r, 'App\Model\Driver', 'network', emergency_text, driver_id[0][0]])
+                        elif name == 'changed_location':
+                                with connections[school_name].cursor() as cursor:
+                                    parent_id = Manager.objects.filter(token=au).values_list('driver_id')
+                                    for e in parent_id:
+                                        parent_id = e[0]
+                                    sender_id = parent_id
+                                    if type == 'drop-off':
+
+                                        cursor.execute(
+                                            "UPDATE   student_student SET drop_off_lat=%s ,drop_off_lng=%s WHERE id = %s",
+                                            [lat, long, student_id])
+                                        result = {'result': "ok"}
+                                        return Response(result)
+                                    elif type == 'pick-up':
+
+                                        cursor.execute(
+                                            "UPDATE   student_student SET pick_up_lat=%s ,pick_up_lng=%s WHERE id = %s",
+                                            [lat, long, student_id])
+                                        result = {'result': "ok"}
+                                        return Response(result)
+                                    elif type == 'both':
+                                        cursor.execute(
+                                            "UPDATE   student_student SET pick_up_lat=%s ,pick_up_lng=%s,drop_off_lat,drop_off_lng WHERE id = %s",
+                                            [lat, long, lat, long, student_id])
+                                        result = {'result': "ok"}
+                                        return Response(result)
+                                # user_no_move_time_exceeded
+
+
+
