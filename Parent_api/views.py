@@ -13,6 +13,8 @@ from django.core.serializers import serialize
 from collections import ChainMap
 from rest_framework import status
 from itertools import chain
+# from ..Driver_api.models import Manager
+# from yousef.api.Tracking_python_core.Driver_api.models import Manager
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 import json
@@ -30,7 +32,6 @@ def parent_login(request):
         user_name = request.data.get('user_name')
         school_name = request.data.get('school_name')
         mobile_token = request.data.get('mobile_token')
-        # print("jjjjjjjjjjjjjjjjjjjjjjjjjjjj ",mobile_token)
 
         # url = "http://localhost:9098/web/session/authenticate"
         url = 'https://' + school_name + '.staging.trackware.com/web/session/authenticate'
@@ -57,6 +58,9 @@ def parent_login(request):
             # print(unique_id)
             ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name, user_id=uid).update(
                 is_active=False)
+            cursor.execute(
+                "UPDATE public.school_parent SET mobile_token=%s WHERE id=%s;",
+                [mobile_token, parent_id[0][0]])
             manager_parent = ManagerParent(token=unique_id, db_name=school_name, user_id=uid,
                                            parent_id=parent_id[0][0],
                                            school_id=company_id, mobile_token=mobile_token)
@@ -974,22 +978,24 @@ def notify(request):
                 if 'Bearer' in request.headers.get('Authorization'):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
                     db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
-                    parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
-                    for e in parent_id:
-                        parent_id = e[0]
+
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
 
                         school_name = ManagerParent.pincode(school_name)
                         type = request.data.get('location_type')
-                        sender_id = parent_id
+
                         date = request.data.get('date')
                         student_id = request.data.get('student_id')
                         name = request.data.get('name')
                         lat = request.data.get('lat')
                         long = request.data.get('long')
                         if name == 'childs_attendance':
+                            parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+                            for e in parent_id:
+                                parent_id = e[0]
+                            sender_id = parent_id
                             when = request.data.get('when')
                             target_rounds=request.data.get('target_rounds')
                             round_id=request.data.get('status')
@@ -1067,6 +1073,10 @@ def notify(request):
                                 return Response(result)
                         elif name == 'changed_location':
                             with connections[school_name].cursor() as cursor:
+                                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+                                for e in parent_id:
+                                    parent_id = e[0]
+                                sender_id = parent_id
                                 if type =='drop-off':
 
                                     cursor.execute("UPDATE   student_student SET drop_off_lat=%s ,drop_off_lng=%s WHERE id = %s",
@@ -1086,5 +1096,63 @@ def notify(request):
                                         [lat, long,lat, long, student_id])
                                     result = {'result': "ok"}
                                     return Response(result)
-
-
+                        # elif name == 'battery_low':
+                        #     with connections[school_name].cursor() as cursor:
+                        #         driver_id = Manager.objects.filter(token=au).values_list('driver_id')
+                        #         for e in driver_id:
+                        #             driver_id = e[0]
+                        #         date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        #         r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+                        #         cursor.execute(
+                        #             "select  bus_num  from fleet_vehicle WHERE driver_id = %s  ",
+                        #             [driver_id])
+                        #         bus_num = cursor.fetchall()
+                        #         cursor.execute(
+                        #             "select  name  from res_partner WHERE id = %s  ",
+                        #             [driver_id])
+                        #         driver_id = cursor.fetchall()
+                        #
+                        #
+                        #         message_en="The battery of the tracking device in the bus "+bus_num+" is running out of charge"
+                        #         cursor.execute(
+                        #                 "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
+                        #                 [r, 'App\Model\Driver', 'battery_low', message_en, driver_id[0][0]])
+                        # elif name == 'network':
+                        #     with connections[school_name].cursor() as cursor:
+                        #         driver_id = Manager.objects.filter(token=au).values_list('driver_id')
+                        #         for e in driver_id:
+                        #             driver_id = e[0]
+                        #         date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        #         r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+                        #         cursor.execute(
+                        #             "select  bus_num  from fleet_vehicle WHERE driver_id = %s  ",
+                        #             [driver_id])
+                        #         bus_num = cursor.fetchall()
+                        #         cursor.execute(
+                        #             "select  name  from res_partner WHERE id = %s  ",
+                        #             [driver_id])
+                        #         driver_id = cursor.fetchall()
+                        #
+                        #         message_en = "The battery of the tracking device in the bus " + bus_num + " is running out of charge"
+                        #         cursor.execute(
+                        #             "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
+                        #             [r, 'App\Model\Driver', 'network', message_en, driver_id[0][0]])
+                        # elif name == 'user_no_move_time_exceeded':
+                        #         with connections[school_name].cursor() as cursor:
+                        #             driver_id = Manager.objects.filter(token=au).values_list('driver_id')
+                        #             for e in driver_id:
+                        #                 driver_id = e[0]
+                        #             date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        #             r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+                        #             cursor.execute(
+                        #                 "select  name  from res_partner WHERE id = %s  ",
+                        #                 [driver_id])
+                        #             driver_id = cursor.fetchall()
+                        #
+                        #             message_en = "	The driver "+driver_id[0][0]+" has stopped in . The allowed time is 1 minute(s)"
+                        #             cursor.execute(
+                        #                 "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
+                        #                 [r, 'App\Model\Driver', 'network', message_en, driver_id[0][0]])
+                        #         # user_no_move_time_exceeded
+                        #
+                        #

@@ -9,6 +9,7 @@ from Parent_api.models import ManagerParent
 from django.db.models import Q
 from datetime import datetime
 import calendar
+import json
 
 # Remember the code we copied from Firebase.
 # This can be copied by clicking on the settings icon > project settings, then scroll down in your firebase dashboard
@@ -190,24 +191,26 @@ def send_school_message(request):
             mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id),Q(db_name='iks'),Q(is_active=True)).values_list(
                 'mobile_token').order_by('-pk')
             token = []
-            # print(len(mobile_token))
+            print(mobile_token[0])
             for tok in mobile_token:
                 token.append(tok[0])
 
-            # print(token)
 
             push_service = FCMNotification(
                 api_key="AAAAHsQAH5c:APA91bHWCcnal6mjBxwAODprATUgGX8pQKIkeBC_GA29fM29YHKXPYmRd7g_Ve1odxo1o_wOAYSkWMUVEh52HAQWPt_zFkM1fx7YVor6xaYYc8bWwKPbuLRy5fS_RBcLsqbeOa5RB0EV")
             registration_id = token
             # print(mobile_token)
             message_title = school_message[0][1]
+            
             message_body = school_message[0][0]
             result = push_service.notify_multiple_devices \
                 (message_title=message_title, message_body=message_body, registration_ids=registration_id,
                  data_message={})
-            # print(result)
+
+            print(result)
             result1 = {
                 "route": 'Ok'
+
             }
 
         return Response(result1)
@@ -244,23 +247,46 @@ def send_confirmation_message_to_parent(request):
 @api_view(['POST'])
 def push_notification(request):
     if request.method == 'POST':
+        print(request.data)
         action = request.data.get('action')
         avatar = request.data.get('avatar')
         endpoint_arn = request.data.get('endpoint_arn')
         message = request.data.get('message')
+
         platform = request.data.get('platform')
         round_id = request.data.get('round_id')
         school_id = request.data.get('school_id')
         title = request.data.get('title')
         user_id = request.data.get('user_id')
         user_ids = request.data.get('user_ids')
+        parent_id = request.data.get('parent_id')
         mobile_token = []
-        for rec in user_ids:
-            mobile_token1 = ManagerParent.objects.filter(Q(user_id=rec) , Q(db_name=school_id),Q(is_active=True)).values_list(
-                'mobile_token').order_by('-pk')
-            for e in mobile_token1:
-                mobile_token.append(e[0])
+        school_name = ManagerParent.objects.filter(school_id=school_id).values_list('db_name').order_by('-pk')
+        # print(school_name[0][0])
+        school_name=school_name[0][0]
+        # for rec in parent_id:
 
+        with connections[str(school_name)].cursor() as cursor:
+                cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                settings = cursor.fetchall()
+            # print(rec,school_id, ManagerParent.objects.filter(Q(user_id=rec) , Q(db_name=school_name),Q(is_active=True)).values_list(
+            #     'mobile_token').order_by('-pk'))
+        mobile_token1 = ManagerParent.objects.filter(Q(parent_id=parent_id) , Q(db_name=school_name),Q(is_active=True)).values_list(
+                'mobile_token').order_by('-pk')
+
+        if settings[0][0]:
+            data = json.loads(settings[0][0])
+
+        for e in mobile_token1:
+            if data['notifications']['nearby'] and action =='near':
+                mobile_token.append(e[0])
+            elif    data['notifications']['check_in'] and action =='near':
+                mobile_token.append(e[0])
+            elif data['notifications']['check_out'] and action == 'near':
+
+                mobile_token.append(e[0])
+            else:
+                 mobile_token.append(e[0])
         # for e in mobile_token:
         #     mobile_token = e[0]
         # print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token)
