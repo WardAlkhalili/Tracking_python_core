@@ -35,6 +35,8 @@ def parent_login(request):
 
         # url = "http://localhost:9098/web/session/authenticate"
         url = 'https://' + school_name + '.staging.trackware.com/web/session/authenticate'
+
+
         # url = 'http://127.0.0.1:9098/web/session/authenticate'
         body = json.dumps({"jsonrpc": "2.0", "params": {"db": school_name, "login": user_name, "password": password}})
         headers = {
@@ -178,10 +180,11 @@ def settings(request):
                         for e in db_name:
                             school_name = e[0]
                         school_name = ManagerParent.pincode(school_name)
-                        notifications = request.data.get('notifications')
+                        notifications = request.data.get('settings')
+                        print(request.data)
                         # school_name = ManagerParent.pincode('iks')
                         with connections[school_name].cursor() as cursor:
-                            y = json.dumps(notifications)
+                            y = json.dumps(notifications['notifications'])
                             settings = "{\"notifications\":" + y + "}"
                             cursor.execute(
                                 "UPDATE public.school_parent SET settings=%s WHERE id=%s;",
@@ -190,16 +193,16 @@ def settings(request):
                                 'status': 'ok', }
                             return Response(result)
                     else:
-                        result = {'result': 'error'}
+                        result = {'result': 'error1'}
                         return Response(result)
                 else:
-                    result = {'result': 'error'}
+                    result = {'result': 'error2'}
                     return Response(result)
             else:
-                result = {'result': 'error'}
+                result = {'result': 'error3'}
                 return Response(result)
         else:
-            result = {'result': 'error'}
+            result = {'result': 'error4'}
             return Response(result)
     elif request.method == 'GET':
         if request.headers:
@@ -219,7 +222,6 @@ def settings(request):
                             cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                             columns = (x.name for x in cursor.description)
                             data_id_bus = cursor.fetchall()
-
                             if data_id_bus[0][0]:
                                 data = json.loads(data_id_bus[0][0])
                                 return Response(data)
@@ -848,19 +850,17 @@ def kids_hstory(request):
                                             "notifications_title": school_message1[rec][2],
 
                                         })
-
                                     result = {"notifications": notifications}
-
                                     return Response(result)
                             notifications = []
-                            # notifications.append({
-                            #
-                            #     "notifications_text": 'school_message1[rec][3]',
-                            #     "date_time": 'school_message1[rec][5]',
-                            #     "create_date": 'school_message1[rec][4]',
-                            #     "notifications_title": 'school_message1[rec][2]',
-                            #     "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                            # })
+                            notifications.append({
+
+                                "notifications_text": 'school_message1[rec][3]',
+                                "date_time": 'school_message1[rec][5]',
+                                "create_date": 'school_message1[rec][4]',
+                                "notifications_title": 'school_message1[rec][2]',
+                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                            })
                             result = {"notifications": notifications}
                             return Response(result)
                     else:
