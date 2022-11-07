@@ -80,6 +80,7 @@ def parent_login(request):
             #     'school_id': company_id
             #
             # }
+
             result = {
                 "status": "ok",
                 "kids": [],
@@ -110,6 +111,7 @@ def parent_login(request):
                 "session_id": session.get_dict()['session_id'],
                 "web_base_url": response['result']['web_base_url'],
                 "Authorization": "Bearer " + unique_id}
+
         return Response(result)
 
 
@@ -174,14 +176,15 @@ def settings(request):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
                     db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
                     parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
                     for e in parent_id:
                         parent_id = e[0]
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
                         school_name = ManagerParent.pincode(school_name)
-                        notifications = request.data.get('settings')
-                        print(request.data)
+                        notifications = request.data
+
                         # school_name = ManagerParent.pincode('iks')
                         with connections[school_name].cursor() as cursor:
                             y = json.dumps(notifications['notifications'])
@@ -191,6 +194,7 @@ def settings(request):
                                 [settings, parent_id])
                             result = {
                                 'status': 'ok', }
+
                             return Response(result)
                     else:
                         result = {'result': 'error1'}
@@ -488,7 +492,7 @@ def kids_list(request):
                                 rounds_details = cursor.fetchall()
                                 for rou in range(len(rounds_details)):
                                     cursor.execute(
-                                        "select round_schedule_id from transport_participant WHERE round_schedule_id = %s and student_id = %s",
+                                        "select round_schedule_id,transport_state from transport_participant WHERE round_schedule_id = %s and student_id = %s",
                                         [rounds_details[rou][0], student1[rec]['id']])
                                     columns4 = (x.name for x in cursor.description)
                                     rounds_count_student = cursor.fetchall()
@@ -541,7 +545,7 @@ def kids_list(request):
                                     # },
                                     "Events":
                                         {"name": "Events",
-                                         "name_ar": "Events",
+                                         "name_ar": "الفعاليات و الانشطة",
                                          "url": "https://" + school_name + ".staging.trackware.com/my/Events/",
                                          "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Events/",
                                          "arabic_name": "الفعاليات و الانشطة",
@@ -564,7 +568,7 @@ def kids_list(request):
 
                                     "Clinic":
                                         {"name": "Clinic",
-                                         "name_ar": "Clinic",
+                                         "name_ar": "العيادة",
                                          "url": "https://" + school_name + ".staging.trackware.com/my/Clinic/",
                                          "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Clinic/",
                                          "arabic_name": "العيادة",
@@ -671,59 +675,116 @@ def kids_list(request):
                                     drop = True
                                 else:
                                     drop = False
-
+                                print("sssssssssssssssssssss",show_absence)
+                                student_st=''
+                                assistant_id=0
+                                assistant_name=''
+                                assistant_mobile_number=''
+                                driver_mobile_token=''
+                                driver_mobile_number=''
+                                driver_name=''
+                                bus_id=0
+                                round_type=''
+                                round_name=''
+                                if bool(is_active_round):
+                                    student_st=rounds_count_student[0][1]
+                                    cursor.execute(
+                                        "select name,type,attendant_id,vehicle_id,driver_id from transport_round WHERE id = %s",
+                                        [ int(student_round_id)])
+                                    round_info = cursor.fetchall()
+                                    round_type=round_info[0][1]
+                                    round_name=round_info[0][0]
+                                    assistant_id=int(round_info[0][2])
+                                    cursor.execute(
+                                        "select name,mobile_phone from hr_employee WHERE id = %s",
+                                        [assistant_id])
+                                    assistant = cursor.fetchall()
+                                    assistant_mobile_number=assistant[0][1]
+                                    assistant_name = assistant[0][0]
+                                    cursor.execute(
+                                        "select name,mobile from res_partner WHERE id = %s",
+                                        [round_info[0][4]])
+                                    driver_info = cursor.fetchall()
+                                    driver_name=driver_info[0][0]
+                                    driver_mobile_number = driver_info[0][1]
+                                    cursor.execute(
+                                        "select bus_no from fleet_vehicle WHERE id = %s",
+                                        [round_info[0][3]])
+                                    fleet_info = cursor.fetchall()
+                                    bus_id=int(fleet_info[0][0])
+                                    # fleet.vehicle
                                 studen_list.append({
-                                    'id': student1[rec]['id'],
-                                    'user_id': student1[rec]['user_id'],
-                                    'father_id': student1[rec]['father_id'],
-                                    'mother_id': student1[rec]['mother_id'],
-                                    'student_grade': student1[rec]['academic_grade_name1'],
-                                    "change_location": setting[0][3],
-                                    'name': student1[rec]['display_name_search'],
-                                    'grade_name': '',
-                                    'drop_off_by_parent': drop,
-                                    'pickup_by_parent': pick,
-                                    "is_active": is_active_round,
-                                    "round_id": student_round_id,
-                                    'avatar': 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
+
+                                    "name": student1[rec]['display_name_search'],
+                                    "id": student1[rec]['id'],
+                                    "user_id": student1[rec]['user_id'],
+                                    "avatar":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
                                         student1[rec]['image_url']) if student1[rec][
-                                        'image_url'] else str(
-                                        'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png'),
+                                        'image_url'] else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
+                                    "school_id": int(school_id),
+                                    "student_grade": student1[rec]['academic_grade_name1'],
+                                    "drop_off_by_parent": drop,
+                                    "pickup_by_parent": pick,
+                                    "father_id": student1[rec]['father_id'],
+                                    "mother_id": student1[rec]['mother_id'],
+                                    "other_1": 0,
+                                    "other_2": 0,
                                     "school_name": school[0][0],
                                     "school_mobile_number": school[0][1],
-                                    "school_lat": setting[0][0],
-                                    "school_lng": setting[0][1],
-                                    'pickup_request_distance': setting[0][2],
-                                    "show_map": setting[0][4],
-                                    "show_absence": show_absence,
-                                    'pickup_request_distance':setting[0][5],
-                                    "show_pickup_request": True if student1[rec]['pick_up_type']=='by_school' else False,
+                                    "school_lat": str(setting[0][0]),
+                                    "school_lng": str(setting[0][1]),
+                                    "driver_mobile_number": driver_mobile_number,
+                                    "driver_mobile_token": "",
+                                    "driver_name": driver_name,
+                                    "assistant_name": assistant_name,
+                                    "assistant_mobile_number": assistant_mobile_number,
+                                    "bus_id": bus_id,
+                                    "round_type": round_type,
+                                    "is_active": bool(is_active_round),
+                                    "round_name": round_name,
+                                    "round_id": int(student_round_id),
+                                    "assistant_id": assistant_id,
+                                    "route_order": 0,
+                                    "chat_teachers": False,
+                                    "target_lng": "0.0",
+                                    "target_lat": "0.0",
+                                    "license_state": "not_active",
+                                    "trial_days_left": 0,
+                                    "license_days_left": 0,
+                                    "semester_start_date": "",
+                                    "semester_end_date": "",
+                                    "show_add_bus_card": False,
+                                    "allow_upload_students_images": False,
+                                    "show_map": bool(setting[0][4]),
+                                    "change_location": bool(setting[0][3]),
+                                    "pickup_request_distance": int(setting[0][2]),
+
+                                    "show_absence":show_absence,
                                     "student_status": {
-                                        "activity_type": "",
-                                        "round_id": 0,
+                                        "activity_type": str(student_st),
+                                        "round_id":int(student_round_id) ,
                                         "datetime": ""
                                     },
-                                    "mobile_numbers": [
-                                        {
-                                            "mobile": school[0][1],
-                                            "name": school[0][0],
-                                            "type": "school"
-                                        },
-                                        {
-                                            "mobile": "",
-                                            "name": "My Company (San Francisco)",
-                                            "type": "school"
-                                        },
-                                        {
-                                            "mobile": "",
-                                            "name": "My Company (San Francisco)",
-                                            "type": "school"
-                                        }
-                                    ],
+                                    # "mobile_numbers": [
+                                    #     {
+                                    #         "mobile": school[0][1],
+                                    #         "name": school[0][0],
+                                    #         "type": "school"
+                                    #     },
+                                    #     {
+                                    #         "mobile": "",
+                                    #         "name": "My Company (San Francisco)",
+                                    #         "type": "school"
+                                    #     },
+                                    #     {
+                                    #         "mobile": "",
+                                    #         "name": "My Company (San Francisco)",
+                                    #         "type": "school"
+                                    #     }
+                                    # ],
                                     "features": model,
                                 })
-                            result = {'students': studen_list}
-                            # print(result)
+                            result = {'message':'','students': studen_list, "parent_id": int(parent_id)}
                             return Response(result)
                     result = {'status': 'error'}
                     return Response(result)
@@ -752,14 +813,14 @@ def kids_hstory(request):
                         school_name = ManagerParent.pincode(school_name)
                         start_date = request.data.get('start_date')
                         end_date = request.data.get('end_date')
-                        # print(start_date,end_date)
+                        print(start_date,end_date)
                         with connections[school_name].cursor() as cursor:
                             if start_date and end_date:
                                 cursor.execute(
                                     "select  id  from school_message WHERE create_date >= %s AND create_date <= %s",
                                     [start_date, end_date])
                                 school_message = cursor.fetchall()
-                                # print(school_message)
+                                print(school_message)
                             elif start_date and not end_date:
                                 cursor.execute(
                                     "select  id  from school_message WHERE create_date >= %s ",
@@ -815,12 +876,13 @@ def kids_hstory(request):
                             message_ids = []
                             for rec in school_message:
                                 message_ids.append(rec[0])
-                            # print(student_id)
+
                             if message_ids:
                                 cursor.execute(
                                     "select  student_student_id  from school_message_student_student where school_message_id in %s",
                                     [tuple(message_ids)])
                                 school_message_student_student = cursor.fetchall()
+
                                 # print(school_message_student_student)
                                 cursor.execute(
                                     "select  school_message_id from school_message_student_student WHERE school_message_id in %s AND student_student_id in %s",
@@ -836,12 +898,11 @@ def kids_hstory(request):
                                         [tuple(list(dict.fromkeys(message_id)))])
                                     school_message1 = cursor.fetchall()
                                     for rec in range(len(school_message1)):
+                                        month='0'+str(school_message1[rec][4].month)if int(school_message1[rec][4].month)<10 else str(school_message1[rec][4].month)
                                         notifications.append({
                                             "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_msg_admin.png",
-                                            "date_time": str(school_message1[rec][4].year) + "-" + str(
-                                                school_message1[rec][4].month) + "-" + str(
+                                            "date_time": str(school_message1[rec][4].year) + "-" + month+ "-" + str(
                                                 school_message1[rec][4].day) + " " + str(
-                                                school_message1[rec][4].hour) + ":" + str(
                                                 school_message1[rec][4].hour) + ":" + str(
                                                 school_message1[rec][4].minute) + ":" + str(
                                                 school_message1[rec][4].second),
@@ -851,16 +912,17 @@ def kids_hstory(request):
 
                                         })
                                     result = {"notifications": notifications}
+
                                     return Response(result)
                             notifications = []
-                            notifications.append({
-
-                                "notifications_text": 'school_message1[rec][3]',
-                                "date_time": 'school_message1[rec][5]',
-                                "create_date": 'school_message1[rec][4]',
-                                "notifications_title": 'school_message1[rec][2]',
-                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                            })
+                            # notifications.append({
+                            #
+                            #     "notifications_text": 'school_message1[rec][3]',
+                            #     "date_time": 'school_message1[rec][5]',
+                            #     "create_date": 'school_message1[rec][4]',
+                            #     "notifications_title": 'school_message1[rec][2]',
+                            #     "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                            # })
                             result = {"notifications": notifications}
                             return Response(result)
                     else:
@@ -955,6 +1017,7 @@ def pre_arrive(request):
                                     [pickup_id[0][0], student_id])
 
                                 result = {'result': True}
+                                print("pre_arrive")
                                 return Response(result)
                     else:
                         result = {'status': 'error'}
@@ -1052,9 +1115,10 @@ def notify(request):
                                     round_id=[]
                                     for rec in rounds_details:
                                         round_id.append(rec[1])
+
                                     cursor.execute(
                                         "select id from transport_round WHERE id in %s and  type=%s",
-                                        [round_id, 'pick_up'])
+                                        [tuple(round_id), 'pick_up'])
                                     rounds_details = cursor.fetchall()
 
                                     for res in rounds_details:
@@ -1069,6 +1133,7 @@ def notify(request):
                                             "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
                                             ['absent', student_id, res[0]])
                                 result = {'result': "ok"}
+                                print("childs_attendance")
 
                                 return Response(result)
                         elif name == 'changed_location':
@@ -1082,6 +1147,7 @@ def notify(request):
                                     cursor.execute("UPDATE   student_student SET drop_off_lat=%s ,drop_off_lng=%s WHERE id = %s",
                                                    [lat,long,student_id])
                                     result = {'result': "ok"}
+                                    print("changed_location")
                                     return Response(result)
                                 elif type == 'pick-up':
 
