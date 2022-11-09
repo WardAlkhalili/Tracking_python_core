@@ -11,5 +11,5 @@ urlpatterns = [
     path('api/recent-notifications/', views.recent_notifications),
     path('api/drivers/round-students-list/<int:round_id>', views.student_list),
     path('api/drivers/reordered-students', views.reordered_students),
-    path('/api/notify', views.notify),
+    path('api/notify', views.notify),
 ]
