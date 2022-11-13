@@ -15,15 +15,15 @@ import json
 # This can be copied by clicking on the settings icon > project settings, then scroll down in your firebase dashboard
 
 
-config = {
-    "apiKey": "AIzaSyBVlQbdFekQRIEQcfNkXQYcuIabxTJr7YE",
-    "authDomain": "trackware-auth0.firebaseapp.com",
-    "databaseURL": "https://trackware-auth0.firebaseio.com",
-    "projectId": "trackware-auth0",
-    "storageBucket": "trackware-auth0.appspot.com",
-    "messagingSenderId": "404758940845",
-    "appId": "1:404758940845:web:19c2ebf3323760ff"
-}
+# config = {
+#     "apiKey": "AIzaSyBVlQbdFekQRIEQcfNkXQYcuIabxTJr7YE",
+#     "authDomain": "trackware-auth0.firebaseapp.com",
+#     "databaseURL": "https://trackware-auth0.firebaseio.com",
+#     "projectId": "trackware-auth0",
+#     "storageBucket": "trackware-auth0.appspot.com",
+#     "messagingSenderId": "404758940845",
+#     "appId": "1:404758940845:web:19c2ebf3323760ff"
+# }
 # config = {
 #     "apiKey": "AIzaSyCYVFzNlEcAP7mBstY59zB9CIEsa5W2bgc",
 #     "authDomain": "field-service-management-da2ca.firebaseio.com",
@@ -33,15 +33,15 @@ config = {
 #     "messagingSenderId": "132137361303",
 #     "appId": "1:132137361303:android:ee543bda9568756c"
 # }
-# config = {
-#     "apiKey": "AIzaSyBs2DgXkohpuWM0htNuAPHnk6_5yz5IOdo",
-#     "authDomain": "odoo-test1-6d92c.firebaseapp.com",
-#     "databaseURL": "https://odoo-test1-6d92c-default-rtdb.firebaseio.com",
-#     "projectId": "odoo-test1-6d92c",
-#     "storageBucket": "odoo-test1-6d92c.appspot.com",
-#     "messagingSenderId": "761759455686",
-#     "appId": "1:761759455686:web:9621a5608d0f564ab47ac7"
-# }
+config = {
+    "apiKey": "AIzaSyAioXmXtdm0-5c5TruEgczV1B5uT43iZZA",
+    "authDomain": "trackware-sms.firebaseapp.com",
+    "databaseURL": "https://trackware-sms-default-rtdb.firebaseio.com",
+    "projectId": "trackware-sms",
+    "storageBucket": "trackware-sms.appspot.com",
+    "messagingSenderId": "889780824569",
+    "appId": "1:889780824569:android:9df33727f007d8ffa47528"
+}
 
 firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()
@@ -51,7 +51,7 @@ database = firebase.database()
 @api_view(['GET'])
 def Get_last_bus_location(request, bus_id, school_name):
     if request.method == 'GET':
-        fullRound = school_name + "-round-" + str(bus_id)
+        fullRound = school_name + "-stg-round-" + str(bus_id)
         curr_date = date.today()
         #     # here we are doing firebase authentication
         # print("name sssssssssss11", request.build_absolute_uri())
@@ -105,7 +105,6 @@ def Get_last_bus_location(request, bus_id, school_name):
                 "lat": 1,
                 "long": 0
             }
-        # print(fullRound,result)
 
         return Response(result)
 
@@ -116,12 +115,14 @@ def Get_round_locations(request):
         school_name = request.data.get('school_name')
         round_id = request.data.get('round_id')
         start_unix_time = request.data.get('start_unix_time')
-        fullRound = school_name + "-round-" + str(round_id)
+        fullRound = school_name + "-stg-round-" + str(round_id)
         date = request.data.get('date').split('-')
-        currentDate = datetime.strptime(date[0] + "/" + date[1] + "/" + date[2], '%d/%m/%Y').date()
+        currentDate = datetime.strptime(date[0] + "/" + date[1] + "/" + date[2], '%Y/%m/%d').date()
 
         route = []
+        # print(database.child(fullRound).child(str(currentDate)).get().val().items())
         try:
+
             for key, value in database.child(fullRound).child(str(currentDate)).get().val().items():
                 route.append(value)
             result = {
@@ -131,7 +132,6 @@ def Get_round_locations(request):
             result = {
                 "route": route
             }
-
         return Response(result)
 
 
@@ -191,13 +191,12 @@ def send_school_message(request):
             mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id),Q(db_name='iks'),Q(is_active=True)).values_list(
                 'mobile_token').order_by('-pk')
             token = []
-            print(mobile_token[0])
             for tok in mobile_token:
                 token.append(tok[0])
 
 
             push_service = FCMNotification(
-                api_key="AAAAHsQAH5c:APA91bHWCcnal6mjBxwAODprATUgGX8pQKIkeBC_GA29fM29YHKXPYmRd7g_Ve1odxo1o_wOAYSkWMUVEh52HAQWPt_zFkM1fx7YVor6xaYYc8bWwKPbuLRy5fS_RBcLsqbeOa5RB0EV")
+                api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
             registration_id = token
             # print(mobile_token)
             message_title = school_message[0][1]
@@ -206,8 +205,6 @@ def send_school_message(request):
             result = push_service.notify_multiple_devices \
                 (message_title=message_title, message_body=message_body, registration_ids=registration_id,
                  data_message={})
-
-            print(result)
             result1 = {
                 "route": 'Ok'
 
@@ -228,7 +225,7 @@ def send_confirmation_message_to_parent(request):
             mobile_token = e[0]
         # print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token)
         push_service = FCMNotification(
-            api_key="AAAAHsQAH5c:APA91bHWCcnal6mjBxwAODprATUgGX8pQKIkeBC_GA29fM29YHKXPYmRd7g_Ve1odxo1o_wOAYSkWMUVEh52HAQWPt_zFkM1fx7YVor6xaYYc8bWwKPbuLRy5fS_RBcLsqbeOa5RB0EV")
+            api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
         # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
         registration_id = mobile_token
         message_title = "picked up"
@@ -247,7 +244,6 @@ def send_confirmation_message_to_parent(request):
 @api_view(['POST'])
 def push_notification(request):
     if request.method == 'POST':
-        print(request.data)
         action = request.data.get('action')
         avatar = request.data.get('avatar')
         endpoint_arn = request.data.get('endpoint_arn')
@@ -291,7 +287,7 @@ def push_notification(request):
         #     mobile_token = e[0]
         # print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token)
         push_service = FCMNotification(
-            api_key="AAAAHsQAH5c:APA91bHWCcnal6mjBxwAODprATUgGX8pQKIkeBC_GA29fM29YHKXPYmRd7g_Ve1odxo1o_wOAYSkWMUVEh52HAQWPt_zFkM1fx7YVor6xaYYc8bWwKPbuLRy5fS_RBcLsqbeOa5RB0EV")
+            api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
         # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
         registration_id = mobile_token
         message_title = title
