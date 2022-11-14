@@ -36,17 +36,28 @@ def parent_login(request):
         # url = "http://localhost:9098/web/session/authenticate"
         url = 'https://' + school_name + '.staging.trackware.com/web/session/authenticate'
 
-
+        # url = 'http://35.158.214.125/web/session/authenticate'
         # url = 'http://127.0.0.1:9098/web/session/authenticate'
-        body = json.dumps({"jsonrpc": "2.0", "params": {"db": school_name, "login": user_name, "password": password}})
-        headers = {
-            'Content-Type': 'application/json',
-        }
-        response1 = requests.request("POST", url, headers=headers, data=body)
-        response = response1.json()
-        session = response1.cookies
-        uid = response['result']['uid']
-        company_id = response['result']['company_id']
+        try:
+            body = json.dumps({"jsonrpc": "2.0", "params": {"db": school_name, "login": user_name, "password": password}})
+            headers = {
+                'Content-Type': 'application/json',
+            }
+            response1 = requests.request("POST", url, headers=headers, data=body)
+            # print(response1)
+
+            response = response1.json()
+            if "error" in response:
+                result = {
+                    "status": "erorr"}
+                return Response(result)
+            session = response1.cookies
+            uid = response['result']['uid']
+            company_id = response['result']['company_id']
+        except:
+            result = {
+                "status": "erorr"}
+            return Response(result)
         with connections[school_name].cursor() as cursor:
             cursor.execute("select id from school_parent WHERE user_id = %s", [response['result']['uid']])
             columns2 = (x.name for x in cursor.description)
@@ -675,7 +686,7 @@ def kids_list(request):
                                     drop = True
                                 else:
                                     drop = False
-                                print("sssssssssssssssssssss",show_absence)
+                                # print("sssssssssssssssssssss",show_absence)
                                 student_st=''
                                 assistant_id=0
                                 assistant_name=''
@@ -813,14 +824,14 @@ def kids_hstory(request):
                         school_name = ManagerParent.pincode(school_name)
                         start_date = request.data.get('start_date')
                         end_date = request.data.get('end_date')
-                        print(start_date,end_date)
+                        # print(start_date,end_date)
                         with connections[school_name].cursor() as cursor:
                             if start_date and end_date:
                                 cursor.execute(
                                     "select  id  from school_message WHERE create_date >= %s AND create_date <= %s",
                                     [start_date, end_date])
                                 school_message = cursor.fetchall()
-                                print(school_message)
+                                # print(school_message)
                             elif start_date and not end_date:
                                 cursor.execute(
                                     "select  id  from school_message WHERE create_date >= %s ",
@@ -1017,7 +1028,7 @@ def pre_arrive(request):
                                     [pickup_id[0][0], student_id])
 
                                 result = {'result': True}
-                                print("pre_arrive")
+                                # print("pre_arrive")
                                 return Response(result)
                     else:
                         result = {'status': 'error'}
@@ -1133,7 +1144,7 @@ def notify(request):
                                             "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
                                             ['absent', student_id, res[0]])
                                 result = {'result': "ok"}
-                                print("childs_attendance")
+                                # print("childs_attendance")
 
                                 return Response(result)
                         elif name == 'changed_location':
@@ -1147,7 +1158,7 @@ def notify(request):
                                     cursor.execute("UPDATE   student_student SET drop_off_lat=%s ,drop_off_lng=%s WHERE id = %s",
                                                    [lat,long,student_id])
                                     result = {'result': "ok"}
-                                    print("changed_location")
+                                    # print("changed_location")
                                     return Response(result)
                                 elif type == 'pick-up':
 
