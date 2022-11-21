@@ -153,7 +153,7 @@ def send_school_message(request):
         school_name = request.data.get('school_name')
         message_id = request.data.get('message_id')
 
-        with connections['iks'].cursor() as cursor:
+        with connections[school_name].cursor() as cursor:
             cursor.execute(
                 "select  message,title  from school_message where id = %s",
                 [message_id])
@@ -179,6 +179,7 @@ def send_school_message(request):
                 if rec[2]:
                     id.append(rec[2])
             id = list(dict.fromkeys(id))
+
             # cursor.execute(
             #     "select  user_id from school_parent WHERE id in %s ",
             #     [tuple(id)])
@@ -205,6 +206,7 @@ def send_school_message(request):
             result = push_service.notify_multiple_devices \
                 (message_title=message_title, message_body=message_body, registration_ids=registration_id,
                  data_message={})
+            # print("dddd",result)
             result1 = {
                 "route": 'Ok'
 
@@ -256,6 +258,7 @@ def push_notification(request):
         user_id = request.data.get('user_id')
         user_ids = request.data.get('user_ids')
         parent_id = request.data.get('parent_id')
+
         mobile_token = []
         school_name = ManagerParent.objects.filter(school_id=school_id).values_list('db_name').order_by('-pk')
         # print(school_name[0][0])
@@ -263,37 +266,51 @@ def push_notification(request):
         # for rec in parent_id:
 
         with connections[str(school_name)].cursor() as cursor:
-                cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-                settings = cursor.fetchall()
+                if parent_id==0:
+                    cursor.execute("select  settings,id from school_parent WHERE user_id = %s", [user_id])
+                    settings = cursor.fetchall()
+                    if settings:
+                        parent_id=settings[0][1]
+                else:
+                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                    settings = cursor.fetchall()
+                mobile_token1 = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
+                                                             Q(is_active=True)).values_list(
+                    'mobile_token').order_by('-pk')
             # print(rec,school_id, ManagerParent.objects.filter(Q(user_id=rec) , Q(db_name=school_name),Q(is_active=True)).values_list(
             #     'mobile_token').order_by('-pk'))
-        mobile_token1 = ManagerParent.objects.filter(Q(parent_id=parent_id) , Q(db_name=school_name),Q(is_active=True)).values_list(
-                'mobile_token').order_by('-pk')
 
-        if settings[0][0]:
-            data = json.loads(settings[0][0])
+        if settings:
+            if settings[0]=='None':
 
-        for e in mobile_token1:
-            if data['notifications']['nearby'] and action =='near':
-                mobile_token.append(e[0])
-            elif    data['notifications']['check_in'] and action =='near':
-                mobile_token.append(e[0])
-            elif data['notifications']['check_out'] and action == 'near':
+                data = json.loads(settings[0][0])
 
-                mobile_token.append(e[0])
-            else:
-                 mobile_token.append(e[0])
-        # for e in mobile_token:
-        #     mobile_token = e[0]
-        # print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token)
-        push_service = FCMNotification(
-            api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-        # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
-        registration_id = mobile_token
-        message_title = title
-        message_body = message
-        result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
-                                                   message_body=message_body)
+                for e in mobile_token1:
+                    if data['notifications']['nearby'] and (action =='near' or action =='driver'):
+                        mobile_token.append(e[0])
+                    elif    data['notifications']['check_in'] and (action =='near' or action =='driver'):
+                        mobile_token.append(e[0])
+                    elif data['notifications']['check_out'] and (action =='near' or action =='driver'):
+
+                        mobile_token.append(e[0])
+                    else:
+                         mobile_token.append(e[0])
+                # for e in mobile_token:
+                #     mobile_token = e[0]
+                # print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token)
+                push_service = FCMNotification(
+                    api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
+                registration_id = mobile_token
+                message_title = title
+                message_body = message
+                result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
+                                                           message_body=message_body)
+                result1 = {
+                    "route": 'Ok'
+                }
+
+                return Response(result1)
         result1 = {
             "route": 'Ok'
         }

@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.db.models import Q
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -16,6 +17,9 @@ from django.contrib.auth.models import User
 import datetime
 from datetime import date
 import calendar
+from pyfcm import FCMNotification
+from Parent_api.models import ManagerParent
+# from ..Parent_api.models import ManagerParent
 
 
 # Create your views here.
@@ -770,7 +774,7 @@ def student_list(request, round_id):
                                     [ch_out, ch_in, round_id])
                                 result = {"students_list": student
                                           }
-
+                                # print("yousef student list 773")
                                 return Response(result)
                     if request.method == 'POST':
                         result = {"status": "error"
@@ -995,6 +999,7 @@ def set_round_status(request):
 @api_view(['POST'])
 def students_bus_checks(request):
     if request.method == 'POST':
+        # print("ooooooooooo")
         if request.headers:
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
@@ -1099,6 +1104,7 @@ def students_bus_checks(request):
                                     "UPDATE public.transport_participant SET transport_state = %s WHERE student_id =%s AND round_schedule_id= %s",
                                     [status, student_id, round_schedule[0][0]])
                                 result = {'status': 'OK'}
+
                                 return Response(result)
                     else:
                         result = {'status': 'error'}
@@ -1188,10 +1194,18 @@ def notify(request):
                         # round_type = request.data.get('round_type')
                         # student_id = request.data[0].get('student_id')
                         # name = request.data[0].get('notification_type')
-                        name = request.data.get('name')
-                        round_id=request.data.get('round_id')
-                        lat = request.data.get('lat')
-                        long = request.data.get('long')
+                        # print('=============================')
+                        # print(request.data)
+                        # print(request.data[0].get('round_type'))
+                        if not ("arrive_alarm" in  str(request.data)):
+                            name = request.data.get('name')
+                            round_id = request.data.get('round_id')
+                            lat = request.data.get('lat')
+                            long = request.data.get('long')
+                        elif request.data[0].get('notification_type')=='arrive_alarm':
+                            name="arrive_alarm"
+
+
                         if name == 'battery_low':
                             with connections[school_name].cursor() as cursor:
                                 driver_id = Manager.objects.filter(token=au).values_list('driver_id')
@@ -1373,8 +1387,37 @@ def notify(request):
                                     result = {'result': "ok"}
                                     return Response(result)
                         elif name == 'arrive_alarm':
-                            result = {'result': "ok"}
-                            return Response(result)
+                            # select  father_id,mother_id,responsible_id_value from student_student WHERE id=1
+                            with connections[school_name].cursor() as cursor:
+                                cursor.execute("select  father_id,mother_id,responsible_id_value from student_student WHERE id= %s", [request.data[0].get('student_id')])
+                                student_info = cursor.fetchall()
+                                # print("ooooooooooooooooooooooooooooooooooo")
+                                # print(student_info)
+                                mobile_token = []
+                                for rec in student_info[0]:
+                                    # print("111111111")
+                                    # print(rec)
+
+                                    mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec),
+                                                                                 Q(db_name=school_name),
+                                                                                 Q(is_active=True)).values_list( 'mobile_token').order_by('-pk')
+
+                                    for e in mobile_token1:
+                                            mobile_token.append(e[0])
+                                    push_service = FCMNotification(
+                                        api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                    # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
+                                    registration_id = mobile_token
+                                    message_title = "arrive_alarm"
+                                    message_body = "arrive_alarm"
+                                    if mobile_token:
+                                        result = push_service.notify_single_device(registration_id=registration_id,
+                                                                                   message_title=message_title,
+                                                                                   message_body=message_body)
+
+
+                                result = {'result': "ok"}
+                                return Response(result)
                                 # user_no_move_time_exceeded
 
 
