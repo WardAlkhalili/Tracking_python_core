@@ -189,7 +189,7 @@ def send_school_message(request):
             # for rec in parent:
             #     parent_id.append(rec[0])
             #
-            mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id),Q(db_name='iks'),Q(is_active=True)).values_list(
+            mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id),Q(db_name=school_name),Q(is_active=True)).values_list(
                 'mobile_token').order_by('-pk')
             token = []
             for tok in mobile_token:

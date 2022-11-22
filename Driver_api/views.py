@@ -19,8 +19,7 @@ from datetime import date
 import calendar
 from pyfcm import FCMNotification
 from Parent_api.models import ManagerParent
-# from ..Parent_api.models import ManagerParent
-
+import json
 
 # Create your views here.
 
@@ -396,6 +395,7 @@ def student_list(request, round_id):
     if request.method == 'GET':
         if request.headers:
             if request.headers.get('Authorization'):
+                # print("ddddddddddddddddddddddddddd")
                 if 'Bearer' in request.headers.get('Authorization'):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
                     db_name = Manager.objects.filter(token=au).values_list('db_name')
@@ -896,6 +896,66 @@ def set_round_status(request):
                                     [round_id])
                                 round_info = cursor.fetchall()
                                 if status == 'start':
+
+                                    # import datetime
+                                    curr_date = date.today()
+                                    cursor.execute(
+                                        "select  id  from school_day where name = %s",
+                                        [calendar.day_name[curr_date.weekday()]])
+                                    day_name = cursor.fetchall()
+                                    cursor.execute(
+                                        "select id,day_id from round_schedule WHERE round_id = %s and day_id = %s",
+                                        [round_id, day_name[0][0]])
+                                    columns3 = (x.name for x in cursor.description)
+                                    rounds_details = cursor.fetchall()
+                                    day_list = {}
+                                    cursor.execute(
+                                        "select  write_date,type,id from transport_round WHERE id = %s  ",
+                                        [round_id])
+                                    round_info1 = cursor.fetchall()
+
+                                    cursor.execute(
+                                        "select student_id from transport_participant WHERE round_schedule_id = %s ORDER BY sequence ASC",
+                                        [rounds_details[0][0]])
+                                    columns4 = (x.name for x in cursor.description)
+                                    rounds_count_student = cursor.fetchall()
+                                    # print("--------------------======")
+                                    # print(rounds_count_student)
+                                    st_id = []
+                                    for k in rounds_count_student:
+                                        # print("--------------==============================")
+                                        # print(k)
+                                        cursor.execute(
+                                            "select  name from student_student WHERE id= %s",
+                                            [k[0]])
+                                        student_name = cursor.fetchall()
+                                        cursor.execute(
+                                            "select father_id,mother_id,responsible_id_value from student_student WHERE id = %s ",
+                                            [k[0]])
+                                        columns4 = (x.name for x in cursor.description)
+                                        student_student2 = cursor.fetchall()
+                                        # parent_id = []
+                                        for rec in student_student2[0]:
+                                            # parent_id.append[rec]
+                                            mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec), Q(db_name=school_name),
+                                                                                        Q(is_active=True)).values_list(
+                                                'mobile_token').order_by('-pk')
+                                        mobile_token=[]
+                                        for e in mobile_token1:
+                                            mobile_token.append(e[0])
+
+                                        push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                        registration_id = mobile_token
+                                        message_title = "School Departure"
+                                        # print("-------------------------------------")
+                                        # print(student_name[0][0])
+                                        # print(mobile_token)
+                                        message_body = student_name[0][0] + "  has just been checked into the bus."
+                                        if mobile_token and not("token" in mobile_token):
+                                            notify_single_device = push_service.notify_single_device(
+                                                registration_id=registration_id[0],
+                                                message_title=message_title,
+                                                message_body=message_body)
                                     cursor.execute(
                                         "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
                                         [round_id, round_info[0][2], round_info[0][1], round_id])
@@ -1103,6 +1163,73 @@ def students_bus_checks(request):
                                 cursor.execute(
                                     "UPDATE public.transport_participant SET transport_state = %s WHERE student_id =%s AND round_schedule_id= %s",
                                     [status, student_id, round_schedule[0][0]])
+                                cursor.execute(
+                                    "select  father_id,mother_id,responsible_id_value from student_student WHERE id= %s",
+                                    [request.data.get('student_id')])
+                                student_info = cursor.fetchall()
+                                cursor.execute(
+                                    "select  name from student_student WHERE id= %s",
+                                    [request.data.get('student_id')])
+                                student_name = cursor.fetchall()
+                                driver_id = Manager.objects.filter(token=au).values_list('driver_id')
+                                for e in driver_id:
+                                    driver_id = e[0]
+                                cursor.execute(
+                                    "select  bus_no  from fleet_vehicle WHERE driver_id = %s  ",
+                                    [driver_id])
+                                bus_num = cursor.fetchall()
+
+                                mobile_token = []
+                                # print(student_info)
+                                if student_info:
+                                    for rec in student_info[0]:
+                                        cursor.execute("select  settings from school_parent WHERE id = %s", [rec])
+                                        settings = cursor.fetchall()
+
+
+                                        mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec),
+                                                                                     Q(db_name=school_name),
+                                                                                     Q(is_active=True)).values_list( 'mobile_token').order_by('-pk')
+
+                                        if settings:
+                                            if settings[0] == 'None':
+
+                                                data = json.loads(settings[0][0])
+                                                title=''
+                                                message=''
+                                                for e in mobile_token1:
+                                                    if data['notifications']['check_in'] and status=='in' :
+                                                        mobile_token.append(e[0])
+                                                        title='Bus notification'
+                                                        message=student_name[0][0]+' has just been checked into the bus'
+                                                    elif data['notifications']['check_out'] and status=='out':
+                                                        mobile_token.append(e[0])
+                                                        title = 'Checkout Notification'
+                                                        message = 'The bus '+bus_num[0]+'has arrived at your home and '+student_name[0][0]+' has been checked out of the bus. '
+                                                    else:
+                                                        if status=='no-show':
+                                                            mobile_token.append(e[0])
+                                                            title = ' No Show Notification'
+                                                            message = student_name[0][0]+' did not check into the bus today'
+
+                                                        elif   status=='absent':
+                                                            mobile_token.append(e[0])
+                                                            title = 'Absence notification'
+                                                            message = ' Your child '+ student_name[0][0]+' has not checked into the bus and is absent today.'
+                                                # for e in mobile_token:
+                                                #     mobile_token = e[0]
+                                                # print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token)
+                                                push_service = FCMNotification(
+                                                    api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                                # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
+                                                registration_id = mobile_token
+                                                message_title = title
+                                                message_body = message
+                                                result = push_service.notify_single_device(registration_id=registration_id,
+                                                                                           message_title=message_title,
+                                                                                           message_body=message_body)
+                                #             print("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
+
                                 result = {'status': 'OK'}
 
                                 return Response(result)
@@ -1123,6 +1250,7 @@ def students_bus_checks(request):
 @api_view(['POST'])
 def reordered_students(request):
     if request.method == 'POST':
+        # print("ooooooooooooooossssssssssssssssss")
         if request.headers:
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
@@ -1214,7 +1342,7 @@ def notify(request):
                                 date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
                                 cursor.execute(
-                                    "select  bus_num  from fleet_vehicle WHERE driver_id = %s  ",
+                                    "select  bus_no  from fleet_vehicle WHERE driver_id = %s  ",
                                     [driver_id])
                                 bus_num = cursor.fetchall()
                                 cursor.execute(
@@ -1227,6 +1355,8 @@ def notify(request):
                                 cursor.execute(
                                         "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                         [r, 'App\Model\Driver', 'battery_low', message_en, driver_id[0][0]])
+                                result = {'result': "ok"}
+                                return Response(result)
                         elif name == 'network':
                             with connections[school_name].cursor() as cursor:
                                 driver_id = Manager.objects.filter(token=au).values_list('driver_id')
@@ -1235,7 +1365,7 @@ def notify(request):
                                 date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
                                 cursor.execute(
-                                    "select  bus_num  from fleet_vehicle WHERE driver_id = %s  ",
+                                    "select  bus_no  from fleet_vehicle WHERE driver_id = %s  ",
                                     [driver_id])
                                 bus_num = cursor.fetchall()
                                 cursor.execute(
@@ -1247,6 +1377,8 @@ def notify(request):
                                 cursor.execute(
                                     "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                     [r, 'App\Model\Driver', 'network', message_en, driver_id[0][0]])
+                                result = {'result': "ok"}
+                                return Response(result)
                         elif name == 'gps_off':
                             with connections[school_name].cursor() as cursor:
                                 driver_id = Manager.objects.filter(token=au).values_list('driver_id')
@@ -1255,7 +1387,7 @@ def notify(request):
                                 date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
                                 cursor.execute(
-                                    "select  bus_num  from fleet_vehicle WHERE driver_id = %s  ",
+                                    "select  bus_no  from fleet_vehicle WHERE driver_id = %s  ",
                                     [driver_id])
                                 bus_num = cursor.fetchall()
                                 cursor.execute(
@@ -1267,13 +1399,15 @@ def notify(request):
                                 cursor.execute(
                                     "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                     [r, 'App\Model\Driver', 'gps_off', message_en, driver_id[0][0]])
+                                result = {'result': "ok"}
+                                return Response(result)
                         elif name == 'route_changed':
                             with connections[school_name].cursor() as cursor:
                                 driver_id = Manager.objects.filter(token=au).values_list('driver_id')
                                 for e in driver_id:
                                     driver_id = e[0]
-                                original_student_id = request.data[0].get('original_student_id')
-                                picked_student_id = request.data[0].get('picked_student_id')
+                                original_student_id = request.data.get('original_student_id')
+                                picked_student_id = request.data.get('picked_student_id')
                                 date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
                                 cursor.execute("select display_name_search from student_student WHERE id = %s",
@@ -1285,7 +1419,7 @@ def notify(request):
 
 
                                 cursor.execute(
-                                    "select  bus_num  from fleet_vehicle WHERE driver_id = %s  ",
+                                    "select   bus_no from fleet_vehicle WHERE driver_id = %s  ",
                                     [driver_id])
                                 bus_num = cursor.fetchall()
                                 cursor.execute(
@@ -1305,6 +1439,8 @@ def notify(request):
                                 cursor.execute(
                                     "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                     [r, 'App\Model\Driver', 'route_changed', message_en, driver_id[0][0]])
+                                result = {'result': "ok"}
+                                return Response(result)
                         elif name == 'user_speed_exceeded':
                             with connections[school_name].cursor() as cursor:
                                 driver_id = Manager.objects.filter(token=au).values_list('driver_id')
@@ -1314,7 +1450,7 @@ def notify(request):
                                 date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
                                 cursor.execute(
-                                    "select  bus_num  from fleet_vehicle WHERE driver_id = %s  ",
+                                    "select  bus_no  from fleet_vehicle WHERE driver_id = %s  ",
                                     [driver_id])
                                 bus_num = cursor.fetchall()
                                 cursor.execute(
@@ -1326,6 +1462,8 @@ def notify(request):
                                 cursor.execute(
                                     "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                     [r, 'App\Model\Driver', 'user_speed_exceeded', message_en, driver_id[0][0]])
+                                result = {'result': "ok"}
+                                return Response(result)
                         elif name == 'user_no_move_time_exceeded':
                                 with connections[school_name].cursor() as cursor:
                                     driver_id = Manager.objects.filter(token=au).values_list('driver_id')
@@ -1342,6 +1480,8 @@ def notify(request):
                                     cursor.execute(
                                         "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                         [r, 'App\Model\Driver', 'network', message_en, driver_id[0][0]])
+                                    result = {'result': "ok"}
+                                    return Response(result)
 
                         elif name == 'emergency':
                                 emergency_text = request.data.get('emergency_text')
@@ -1359,6 +1499,8 @@ def notify(request):
                                     cursor.execute(
                                         "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                         [r, 'App\Model\Driver', 'network', emergency_text, driver_id[0][0]])
+                                    result = {'result': "ok"}
+                                    return Response(result)
                         elif name == 'changed_location':
                                 with connections[school_name].cursor() as cursor:
                                     parent_id = Manager.objects.filter(token=au).values_list('driver_id')
@@ -1369,7 +1511,7 @@ def notify(request):
                                     date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                     r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
                                     cursor.execute(
-                                        "select  bus_num  from fleet_vehicle WHERE driver_id = %s  ",
+                                        "select  bus_no  from fleet_vehicle WHERE driver_id = %s  ",
                                         [driver_id])
                                     bus_num = cursor.fetchall()
                                     cursor.execute(
@@ -1383,6 +1525,7 @@ def notify(request):
                                     cursor.execute(
                                         "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                         [r, 'App\Model\Driver', 'changed_location_driver', message_en, driver_id[0][0]])
+                                    # print("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
 
                                     result = {'result': "ok"}
                                     return Response(result)
@@ -1391,6 +1534,13 @@ def notify(request):
                             with connections[school_name].cursor() as cursor:
                                 cursor.execute("select  father_id,mother_id,responsible_id_value from student_student WHERE id= %s", [request.data[0].get('student_id')])
                                 student_info = cursor.fetchall()
+                                driver_id = Manager.objects.filter(token=au).values_list('driver_id')
+                                for e in driver_id:
+                                    driver_id = e[0]
+                                cursor.execute(
+                                    "select bus_no from fleet_vehicle WHERE driver_id = %s  ",
+                                    [driver_id])
+                                bus_num = cursor.fetchall()
                                 # print("ooooooooooooooooooooooooooooooooooo")
                                 # print(student_info)
                                 mobile_token = []
@@ -1404,18 +1554,19 @@ def notify(request):
 
                                     for e in mobile_token1:
                                             mobile_token.append(e[0])
+                                    # print("pppppppppppppppppppppppppppppppp")
+                                    # print(bus_num)
                                     push_service = FCMNotification(
                                         api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
                                     # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
-                                    registration_id = mobile_token
-                                    message_title = "arrive_alarm"
-                                    message_body = "arrive_alarm"
-                                    if mobile_token:
-                                        result = push_service.notify_single_device(registration_id=registration_id,
-                                                                                   message_title=message_title,
-                                                                                   message_body=message_body)
 
-
+                                if mobile_token:
+                                    registration_id = mobile_token[0]
+                                    message_title = "Arrival - Parent"
+                                    message_body = "The bus " + str(bus_num[0][0]) + "has arrived at your home"
+                                    result = push_service.notify_single_device(registration_id=registration_id,
+                                                                               message_title=message_title,
+                                                                               message_body=message_body)
                                 result = {'result': "ok"}
                                 return Response(result)
                                 # user_no_move_time_exceeded

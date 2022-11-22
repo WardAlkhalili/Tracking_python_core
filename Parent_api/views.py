@@ -34,9 +34,9 @@ def parent_login(request):
         mobile_token = request.data.get('mobile_token')
 
         # url = "http://localhost:9098/web/session/authenticate"
-        url = 'https://' + school_name + '.staging.trackware.com/web/session/authenticate'
+        # url = 'https://' + school_name + '.staging.trackware.com/web/session/authenticate'
 
-        # url = 'http://35.158.214.125/web/session/authenticate'
+        url = 'https://tst.tracking.trackware.com/web/session/authenticate'
         # url = 'http://127.0.0.1:9098/web/session/authenticate'
         try:
             body = json.dumps({"jsonrpc": "2.0", "params": {"db": school_name, "login": user_name, "password": password}})
@@ -49,14 +49,15 @@ def parent_login(request):
             response = response1.json()
             if "error" in response:
                 result = {
-                    "status": "erorr"}
+                    "status": "erorrq"}
                 return Response(result)
             session = response1.cookies
             uid = response['result']['uid']
             company_id = response['result']['company_id']
         except:
             result = {
-                "status": "erorr"}
+                "status": "erorr2"
+                          ""}
             return Response(result)
         with connections[school_name].cursor() as cursor:
             cursor.execute("select id from school_parent WHERE user_id = %s", [response['result']['uid']])
