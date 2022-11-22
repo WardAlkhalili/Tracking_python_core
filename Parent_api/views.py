@@ -32,14 +32,14 @@ def parent_login(request):
         user_name = request.data.get('user_name')
         school_name = request.data.get('school_name')
         mobile_token = request.data.get('mobile_token')
-
+        print(school_name)
         # url = "http://localhost:9098/web/session/authenticate"
         # url = 'https://' + school_name + '.staging.trackware.com/web/session/authenticate'
 
         url = 'https://tst.tracking.trackware.com/web/session/authenticate'
         # url = 'http://127.0.0.1:9098/web/session/authenticate'
         try:
-            body = json.dumps({"jsonrpc": "2.0", "params": {"db": school_name, "login": user_name, "password": password}})
+            body = json.dumps({"jsonrpc": "2.0", "params": {"db": 'tst', "login": user_name, "password": password}})
             headers = {
                 'Content-Type': 'application/json',
             }
@@ -47,6 +47,7 @@ def parent_login(request):
             # print(response1)
 
             response = response1.json()
+            print(response)
             if "error" in response:
                 result = {
                     "status": "erorrq"}
@@ -59,7 +60,7 @@ def parent_login(request):
                 "status": "erorr2"
                           ""}
             return Response(result)
-        with connections[school_name].cursor() as cursor:
+        with connections['iks'].cursor() as cursor:
             cursor.execute("select id from school_parent WHERE user_id = %s", [response['result']['uid']])
             columns2 = (x.name for x in cursor.description)
             parent_id = cursor.fetchall()
@@ -528,23 +529,29 @@ def kids_list(request):
 
                                 x = {
                                     "Badges": {
-                                        "url": "https://" + school_name + ".staging.trackware.com/my/Badges/",
-                                        "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Badges/",
+                                        # "url": "https://" + school_name + ".staging.trackware.com/my/Badges/",tst.tracking.trackware.com
+                                        # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Badges/",
+                                        "url": "https://tst.tracking.trackware.com/my/Badges/",
+                                        "arabic_url": "tst.tracking.trackware.com/ar_SY/my/Badges/",
                                         "name": "Badges",
                                         "name_ar": "الشارات",
                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Badge.png"
                                     },
                                     "Weeklyplans":
                                         {
-                                            "url": "https://" + school_name + ".staging.trackware.com/my/Weekly-plans/",
-                                            "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Weekly-plans/",
+                                            # "url": "https://" + school_name + ".staging.trackware.com/my/Weekly-plans/",
+                                            # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Weekly-plans/",
+                                            "url": "https://tst.tracking.trackware.com/my/Weekly-plans/",
+                                            "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Weekly-plans/",
                                             "name": "Weeklyplans",
                                             "name_ar": "الخطط الأسبوعية",
                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Weekly+Plans.png"
                                         },
                                     "Assignments": {
-                                        "url": "https://" + school_name + ".staging.trackware.com/my/Assignments/",
-                                        "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Assignments/",
+                                        "url": "https://tst.tracking.trackware.com/my/Assignments/",
+                                        "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Assignments/",
+                                        # "url": "https://" + school_name + ".staging.trackware.com/my/Assignments/",
+                                        # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Assignments/",
                                         "name": "Assignments",
                                         "name_ar": "الواجبات الالكترونية",
                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png"
@@ -558,22 +565,28 @@ def kids_list(request):
                                     "Events":
                                         {"name": "Events",
                                          "name_ar": "الفعاليات و الانشطة",
-                                         "url": "https://" + school_name + ".staging.trackware.com/my/Events/",
-                                         "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Events/",
+                                         # "url": "https://" + school_name + ".staging.trackware.com/my/Events/",
+                                         # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Events/",
+                                         "url": "https://tst.tracking.trackware.com/my/Events/",
+                                         "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Events/",
                                          "arabic_name": "الفعاليات و الانشطة",
                                          "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Events.png"
                                          },
                                     "Homeworks":
                                         {"name": "Homeworks",
-                                         "url": "https://" + school_name + ".staging.trackware.com/my/Homeworks/",
-                                         "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Homeworks/",
+                                         # "url": "https://" + school_name + ".staging.trackware.com/my/Homeworks/",
+                                         # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Homeworks/",
+                                         "url": "https://tst.tracking.trackware.com/my/Homeworks/",
+                                         "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Homeworks/",
                                          "name_ar": "الواجبات المنزلية",
                                          "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/worksheets.png"
                                          },
                                     "Calendar":
                                         {"name": "Calendar",
-                                         "url": "https://" + school_name + ".staging.trackware.com/my/Calendar/",
-                                         "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Calendar/",
+                                         "url": "https://tst.tracking.trackware.com/my/Calendar/",
+                                         "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Calendar/",
+                                         # "url": "https://" + school_name + ".staging.trackware.com/my/Calendar/",
+                                         # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Calendar/",
                                          "name_ar": "التقويم",
                                          "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/School+Calendar.png"
                                          },
@@ -581,8 +594,10 @@ def kids_list(request):
                                     "Clinic":
                                         {"name": "Clinic",
                                          "name_ar": "العيادة",
-                                         "url": "https://" + school_name + ".staging.trackware.com/my/Clinic/",
-                                         "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Clinic/",
+                                         # "url": "https://" + school_name + ".staging.trackware.com/my/Clinic/",
+                                         # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Clinic/",
+                                         "url": "https://tst.tracking.trackware.com/my/Clinic/",
+                                         "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Clinic/",
                                          "arabic_name": "العيادة",
                                          "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png"
                                          }
@@ -648,9 +663,13 @@ def kids_list(request):
 
                                 if len(tracking) > 0:
                                     model.append({
-                                        "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(
+                                        # "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(
+                                        #     student1[rec]['user_id']),
+                                        # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Absence/" + str(
+                                        #     student1[rec]['user_id']),
+                                        "url": "https://tst.tracking.trackware.com/my/Absence/" + str(
                                             student1[rec]['user_id']),
-                                        "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Absence/" + str(
+                                        "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Absence/" + str(
                                             student1[rec]['user_id']),
                                         "name": "Absence",
                                         "name_ar": "الغياب",
@@ -667,9 +686,13 @@ def kids_list(request):
                                     model = {
                                         "Absence":
                                             {
-                                                "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(
+                                                # "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(
+                                                #     student1[rec]['user_id']),
+                                                # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Absence/" + str(
+                                                #     student1[rec]['user_id']),
+                                                "url": "https://tst.tracking.trackware.com/my/Absence/" + str(
                                                     student1[rec]['user_id']),
-                                                "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Absence/" + str(
+                                                "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Absence/" + str(
                                                     student1[rec]['user_id']),
                                                 "name": "Absence",
                                                 "name_ar": "الغياب",
