@@ -32,14 +32,14 @@ def parent_login(request):
         user_name = request.data.get('user_name')
         school_name = request.data.get('school_name')
         mobile_token = request.data.get('mobile_token')
-        print(school_name)
+
         # url = "http://localhost:9098/web/session/authenticate"
         # url = 'https://' + school_name + '.staging.trackware.com/web/session/authenticate'
 
         url = 'https://tst.tracking.trackware.com/web/session/authenticate'
         # url = 'http://127.0.0.1:9098/web/session/authenticate'
         try:
-            body = json.dumps({"jsonrpc": "2.0", "params": {"db": 'tst', "login": user_name, "password": password}})
+            body = json.dumps({"jsonrpc": "2.0", "params": {"db": school_name, "login": user_name, "password": password}})
             headers = {
                 'Content-Type': 'application/json',
             }
@@ -47,7 +47,6 @@ def parent_login(request):
             # print(response1)
 
             response = response1.json()
-            print(response)
             if "error" in response:
                 result = {
                     "status": "erorrq"}
@@ -60,7 +59,7 @@ def parent_login(request):
                 "status": "erorr2"
                           ""}
             return Response(result)
-        with connections['iks'].cursor() as cursor:
+        with connections[school_name].cursor() as cursor:
             cursor.execute("select id from school_parent WHERE user_id = %s", [response['result']['uid']])
             columns2 = (x.name for x in cursor.description)
             parent_id = cursor.fetchall()
@@ -468,7 +467,11 @@ def kids_list(request):
 
                         school_name = ManagerParent.pincode(school_name)
                         with connections[school_name].cursor() as cursor:
-
+                            cursor.execute(
+                                "select activate_app_map from school_parent WHERE id = %s",
+                                [parent_id])
+                            columns = (x.name for x in cursor.description)
+                            parent_show_map = cursor.fetchall()
                             cursor.execute(
                                 "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
@@ -790,7 +793,7 @@ def kids_list(request):
                                     "semester_end_date": "",
                                     "show_add_bus_card": False,
                                     "allow_upload_students_images": False,
-                                    "show_map": bool(setting[0][4]),
+                                    "show_map": True if parent_show_map[0][0] else False,
                                     "change_location": bool(setting[0][3]),
                                     "pickup_request_distance": int(setting[0][2]),
 
@@ -820,6 +823,7 @@ def kids_list(request):
                                     "features": model,
                                 })
                             result = {'message':'','students': studen_list, "parent_id": int(parent_id)}
+                            # print(result)
                             return Response(result)
                     result = {'status': 'error'}
                     return Response(result)

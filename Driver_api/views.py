@@ -243,11 +243,13 @@ def round_list(request):
                             day_id = cursor.fetchall()
                             result = {}
                             cursor.execute(
-                                "select name,start_time,pick_up_address,drop_off_address,pick_up_lat,pick_up_lng,drop_off_lat,drop_off_lng,route_id,id,is_active from transport_round WHERE vehicle_id = %s and  type = %s",
+                                "select name,start_time,pick_up_address,drop_off_address,pick_up_lat,pick_up_lng,drop_off_lat,drop_off_lng,route_id,id,is_active from transport_round WHERE vehicle_id = %s and  type = %s and  active_status='active'",
                                 [request.data.get('bus_id'),
                                  'drop_off' if 'drop' in request.data.get('round_type') else 'pick_up'])
                             columns = (x.name for x in cursor.description)
                             list_round = cursor.fetchall()
+                            # print("-------------------------")
+                            # print(list_round)
                             list_round1 = []
                             columnNames = [column[0] for column in cursor.description]
                             for record in list_round:
