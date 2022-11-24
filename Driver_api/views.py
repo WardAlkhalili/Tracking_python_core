@@ -361,18 +361,19 @@ def round_list(request):
 
                                     }
                             cursor.execute(
-                                """ select 	allow_driver_change_students_location,allow_driver_to_use_beacon from transport_setting ORDER BY ID DESC LIMIT 1""")
+                                """ select 	allow_driver_change_students_location,allow_driver_to_use_beacon from transport_setting ORDER BY ID ASC LIMIT 1""")
                             login_details = cursor.fetchall()
 
                             for rec in range(len(result1)):
                                 round.append(result1[rec])
                                 result = {
                                     "school_settings": {
-                                        "change_student_location": login_details[0][1],
+                                        "change_student_location": login_details[0][0],
                                         "allow_driver_to_use_beacon": login_details[0][1]
                                     },
                                     "rounds": round
                                 }
+
                             return Response(result)
                     else:
                         result = {"status": "Token notFound"
