@@ -1362,7 +1362,7 @@ def notify(request):
                                 cursor.execute(
                                         "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                         [r, 'App\Model\Driver', 'battery_low', message_en, driver_id[0][0]])
-                                result = {'result': "ok"}
+                                result = {'status': "ok"}
                                 return Response(result)
                         elif name == 'network':
                             with connections[school_name].cursor() as cursor:
@@ -1384,7 +1384,7 @@ def notify(request):
                                 cursor.execute(
                                     "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                     [r, 'App\Model\Driver', 'network', message_en, driver_id[0][0]])
-                                result = {'result': "ok"}
+                                result = {'status': "ok"}
                                 return Response(result)
                         elif name == 'gps_off':
                             with connections[school_name].cursor() as cursor:
@@ -1406,7 +1406,7 @@ def notify(request):
                                 cursor.execute(
                                     "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                     [r, 'App\Model\Driver', 'gps_off', message_en, driver_id[0][0]])
-                                result = {'result': "ok"}
+                                result = {'status': "ok"}
                                 return Response(result)
                         elif name == 'route_changed':
                             with connections[school_name].cursor() as cursor:
@@ -1446,7 +1446,7 @@ def notify(request):
                                 cursor.execute(
                                     "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                     [r, 'App\Model\Driver', 'route_changed', message_en, driver_id[0][0]])
-                                result = {'result': "ok"}
+                                result = {'status': "ok"}
                                 return Response(result)
                         elif name == 'user_speed_exceeded':
                             with connections[school_name].cursor() as cursor:
@@ -1469,7 +1469,7 @@ def notify(request):
                                 cursor.execute(
                                     "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                     [r, 'App\Model\Driver', 'user_speed_exceeded', message_en, driver_id[0][0]])
-                                result = {'result': "ok"}
+                                result = {'status': "ok"}
                                 return Response(result)
                         elif name == 'user_no_move_time_exceeded':
                                 with connections[school_name].cursor() as cursor:
@@ -1487,7 +1487,7 @@ def notify(request):
                                     cursor.execute(
                                         "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                         [r, 'App\Model\Driver', 'network', message_en, driver_id[0][0]])
-                                    result = {'result': "ok"}
+                                    result = {'status': "ok"}
                                     return Response(result)
 
                         elif name == 'emergency':
@@ -1506,7 +1506,7 @@ def notify(request):
                                     cursor.execute(
                                         "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                         [r, 'App\Model\Driver', 'network', emergency_text, driver_id[0][0]])
-                                    result = {'result': "ok"}
+                                    result = {'status': "ok"}
                                     return Response(result)
                         elif name == 'changed_location':
                                 with connections[school_name].cursor() as cursor:
@@ -1535,7 +1535,7 @@ def notify(request):
                                         [r, 'App\Model\Driver', 'changed_location_driver', message_en, driver_id[0][0]])
                                     # print("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
 
-                                    result = {'result': "ok"}
+                                    result = {'status': "ok"}
                                     return Response(result)
                         elif name == 'arrive_alarm':
                             # select  father_id,mother_id,responsible_id_value from student_student WHERE id=1
@@ -1575,7 +1575,7 @@ def notify(request):
                                     result = push_service.notify_single_device(registration_id=registration_id,
                                                                                message_title=message_title,
                                                                                message_body=message_body)
-                                result = {'result': "ok"}
+                                result = {'status': "ok"}
                                 return Response(result)
                                 # user_no_move_time_exceeded
 
