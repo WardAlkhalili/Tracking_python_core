@@ -887,8 +887,8 @@ def set_round_status(request):
                             school_name = e[0]
                             school_name = Manager.pincode(school_name)
                             with connections[school_name].cursor() as cursor:
-                                print("--------------------------------------------")
-                                print(request.data)
+                                # print("--------------------------------------------")
+                                # print(request.data)
                                 round_id = request.data.get('round_id')
                                 lat = request.data.get('lat')
                                 long = request.data.get('long')
@@ -1358,7 +1358,7 @@ def notify(request):
                                 driver_id = cursor.fetchall()
 
 
-                                message_en="The battery of the tracking device in the bus "+bus_num+" is running out of charge"
+                                message_en="The battery of the tracking device in the bus "+ str(bus_num[0][0])+" is running out of charge"
                                 cursor.execute(
                                         "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                         [r, 'App\Model\Driver', 'battery_low', message_en, driver_id[0][0]])
@@ -1380,7 +1380,7 @@ def notify(request):
                                     [driver_id])
                                 driver_id = cursor.fetchall()
 
-                                message_en = "The battery of the tracking device in the bus " + bus_num + " is running out of charge"
+                                message_en = "The battery of the tracking device in the bus " +  str(bus_num[0][0]) + " is running out of charge"
                                 cursor.execute(
                                     "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                     [r, 'App\Model\Driver', 'network', message_en, driver_id[0][0]])
@@ -1402,7 +1402,7 @@ def notify(request):
                                     [driver_id])
                                 driver_id = cursor.fetchall()
 
-                                message_en = "The battery of the tracking device in the bus " + bus_num + " is running out of charge"
+                                message_en = "The battery of the tracking device in the bus " +  str(bus_num[0][0]) + " is running out of charge"
                                 cursor.execute(
                                     "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                     [r, 'App\Model\Driver', 'gps_off', message_en, driver_id[0][0]])
@@ -1442,7 +1442,7 @@ def notify(request):
                                                 0] + '.The driver' + round_info[0][2] + ' the student ' + \
                                             student_picked[0][0] + ' before the student' + \
                                             student_original[0][0] + ' .'
-                                # message_en = "The battery of the tracking device in the bus " + bus_num + " is running out of charge"
+
                                 cursor.execute(
                                     "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                     [r, 'App\Model\Driver', 'route_changed', message_en, driver_id[0][0]])
@@ -1465,7 +1465,7 @@ def notify(request):
                                     [driver_id])
                                 driver_id = cursor.fetchall()
 
-                                message_en = "The battery of the tracking device in the bus " + bus_num + " is running out of charge"
+                                message_en = "The battery of the tracking device in the bus " +  str(bus_num[0][0]) + " is running out of charge"
                                 cursor.execute(
                                     "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                     [r, 'App\Model\Driver', 'user_speed_exceeded', message_en, driver_id[0][0]])
@@ -1528,7 +1528,8 @@ def notify(request):
                                     cursor.execute("select display_name_search from student_student WHERE id = %s",
                                                    [student_id])
                                     student_name = cursor.fetchall()
-                                    message_en = "	The home location of the student "+student_name[0][0]+" has been changed by the bus  " + bus_num
+
+                                    message_en = "	The home location of the student "+str(student_name[0][0])+" has been changed by the bus  " + str(bus_num[0][0])
                                     cursor.execute(
                                         "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                         [r, 'App\Model\Driver', 'changed_location_driver', message_en, driver_id[0][0]])
