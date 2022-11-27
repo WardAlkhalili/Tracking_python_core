@@ -1525,7 +1525,7 @@ def notify(request):
                                         "select  name  from res_partner WHERE id = %s  ",
                                         [driver_id])
                                     driver_id = cursor.fetchall()
-                                    cursor.execute("select display_name_search from student_student WHERE id in %s",
+                                    cursor.execute("select display_name_search from student_student WHERE id = %s",
                                                    [student_id])
                                     student_name = cursor.fetchall()
                                     message_en = "	The home location of the student "+student_name[0][0]+" has been changed by the bus  " + bus_num
