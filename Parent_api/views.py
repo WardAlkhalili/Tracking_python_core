@@ -512,6 +512,7 @@ def kids_list(request):
                                         [rounds_details[rou][0], student1[rec]['id']])
                                     columns4 = (x.name for x in cursor.description)
                                     rounds_count_student = cursor.fetchall()
+                                    print(rounds_count_student)
                                     if rounds_count_student:
                                         cursor.execute(
                                             "select round_id from round_schedule WHERE  id = %s",
@@ -725,7 +726,9 @@ def kids_list(request):
                                 round_type=''
                                 round_name=''
                                 if bool(is_active_round):
-                                    student_st=rounds_count_student[0][1]
+                                    # print(rounds_count_student)
+                                    student_st=rounds_count_student[0][1] if rounds_count_student else ""
+
                                     cursor.execute(
                                         "select name,type,attendant_id,vehicle_id,driver_id from transport_round WHERE id = %s",
                                         [ int(student_round_id)])
@@ -881,36 +884,67 @@ def kids_hstory(request):
                             student = cursor.fetchall()
                             # print(student)
                             student_id = []
-                            for rec in student:
-                                student_id.append(rec[0])
-                            cursor.execute(
-                                "select  round_schedule_id from transport_participant WHERE student_id in %s",
-                                [tuple(student_id)])
-                            round_schedule_id = cursor.fetchall()
-                            round_schedule_ids = []
-                            for rec in round_schedule_id:
-                                round_schedule_ids.append(rec[0])
-                            if round_schedule_ids:
+                            for rec1 in student:
+                                student_id.append(rec1[0])
+
                                 cursor.execute(
-                                    "select  round_id from round_schedule WHERE id in %s",
-                                    [tuple(round_schedule_ids)])
-                                round_schedule = cursor.fetchall()
-                                round_schedules = []
-                                for rec in round_schedule:
-                                    round_schedules.append(rec[0])
-                                if round_schedules:
+                                    "select  round_schedule_id from transport_participant WHERE student_id = %s",
+                                    [rec1[0]])
+                                round_schedule_id = cursor.fetchall()
+                                round_schedule_ids = []
+                                for rec in round_schedule_id:
+                                    round_schedule_ids.append(rec[0])
+                                if round_schedule_ids:
                                     cursor.execute(
-                                        "select  message_ar,create_date,type from sh_message_wizard WHERE round_id in %s",
-                                        [tuple(list(dict.fromkeys(round_schedules)))])
+                                        "select  round_id from round_schedule WHERE id in %s",
+                                        [tuple(round_schedule_ids)])
+                                    round_schedule = cursor.fetchall()
+
+                                    round_schedules = []
+                                    for rec in round_schedule:
+                                        round_schedules.append(rec[0])
+
+                                    # for rec in round_schedules:
+                                    cursor.execute(
+                                        "select  vehicle_id from transport_round WHERE id in %s",
+                                        [tuple(round_schedules)])
+
+                                    vehicle_id = cursor.fetchall()
+                                    cursor.execute(
+                                        "select bus_no from fleet_vehicle WHERE id = %s  ",
+                                        [vehicle_id[0][0]])
+                                    bus_num = cursor.fetchall()
+                                    cursor.execute(
+                                        "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and type= %s",
+                                        [rec,'emergency'])
                                     sh_message_wizard = cursor.fetchall()
-                                    # for rec in range(len(sh_message_wizard)):
-                                    # notifications.append({
-                                    #     "notifications_text": sh_message_wizard[rec][0],
-                                    #     "date_time": sh_message_wizard[rec][1],
-                                    #     "create_date": sh_message_wizard[rec][1],
-                                    #     "notifications_title": sh_message_wizard[rec][2],
-                                    #     "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                    # })
+                                    # print(sh_message_wizard)
+
+                                    for rec in range(len(sh_message_wizard)):
+                                        # print( str(sh_message_wizard[rec][1].year))
+                                        year = str(sh_message_wizard[rec][1].year)
+                                        month = '0' + str(sh_message_wizard[rec][1].month) if int(
+                                            sh_message_wizard[rec][1].month) < 10 else str(sh_message_wizard[rec][1].month)
+                                        day = str(sh_message_wizard[rec][1].day) if len(
+                                            str(sh_message_wizard[rec][1].day)) > 1 else "0" + str(
+                                            sh_message_wizard[rec][1].day)
+                                        hour = str(sh_message_wizard[rec][1].hour) if len(
+                                            str(sh_message_wizard[rec][1].hour)) > 1 else "0" + str(
+                                            sh_message_wizard[rec][1].hour)
+                                        minute = str(sh_message_wizard[rec][1].minute) if len(
+                                            str(sh_message_wizard[rec][1].minute)) > 1 else "0" + str(
+                                            sh_message_wizard[rec][1].minute)
+                                        second = str(sh_message_wizard[rec][1].second) if len(
+                                            str(sh_message_wizard[rec][1].second)) > 1 else "0" + str(
+                                            sh_message_wizard[rec][1].second)
+
+                                        notifications.append({
+                                            "notifications_text": sh_message_wizard[rec][0],
+                                            "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
+                                            "create_date": sh_message_wizard[rec][1],
+                                            "notifications_title": "Message from bus no. "+str(bus_num[0][0])+str(rec1[1]),
+                                            "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                        })
 
                             message_ids = []
                             for rec in school_message:
@@ -936,15 +970,19 @@ def kids_hstory(request):
                                         "select  id,search_type,title,message,create_date,date from school_message WHERE id in %s",
                                         [tuple(list(dict.fromkeys(message_id)))])
                                     school_message1 = cursor.fetchall()
+
                                     for rec in range(len(school_message1)):
+
+                                        year=str(school_message1[rec][4].year)
                                         month='0'+str(school_message1[rec][4].month)if int(school_message1[rec][4].month)<10 else str(school_message1[rec][4].month)
+                                        day=str(school_message1[rec][4].day)if len(str( school_message1[rec][4].day))>1 else "0"+str( school_message1[rec][4].day)
+                                        hour =str( school_message1[rec][4].hour) if len(str( school_message1[rec][4].hour))>1 else "0"+str( school_message1[rec][4].hour)
+                                        minute = str(school_message1[rec][4].minute) if len(str(school_message1[rec][4].minute)) > 1 else "0" + str(school_message1[rec][4].minute)
+                                        second = str(school_message1[rec][4].second)if len(str(school_message1[rec][4].second)) > 1 else "0" + str(school_message1[rec][4].second)
+
                                         notifications.append({
                                             "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_msg_admin.png",
-                                            "date_time": str(school_message1[rec][4].year) + "-" + month+ "-" + str(
-                                                school_message1[rec][4].day) + " " + str(
-                                                school_message1[rec][4].hour) + ":" + str(
-                                                school_message1[rec][4].minute) + ":" + str(
-                                                school_message1[rec][4].second),
+                                            "date_time": year + "-" + month+ "-" + day + " " + hour + ":" +minute + ":" + second,
                                             "notifications_text": school_message1[rec][3],
                                             "create_date": school_message1[rec][5],
                                             "notifications_title": school_message1[rec][2],
