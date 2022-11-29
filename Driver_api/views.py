@@ -1,3 +1,5 @@
+from builtins import map
+
 from django.conf import settings
 from django.db.models import Q
 
@@ -248,14 +250,12 @@ def round_list(request):
                                  'drop_off' if 'drop' in request.data.get('round_type') else 'pick_up'])
                             columns = (x.name for x in cursor.description)
                             list_round = cursor.fetchall()
-                            # print("-------------------------")
-                            # print(list_round)
+
                             list_round1 = []
                             columnNames = [column[0] for column in cursor.description]
                             for record in list_round:
                                 list_round1.append(dict(zip(columnNames, record)))
-                            # list_round = cursor.fetchall()
-                            # print("dddddddddddddddddddddddddddddddddddddddddddddddd",list_round1)
+
                             result1 = {}
                             round = []
                             r_id = []
@@ -398,7 +398,6 @@ def student_list(request, round_id):
     if request.method == 'GET':
         if request.headers:
             if request.headers.get('Authorization'):
-                # print("ddddddddddddddddddddddddddd")
                 if 'Bearer' in request.headers.get('Authorization'):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
                     db_name = Manager.objects.filter(token=au).values_list('db_name')
@@ -414,7 +413,6 @@ def student_list(request, round_id):
                                 "select  id  from school_day where name = %s",
                                 [calendar.day_name[curr_date.weekday()]])
                             day_name = cursor.fetchall()
-                            # print(day_name,round_id)
                             cursor.execute("select id,day_id from round_schedule WHERE round_id = %s and day_id = %s",
                                            [round_id, day_name[0][0]])
                             columns3 = (x.name for x in cursor.description)
@@ -447,8 +445,7 @@ def student_list(request, round_id):
                                 st_id.append(k[0])
                             if st_id:
                                 for std_id in st_id:
-                                    # print("--------------------------------------")
-                                    # print(std_id)
+
                                     cursor.execute("select * from student_student WHERE id = %s ",
                                                    [std_id])
                                     columns4 = (x.name for x in cursor.description)
@@ -780,7 +777,7 @@ def student_list(request, round_id):
 
                                 result = {"students_list": student
                                           }
-                                print("yousef student list 773",result)
+
                                 return Response(result)
                     if request.method == 'POST':
                         result = {"status": "error"
@@ -830,7 +827,6 @@ def recent_notifications(request):
                                     "select  id from transport_round WHERE driver_id = %s",
                                     [driver_id])
                                 transport_round = cursor.fetchall()
-                                # print(transport_round)
                                 transport_rounds = []
                                 for rec in transport_round:
                                     transport_rounds.append(rec[0])
@@ -890,8 +886,7 @@ def set_round_status(request):
                             school_name = e[0]
                             school_name = Manager.pincode(school_name)
                             with connections[school_name].cursor() as cursor:
-                                # print("--------------------------------------------")
-                                # print(request.data)
+
                                 round_id = request.data.get('round_id')
                                 lat = request.data.get('lat')
                                 long = request.data.get('long')
@@ -902,36 +897,33 @@ def set_round_status(request):
                                     "select  name,vehicle_id,driver_id ,type from transport_round WHERE id = %s  ",
                                     [round_id])
                                 round_info = cursor.fetchall()
+                                curr_date = date.today()
+                                cursor.execute(
+                                    "select  id  from school_day where name = %s",
+                                    [calendar.day_name[curr_date.weekday()]])
+                                day_name = cursor.fetchall()
+                                cursor.execute(
+                                    "select id,day_id from round_schedule WHERE round_id = %s and day_id = %s",
+                                    [round_id, day_name[0][0]])
+                                columns3 = (x.name for x in cursor.description)
+                                rounds_details = cursor.fetchall()
+                                day_list = {}
+                                cursor.execute(
+                                    "select  write_date,type,id from transport_round WHERE id = %s  ",
+                                    [round_id])
+                                round_info1 = cursor.fetchall()
+
+                                cursor.execute(
+                                    "select student_id from transport_participant WHERE round_schedule_id = %s ORDER BY sequence ASC",
+                                    [rounds_details[0][0]])
+                                columns4 = (x.name for x in cursor.description)
+                                rounds_count_student = cursor.fetchall()
                                 if status == 'start':
 
                                     # import datetime
-                                    curr_date = date.today()
-                                    cursor.execute(
-                                        "select  id  from school_day where name = %s",
-                                        [calendar.day_name[curr_date.weekday()]])
-                                    day_name = cursor.fetchall()
-                                    cursor.execute(
-                                        "select id,day_id from round_schedule WHERE round_id = %s and day_id = %s",
-                                        [round_id, day_name[0][0]])
-                                    columns3 = (x.name for x in cursor.description)
-                                    rounds_details = cursor.fetchall()
-                                    day_list = {}
-                                    cursor.execute(
-                                        "select  write_date,type,id from transport_round WHERE id = %s  ",
-                                        [round_id])
-                                    round_info1 = cursor.fetchall()
 
-                                    cursor.execute(
-                                        "select student_id from transport_participant WHERE round_schedule_id = %s ORDER BY sequence ASC",
-                                        [rounds_details[0][0]])
-                                    columns4 = (x.name for x in cursor.description)
-                                    rounds_count_student = cursor.fetchall()
-                                    # print("--------------------======")
-                                    # print(rounds_count_student)
                                     st_id = []
                                     for k in rounds_count_student:
-                                        # print("--------------==============================")
-                                        # print(k)
                                         cursor.execute(
                                             "select  name from student_student WHERE id= %s",
                                             [k[0]])
@@ -941,9 +933,7 @@ def set_round_status(request):
                                             [k[0]])
                                         columns4 = (x.name for x in cursor.description)
                                         student_student2 = cursor.fetchall()
-                                        # parent_id = []
                                         for rec in student_student2[0]:
-                                            # parent_id.append[rec]
                                             mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec), Q(db_name=school_name),
                                                                                         Q(is_active=True)).values_list(
                                                 'mobile_token').order_by('-pk')
@@ -951,18 +941,15 @@ def set_round_status(request):
                                         for e in mobile_token1:
                                             mobile_token.append(e[0])
 
-                                        push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                        registration_id = mobile_token
-                                        message_title = "School Departure"
-                                        # print("-------------------------------------")
-                                        # print(student_name[0][0])
-                                        # print(mobile_token)
-                                        message_body = student_name[0][0] + "  has just been checked into the bus."
-                                        if mobile_token and not("token" in mobile_token):
-                                            notify_single_device = push_service.notify_single_device(
-                                                registration_id=registration_id[0],
-                                                message_title=message_title,
-                                                message_body=message_body)
+                                        # push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                        # registration_id = mobile_token
+                                        # message_title = "School Departure"
+                                        # message_body = student_name[0][0] + "  has just been checked into the bus."
+                                        # if mobile_token and not("token" in mobile_token):
+                                        #     notify_single_device = push_service.notify_single_device(
+                                        #         registration_id=registration_id[0],
+                                        #         message_title=message_title,
+                                        #         message_body=message_body)
                                     cursor.execute(
                                         "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
                                         [round_id, round_info[0][2], round_info[0][1], round_id])
@@ -1021,6 +1008,27 @@ def set_round_status(request):
                                             [round_id, round_id, distance, round_info[0][1], round_info[0][2],
                                              datetime.datetime.now(), assistant_id])
                                 elif status == 'end' or status == 'force_end':
+                                    for k in rounds_count_student:
+                                        cursor.execute(
+                                            "select  id,round_start from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
+                                            [round_id, round_info[0][2], round_info[0][1], round_id])
+                                        round_history = cursor.fetchall()
+                                        if round_history:
+                                            now = datetime.date.today()
+                                            if round_history[0][1].strftime('%Y-%m-%d') == str(now):
+                                                cursor.execute(
+                                                    "select  datetime,id from round_student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
+                                                    [round_id, k[0], round_history[0][0]])
+                                                student_history = cursor.fetchall()
+                                                if student_history:
+                                                    if  round_info[0][3] == 'pick_up':
+                                                        cursor.execute(
+                                                            "UPDATE public.round_student_history SET time_out = %s WHERE id =%s ",
+                                                            [datetime.datetime.now(), student_history[0][1]])
+                                                    else:
+                                                        cursor.execute(
+                                                            "UPDATE public.round_student_history SET bus_check_in = %s WHERE id =%s ",
+                                                            [datetime.datetime.now(),student_history[0][1]])
 
                                     cursor.execute(
                                         "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
@@ -1071,20 +1079,26 @@ def students_bus_checks(request):
                 if 'Bearer' in request.headers.get('Authorization'):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
                     db_name = Manager.objects.filter(token=au).values_list('db_name')
+                    driver_id = Manager.objects.filter(token=au).values_list('driver_id')
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
                             school_name = Manager.pincode(school_name)
                             with connections[school_name].cursor() as cursor:
                                 students = request.data.get('students')
+
                                 for rec in students:
+
                                     round_id = rec['round_id']
                                     status = rec['status']
-                                    day_count = rec['day_count']
+                                    # day_count = rec['day_count']
                                     lat = rec['lat']
                                     long = rec['long']
                                     student_id = rec['student_id']
-                                    waiting_minutes = rec['waiting_minutes']
+                                    if "waiting_minutes" in rec:
+                                        waiting_minutes = rec['waiting_minutes']
+                                    else:
+                                        waiting_minutes=""
                                     curr_date = date.today()
                                     cursor.execute(
                                         "select  name,vehicle_id,driver_id,type,total_checkedout_students,total_checkedin_students from transport_round WHERE id = %s  ",
@@ -1098,7 +1112,7 @@ def students_bus_checks(request):
                                         now = datetime.date.today()
                                         if round_history[0][1].strftime('%Y-%m-%d') == str(now):
                                             cursor.execute(
-                                                "select  datetime from round_student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
+                                                "select  datetime,id from round_student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
                                                 [round_id, student_id, round_history[0][0]])
                                             student_history = cursor.fetchall()
                                             if student_history:
@@ -1110,7 +1124,7 @@ def students_bus_checks(request):
 
                                                     cursor.execute(
                                                         "UPDATE public.round_student_history SET bus_check_in = %s WHERE id =%s ",
-                                                        [datetime.datetime.now(), student_history[0][0]])
+                                                        [datetime.datetime.now(), student_history[0][1]])
                                                     if round_info[0][3] == 'pick_up':
                                                         ch_in = round_info[0][5] + 1
                                                         ch_out = round_info[0][4] - 1
@@ -1123,10 +1137,10 @@ def students_bus_checks(request):
                                                         [ch_out, ch_in, round_id])
 
                                                 elif status == 'out':
-
+                                                    # print("uyuuuuu")
                                                     cursor.execute(
                                                         "UPDATE public.round_student_history SET time_out = %s WHERE id =%s ",
-                                                        [datetime.datetime.now(), student_id])
+                                                        [datetime.datetime.now(), student_history[0][1]])
                                                     if round_info[0][3] == 'pick_up':
                                                         ch_in = round_info[0][5] + 1
                                                         ch_out = round_info[0][4] - 1
@@ -1172,24 +1186,35 @@ def students_bus_checks(request):
                                         [status, student_id, round_schedule[0][0]])
                                     cursor.execute(
                                         "select  father_id,mother_id,responsible_id_value from student_student WHERE id= %s",
-                                        [request.data.get('student_id')])
+                                        [student_id])
                                     student_info = cursor.fetchall()
                                     cursor.execute(
                                         "select  name from student_student WHERE id= %s",
-                                        [request.data.get('student_id')])
+                                        [student_id])
                                     student_name = cursor.fetchall()
-                                    driver_id = Manager.objects.filter(token=au).values_list('driver_id')
-                                    for e in driver_id:
-                                        driver_id = e[0]
+
+                                    if type(driver_id) is not int:
+                                        for e in driver_id:
+                                            driver_id = e[0]
                                     cursor.execute(
                                         "select  bus_no  from fleet_vehicle WHERE driver_id = %s  ",
                                         [driver_id])
                                     bus_num = cursor.fetchall()
-
+                                    cursor.execute(
+                                        "select name from res_partner WHERE id = %s  ",
+                                        [driver_id])
+                                    driver_name = cursor.fetchall()
                                     mobile_token = []
-                                    mobile_token1 =""
+                                    id=[]
                                     if student_info:
-                                        for rec in student_info[0]:
+                                        if student_info[0][0]:
+                                            id.append(student_info[0][0])
+                                        if student_info[0][1]:
+                                            id.append(student_info[0][1])
+                                        if student_info[0][2]:
+                                            id.append(student_info[0][2])
+                                        id = list(dict.fromkeys(id))
+                                        for rec in id:
                                             cursor.execute("select  settings from school_parent WHERE id = %s", [rec])
                                             settings = cursor.fetchall()
 
@@ -1199,122 +1224,231 @@ def students_bus_checks(request):
                                                                                          Q(is_active=True)).values_list( 'mobile_token').order_by('-pk')
 
                                             if settings:
-                                                if settings[0] == 'None':
+
+                                                if not('None' in str(settings)) :
 
                                                     data = json.loads(settings[0][0])
                                                     title=''
                                                     message=''
-                                                    for e in mobile_token1:
-                                                        if data['notifications']['check_in'] and status=='in' :
-                                                            mobile_token.append(e[0])
-                                                            title = 'Bus notification'
-                                                            message = student_name[0][
-                                                                          0] + ' has just been checked into the bus'
-                                                            date_string = datetime.datetime.now().strftime(
-                                                                "%Y-%m-%d %H:%M:%S")
-                                                            r = datetime.datetime.strptime(date_string,
-                                                                                           '%Y-%m-%d %H:%M:%S')
-                                                            cursor.execute(
-                                                                "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s);",
-                                                                [round_id,r, 'App\Model\sta', 'Bus notification', message,message,
-                                                                 driver_id[0][0]])
 
-
-                                                        elif data['notifications']['check_out'] and status=='out':
-                                                            mobile_token.append(e[0])
-                                                            title = 'Checkout Notification'
-                                                            message = 'The bus '+bus_num[0]+'has arrived at your home and '+student_name[0][0]+' has been checked out of the bus. '
-                                                        else:
-                                                            if status=='no-show':
+                                                    if type(data['notifications']) is dict:
+                                                        for e in mobile_token1:
+                                                            if data['notifications']['check_in'] and status == 'in':
                                                                 mobile_token.append(e[0])
-                                                                title = ' No Show Notification'
-                                                                message = student_name[0][0]+' did not check into the bus today'
-
-                                                            elif   status=='absent':
-                                                                mobile_token.append(e[0])
-                                                                title = 'Absence notification'
-                                                                message = ' Your child '+ student_name[0][0]+' has not checked into the bus and is absent today.'
+                                                                title = 'Bus notification'
+                                                                message = student_name[0][
+                                                                              0] + ' has just been checked into the bus'
                                                                 date_string = datetime.datetime.now().strftime(
                                                                     "%Y-%m-%d %H:%M:%S")
                                                                 r = datetime.datetime.strptime(date_string,
                                                                                                '%Y-%m-%d %H:%M:%S')
                                                                 cursor.execute(
-                                                                    "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s);",
-                                                                    [round_id, r, 'App\Model\sta', 'Absence notification',
+                                                                    "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                                    [round_id, r, 'App\Model\sta', 'Bus notification',
                                                                      message, message,
-                                                                     driver_id[0][0]])
+                                                                     driver_name[0][0]])
 
 
+                                                            elif data['notifications']['check_out'] and status == 'out':
+                                                                mobile_token.append(e[0])
+                                                                title = 'Checkout Notification'
+                                                                message = 'The bus ' +str( bus_num[
+                                                                    0]) + 'has arrived at your home and ' + \
+                                                                          student_name[0][
+                                                                              0] + ' has been checked out of the bus. '
+                                                                cursor.execute(
+                                                                    "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                                    [round_id, r, 'App\Model\sta',
+                                                                     'Checkout Notification',
+                                                                     message, message,
+                                                                     driver_name[0][0]])
+                                                            else:
+                                                                if status == 'no-show':
+                                                                    mobile_token.append(e[0])
+                                                                    title = ' No Show Notification'
+                                                                    message = student_name[0][
+                                                                                  0] + ' did not check into the bus today'
+                                                                    cursor.execute(
+                                                                        "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                                        [round_id, r, 'App\Model\sta',
+                                                                         'No Show Notification',
+                                                                         message, message,
+                                                                         driver_name[0][0]])
 
-                                                    # for e in mobile_token:
-                                                    #     mobile_token = e[0]
-                                                    # print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token)
+                                                                elif status == 'absent':
+                                                                    mobile_token.append(e[0])
+                                                                    title = 'Absence notification'
+                                                                    message = ' Your child ' + student_name[0][
+                                                                        0] + ' has not checked into the bus and is absent today.'
+                                                                    date_string = datetime.datetime.now().strftime(
+                                                                        "%Y-%m-%d %H:%M:%S")
+                                                                    r = datetime.datetime.strptime(date_string,
+                                                                                                   '%Y-%m-%d %H:%M:%S')
+                                                                    cursor.execute(
+                                                                        "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s);",
+                                                                        [round_id, r, 'App\Model\sta',
+                                                                         'Absence notification',
+                                                                         message, message,
+                                                                         driver_name[0][0]])
+                                                    else:
+
+                                                       notifications = list(data['notifications'].split(" "))
+
+                                                       for e in mobile_token1:
+                                                           if notifications[3]=="true," and status == 'in':
+                                                               mobile_token.append(e[0])
+                                                               title = 'Bus notification'
+                                                               message = student_name[0][
+                                                                             0] + ' has just been checked into the bus'
+                                                               date_string = datetime.datetime.now().strftime(
+                                                                   "%Y-%m-%d %H:%M:%S")
+                                                               r = datetime.datetime.strptime(date_string,
+                                                                                              '%Y-%m-%d %H:%M:%S')
+                                                               cursor.execute(
+                                                                   "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                                   [round_id, r, 'App\Model\sta', 'Bus notification',
+                                                                    message, message,
+                                                                    driver_name[0][0]])
+
+
+                                                           elif notifications[4]=="true," and status == 'out':
+                                                               mobile_token.append(e[0])
+                                                               title = 'Checkout Notification'
+                                                               message = 'The bus ' + bus_num[
+                                                                   0] + 'has arrived at your home and ' + \
+                                                                         student_name[0][
+                                                                             0] + ' has been checked out of the bus. '
+                                                               cursor.execute(
+                                                                   "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                                   [round_id, r, 'App\Model\sta',
+                                                                    'Checkout Notification',
+                                                                    message, message,
+                                                                    driver_name[0][0]])
+                                                           else:
+                                                               if status == 'no-show':
+                                                                   mobile_token.append(e[0])
+                                                                   title = ' No Show Notification'
+                                                                   message = student_name[0][
+                                                                                 0] + ' did not check into the bus today'
+                                                                   cursor.execute(
+                                                                       "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                                       [round_id, r, 'App\Model\sta',
+                                                                        'No Show Notification',
+                                                                        message, message,
+                                                                        driver_name[0][0]])
+
+                                                               elif status == 'absent':
+                                                                   mobile_token.append(e[0])
+                                                                   title = 'Absence notification'
+                                                                   message = ' Your child ' + student_name[0][
+                                                                       0] + ' has not checked into the bus and is absent today.'
+                                                                   date_string = datetime.datetime.now().strftime(
+                                                                       "%Y-%m-%d %H:%M:%S")
+                                                                   r = datetime.datetime.strptime(date_string,
+                                                                                                  '%Y-%m-%d %H:%M:%S')
+                                                                   cursor.execute(
+                                                                       "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s);",
+                                                                       [round_id, r, 'App\Model\sta',
+                                                                        'Absence notification',
+                                                                        message, message,
+                                                                        driver_name[0][0]])
+
+                                                    if mobile_token1:
+                                                        mobile_token = []
+                                                        for e in mobile_token1:
+                                                            mobile_token.append(e[0])
+                                                        push_service = FCMNotification(
+                                                            api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                                        registration_id = mobile_token
+                                                        message_title = title
+                                                        message_body = message
+                                                        if mobile_token and not ("token" in mobile_token):
+                                                            notify_single_device = push_service.notify_single_device(
+                                                                registration_id=registration_id[0],
+                                                                message_title=message_title,
+                                                                message_body=message_body)
+
+
+                                                else:
+                                                    if status == 'in':
+                                                        mobile_token.append(e[0])
+                                                        title = 'Bus notification'
+                                                        message = student_name[0][0] + ' has just been checked into the bus'
+                                                        date_string = datetime.datetime.now().strftime(
+                                                            "%Y-%m-%d %H:%M:%S")
+                                                        r = datetime.datetime.strptime(date_string,
+                                                                                       '%Y-%m-%d %H:%M:%S')
+                                                        cursor.execute(
+                                                            "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                            [round_id, r, 'App\Model\sta', 'Bus notification', message, message,
+                                                             driver_name[0][0]])
+
+
+                                                    elif status == 'out':
+                                                        mobile_token.append(e[0])
+                                                        title = 'Checkout Notification'
+                                                        message = 'The bus ' +str(bus_num[0]) + 'has arrived at your home and ' + \
+                                                                  student_name[0][0] + ' has been checked out of the bus. '
+                                                        date_string = datetime.datetime.now().strftime(
+                                                            "%Y-%m-%d %H:%M:%S")
+                                                        r = datetime.datetime.strptime(date_string,
+                                                                                       '%Y-%m-%d %H:%M:%S')
+                                                        cursor.execute(
+                                                            "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                            [round_id, r, 'App\Model\sta', 'Checkout Notification',message, message,driver_name[0][0]])
+                                                    else:
+                                                        if status == 'no-show':
+                                                            mobile_token.append(e[0])
+                                                            title = ' No Show Notification'
+                                                            message = student_name[0][0] + ' did not check into the bus today'
+                                                            date_string = datetime.datetime.now().strftime(
+                                                                "%Y-%m-%d %H:%M:%S")
+                                                            r = datetime.datetime.strptime(date_string,
+                                                                                           '%Y-%m-%d %H:%M:%S')
+                                                            cursor.execute(
+                                                                "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                                [round_id, r, 'App\Model\sta', 'No Show Notification',
+                                                                 message, message,
+                                                                 driver_name[0][0]])
+
+                                                        elif status == 'absent':
+                                                            mobile_token.append(e[0])
+                                                            title = 'Absence notification'
+                                                            message = ' Your child ' + student_name[0][
+                                                                0] + ' has not checked into the bus and is absent today.'
+                                                            date_string = datetime.datetime.now().strftime(
+                                                                "%Y-%m-%d %H:%M:%S")
+                                                            r = datetime.datetime.strptime(date_string,
+                                                                                           '%Y-%m-%d %H:%M:%S')
+                                                            cursor.execute(
+                                                                "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                                [round_id, r, 'App\Model\sta', 'Absence notification',
+                                                                 message, message,
+                                                                 driver_name[0][0]])
+
+
+                                                if mobile_token:
+                                                    mobile_token = []
+
+                                                    for e in mobile_token1:
+                                                        mobile_token.append(e[0])
+
                                                     push_service = FCMNotification(
                                                         api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                                    # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
-                                                    registration_id = mobile_token[0]
+                                                    registration_id = mobile_token
                                                     message_title = title
                                                     message_body = message
-                                                    result = push_service.notify_single_device(registration_id=registration_id,
-                                                                                               message_title=message_title,
-                                                                                               message_body=message_body)
-                                    else:
-                                        if status == 'in':
-                                            mobile_token.append(e[0])
-                                            title = 'Bus notification'
-                                            message = student_name[0][
-                                                          0] + ' has just been checked into the bus'
-                                            date_string = datetime.datetime.now().strftime(
-                                                "%Y-%m-%d %H:%M:%S")
-                                            r = datetime.datetime.strptime(date_string,
-                                                                           '%Y-%m-%d %H:%M:%S')
-                                            cursor.execute(
-                                                "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s);",
-                                                [round_id, r, 'App\Model\sta', 'Bus notification', message, message,
-                                                 driver_id[0][0]])
 
+                                                    if mobile_token and not ("token" in mobile_token):
 
-                                        elif status == 'out':
-                                            mobile_token.append(e[0])
-                                            title = 'Checkout Notification'
-                                            message = 'The bus ' + bus_num[0] + 'has arrived at your home and ' + \
-                                                      student_name[0][0] + ' has been checked out of the bus. '
-                                        else:
-                                            if status == 'no-show':
-                                                mobile_token.append(e[0])
-                                                title = ' No Show Notification'
-                                                message = student_name[0][0] + ' did not check into the bus today'
-
-                                            elif status == 'absent':
-                                                mobile_token.append(e[0])
-                                                title = 'Absence notification'
-                                                message = ' Your child ' + student_name[0][
-                                                    0] + ' has not checked into the bus and is absent today.'
-                                                date_string = datetime.datetime.now().strftime(
-                                                    "%Y-%m-%d %H:%M:%S")
-                                                r = datetime.datetime.strptime(date_string,
-                                                                               '%Y-%m-%d %H:%M:%S')
-                                                cursor.execute(
-                                                    "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s);",
-                                                    [round_id, r, 'App\Model\sta', 'Absence notification',
-                                                     message, message,
-                                                     driver_id[0][0]])
-                                        # for e in mobile_token1:
-                                        #     mobile_token.append(e[0])
-                                        push_service = FCMNotification(
-                                            api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                        # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
-                                        registration_id = mobile_token[0]
-                                        message_title = title
-                                        message_body = message
-                                        result = push_service.notify_single_device(registration_id=registration_id,
-                                                                                   message_title=message_title,
-                                                                                   message_body=message_body)
+                                                        notify_single_device = push_service.notify_single_device(
+                                                            registration_id=registration_id[0],
+                                                            message_title=message_title,
+                                                            message_body=message_body)
 
 
 
                                 result = {'status': 'OK'}
-
                                 return Response(result)
                     else:
                         result = {'status': 'error'}
@@ -1333,7 +1467,7 @@ def students_bus_checks(request):
 @api_view(['POST'])
 def reordered_students(request):
     if request.method == 'POST':
-        # print("ooooooooooooooossssssssssssssssss")
+
         if request.headers:
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
@@ -1394,7 +1528,7 @@ def notify(request):
                 if 'Bearer' in request.headers.get('Authorization'):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
                     db_name = Manager.objects.filter(token=au).values_list('db_name')
-                    print(request.data)
+
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
@@ -1405,9 +1539,7 @@ def notify(request):
                         # round_type = request.data.get('round_type')
                         # student_id = request.data[0].get('student_id')
                         # name = request.data[0].get('notification_type')
-                        # print('=============================')
-                        # print(request.data)
-                        # print(request.data[0].get('round_type'))
+
                         if not ("arrive_alarm" in  str(request.data)):
                             name = request.data.get('name')
                             round_id = request.data.get('round_id')
@@ -1609,7 +1741,6 @@ def notify(request):
                                     cursor.execute(
                                         "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                         [r, 'App\Model\Driver', 'changed_location_driver', message_en, driver_id[0][0]])
-                                    # print("uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu")
 
                                     result = {'status': "ok"}
                                     return Response(result)
@@ -1625,12 +1756,9 @@ def notify(request):
                                     "select bus_no from fleet_vehicle WHERE driver_id = %s  ",
                                     [driver_id])
                                 bus_num = cursor.fetchall()
-                                # print("ooooooooooooooooooooooooooooooooooo")
-                                # print(student_info)
+
                                 mobile_token = []
                                 for rec in student_info[0]:
-                                    # print("111111111")
-                                    # print(rec)
 
                                     mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec),
                                                                                  Q(db_name=school_name),
@@ -1638,8 +1766,7 @@ def notify(request):
 
                                     for e in mobile_token1:
                                             mobile_token.append(e[0])
-                                    # print("pppppppppppppppppppppppppppppppp")
-                                    # print(bus_num)
+
                                     push_service = FCMNotification(
                                         api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
                                     # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"

@@ -915,11 +915,9 @@ def kids_hstory(request):
                                         [vehicle_id[0][0]])
                                     bus_num = cursor.fetchall()
                                     cursor.execute(
-                                        "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and type= %s",
-                                        [rec,'emergency'])
+                                        "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and type= %s or from_type =%s ORDER BY ID DESC ",
+                                        [rec,'emergency','App\Model\sta'])
                                     sh_message_wizard = cursor.fetchall()
-                                    # print(sh_message_wizard)
-
                                     for rec in range(len(sh_message_wizard)):
                                         # print( str(sh_message_wizard[rec][1].year))
                                         year = str(sh_message_wizard[rec][1].year)
@@ -945,6 +943,7 @@ def kids_hstory(request):
                                             "notifications_title": "Message from bus no. "+str(bus_num[0][0])+str(rec1[1]),
                                             "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                         })
+                            # print(notifications)
 
                             message_ids = []
                             for rec in school_message:
