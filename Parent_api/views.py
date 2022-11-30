@@ -916,7 +916,7 @@ def kids_hstory(request):
                                     bus_num = cursor.fetchall()
                                     cursor.execute(
                                         "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and type= %s or from_type =%s ORDER BY ID DESC ",
-                                        [rec,'emergency','App\Model\sta'])
+                                        [rec,'emergency','App\Model\sta'+str(parent_id)])
                                     sh_message_wizard = cursor.fetchall()
                                     for rec in range(len(sh_message_wizard)):
                                         # print( str(sh_message_wizard[rec][1].year))
@@ -929,6 +929,7 @@ def kids_hstory(request):
                                         hour = str(sh_message_wizard[rec][1].hour) if len(
                                             str(sh_message_wizard[rec][1].hour)) > 1 else "0" + str(
                                             sh_message_wizard[rec][1].hour)
+
                                         minute = str(sh_message_wizard[rec][1].minute) if len(
                                             str(sh_message_wizard[rec][1].minute)) > 1 else "0" + str(
                                             sh_message_wizard[rec][1].minute)

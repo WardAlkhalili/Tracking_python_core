@@ -1244,7 +1244,7 @@ def students_bus_checks(request):
                                                                                                '%Y-%m-%d %H:%M:%S')
                                                                 cursor.execute(
                                                                     "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                                    [round_id, r, 'App\Model\sta', 'Bus notification',
+                                                                    [round_id, r, 'App\Model\sta'+str(rec), 'Bus notification',
                                                                      message, message,
                                                                      driver_name[0][0]])
 
@@ -1258,7 +1258,7 @@ def students_bus_checks(request):
                                                                               0] + ' has been checked out of the bus. '
                                                                 cursor.execute(
                                                                     "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                                    [round_id, r, 'App\Model\sta',
+                                                                    [round_id, r, 'App\Model\sta'+str(rec),
                                                                      'Checkout Notification',
                                                                      message, message,
                                                                      driver_name[0][0]])
@@ -1270,7 +1270,7 @@ def students_bus_checks(request):
                                                                                   0] + ' did not check into the bus today'
                                                                     cursor.execute(
                                                                         "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                                        [round_id, r, 'App\Model\sta',
+                                                                        [round_id, r, 'App\Model\sta'+str(rec),
                                                                          'No Show Notification',
                                                                          message, message,
                                                                          driver_name[0][0]])
@@ -1286,7 +1286,7 @@ def students_bus_checks(request):
                                                                                                    '%Y-%m-%d %H:%M:%S')
                                                                     cursor.execute(
                                                                         "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s);",
-                                                                        [round_id, r, 'App\Model\sta',
+                                                                        [round_id, r, 'App\Model\sta'+str(rec),
                                                                          'Absence notification',
                                                                          message, message,
                                                                          driver_name[0][0]])
@@ -1306,7 +1306,7 @@ def students_bus_checks(request):
                                                                                               '%Y-%m-%d %H:%M:%S')
                                                                cursor.execute(
                                                                    "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                                   [round_id, r, 'App\Model\sta', 'Bus notification',
+                                                                   [round_id, r, 'App\Model\sta'+str(rec), 'Bus notification',
                                                                     message, message,
                                                                     driver_name[0][0]])
 
@@ -1320,7 +1320,7 @@ def students_bus_checks(request):
                                                                              0] + ' has been checked out of the bus. '
                                                                cursor.execute(
                                                                    "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                                   [round_id, r, 'App\Model\sta',
+                                                                   [round_id, r, 'App\Model\sta'+str(rec),
                                                                     'Checkout Notification',
                                                                     message, message,
                                                                     driver_name[0][0]])
@@ -1332,7 +1332,7 @@ def students_bus_checks(request):
                                                                                  0] + ' did not check into the bus today'
                                                                    cursor.execute(
                                                                        "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                                       [round_id, r, 'App\Model\sta',
+                                                                       [round_id, r, 'App\Model\sta'+str(rec),
                                                                         'No Show Notification',
                                                                         message, message,
                                                                         driver_name[0][0]])
@@ -1348,7 +1348,7 @@ def students_bus_checks(request):
                                                                                                   '%Y-%m-%d %H:%M:%S')
                                                                    cursor.execute(
                                                                        "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s);",
-                                                                       [round_id, r, 'App\Model\sta',
+                                                                       [round_id, r, 'App\Model\sta'+str(rec),
                                                                         'Absence notification',
                                                                         message, message,
                                                                         driver_name[0][0]])
@@ -1380,7 +1380,7 @@ def students_bus_checks(request):
                                                                                        '%Y-%m-%d %H:%M:%S')
                                                         cursor.execute(
                                                             "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                            [round_id, r, 'App\Model\sta', 'Bus notification', message, message,
+                                                            [round_id, r, 'App\Model\sta'+str(rec), 'Bus notification', message, message,
                                                              driver_name[0][0]])
 
 
@@ -1395,7 +1395,7 @@ def students_bus_checks(request):
                                                                                        '%Y-%m-%d %H:%M:%S')
                                                         cursor.execute(
                                                             "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                            [round_id, r, 'App\Model\sta', 'Checkout Notification',message, message,driver_name[0][0]])
+                                                            [round_id, r, 'App\Model\sta'+str(rec), 'Checkout Notification',message, message,driver_name[0][0]])
                                                     else:
                                                         if status == 'no-show':
                                                             mobile_token.append(e[0])
@@ -1407,7 +1407,7 @@ def students_bus_checks(request):
                                                                                            '%Y-%m-%d %H:%M:%S')
                                                             cursor.execute(
                                                                 "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                                [round_id, r, 'App\Model\sta', 'No Show Notification',
+                                                                [round_id, r, 'App\Model\sta'+str(rec), 'No Show Notification',
                                                                  message, message,
                                                                  driver_name[0][0]])
 
@@ -1422,7 +1422,7 @@ def students_bus_checks(request):
                                                                                            '%Y-%m-%d %H:%M:%S')
                                                             cursor.execute(
                                                                 "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                                [round_id, r, 'App\Model\sta', 'Absence notification',
+                                                                [round_id, r, 'App\Model\sta'+str(rec), 'Absence notification',
                                                                  message, message,
                                                                  driver_name[0][0]])
 

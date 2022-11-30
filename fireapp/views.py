@@ -10,7 +10,7 @@ from django.db.models import Q
 from datetime import datetime
 import calendar
 import json
-
+from threading import Timer
 # Remember the code we copied from Firebase.
 # This can be copied by clicking on the settings icon > project settings, then scroll down in your firebase dashboard
 
@@ -152,69 +152,91 @@ def send_school_message(request):
     if request.method == 'POST':
         school_name = request.data.get('school_name')
         message_id = request.data.get('message_id')
+        print(school_name)
+        r =Timer(3.0, twoArgs, (message_id, school_name))
+        r.start()
+        result1 = {
+            "route": 'Ok'
 
-        with connections[school_name].cursor() as cursor:
-            cursor.execute(
-                "select  message,title  from school_message where id = %s",
-                [message_id])
-            school_message = cursor.fetchall()
-            cursor.execute(
-                "select  student_student_id  from school_message_student_student where school_message_id = %s",
-                [message_id])
-            school_message_student_student = cursor.fetchall()
-            r_id = []
-            for id in school_message_student_student:
-                r_id.append(id[0])
-            cursor.execute(
-                "select  mother_id,father_id,responsible_id_value from student_student WHERE id in %s ",
-                [tuple(r_id)])
-            columns = (x.name for x in cursor.description)
-            student = cursor.fetchall()
-            # print(student)
-            id = []
-            for rec in student:
-                if rec[0]:
-                    id.append(rec[0])
-                if rec[1]:
-                    id.append(rec[1])
-                if rec[2]:
-                    id.append(rec[2])
-            id = list(dict.fromkeys(id))
-            # print(id)
+        }
 
-            # cursor.execute(
-            #     "select  user_id from school_parent WHERE id in %s ",
-            #     [tuple(id)])
-            # columns = (x.name for x in cursor.description)
-            # parent = cursor.fetchall()
-            # parent_id = []
-            # for rec in parent:
-            #     parent_id.append(rec[0])
-            #
-            mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id),Q(db_name='iks'),Q(is_active=True)).values_list(
-                'mobile_token').order_by('-pk')
-            print(mobile_token)
-            token = []
-            for tok in mobile_token:
-                token.append(tok[0])
+    return Response(result1)
 
 
-            push_service = FCMNotification(
-                api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-            registration_id = token
-            # print(token)
-            message_title = school_message[0][1]
-            # print(message_title)
-            message_body = school_message[0][0]
-            result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body, registration_ids=registration_id,
-                 data_message={})
-            # print("dddd",result)
-            result1 = {
-                "route": 'Ok'
 
-            }
 
-        return Response(result1)
+def twoArgs(message_id,school_name):
+    with connections['iks'].cursor() as cursor:
+
+        cursor.execute(
+            "select  message,title  from school_message where id = %s",
+            [message_id])
+        school_message = cursor.fetchall()
+        print(school_message)
+
+        print(message_id)
+        cursor.execute(
+            "select  student_student_id  from school_message_student_student where school_message_id = %s",
+            [message_id])
+        school_message_student_student = cursor.fetchall()
+        print(school_message_student_student)
+        r_id = []
+        for id in school_message_student_student:
+            r_id.append(id[0])
+
+        print(r_id)
+
+        cursor.execute(
+            "select  mother_id,father_id,responsible_id_value from student_student WHERE id in %s ",
+            [tuple(r_id)])
+        columns = (x.name for x in cursor.description)
+        student = cursor.fetchall()
+        # print(student)
+        id = []
+        for rec in student:
+            if rec[0]:
+                id.append(rec[0])
+            if rec[1]:
+                id.append(rec[1])
+            if rec[2]:
+                id.append(rec[2])
+        id = list(dict.fromkeys(id))
+        # print(id)
+
+        # cursor.execute(
+        #     "select  user_id from school_parent WHERE id in %s ",
+        #     [tuple(id)])
+        # columns = (x.name for x in cursor.description)
+        # parent = cursor.fetchall()
+        # parent_id = []
+        # for rec in parent:
+        #     parent_id.append(rec[0])
+        #
+        mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id), Q(db_name='iks'),
+                                                    Q(is_active=True)).values_list(
+            'mobile_token').order_by('-pk')
+        print(mobile_token)
+        token = []
+        for tok in mobile_token:
+            token.append(tok[0])
+
+        push_service = FCMNotification(
+            api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+        registration_id = token
+        # print(token)
+        message_title = school_message[0][1]
+        # print(message_title)
+        message_body = school_message[0][0]
+        result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
+                                                      registration_ids=registration_id,
+                                                      data_message={})
+        # print("dddd",result)
+        result1 = {
+            "route": 'Ok'
+
+        }
+
+    return Response(result1)
 
 
 @api_view(['POST'])
