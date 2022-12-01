@@ -1738,6 +1738,26 @@ def notify(request):
                                     cursor.execute("select display_name_search from student_student WHERE id = %s",
                                                    [student_id])
                                     student_name = cursor.fetchall()
+                                    type = request.data.get('location_type')
+                                    lat = request.data.get('lat')
+                                    long = request.data.get('long')
+
+                                    if type == 'drop-off':
+
+                                        cursor.execute(
+                                            "UPDATE   student_student SET drop_off_lat=%s ,drop_off_lng=%s WHERE id = %s",
+                                            [lat, long, student_id])
+
+                                    elif type == 'pick-up':
+
+                                        cursor.execute(
+                                            "UPDATE   student_student SET pick_up_lat=%s ,pick_up_lng=%s WHERE id = %s",
+                                            [lat, long, student_id])
+
+                                    elif type == 'both':
+                                       print( cursor.execute(
+                                            "UPDATE   student_student SET pick_up_lat=%s ,pick_up_lng=%s,drop_off_lat=%s,drop_off_lng=%s WHERE id = %s",
+                                            [lat, long, lat, long, student_id]))
 
                                     message_en = "	The home location of the student "+str(student_name[0][0])+" has been changed by the bus  " + str(bus_num[0][0])
                                     cursor.execute(

@@ -765,9 +765,7 @@ def kids_list(request):
                                     "name": student1[rec]['display_name_search'],
                                     "id": student1[rec]['id'],
                                     "user_id": student1[rec]['user_id'],
-                                    "avatar":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
-                                        student1[rec]['image_url']) if student1[rec][
-                                        'image_url'] else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
+                                    "avatar":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(student1[rec]['image_url']) if student1[rec]['image_url'] else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
                                     "school_id": int(school_id),
                                     "student_grade": student1[rec]['academic_grade_name1'],
                                     "drop_off_by_parent": drop,
@@ -1241,7 +1239,7 @@ def notify(request):
                                     return Response(result)
                                 elif type =='both':
                                     cursor.execute(
-                                        "UPDATE   student_student SET pick_up_lat=%s ,pick_up_lng=%s,drop_off_lat,drop_off_lng WHERE id = %s",
+                                        "UPDATE  student_student SET pick_up_lat=%s ,pick_up_lng=%s,drop_off_lat=%s,drop_off_lng=%s WHERE id = %s",
                                         [lat, long,lat, long, student_id])
                                     result = {'result': "ok"}
                                     return Response(result)
