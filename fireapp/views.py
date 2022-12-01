@@ -185,7 +185,7 @@ def twoArgs(message_id,school_name):
             [tuple(r_id)])
         columns = (x.name for x in cursor.description)
         student = cursor.fetchall()
-        # print(student)
+        print(student)
         id = []
         for rec in student:
             if rec[0]:
@@ -195,7 +195,7 @@ def twoArgs(message_id,school_name):
             if rec[2]:
                 id.append(rec[2])
         id = list(dict.fromkeys(id))
-        # print(id)
+        print(id)
 
         # cursor.execute(
         #     "select  user_id from school_parent WHERE id in %s ",
@@ -216,7 +216,7 @@ def twoArgs(message_id,school_name):
         push_service = FCMNotification(
             api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
         registration_id = token
-        # print(token)
+        print(token)
         message_title = school_message[0][1]
         # print(message_title)
         message_body = school_message[0][0]
