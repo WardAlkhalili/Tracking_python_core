@@ -486,6 +486,11 @@ def kids_list(request):
                                 "select  lat,lng,pickup_request_distance,change_location,show_map,enable_parents_to_confirm_student_pickup,pickup_request_distance from transport_setting  ORDER BY ID DESC LIMIT 1")
                             columns = (x.name for x in cursor.description)
                             setting = cursor.fetchall()
+                            show_map=True
+                            if (setting[0][4]==True and parent_show_map[0][0]==None) or (setting[0][4]==False and parent_show_map[0][0]==True) or (setting[0][4]and parent_show_map[0][0]) :
+                                show_map =True
+                            else:
+                                show_map=False
                             cursor.execute(
                                 "select  name,phone from res_company WHERE id = %s ",
                                 [school_id])
@@ -512,7 +517,7 @@ def kids_list(request):
                                         [rounds_details[rou][0], student1[rec]['id']])
                                     columns4 = (x.name for x in cursor.description)
                                     rounds_count_student = cursor.fetchall()
-                                    print(rounds_count_student)
+
                                     if rounds_count_student:
                                         cursor.execute(
                                             "select round_id from round_schedule WHERE  id = %s",
@@ -742,6 +747,7 @@ def kids_list(request):
                                     assistant = cursor.fetchall()
                                     assistant_mobile_number=assistant[0][1]
                                     assistant_name = assistant[0][0]
+
                                     cursor.execute(
                                         "select name,mobile from res_partner WHERE id = %s",
                                         [round_info[0][4]])
@@ -796,7 +802,7 @@ def kids_list(request):
                                     "semester_end_date": "",
                                     "show_add_bus_card": False,
                                     "allow_upload_students_images": False,
-                                    "show_map": True if parent_show_map[0][0] else False,
+                                    "show_map": show_map,
                                     "change_location": bool(setting[0][3]),
                                     "pickup_request_distance": int(setting[0][2]),
 

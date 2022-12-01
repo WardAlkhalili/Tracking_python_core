@@ -446,9 +446,11 @@ def student_list(request, round_id):
                             if st_id:
                                 for std_id in st_id:
 
+
                                     cursor.execute("select * from student_student WHERE id = %s ",
                                                    [std_id])
                                     columns4 = (x.name for x in cursor.description)
+
                                     student_student2 = cursor.fetchall()
                                     # s = [dict(zip(columns4, row)) for row in student_student]
                                     student_student12 = []

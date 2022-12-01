@@ -172,20 +172,14 @@ def twoArgs(message_id,school_name):
             "select  message,title  from school_message where id = %s",
             [message_id])
         school_message = cursor.fetchall()
-        print(school_message)
 
-        print(message_id)
         cursor.execute(
             "select  student_student_id  from school_message_student_student where school_message_id = %s",
             [message_id])
         school_message_student_student = cursor.fetchall()
-        print(school_message_student_student)
         r_id = []
         for id in school_message_student_student:
             r_id.append(id[0])
-
-        print(r_id)
-
         cursor.execute(
             "select  mother_id,father_id,responsible_id_value from student_student WHERE id in %s ",
             [tuple(r_id)])
@@ -215,7 +209,6 @@ def twoArgs(message_id,school_name):
         mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id), Q(db_name='iks'),
                                                     Q(is_active=True)).values_list(
             'mobile_token').order_by('-pk')
-        print(mobile_token)
         token = []
         for tok in mobile_token:
             token.append(tok[0])
