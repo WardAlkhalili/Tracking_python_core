@@ -166,7 +166,7 @@ def send_school_message(request):
 
 
 def twoArgs(message_id,school_name):
-    with connections['iks'].cursor() as cursor:
+    with connections[school_name].cursor() as cursor:
 
         cursor.execute(
             "select  message,title  from school_message where id = %s",
