@@ -153,7 +153,7 @@ def send_school_message(request):
         school_name = request.data.get('school_name')
         message_id = request.data.get('message_id')
         print(school_name)
-        r =Timer(8.0, twoArgs, (message_id, school_name))
+        r =Timer(3.0, twoArgs, (message_id, school_name))
         r.start()
         result1 = {
             "route": 'Ok'
