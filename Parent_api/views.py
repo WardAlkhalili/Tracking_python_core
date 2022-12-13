@@ -990,8 +990,11 @@ def kids_hstory(request):
                                             "notifications_text": school_message1[rec][3],
                                             "create_date": school_message1[rec][5],
                                             "notifications_title": school_message1[rec][2],
-
                                         })
+
+
+
+                                        notifications.sort(key=get_year, reverse=True)
                                     result = {"notifications": notifications}
 
                                     return Response(result)
@@ -1019,7 +1022,8 @@ def kids_hstory(request):
             result = {'status': 'error'}
             return Response(result)
 
-
+def get_year(element):
+        return element['date_time']
 @api_view(['POST'])
 def pre_arrive(request):
     if request.method == 'POST':
@@ -1243,8 +1247,28 @@ def notify(request):
                                         [lat, long,lat, long, student_id])
                                     result = {'result': "ok"}
                                     return Response(result)
-                        # elif name == 'battery_low':
-                        #     with connections[school_name].cursor() as cursor:
+                        elif name == 'confirmed_pick':
+
+                            with connections[school_name].cursor() as cursor:
+                                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+                                for e in parent_id:
+                                    parent_id = e[0]
+                                cursor.execute("select  display_name_search from student_student WHERE id = %s",
+                                               [student_id])
+                                columns = (x.name for x in cursor.description)
+                                student_name = cursor.fetchall()
+                                cursor.execute(
+                                    "select  id,date,state from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
+                                    [student_name[0][0], parent_id])
+                                columns = (x.name for x in cursor.description)
+                                date_t = cursor.fetchall()
+                                if date_t:
+                                            cursor.execute(
+                                                "UPDATE public.pickup_request SET picked_up_par=%s WHERE id=%s",
+                                                ['confirmed', date_t[0][0]])
+                                            result = {'result': True}
+                                            return Response(result)
+
                         #         driver_id = Manager.objects.filter(token=au).values_list('driver_id')
                         #         for e in driver_id:
                         #             driver_id = e[0]

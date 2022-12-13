@@ -262,8 +262,9 @@ def round_list(request):
                             round = []
                             r_id = []
                             l_round = []
-                            moved_students=[]
+
                             for id in list_round1:
+                                moved_students = []
                                 r_id.append(id['id'])
                                 cursor.execute(
                                     "select id,day_id from round_schedule WHERE round_id = %s and day_id = %s",
@@ -397,9 +398,7 @@ def round_list(request):
                                         },
                                         "round_id": list_round1[rec]['id'],
                                         "moved_students":moved_students,
-                                        # "moved_students": [
-                                        #     "The student <br><b><font color='#CE3337'>test001</font></b><br> has been moved from this bus for this round only"
-                                        # ],
+
                                         "students_list": [day_list]
 
                                     }
@@ -416,7 +415,6 @@ def round_list(request):
                                     },
                                     "rounds": round
                                 }
-
                             return Response(result)
                     else:
                         result = {"status": "Token notFound"
@@ -534,12 +532,13 @@ def student_list(request, round_id):
                                                     "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
                                                     [round_id, student_student12[0]['id'], round_history[0][0]])
                                                 student_history = cursor.fetchall()
+
                                                 if student_history:
 
                                                     lat = student_history[0][1]
                                                     long = student_history[0][2]
 
-                                                    if student_history[0][0] == 'in':
+                                                    if student_history[0][0] == 'in' or student_history[0][0] == 'near':
 
                                                         in_round = True
                                                         out_round = False
@@ -850,6 +849,7 @@ def student_list(request, round_id):
                                 result = {"students_list": student
                                           }
 
+
                                 return Response(result)
                     if request.method == 'POST':
                         result = {"status": "error"
@@ -1090,18 +1090,20 @@ def set_round_status(request):
                                             now = datetime.date.today()
                                             if round_history[0][1].strftime('%Y-%m-%d') == str(now):
                                                 cursor.execute(
-                                                    "select  datetime,id from round_student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
+                                                    "select  datetime,id,time_out,bus_check_in from round_student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
                                                     [round_id, k[0], round_history[0][0]])
                                                 student_history = cursor.fetchall()
                                                 if student_history:
                                                     if  round_info[0][3] == 'pick_up':
-                                                        cursor.execute(
-                                                            "UPDATE public.round_student_history SET time_out = %s WHERE id =%s ",
-                                                            [datetime.datetime.now(), student_history[0][1]])
+                                                        if student_history[0][3]:
+                                                            cursor.execute(
+                                                                "UPDATE public.round_student_history SET time_out = %s WHERE id =%s ",
+                                                                [datetime.datetime.now(), student_history[0][1]])
                                                     else:
-                                                        cursor.execute(
-                                                            "UPDATE public.round_student_history SET bus_check_in = %s WHERE id =%s ",
-                                                            [datetime.datetime.now(),student_history[0][1]])
+                                                        if student_history[0][2]:
+                                                            cursor.execute(
+                                                                "UPDATE public.round_student_history SET bus_check_in = %s WHERE id =%s ",
+                                                                [datetime.datetime.now(),student_history[0][1]])
 
                                     cursor.execute(
                                         "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
@@ -1159,7 +1161,6 @@ def students_bus_checks(request):
                             school_name = Manager.pincode(school_name)
                             with connections[school_name].cursor() as cursor:
                                 students = request.data.get('students')
-
                                 for rec in students:
 
                                     round_id = rec['round_id']
@@ -1189,6 +1190,7 @@ def students_bus_checks(request):
                                                 [round_id, student_id, round_history[0][0]])
                                             student_history = cursor.fetchall()
                                             if student_history:
+
                                                 cursor.execute(
                                                     "INSERT INTO  student_history (round_id,student_id,bus_check_in,datetime,history_id,lat,long,activity_type) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
                                                     [round_id, student_id, datetime.datetime.now(),
@@ -1236,10 +1238,18 @@ def students_bus_checks(request):
                                                 cursor.execute(
                                                     "UPDATE public.transport_round SET total_checkedout_students= %s , total_checkedin_students= %s WHERE id=%s",
                                                     [ch_out, ch_in, round_id])
-                                                cursor.execute(
-                                                    "INSERT INTO  round_student_history (round_id,student_id,driver_waiting,bus_check_in,datetime,history_id) VALUES (%s,%s,%s,%s,%s,%s); ",
-                                                    [round_id, student_id, waiting_minutes, datetime.datetime.now(),
-                                                     datetime.datetime.now(), round_history[0][0]])
+
+                                                if status =='out' or status =='in':
+
+                                                    cursor.execute(
+                                                        "INSERT INTO  round_student_history (round_id,student_id,driver_waiting,bus_check_in,datetime,history_id) VALUES (%s,%s,%s,%s,%s,%s); ",
+                                                        [round_id, student_id, waiting_minutes, datetime.datetime.now(),
+                                                         datetime.datetime.now(), round_history[0][0]])
+                                                else:
+                                                    cursor.execute(
+                                                        "INSERT INTO  round_student_history (round_id,student_id,history_id,driver_waiting) VALUES (%s,%s,%s,%s); ",
+                                                        [round_id, student_id, round_history[0][0],waiting_minutes])
+
                                                 cursor.execute(
                                                     "INSERT INTO  student_history (round_id,student_id,bus_check_in,datetime,history_id,lat,long,activity_type) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
                                                     [round_id, student_id, datetime.datetime.now(),

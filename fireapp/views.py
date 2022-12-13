@@ -237,8 +237,10 @@ def send_confirmation_message_to_parent(request):
     if request.method == 'POST':
         school_name = request.data.get('school_name')
         student_name = request.data.get('student_name')
+        student_id=request.data.get('student_id')
         parent_id = request.data.get('parent_id')
-        mobile_token = ManagerParent.objects.filter(Q(user_id=parent_id) , Q(db_name=school_name),Q(is_active=True)).values_list(
+        # student_name=''
+        mobile_token = ManagerParent.objects.filter(Q(parent_id=parent_id) , Q(db_name=school_name),Q(is_active=True)).values_list(
             'mobile_token').order_by('-pk')
         for e in mobile_token:
             mobile_token = e[0]
@@ -247,10 +249,11 @@ def send_confirmation_message_to_parent(request):
             api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
         # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
         registration_id = mobile_token
+ 
         message_title = "picked up"
-        message_body = "please confirm that you have picked up" + student_name + "from the school"
+        message_body = "please confirm that you have picked up  " + student_name + "from the school"
         result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
-                                                   message_body=message_body)
+                                                   message_body=message_body,data_message={"student_id":str(student_id),"picked":True})
         #
         # print(result)
         result1 = {
