@@ -263,6 +263,8 @@ def round_list(request):
                             r_id = []
                             l_round = []
 
+                            moved_students1=[]
+                            index=0
                             for id in list_round1:
                                 moved_students = []
                                 r_id.append(id['id'])
@@ -283,26 +285,37 @@ def round_list(request):
                                                               datetime.datetime.now().month,
                                                               datetime.datetime.now().day+1)
                                     for student_state in round_state_student:
-                                        if 'drop' in request.data.get('round_type'):
+
+                                        if 'drop' == request.data.get('round_type'):
                                             cursor.execute(
                                                 "select * FROM pickup_request  WHERE student_name_id = %s and date <= %s and date >= %s and state= %s",
                                                 [student_state[0], datetime.datetime.now(), start, 'done'])
                                             pickup_request = cursor.fetchall()
+                                            print(pickup_request)
+                                            print(student_state[0])
                                             if pickup_request:
                                                 cursor.execute("select name from student_student WHERE id = %s ",
                                                                [student_state[0]])
                                                 student_student2 = cursor.fetchall()
-                                                moved_students.append(student_student2[0][0] +", has been picked up by parents")
+                                                moved_students.append(
+                                                     student_student2[0][0] + "</font></b><br> , has been picked up by parents")
+
                                         if student_state[2]:
-                                            if "Transferred to" in student_state[2]:
+
+                                            if "Transferred to" == student_state[2]:
                                                 cursor.execute("select name from student_student WHERE id = %s ",
                                                                [student_state[0]])
-                                                student_student2 = cursor.fetchall()
-                                                moved_students.append( "The student <br><b><font color='#CE3337'>"+student_student2[0][0]+"</font></b><br> has been moved from this bus for this round only")
+                                                student_student21 = cursor.fetchall()
+                                                moved_students.append( "The student <br><b><font color='#CE3337'>"+student_student21[0][0]+"</font></b><br> has been moved from this bus for this round only")
                                             else:
+                                                cursor.execute("select name from student_student WHERE id = %s ",
+                                                               [student_state[0]])
+                                                student_student21 = cursor.fetchall()
                                                 moved_students.append(
-                                                    " The student "+student_student2[0][0]+" has been added to this round. Before you start the round please check the availability of the student on the bus and the pickup location of the studen"
-                                                )
+                                                    "The student <br><b><font color='#CE3337'>" + student_student21[0][
+                                                        0] + "</font></b><br> has been added to this round. Before you start the round please check the availability of the student on the bus and the pickup location of the studen")
+
+                                moved_students1.append(moved_students)
                             if r_id:
                                 cursor.execute(
                                     "select id,day_id,round_id from round_schedule WHERE round_id in %s and day_id =%s",
@@ -397,11 +410,15 @@ def round_list(request):
                                             }
                                         },
                                         "round_id": list_round1[rec]['id'],
-                                        "moved_students":moved_students,
+                                        "moved_students":moved_students1[rec],
 
                                         "students_list": [day_list]
 
                                     }
+                                    # moved_students = []
+                                    # print("------------------------------------------")
+                                    # print(result1)
+
                             cursor.execute(
                                 """ select 	allow_driver_change_students_location,allow_driver_to_use_beacon from transport_setting ORDER BY ID ASC LIMIT 1""")
                             login_details = cursor.fetchall()
@@ -415,6 +432,7 @@ def round_list(request):
                                     },
                                     "rounds": round
                                 }
+
                             return Response(result)
                     else:
                         result = {"status": "Token notFound"
@@ -486,7 +504,7 @@ def student_list(request, round_id):
                             if rounds_count_student:
                                 for student_state in rounds_count_student:
                                     if student_state[2]:
-                                        if "Transferred to" in student_state[2]:
+                                        if "Transferred to" == student_state[2]:
                                             student_student2 = None
                                             st_id.remove(student_state[0])
                             if st_id:
@@ -1012,16 +1030,16 @@ def set_round_status(request):
                                         mobile_token=[]
                                         for e in mobile_token1:
                                             mobile_token.append(e[0])
-
-                                        # push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                        # registration_id = mobile_token
-                                        # message_title = "School Departure"
-                                        # message_body = student_name[0][0] + "  has just been checked into the bus."
-                                        # if mobile_token and not("token" in mobile_token):
-                                        #     notify_single_device = push_service.notify_single_device(
-                                        #         registration_id=registration_id[0],
-                                        #         message_title=message_title,
-                                        #         message_body=message_body)
+                                        if round_info[0][3] == 'pick_up':
+                                                push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                                registration_id = mobile_token
+                                                message_title = "School Departure"
+                                                message_body = student_name[0][0] + "  has just been checked into the bus."
+                                                if mobile_token and not("token" in mobile_token):
+                                                    notify_single_device = push_service.notify_single_device(
+                                                        registration_id=registration_id[0],
+                                                        message_title=message_title,
+                                                        message_body=message_body)
                                     cursor.execute(
                                         "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
                                         [round_id, round_info[0][2], round_info[0][1], round_id])
