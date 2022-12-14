@@ -254,6 +254,7 @@ def round_list(request):
                             list_round = cursor.fetchall()
 
                             list_round1 = []
+
                             columnNames = [column[0] for column in cursor.description]
                             for record in list_round:
                                 list_round1.append(dict(zip(columnNames, record)))
@@ -264,7 +265,8 @@ def round_list(request):
                             l_round = []
 
                             moved_students1=[]
-                            index=0
+
+
                             for id in list_round1:
                                 moved_students = []
                                 r_id.append(id['id'])
@@ -273,9 +275,11 @@ def round_list(request):
                                     [id['id'], day_id[0][0]])
                                 rounds_details = cursor.fetchall()
                                 cursor.execute(
-                                    "select student_id,sequence,transfer_state from transport_participant WHERE round_schedule_id = %s ORDER BY sequence ASC",
+                                    "select student_id,sequence,transfer_state,source_round_id from transport_participant WHERE round_schedule_id = %s ORDER BY sequence ASC",
                                     [rounds_details[0][0]])
                                 round_state_student = cursor.fetchall()
+
+
 
                                 if round_state_student:
                                     import datetime
@@ -284,15 +288,19 @@ def round_list(request):
                                     end = datetime.datetime(datetime.datetime.now().year,
                                                               datetime.datetime.now().month,
                                                               datetime.datetime.now().day+1)
+                                    today=str(datetime.datetime.now().year)+"-"+str(datetime.datetime.now().month)+"-"+str(datetime.datetime.now().day)
                                     for student_state in round_state_student:
+                                        type_round="drop_off" if 'drop' == request.data.get('round_type') else "pick_up"
+                                        cursor.execute(
+                                            "select * FROM student_round_transfer  WHERE student_id = %s  and state= %s and date_from <= %s and date_to >=%s and type =%s ",
+                                            [student_state[0], 'approve', today,today, type_round])
+                                        student_round_transfer = cursor.fetchall()
 
                                         if 'drop' == request.data.get('round_type'):
                                             cursor.execute(
-                                                "select * FROM pickup_request  WHERE student_name_id = %s and date <= %s and date >= %s and state= %s",
-                                                [student_state[0], datetime.datetime.now(), start, 'done'])
+                                                "select * FROM pickup_request  WHERE student_name_id = %s  and state= %s and date >= %s and date <= %s",
+                                                [student_state[0], 'done',start, datetime.datetime.now()])
                                             pickup_request = cursor.fetchall()
-                                            print(pickup_request)
-                                            print(student_state[0])
                                             if pickup_request:
                                                 cursor.execute("select name from student_student WHERE id = %s ",
                                                                [student_state[0]])
@@ -300,20 +308,26 @@ def round_list(request):
                                                 moved_students.append(
                                                      student_student2[0][0] + "</font></b><br> , has been picked up by parents")
 
-                                        if student_state[2]:
+                                        if  student_round_transfer:
 
-                                            if "Transferred to" == student_state[2]:
-                                                cursor.execute("select name from student_student WHERE id = %s ",
-                                                               [student_state[0]])
-                                                student_student21 = cursor.fetchall()
-                                                moved_students.append( "The student <br><b><font color='#CE3337'>"+student_student21[0][0]+"</font></b><br> has been moved from this bus for this round only")
-                                            else:
-                                                cursor.execute("select name from student_student WHERE id = %s ",
-                                                               [student_state[0]])
-                                                student_student21 = cursor.fetchall()
-                                                moved_students.append(
-                                                    "The student <br><b><font color='#CE3337'>" + student_student21[0][
-                                                        0] + "</font></b><br> has been added to this round. Before you start the round please check the availability of the student on the bus and the pickup location of the studen")
+                                            cursor.execute(
+                                                "SELECT *FROM public.school_day_student_round_transfer_rel WHERE school_day_id =%s and student_round_transfer_id=%s",
+                                                [day_id[0][0],student_round_transfer[0][0] ])
+                                            school_day_student_round_transfer_rel = cursor.fetchall()
+
+                                            if school_day_student_round_transfer_rel:
+                                                if not student_state[3]:
+                                                    cursor.execute("select name from student_student WHERE id = %s ",
+                                                                   [student_state[0]])
+                                                    student_student21 = cursor.fetchall()
+                                                    moved_students.append( "The student <br><b><font color='#CE3337'>"+student_student21[0][0]+"</font></b><br> has been moved from this bus for this round only")
+                                                else:
+                                                    cursor.execute("select name from student_student WHERE id = %s ",
+                                                                   [student_state[0]])
+                                                    student_student21 = cursor.fetchall()
+                                                    moved_students.append(
+                                                        "The student <br><b><font color='#CE3337'>" + student_student21[0][
+                                                            0] + "</font></b><br> has been added to this round. Before you start the round please check the availability of the student on the bus and the pickup location of the studen")
 
                                 moved_students1.append(moved_students)
                             if r_id:
@@ -415,9 +429,7 @@ def round_list(request):
                                         "students_list": [day_list]
 
                                     }
-                                    # moved_students = []
-                                    # print("------------------------------------------")
-                                    # print(result1)
+
 
                             cursor.execute(
                                 """ select 	allow_driver_change_students_location,allow_driver_to_use_beacon from transport_setting ORDER BY ID ASC LIMIT 1""")
@@ -487,11 +499,13 @@ def student_list(request, round_id):
                             round_info1 = cursor.fetchall()
 
                             cursor.execute(
-                                "select student_id,sequence,transfer_state from transport_participant WHERE round_schedule_id = %s ORDER BY sequence ASC",
+                                "select student_id,sequence,transfer_state,source_round_id from transport_participant WHERE round_schedule_id = %s ORDER BY sequence ASC",
                                 [rounds_details[0][0]])
                             rounds_count_student = cursor.fetchall()
                             ch_in = 0
                             ch_out = 0
+                            today = str(datetime.datetime.now().year) + "-" + str(
+                                datetime.datetime.now().month) + "-" + str(datetime.datetime.now().day)
                             if round_info1[0][1] == 'pick_up':
                                 ch_out = len(rounds_count_student)
                             else:
@@ -503,10 +517,26 @@ def student_list(request, round_id):
                                 st_id.append(k[0])
                             if rounds_count_student:
                                 for student_state in rounds_count_student:
-                                    if student_state[2]:
-                                        if "Transferred to" == student_state[2]:
-                                            student_student2 = None
-                                            st_id.remove(student_state[0])
+                                    type_round = round_info1[0][1]
+
+                                    cursor.execute(
+                                        "select * FROM student_round_transfer  WHERE student_id = %s  and state= %s and date_from <= %s and date_to >=%s and type =%s ",
+                                        [student_state[0], 'approve', today, today, type_round])
+                                    student_round_transfer = cursor.fetchall()
+
+                                    if student_round_transfer:
+                                    
+                                        cursor.execute(
+                                            "SELECT *FROM public.school_day_student_round_transfer_rel WHERE school_day_id =%s and student_round_transfer_id=%s",
+                                            [day_name[0][0], student_round_transfer[0][0]])
+                                        school_day_student_round_transfer_rel = cursor.fetchall()
+
+                                        if school_day_student_round_transfer_rel:
+                                            if not student_state[3]:
+                                                student_student2 = None
+
+                                                st_id.remove(student_state[0])
+
                             if st_id:
                                 for std_id in st_id:
                                     cursor.execute("select * from student_student WHERE id = %s ",
