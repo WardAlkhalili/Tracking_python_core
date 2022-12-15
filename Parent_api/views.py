@@ -830,7 +830,7 @@ def kids_list(request):
                                     "features": model,
                                 })
                             result = {'message':'','students': studen_list, "parent_id": int(parent_id)}
-                            # print(result)
+                            print(result)
                             return Response(result)
                     result = {'status': 'error'}
                     return Response(result)
