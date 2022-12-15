@@ -117,10 +117,9 @@ def Get_round_locations(request):
         start_unix_time = request.data.get('start_unix_time')
         fullRound = school_name + "-stg-round-" + str(round_id)
         date = request.data.get('date').split('-')
-        currentDate = datetime.strptime(date[0] + "/" + date[1] + "/" + date[2], '%Y/%m/%d').date()
+        currentDate = datetime.strptime(date[0] + "/" + date[1] + "/" + date[2], '%d/%m/%Y').date()
 
         route = []
-        # print(database.child(fullRound).child(str(currentDate)).get().val().items())
         try:
 
             for key, value in database.child(fullRound).child(str(currentDate)).get().val().items():
@@ -129,6 +128,7 @@ def Get_round_locations(request):
                 "route": route
             }
         except:
+
             result = {
                 "route": route
             }
