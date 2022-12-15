@@ -235,6 +235,10 @@ def round_list(request):
                 if 'Bearer' in request.headers.get('Authorization'):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
                     db_name = Manager.objects.filter(token=au).values_list('db_name')
+                    driver_id = Manager.objects.filter(token=au).values_list('driver_id')
+
+                    for e in driver_id:
+                        driver_id = e[0]
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
@@ -297,16 +301,20 @@ def round_list(request):
                                         student_round_transfer = cursor.fetchall()
 
                                         if 'drop' == request.data.get('round_type'):
+                                            cursor.execute("select display_name_search from student_student WHERE id = %s ",
+                                                           [student_state[0]])
+                                            student_student2 = cursor.fetchall()
+                                            cursor.execute(
+                                                "select * FROM school_message  WHERE title = %s  and driver_id= %s and date >= %s and date <= %s and search_type=%s and message=%s",
+                                                ['Pick Up By Parent', driver_id, start, datetime.datetime.now(),'buses',student_student2[0][0]])
+                                            school_message = cursor.fetchall()
                                             cursor.execute(
                                                 "select * FROM pickup_request  WHERE student_name_id = %s  and state= %s and date >= %s and date <= %s",
                                                 [student_state[0], 'done',start, datetime.datetime.now()])
                                             pickup_request = cursor.fetchall()
-                                            if pickup_request:
-                                                cursor.execute("select name from student_student WHERE id = %s ",
-                                                               [student_state[0]])
-                                                student_student2 = cursor.fetchall()
-                                                moved_students.append(
-                                                     student_student2[0][0] + "</font></b><br> , has been picked up by parents")
+                                            if pickup_request or school_message:
+
+                                                moved_students.append(student_student2[0][0] + "</font></b><br> , has been picked up by parents")
 
                                         if  student_round_transfer:
 
@@ -472,7 +480,10 @@ def student_list(request, round_id):
                 if 'Bearer' in request.headers.get('Authorization'):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
                     db_name = Manager.objects.filter(token=au).values_list('db_name')
+                    driver_id = Manager.objects.filter(token=au).values_list('driver_id')
 
+                    for e in driver_id:
+                        driver_id = e[0]
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
@@ -669,15 +680,21 @@ def student_list(request, round_id):
                                         start = datetime.datetime(datetime.datetime.now().year,
                                                                   datetime.datetime.now().month,
                                                                   datetime.datetime.now().day)
-                                        # end = datetime.datetime(datetime.datetime.now().year,
-                                        #                         datetime.datetime.now().month,
-                                        #                         datetime.datetime.now().day + 1)
+
+                                        cursor.execute("select display_name_search from student_student WHERE id = %s ",
+                                                       [student_student12[0]['id']])
+                                        student_student2 = cursor.fetchall()
+                                        cursor.execute(
+                                            "select * FROM school_message  WHERE title = %s  and driver_id= %s and date >= %s and date <= %s and search_type=%s and message=%s",
+                                            ['Pick Up By Parent', driver_id, start, datetime.datetime.now(), 'buses',
+                                             student_student2[0][0]])
+                                        school_message = cursor.fetchall()
                                         cursor.execute(
                                             "select * FROM pickup_request  WHERE student_name_id = %s and date <= %s and date >= %s and state= %s",
                                             [student_student12[0]['id'], datetime.datetime.now(), start, 'done'])
 
                                         pickup_request = cursor.fetchall()
-                                        if pickup_request:
+                                        if pickup_request or school_message:
                                             in_round = False
                                             out_round = False
                                             abs = False
