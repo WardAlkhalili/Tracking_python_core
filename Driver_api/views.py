@@ -525,7 +525,7 @@ def student_list(request, round_id):
                                     student_round_transfer = cursor.fetchall()
 
                                     if student_round_transfer:
-                                    
+
                                         cursor.execute(
                                             "SELECT *FROM public.school_day_student_round_transfer_rel WHERE school_day_id =%s and student_round_transfer_id=%s",
                                             [day_name[0][0], student_round_transfer[0][0]])
@@ -692,6 +692,22 @@ def student_list(request, round_id):
                                         columns_m = (x.name for x in cursor.description)
                                         mother = cursor.fetchall()
                                         mother_inf = [dict(zip(columns_m, row)) for row in mother]
+                                        student_grade = ''
+                                        cursor.execute(
+                                            "SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s",
+                                            [student_student12[0]['id']])
+                                        student_distribution_line_id = cursor.fetchall()
+                                        if student_distribution_line_id:
+                                            cursor.execute(
+                                                "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = %s",
+                                                [student_distribution_line_id[0][0]])
+                                            student_distribution_line = cursor.fetchall()
+                                            if student_distribution_line:
+                                                cursor.execute(
+                                                    "SELECT name FROM public.academic_grade WHERE id = %s",
+                                                    [student_distribution_line[0][0]])
+                                                academic_grade = cursor.fetchall()
+                                                student_grade = academic_grade[0][0]
                                         student_info[std_id] = {
                                             "id": student_student12[0]['id'],
                                             "year_id": student_student12[0]['year_id'],
@@ -836,7 +852,7 @@ def student_list(request, round_id):
                                                 'image_url'] else student_student12[0]['image_url'],
                                             "round_id": student_student12[0]['round_id'],
                                             "responsible_id_value": student_student12[0]['responsible_id_value'],
-                                            "grade": student_student12[0]['academic_grade_name1'],
+                                            "grade": student_grade,
                                             # "first_mandatory": student_student[std][134],
 
                                             # "second_mandatory": student_student[std][135],

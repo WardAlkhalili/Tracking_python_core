@@ -760,6 +760,22 @@ def kids_list(request):
                                     fleet_info = cursor.fetchall()
                                     bus_id=int(fleet_info[0][0])
                                     # fleet.vehicle
+                                student_grade=''
+                                cursor.execute(
+                                    "SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s",
+                                    [student1[rec]['id']])
+                                student_distribution_line_id = cursor.fetchall()
+                                if student_distribution_line_id:
+                                    cursor.execute(
+                                        "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = %s",
+                                        [student_distribution_line_id[0][0]])
+                                    student_distribution_line = cursor.fetchall()
+                                    if student_distribution_line:
+                                        cursor.execute(
+                                            "SELECT name FROM public.academic_grade WHERE id = %s",
+                                            [student_distribution_line[0][0]])
+                                        academic_grade = cursor.fetchall()
+                                        student_grade=academic_grade[0][0]
                                 studen_list.append({
 
                                     "name": student1[rec]['display_name_search'],
@@ -767,7 +783,7 @@ def kids_list(request):
                                     "user_id": student1[rec]['user_id'],
                                     "avatar":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(student1[rec]['image_url']) if student1[rec]['image_url'] else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
                                     "school_id": int(school_id),
-                                    "student_grade": student1[rec]['academic_grade_name1'],
+                                    "student_grade": student_grade,
                                     "drop_off_by_parent": drop,
                                     "pickup_by_parent": pick,
                                     "father_id": student1[rec]['father_id'],
@@ -830,7 +846,7 @@ def kids_list(request):
                                     "features": model,
                                 })
                             result = {'message':'','students': studen_list, "parent_id": int(parent_id)}
-                            print(result)
+
                             return Response(result)
                     result = {'status': 'error'}
                     return Response(result)
