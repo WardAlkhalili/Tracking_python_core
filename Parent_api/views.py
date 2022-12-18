@@ -200,6 +200,7 @@ def settings(request):
                         # school_name = ManagerParent.pincode('iks')
                         with connections[school_name].cursor() as cursor:
                             y = json.dumps(notifications['notifications'])
+
                             settings = "{\"notifications\":" + y + "}"
                             cursor.execute(
                                 "UPDATE public.school_parent SET settings=%s WHERE id=%s;",
@@ -239,8 +240,21 @@ def settings(request):
                             columns = (x.name for x in cursor.description)
                             data_id_bus = cursor.fetchall()
                             if data_id_bus[0][0]:
+
                                 data = json.loads(data_id_bus[0][0])
-                                return Response(data)
+
+                                li = list(data['notifications'].split(","))
+
+                                result={
+                                          "notifications": {
+                                            "locale": "ar" if "ar" in li[3] else 'en' ,
+                                            "nearby": True if "true"in li[0] else False ,
+                                            "check_in": True if "true" in li[1] else False ,
+                                            "check_out": True if "true" in li[2] else False
+                                          }
+                                        }
+
+                                return Response(result)
                             result = {'status': 'Empty'}
                             return Response(result)
                     else:
