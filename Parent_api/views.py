@@ -774,7 +774,10 @@ def kids_list(request):
                                     fleet_info = cursor.fetchall()
                                     bus_id=int(fleet_info[0][0])
                                     # fleet.vehicle
-                                student_grade=''
+
+                                student_grade = None
+                                # ----------------------
+
                                 cursor.execute(
                                     "SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s",
                                     [student1[rec]['id']])
@@ -790,6 +793,33 @@ def kids_list(request):
                                             [student_distribution_line[0][0]])
                                         academic_grade = cursor.fetchall()
                                         student_grade=academic_grade[0][0]
+                                if student_grade==None:
+                                    cursor.execute(
+                                        "select user_id from student_student where id=%s",
+                                        [student1[rec]['id']])
+                                    user_id_q = cursor.fetchall()
+                                    if user_id_q:
+                                        cursor.execute(
+                                            " select partner_id from res_users where id=%s",
+                                            [user_id_q[0][0]])
+                                        partner_id_q = cursor.fetchall()
+                                        if partner_id_q:
+                                            cursor.execute(
+                                                "select class_id from res_partner where id=%s",
+                                                [partner_id_q[0][0]])
+                                            class_id_q = cursor.fetchall()
+                                            if class_id_q:
+                                                cursor.execute(
+                                                    "select academic_grade_id from school_class where id=%s",
+                                                    [class_id_q[0][0]])
+                                                academic_grade_id_q = cursor.fetchall()
+                                                if academic_grade_id_q:
+                                                    cursor.execute(
+                                                        "select name from academic_grade where id=%s",
+                                                        [academic_grade_id_q[0][0]])
+                                                    academic_grade_q = cursor.fetchall()
+                                                    student_grade = academic_grade_q[0][0]
+                                    # ---------------------
                                 studen_list.append({
 
                                     "name": student1[rec]['display_name_search'],
@@ -1357,3 +1387,64 @@ def notify(request):
                         #         # user_no_move_time_exceeded
                         #
                         #
+
+
+
+@api_view(['GET'])
+def get_badge(request, student_id):
+    if request.method == 'GET':
+        # if request.headers:
+        #     if request.headers.get('Authorization'):
+        #         if 'Bearer' in request.headers.get('Authorization'):
+        #             au = request.headers.get('Authorization').replace('Bearer', '').strip()
+        #             db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+        #
+        #             if db_name:
+        #                 for e in db_name:
+        #                     school_name = e[0]
+                    with connections['tst'].cursor() as cursor:
+                        # academic.year
+                        cursor.execute(
+                            "select  id  from academic_year WHERE state = %s",
+                            ['active'])
+                        academic_year = cursor.fetchall()
+                        academic_year_ids=[]
+                        data=[]
+                        for rec in academic_year:
+                            academic_year_ids.append(rec[0])
+                        cursor.execute(
+                            "select  school_badge_id,teacher_id,subject_id,date,new_badge,id  from badge_badge WHERE student_id = %s AND year_id in %s",
+                            [student_id, tuple(academic_year_ids)])
+                        badges = cursor.fetchall()
+
+                        for b in badges:
+                            cursor.execute(
+                                "select  name,description  from school_badge WHERE id = %s ",
+                                [b[0]])
+                            school_badge = cursor.fetchall()
+
+                            cursor.execute(
+                                "select  name  from hr_employee WHERE id = %s ",
+                                [b[1]])
+                            teacher_name = cursor.fetchall()
+                            subject_name=''
+                            if b[2]:
+                                cursor.execute(
+                                    "select  name  from school_subject WHERE id = %s ",
+                                    [b[2]])
+                                subject_name = cursor.fetchall()
+                            data.append({'name': school_badge[0][0],
+                                         'date':b[3].strftime("%d %b %Y"),
+                                         # 'image': school_badge[0][1],
+                                         'id': b[5],
+                                         'teacher':teacher_name[0][0],
+                                         'subject': subject_name[0][0] if subject_name else '',
+                                         'description': school_badge[0][1],
+                                         'new_badge': b[4],
+                                         # 'disable': b.date.month > fields.date.today().month
+                                         })
+                    result = {'result': data}
+                                                                        # print("childs_attendance")
+
+                    return Response(result)
+

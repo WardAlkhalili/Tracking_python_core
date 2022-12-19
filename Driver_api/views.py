@@ -709,7 +709,8 @@ def student_list(request, round_id):
                                         columns_m = (x.name for x in cursor.description)
                                         mother = cursor.fetchall()
                                         mother_inf = [dict(zip(columns_m, row)) for row in mother]
-                                        student_grade = ''
+                                        student_grade = None
+
                                         cursor.execute(
                                             "SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s",
                                             [student_student12[0]['id']])
@@ -725,6 +726,38 @@ def student_list(request, round_id):
                                                     [student_distribution_line[0][0]])
                                                 academic_grade = cursor.fetchall()
                                                 student_grade = academic_grade[0][0]
+                                        if student_grade== None:
+                                            # ----------------------
+                                            cursor.execute(
+                                                "select user_id from student_student where id=%s",
+                                                [student_student12[0]['id']])
+                                            user_id_q = cursor.fetchall()
+
+                                            if user_id_q:
+                                                cursor.execute(
+                                                    " select partner_id from res_users where id=%s",
+                                                    [user_id_q[0][0]])
+                                                partner_id_q = cursor.fetchall()
+
+                                                if partner_id_q:
+                                                    cursor.execute(
+                                                        "select class_id from res_partner where id=%s",
+                                                        [partner_id_q[0][0]])
+                                                    class_id_q = cursor.fetchall()
+
+                                                    if class_id_q[0][0]:
+                                                        cursor.execute(
+                                                            "select academic_grade_id from school_class where id=%s",
+                                                            [class_id_q[0][0]])
+                                                        academic_grade_id_q = cursor.fetchall()
+
+                                                        if academic_grade_id_q:
+                                                            cursor.execute(
+                                                                "select name from academic_grade where id=%s",
+                                                                [academic_grade_id_q[0][0]])
+                                                            academic_grade_q = cursor.fetchall()
+                                                            student_grade = academic_grade_q[0][0]
+                                            # ---------------------
                                         student_info[std_id] = {
                                             "id": student_student12[0]['id'],
                                             "year_id": student_student12[0]['year_id'],
