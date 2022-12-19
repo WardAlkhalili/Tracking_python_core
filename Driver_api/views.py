@@ -909,7 +909,7 @@ def student_list(request, round_id):
                                                     }
                                                 }
                                             ],
-                                            "avatar": student_student12[0]['image_url'] if student_student12[0][
+                                            "avatar": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +student_student12[0]['image_url'] if student_student12[0][
                                                 'image_url'] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png",
                                             "check_in": in_round,
                                             "check_out": out_round,
