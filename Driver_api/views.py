@@ -584,8 +584,12 @@ def student_list(request, round_id):
                                             [round_id, round_info[0][2], round_info[0][1],
                                              round_id])
                                         round_history = cursor.fetchall()
-
+                                        # print(round_history)
+                                        start = datetime.datetime(datetime.datetime.now().year,
+                                                                  datetime.datetime.now().month,
+                                                                  datetime.datetime.now().day)
                                         if round_history:
+                                            # print("--------------------")
                                             now = datetime.date.today()
                                             if round_history[0][1].strftime('%Y-%m-%d') == str(now):
 
@@ -593,12 +597,9 @@ def student_list(request, round_id):
                                                     "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
                                                     [round_id, student_student12[0]['id'], round_history[0][0]])
                                                 student_history = cursor.fetchall()
-
                                                 if student_history:
-
                                                     lat = student_history[0][1]
                                                     long = student_history[0][2]
-
                                                     if student_history[0][0] == 'in' or student_history[0][0] == 'near':
 
                                                         in_round = True
@@ -610,14 +611,11 @@ def student_list(request, round_id):
                                                             ['in', student_student12[0]['id'],
                                                              rounds_details[0][0]])
                                                         if round_info1[0][1] == 'pick_up':
-
                                                             ch_in = ch_in + 1
                                                             ch_out = ch_out - 1
                                                         else:
-
                                                             ch_in = ch_in - 1
                                                             ch_out = ch_out + 1
-
                                                     elif student_history[0][0] == 'out':
                                                         in_round = False
                                                         out_round = True
@@ -663,6 +661,22 @@ def student_list(request, round_id):
                                                             ['absent_all', student_student12[0]['id'],
                                                              rounds_details[0][0]])
                                                 else:
+
+                                                    cursor.execute(
+                                                        "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and datetime >= %s and datetime <= %s   ORDER BY ID DESC LIMIT 1 ",
+                                                        [round_id, student_student12[0]['id'], start,
+                                                         datetime.datetime.now()])
+                                                    student_history1 = cursor.fetchall()
+
+                                                    if student_history1:
+
+                                                        if student_history1[0][0] == 'absent' or student_history1[0][
+                                                            0] == 'absent-all':
+
+                                                            in_round = False
+                                                            out_round = False
+                                                            abs = True
+                                                            no_show = False
                                                     if round_info1[0][1] == 'pick_up':
 
                                                         cursor.execute(
@@ -677,11 +691,30 @@ def student_list(request, round_id):
                                                             ['in', student_student12[0]['id'],
                                                              rounds_details[0][0]])
                                                         # ch_in = len(rounds_count_student)
+                                            else:
+
+                                                cursor.execute(
+                                                    "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and datetime >= %s and datetime <= %s   ORDER BY ID DESC LIMIT 1 ",
+                                                    [round_id, student_student12[0]['id'],start,datetime.datetime.now()])
+                                                student_history1 = cursor.fetchall()
+
+                                                if student_history1:
+                                                    if round_info1[0][1] == 'pick_up':
+                                                        if student_history1[0][0]=='absent' or student_history1[0][0]=='absent_all':
+
+                                                            in_round = False
+                                                            out_round = False
+                                                            abs = True
+                                                            no_show = False
+                                                    else:
+                                                        if student_history1[0][0] == 'absent' or student_history1[0][
+                                                            0] == 'absent_all':
+                                                            in_round = False
+                                                            out_round = False
+                                                            abs = False
+                                                            no_show = True
 
 
-                                        start = datetime.datetime(datetime.datetime.now().year,
-                                                                  datetime.datetime.now().month,
-                                                                  datetime.datetime.now().day)
 
                                         cursor.execute("select display_name_search from student_student WHERE id = %s ",
                                                        [student_student12[0]['id']])
@@ -760,7 +793,7 @@ def student_list(request, round_id):
                                                             academic_grade_q = cursor.fetchall()
                                                             student_grade = academic_grade_q[0][0]
                                             # ---------------------
-                                     
+
                                         student_info[std_id] = {
                                             "id": student_student12[0]['id'],
                                             "year_id": student_student12[0]['year_id'],

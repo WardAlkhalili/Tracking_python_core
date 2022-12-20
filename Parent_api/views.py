@@ -243,16 +243,27 @@ def settings(request):
 
                                 data = json.loads(data_id_bus[0][0])
 
-                                li = list(data['notifications'].split(","))
-
-                                result={
-                                          "notifications": {
-                                            "locale": "ar" if "ar" in li[3] else 'en' ,
-                                            "nearby": True if "true"in li[0] else False ,
-                                            "check_in": True if "true" in li[1] else False ,
-                                            "check_out": True if "true" in li[2] else False
-                                          }
+                                if type(data['notifications']) is str:
+                                    li = list(data['notifications'].split(","))
+                                    result={
+                                              "notifications": {
+                                                "locale": "ar" if "ar" in li[3] else 'en' ,
+                                                "nearby": True if "true"in li[0] else False ,
+                                                "check_in": True if "true" in li[1] else False ,
+                                                "check_out": True if "true" in li[2] else False
+                                              }
+                                            }
+                                elif type(data['notifications']) is dict:
+                                    result = {
+                                        "notifications": {
+                                            "locale": data['notifications']['locale'],
+                                            "nearby": data['notifications']['nearby'],
+                                            "check_in": data['notifications']['check_in'],
+                                            "check_out": data['notifications']['check_out']
                                         }
+                                    }
+                                else:
+                                    result = {"notifications": {}}
 
                                 return Response(result)
                             result = {'status': 'Empty'}
@@ -262,6 +273,7 @@ def settings(request):
                         return Response(result)
                 else:
                     result = {'result': 'error'}
+
                     return Response(result)
             else:
                 result = {'result': 'error'}
@@ -1200,14 +1212,19 @@ def notify(request):
                         lat = request.data.get('lat')
                         long = request.data.get('long')
                         if name == 'childs_attendance':
+                            print("ffffffffffffffffffffffffffffffffffffffff")
                             parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
                             for e in parent_id:
                                 parent_id = e[0]
                             sender_id = parent_id
                             when = request.data.get('when')
+                            when = datetime.datetime.strptime(when+' 00:00:00', '%d/%m/%Y %H:%M:%S')
+                            print(when)
+
                             target_rounds=request.data.get('target_rounds')
-                            round_id=request.data.get('status')
+                            # round_id=request.data.get('status')
                             with connections[school_name].cursor() as cursor:
+                                type="absent-all" if target_rounds=='both' else "absent"
                                 cursor.execute("select  display_name_search from student_student WHERE id = %s",
                                                [student_id])
 
@@ -1223,7 +1240,12 @@ def notify(request):
                                 cursor.execute(
                                     "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                     [r, 'App\Model\Parents', type, message_en, sender_name[0][0]])
-                                notification_id= cursor.lastrowid
+
+                                cursor.execute("SELECT currval(pg_get_serial_sequence('sh_message_wizard','id'))",
+                                               [])
+
+                                notification_id = cursor.fetchall()
+
                                 cursor.execute("select  display_name_search from school_parent WHERE id = %s",
                                                [sender_id])
 
@@ -1245,14 +1267,17 @@ def notify(request):
                                     "select id,round_id from round_schedule WHERE id in %s and day_id =%s",
                                     [tuple(r_id), day_id[0][0]])
                                 rounds_details = cursor.fetchall()
+
                                 if target_rounds =='both':
                                     for res in rounds_details:
+
                                         cursor.execute(
                                             "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                            [lat, long, student_id, res[1], datetime.datetime.now(),'absent-all',notification_id])
+                                            [lat, long, student_id, res[1], when,"absent-all",notification_id[0][0]])
                                         cursor.execute(
                                             "INSERT INTO round_student_history(student_id,round_id,datetime)VALUES (%s,%s,%s);",
-                                            [student_id, res[1], datetime.datetime.now()])
+                                            [student_id, res[1], when])
+
                                         cursor.execute(
                                             "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
                                             ['absent-all',student_id,res[0]])
@@ -1267,18 +1292,19 @@ def notify(request):
                                     rounds_details = cursor.fetchall()
 
                                     for res in rounds_details:
+                                        print(res)
                                         cursor.execute(
                                             "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                            [lat, long, student_id, res[1], datetime.datetime.now(),
-                                             'absent', notification_id])
+                                            [lat, long, student_id, res[1], when,
+                                             'absent', notification_id[0][0]])
                                         cursor.execute(
                                             "INSERT INTO round_student_history( student_id, round_id,datetime)VALUES (%s,%s,%s);",
-                                            [student_id, res[1], datetime.datetime.now()])
+                                            [student_id, res[1],when])
                                         cursor.execute(
                                             "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
                                             ['absent', student_id, res[0]])
                                 result = {'result': "ok"}
-                                # print("childs_attendance")
+                                print("childs_attendance")
 
                                 return Response(result)
                         elif name == 'changed_location':
@@ -1393,16 +1419,16 @@ def notify(request):
 @api_view(['GET'])
 def get_badge(request, student_id):
     if request.method == 'GET':
-        # if request.headers:
-        #     if request.headers.get('Authorization'):
-        #         if 'Bearer' in request.headers.get('Authorization'):
-        #             au = request.headers.get('Authorization').replace('Bearer', '').strip()
-        #             db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
-        #
-        #             if db_name:
-        #                 for e in db_name:
-        #                     school_name = e[0]
-                    with connections['tst'].cursor() as cursor:
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                    with connections[school_name].cursor() as cursor:
                         # academic.year
                         cursor.execute(
                             "select  id  from academic_year WHERE state = %s",
@@ -1447,4 +1473,278 @@ def get_badge(request, student_id):
                                                                         # print("childs_attendance")
 
                     return Response(result)
+
+@api_view(['GET'])
+def get_calendar(request, student_id):
+    if request.method == 'GET':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                    with connections[school_name].cursor() as cursor:
+
+
+                        cursor.execute(
+                            "select user_id from student_student where id=%s",
+                            [student_id])
+                        user_id_q = cursor.fetchall()
+                        if user_id_q:
+                            cursor.execute(
+                                " select partner_id from res_users where id=%s",
+                                [user_id_q[0][0]])
+                            partner_id_q = cursor.fetchall()
+                            cursor.execute(
+                                " select calendar_event_id from calendar_event_res_partner_rel where res_partner_id = %s",
+                                [partner_id_q[0][0]])
+                            calendar_event_id = cursor.fetchall()
+                        data=[]
+                        for f_data in calendar_event_id:
+                            print(f_data)
+                            cursor.execute(
+                                " select id,name,start_datetime from calendar_event where id = %s",
+                                [f_data[0]])
+                            event = cursor.fetchall()
+
+                            if type(event[0][2]) == bool:
+                                data.append({'id': event[0][0],
+                                             'name': event[0][1],
+                                             'start_date': event[0][2].strftime(
+                                                 "%Y") if event[0][2] else '',
+                                             'year': event[0][2].strftime("%Y") if event[0][2] else ''
+                                             })
+                            else:
+                                data.append({'id': event[0][0],
+                                             'name':event[0][1],
+                                             'start_date': event[0][2].strftime("%d %b %Y"),
+                                             'year': event[0][2],
+                                             })
+
+
+                    result = {'result': data}
+
+
+                    return Response(result)
+
+@api_view(['GET'])
+def get_clinic(request, student_id):
+    if request.method == 'GET':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                    with connections[school_name].cursor() as cursor:
+                        # academic.year
+                        cursor.execute(
+                            "select  id  from academic_year WHERE state = %s",
+                            ['active'])
+                        academic_year = cursor.fetchall()
+                        academic_year_ids=[]
+                        data=[]
+                        cursor.execute(
+                            "select user_id from student_student where id=%s",
+                            [student_id])
+                        user_id_q = cursor.fetchall()
+                        for rec in academic_year:
+                            academic_year_ids.append(rec[0])
+                        if user_id_q:
+                            cursor.execute(
+                                " select partner_id from res_users where id=%s",
+                                [user_id_q[0][0]])
+                            partner_id_q = cursor.fetchall()
+                            cursor.execute(
+                                " select id,name,date,note,temperature,blood_pressure,prescription from school_clinic where patient_id=%s and year_id in %s",
+                                [partner_id_q[0][0],tuple(academic_year_ids)])
+                            vists = cursor.fetchall()
+                        for v in vists:
+
+                            try:
+                                date_s = datetime.datetime.strptime(str(v[2]), '%Y-%m-%d %H:%M:%S')
+                                data.append({'visit_id': v[0],
+                                             'name': v[1],
+                                             'date': date_s.strftime("%d %b %Y"),
+                                             'time': date_s.strftime("%I : %M %p"),
+                                             'note': v[3],
+                                             'temperature': v[4],
+                                             'blood_pressure': v[5],
+                                             'prescription': v[6]})
+                            except:
+                                date_s = v[2]
+                                data.append({'visit_id': v[0],
+                                             'name': v[1],
+                                             'date': date_s,
+                                             'time': date_s,
+                                             'note': v[3],
+                                             'temperature': v[4],
+                                             'blood_pressure': v[5],
+                                             'prescription': v[6]})
+
+                    result = {'result': data}
+                    return Response(result)
+
+
+
+
+@api_view(['GET'])
+def get_attendance(request, student_id):
+    if request.method == 'GET':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                    with connections[school_name].cursor() as cursor:
+
+
+                        absence_request=[]
+                        daily_attendance=[]
+                        cursor.execute(
+                            "select display_name_search,year_id,user_id from student_student where id=%s",
+                            [student_id])
+                        user_id_q = cursor.fetchall()
+                        cursor.execute(
+                            " select branch_id from res_users where id=%s",
+                            [user_id_q[0][2]])
+                        branch_id = cursor.fetchall()
+                        if user_id_q:
+                            cursor.execute(
+                                " select id,name,start_date,end_date,reason,type,state,arrival_time from student_absence_request where student_id=%s and year_id=%s and branch_id=%s",
+                                [student_id,user_id_q[0][1],branch_id[0][0]])
+                            studentleaves = cursor.fetchall()
+                            cursor.execute(
+                                "SELECT daily_attendance_id,id,note,reason,attendance_status,arrival_time FROM daily_attendance_line WHERE student_id=%s ",
+                                [student_id])
+                            daily_attendance_line = cursor.fetchall()
+                            for s in daily_attendance_line:
+                                if not s[0]:
+                                    continue
+                                cursor.execute(
+                                    "SELECT state,date FROM daily_attendance WHERE id = %s",
+                                    [s[0]])
+                                daily = cursor.fetchall()
+                                if daily[0][0] == 'draft':
+                                    continue
+                                if s[4] == 'present':
+                                    continue
+                                if s[2] != False:
+                                    daily_attendance.append({'leave_id': s[1],
+                                                 'name': user_id_q[0][0],
+                                                 'start_date': daily[0][1].strftime("%d %b %Y"),
+                                                 'end_date': '30 Sep 2021',
+                                                 'reason': 'Death of A Relative' if s[3] == 'death' else s[3],
+                                                 'type': s[4],
+                                                 'arrival_time': s[5]
+                                                 })
+                                else:
+                                    daily_attendance.append({'leave_id':  s[1],
+                                                 'name':user_id_q[0][0],
+                                                 'start_date': None,
+                                                 'end_date': '30 Sep 2021',
+                                                 'reason': 'Death of A Relative' if s[3] == 'death' else s[3],
+                                                 'type': s[4],
+                                                 'arrival_time': s[5]
+                                                 })
+                            for st in studentleaves:
+                                # print(st[7])
+                                arrival_time = calculate_time(st[7])
+
+                                absence_request.append({'leave_id': st[0],
+                                             'name': st[1],
+                                             'start_date': st[2],
+                                             'end_date': st[3],
+                                             'reason': 'Death of A Relative' if st[4] == 'death' else (
+                                                 st[4].capitalize() if st[4] else ""),
+                                             'type': st[5].capitalize() if st[5] else "",
+                                             'status': st[6].capitalize() if st[6] else "",
+                                             'arrival_time': arrival_time})
+
+                    result = {'absence_request': absence_request,
+                              'daily_attendance': daily_attendance}
+                    return Response(result)
+def calculate_time(time):
+
+        if time <= 12:
+            result_time = '{0:02.0f}:{1:02.0f}'.format(*divmod(time * 60, 60))
+            result_time = result_time + '  am'
+        else:
+            time = time - 12
+            result_time = '{0:02.0f}:{1:02.0f}'.format(*divmod(time * 60, 60))
+            result_time = result_time + '  pm'
+        return result_time
+
+
+@api_view(['GET'])
+def get_exam(request, student_id):
+    if request.method == 'GET':
+        # if request.headers:
+        #     if request.headers.get('Authorization'):
+        #         if 'Bearer' in request.headers.get('Authorization'):
+        #             au = request.headers.get('Authorization').replace('Bearer', '').strip()
+        #             db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+        #
+        #             if db_name:
+        #                 for e in db_name:
+        #                     school_name = e[0]
+                    with connections['tst'].cursor() as cursor:
+                        # academic.year
+                        cursor.execute(
+                            "select  id  from academic_year WHERE state = %s",
+                            ['active'])
+                        academic_year = cursor.fetchall()
+                        academic_year_ids=[]
+                        data=[]
+                        cursor.execute(
+                            "select user_id from student_student where id=%s",
+                            [student_id])
+                        user_id_q = cursor.fetchall()
+                        for rec in academic_year:
+                            academic_year_ids.append(rec[0])
+                        if user_id_q:
+                            cursor.execute(
+                                " select partner_id from res_users where id=%s",
+                                [user_id_q[0][0]])
+                            partner_id_q = cursor.fetchall()
+                            cursor.execute(
+                                " select id,name,date,note,temperature,blood_pressure,prescription from school_clinic where patient_id=%s and year_id in %s",
+                                [partner_id_q[0][0],tuple(academic_year_ids)])
+                            vists = cursor.fetchall()
+                        for v in vists:
+
+                            try:
+                                date_s = datetime.datetime.strptime(str(v[2]), '%Y-%m-%d %H:%M:%S')
+                                data.append({'visit_id': v[0],
+                                             'name': v[1],
+                                             'date': date_s.strftime("%d %b %Y"),
+                                             'time': date_s.strftime("%I : %M %p"),
+                                             'note': v[3],
+                                             'temperature': v[4],
+                                             'blood_pressure': v[5],
+                                             'prescription': v[6]})
+                            except:
+                                date_s = v[2]
+                                data.append({'visit_id': v[0],
+                                             'name': v[1],
+                                             'date': date_s,
+                                             'time': date_s,
+                                             'note': v[3],
+                                             'temperature': v[4],
+                                             'blood_pressure': v[5],
+                                             'prescription': v[6]})
+
+                    result = {'result': data}
+                    return Response(result)
+
 

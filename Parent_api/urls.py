@@ -12,6 +12,10 @@ urlpatterns = [
     path('parents/kids-history', views.kids_hstory),
     path('parents/pre-arrive', views.pre_arrive),
     path('notify', views.notify),
+    path('api/get_calendar/<int:student_id>', views.get_calendar),
+    path('api/get_badge/<int:student_id>', views.get_badge),
+    path('api/get_clinic/<int:student_id>', views.get_clinic),
+    path('api/get_attendance/<int:student_id>', views.get_attendance),
 
 ]
 
