@@ -443,7 +443,7 @@ def round_list(request):
                             cursor.execute(
                                 """ select 	allow_driver_change_students_location,allow_driver_to_use_beacon from transport_setting ORDER BY ID DESC LIMIT 1""")
                             login_details = cursor.fetchall()
-                         
+
 
                             for rec in range(len(result1)):
                                 round.append(result1[rec])
@@ -760,6 +760,7 @@ def student_list(request, round_id):
                                                             academic_grade_q = cursor.fetchall()
                                                             student_grade = academic_grade_q[0][0]
                                             # ---------------------
+                                     
                                         student_info[std_id] = {
                                             "id": student_student12[0]['id'],
                                             "year_id": student_student12[0]['year_id'],
@@ -769,7 +770,7 @@ def student_list(request, round_id):
                                             "color": student_student12[0]['color'],
                                             "email": student_student12[0]['email'],
                                             "mobile": student_student12[0]['mobile'],
-                                            "name": student_student12[0]['name'],
+                                            "name": student_student12[0]['display_name_search'],
                                             "contact_phone1": student_student12[0]['contact_phone1'],
                                             "contact_mobile1": student_student12[0]['contact_mobile1'],
                                             "nationality_id": student_student12[0]['nationality_id'],
@@ -964,8 +965,6 @@ def student_list(request, round_id):
 
                                 result = {"students_list": student
                                           }
-
-
                                 return Response(result)
                     if request.method == 'POST':
                         result = {"status": "error"
