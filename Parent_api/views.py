@@ -54,6 +54,7 @@ def parent_login(request):
             session = response1.cookies
             uid = response['result']['uid']
             company_id = response['result']['company_id']
+
         except:
             result = {
                 "status": "erorr2"
@@ -512,6 +513,7 @@ def kids_list(request):
                                 "select  lat,lng,pickup_request_distance,change_location,show_map,enable_parents_to_confirm_student_pickup,pickup_request_distance from transport_setting  ORDER BY ID DESC LIMIT 1")
                             columns = (x.name for x in cursor.description)
                             setting = cursor.fetchall()
+
                             show_map=True
                             if (setting[0][4]==True and parent_show_map[0][0]==None) or (setting[0][4]==False and parent_show_map[0][0]==True) or (setting[0][4]and parent_show_map[0][0]) :
                                 show_map =True
@@ -841,7 +843,7 @@ def kids_list(request):
                                     "school_id": int(school_id),
                                     "student_grade": student_grade,
                                     "drop_off_by_parent": drop,
-                                    "pickup_by_parent": pick,
+                                    "pickup_by_parent": drop,
                                     "father_id": student1[rec]['father_id'],
                                     "mother_id": student1[rec]['mother_id'],
                                     "other_1": 0,
