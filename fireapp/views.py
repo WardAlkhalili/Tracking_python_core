@@ -95,6 +95,7 @@ def Get_last_bus_location(request, bus_id, school_name):
             #     route.append(value)
             lat = list(location.items())[-1][1][0]
             long = list(location.items())[-1][1][1]
+
             result = {
                 "lat": float(lat) if lat else 0,
                 "long": float(long) if long else 0
@@ -152,7 +153,7 @@ def send_school_message(request):
     if request.method == 'POST':
         school_name = request.data.get('school_name')
         message_id = request.data.get('message_id')
-        print(school_name)
+
         r =Timer(3.0, twoArgs, (message_id, school_name))
         r.start()
         result1 = {
@@ -167,6 +168,7 @@ def send_school_message(request):
 
 def twoArgs(message_id,school_name):
     with connections[school_name].cursor() as cursor:
+        # print(message_id)
 
         cursor.execute(
             "select  message,title  from school_message where id = %s",
@@ -185,7 +187,7 @@ def twoArgs(message_id,school_name):
             [tuple(r_id)])
         columns = (x.name for x in cursor.description)
         student = cursor.fetchall()
-        print(student)
+        # print(student)
         id = []
         for rec in student:
             if rec[0]:
@@ -195,7 +197,7 @@ def twoArgs(message_id,school_name):
             if rec[2]:
                 id.append(rec[2])
         id = list(dict.fromkeys(id))
-        print(id)
+        # print(id)
 
         # cursor.execute(
         #     "select  user_id from school_parent WHERE id in %s ",
@@ -209,6 +211,7 @@ def twoArgs(message_id,school_name):
         mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id), Q(db_name=school_name),
                                                     Q(is_active=True)).values_list(
             'mobile_token').order_by('-pk')
+
         token = []
         for tok in mobile_token:
             token.append(tok[0])
@@ -216,14 +219,14 @@ def twoArgs(message_id,school_name):
         push_service = FCMNotification(
             api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
         registration_id = token
-        print(token)
+
         message_title = school_message[0][1]
         # print(message_title)
         message_body = school_message[0][0]
         result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
                                                       registration_ids=registration_id,
                                                       data_message={})
-        # print("dddd",result)
+
         result1 = {
             "route": 'Ok'
 
@@ -239,6 +242,7 @@ def send_confirmation_message_to_parent(request):
         student_name = request.data.get('student_name')
         student_id=request.data.get('student_id')
         parent_id = request.data.get('parent_id')
+
         # student_name=''
         mobile_token = ManagerParent.objects.filter(Q(parent_id=parent_id) , Q(db_name=school_name),Q(is_active=True)).values_list(
             'mobile_token').order_by('-pk')
@@ -249,12 +253,16 @@ def send_confirmation_message_to_parent(request):
             api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
         # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
         registration_id = mobile_token
+
  
         message_title = "picked up"
         message_body = "please confirm that you have picked up  " + student_name + "from the school"
+        # result = push_service.notify_single_device(registration_id=registration_id,
+        #                                            message_title=message_title,
+        #                                            message_body=message_body)
         result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
                                                    message_body=message_body,data_message={"student_id":str(student_id),"picked":True})
-        #
+        # #
         # print(result)
         result1 = {
             "route": 'Ok'
@@ -283,6 +291,7 @@ def push_notification(request):
         school_name = ManagerParent.objects.filter(school_id=school_id).values_list('db_name').order_by('-pk')
         # print(school_name[0][0])
         school_name=school_name[0][0]
+
         # for rec in parent_id:
         with connections[str(school_name)].cursor() as cursor:
                 if  user_id != 0:
@@ -291,6 +300,7 @@ def push_notification(request):
                     student_info = cursor.fetchall()
                     if student_info:
                         for rec in student_info[0]:
+
 
                             cursor.execute("select  settings from school_parent WHERE id = %s", [rec])
                             settings = cursor.fetchall()
@@ -323,6 +333,7 @@ def push_notification(request):
                                 result = push_service.notify_single_device(registration_id=registration_id,
                                                                            message_title=message_title,
                                                                            message_body=message_body)
+
                                 result1 = {
                                     "route": 'Ok'
                                 }

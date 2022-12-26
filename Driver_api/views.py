@@ -1145,8 +1145,9 @@ def set_round_status(request):
                                     st_id = []
                                     for k in rounds_count_student:
                                         cursor.execute(
-                                            "select  name from student_student WHERE id= %s",
+                                            "select  display_name_search from student_student WHERE id= %s",
                                             [k[0]])
+
                                         student_name = cursor.fetchall()
                                         cursor.execute(
                                             "select father_id,mother_id,responsible_id_value from student_student WHERE id = %s ",
@@ -1164,6 +1165,7 @@ def set_round_status(request):
                                                 push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
                                                 registration_id = mobile_token
                                                 message_title = "School Departure"
+
                                                 message_body = student_name[0][0] + "  has just been checked into the bus."
                                                 if mobile_token and not("token" in mobile_token):
                                                     notify_single_device = push_service.notify_single_device(
@@ -1421,7 +1423,7 @@ def students_bus_checks(request):
                                         [student_id])
                                     student_info = cursor.fetchall()
                                     cursor.execute(
-                                        "select  name from student_student WHERE id= %s",
+                                        "select  display_name_search from student_student WHERE id= %s",
                                         [student_id])
                                     student_name = cursor.fetchall()
 
@@ -1516,6 +1518,7 @@ def students_bus_checks(request):
                                                                          driver_name[0][0]])
 
                                                                 elif status == 'absent':
+
                                                                     mobile_token.append(e[0])
                                                                     title = 'Absence notification'
                                                                     message = ' Your child ' + student_name[0][
@@ -1525,7 +1528,7 @@ def students_bus_checks(request):
                                                                     r = datetime.datetime.strptime(date_string,
                                                                                                    '%Y-%m-%d %H:%M:%S')
                                                                     cursor.execute(
-                                                                        "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s);",
+                                                                        "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                                                         [round_id, r, 'App\Model\sta'+str(rec),
                                                                          'Absence notification',
                                                                          message, message,
@@ -1601,6 +1604,7 @@ def students_bus_checks(request):
                                                                         driver_name[0][0]])
 
                                                                elif status == 'absent':
+
                                                                    mobile_token.append(e[0])
                                                                    title = 'Absence notification'
                                                                    message = ' Your child ' + student_name[0][
@@ -1610,7 +1614,7 @@ def students_bus_checks(request):
                                                                    r = datetime.datetime.strptime(date_string,
                                                                                                   '%Y-%m-%d %H:%M:%S')
                                                                    cursor.execute(
-                                                                       "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s);",
+                                                                       "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                                                        [round_id, r, 'App\Model\sta'+str(rec),
                                                                         'Absence notification',
                                                                         message, message,
@@ -1686,6 +1690,7 @@ def students_bus_checks(request):
                                                                  driver_name[0][0]])
 
                                                         elif status == 'absent':
+                                  
                                                             mobile_token.append(e[0])
                                                             title = 'Absence notification'
                                                             message = ' Your child ' + student_name[0][
@@ -1701,24 +1706,24 @@ def students_bus_checks(request):
                                                                  driver_name[0][0]])
 
 
-                                                if mobile_token:
-                                                    mobile_token = []
+                                                    if mobile_token:
+                                                        mobile_token = []
 
-                                                    for e in mobile_token1:
-                                                        mobile_token.append(e[0])
+                                                        for e in mobile_token1:
+                                                            mobile_token.append(e[0])
 
-                                                    push_service = FCMNotification(
-                                                        api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                                    registration_id = mobile_token
-                                                    message_title = title
-                                                    message_body = message
+                                                        push_service = FCMNotification(
+                                                            api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                                        registration_id = mobile_token
+                                                        message_title = title
+                                                        message_body = message
 
-                                                    if mobile_token and not ("token" in mobile_token):
+                                                        if mobile_token and not ("token" in mobile_token):
 
-                                                        notify_single_device = push_service.notify_single_device(
-                                                            registration_id=registration_id[0],
-                                                            message_title=message_title,
-                                                            message_body=message_body)
+                                                            notify_single_device = push_service.notify_single_device(
+                                                                registration_id=registration_id[0],
+                                                                message_title=message_title,
+                                                                message_body=message_body)
 
 
 

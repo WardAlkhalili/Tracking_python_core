@@ -924,6 +924,7 @@ def kids_hstory(request):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
                     db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
                     parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
                     notifications = []
                     for e in parent_id:
                         parent_id = e[0]
@@ -934,6 +935,7 @@ def kids_hstory(request):
                         start_date = request.data.get('start_date')
                         end_date = request.data.get('end_date')
                         # print(start_date,end_date)
+                        student_round=[]
                         with connections[school_name].cursor() as cursor:
                             if start_date and end_date:
                                 cursor.execute(
@@ -963,6 +965,7 @@ def kids_hstory(request):
                             # print(student)
                             student_id = []
                             for rec1 in student:
+
                                 student_id.append(rec1[0])
 
                                 cursor.execute(
@@ -980,48 +983,59 @@ def kids_hstory(request):
 
                                     round_schedules = []
                                     for rec in round_schedule:
-                                        round_schedules.append(rec[0])
+
+                                        if rec[0] in  student_round:
+
+                                            continue
+                                        else:
+
+                                            student_round.append(rec[0])
+                                            round_schedules.append(rec[0])
+                                    round_schedules = list(dict.fromkeys(round_schedules))
 
                                     # for rec in round_schedules:
-                                    cursor.execute(
-                                        "select  vehicle_id from transport_round WHERE id in %s",
-                                        [tuple(round_schedules)])
 
-                                    vehicle_id = cursor.fetchall()
-                                    cursor.execute(
-                                        "select bus_no from fleet_vehicle WHERE id = %s  ",
-                                        [vehicle_id[0][0]])
-                                    bus_num = cursor.fetchall()
-                                    cursor.execute(
-                                        "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and type= %s or from_type =%s ORDER BY ID DESC ",
-                                        [rec,'emergency','App\Model\sta'+str(parent_id)])
-                                    sh_message_wizard = cursor.fetchall()
-                                    for rec in range(len(sh_message_wizard)):
-                                        # print( str(sh_message_wizard[rec][1].year))
-                                        year = str(sh_message_wizard[rec][1].year)
-                                        month = '0' + str(sh_message_wizard[rec][1].month) if int(
-                                            sh_message_wizard[rec][1].month) < 10 else str(sh_message_wizard[rec][1].month)
-                                        day = str(sh_message_wizard[rec][1].day) if len(
-                                            str(sh_message_wizard[rec][1].day)) > 1 else "0" + str(
-                                            sh_message_wizard[rec][1].day)
-                                        hour = str(sh_message_wizard[rec][1].hour) if len(
-                                            str(sh_message_wizard[rec][1].hour)) > 1 else "0" + str(
-                                            sh_message_wizard[rec][1].hour)
+                                    if round_schedules:
+                                        cursor.execute(
+                                            "select  vehicle_id from transport_round WHERE id in %s",
+                                            [tuple(round_schedules)])
 
-                                        minute = str(sh_message_wizard[rec][1].minute) if len(
-                                            str(sh_message_wizard[rec][1].minute)) > 1 else "0" + str(
-                                            sh_message_wizard[rec][1].minute)
-                                        second = str(sh_message_wizard[rec][1].second) if len(
-                                            str(sh_message_wizard[rec][1].second)) > 1 else "0" + str(
-                                            sh_message_wizard[rec][1].second)
+                                        vehicle_id = cursor.fetchall()
+                                        cursor.execute(
+                                            "select bus_no from fleet_vehicle WHERE id = %s  ",
+                                            [vehicle_id[0][0]])
+                                        bus_num = cursor.fetchall()
+                                        cursor.execute(
+                                            "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and type= %s or from_type =%s ORDER BY ID DESC ",
+                                            [rec,'emergency','App\Model\sta'+str(parent_id)])
+                                        sh_message_wizard = cursor.fetchall()
 
-                                        notifications.append({
-                                            "notifications_text": sh_message_wizard[rec][0],
-                                            "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
-                                            "create_date": sh_message_wizard[rec][1],
-                                            "notifications_title": "Message from bus no. "+str(bus_num[0][0])+str(rec1[1]),
-                                            "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                        })
+                                        for rec in range(len(sh_message_wizard)):
+                                            # print( str(sh_message_wizard[rec][1].year))
+                                            year = str(sh_message_wizard[rec][1].year)
+                                            month = '0' + str(sh_message_wizard[rec][1].month) if int(
+                                                sh_message_wizard[rec][1].month) < 10 else str(sh_message_wizard[rec][1].month)
+                                            day = str(sh_message_wizard[rec][1].day) if len(
+                                                str(sh_message_wizard[rec][1].day)) > 1 else "0" + str(
+                                                sh_message_wizard[rec][1].day)
+                                            hour = str(sh_message_wizard[rec][1].hour) if len(
+                                                str(sh_message_wizard[rec][1].hour)) > 1 else "0" + str(
+                                                sh_message_wizard[rec][1].hour)
+
+                                            minute = str(sh_message_wizard[rec][1].minute) if len(
+                                                str(sh_message_wizard[rec][1].minute)) > 1 else "0" + str(
+                                                sh_message_wizard[rec][1].minute)
+                                            second = str(sh_message_wizard[rec][1].second) if len(
+                                                str(sh_message_wizard[rec][1].second)) > 1 else "0" + str(
+                                                sh_message_wizard[rec][1].second)
+
+                                            notifications.append({
+                                                "notifications_text": sh_message_wizard[rec][0],
+                                                "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
+                                                "create_date": sh_message_wizard[rec][1],
+                                                "notifications_title": "Message from bus no. "+str(bus_num[0][0])+str(rec1[1]),
+                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                            })
                             # print(notifications)
 
                             message_ids = []
@@ -1214,14 +1228,13 @@ def notify(request):
                         lat = request.data.get('lat')
                         long = request.data.get('long')
                         if name == 'childs_attendance':
-                            print("ffffffffffffffffffffffffffffffffffffffff")
+
                             parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
                             for e in parent_id:
                                 parent_id = e[0]
                             sender_id = parent_id
                             when = request.data.get('when')
                             when = datetime.datetime.strptime(when+' 00:00:00', '%d/%m/%Y %H:%M:%S')
-                            print(when)
 
                             target_rounds=request.data.get('target_rounds')
                             # round_id=request.data.get('status')
@@ -1294,7 +1307,7 @@ def notify(request):
                                     rounds_details = cursor.fetchall()
 
                                     for res in rounds_details:
-                                        print(res)
+
                                         cursor.execute(
                                             "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                             [lat, long, student_id, res[1], when,
@@ -1306,7 +1319,6 @@ def notify(request):
                                             "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
                                             ['absent', student_id, res[0]])
                                 result = {'result': "ok"}
-                                print("childs_attendance")
 
                                 return Response(result)
                         elif name == 'changed_location':
@@ -1506,7 +1518,7 @@ def get_calendar(request, student_id):
                             calendar_event_id = cursor.fetchall()
                         data=[]
                         for f_data in calendar_event_id:
-                            print(f_data)
+
                             cursor.execute(
                                 " select id,name,start_datetime from calendar_event where id = %s",
                                 [f_data[0]])
