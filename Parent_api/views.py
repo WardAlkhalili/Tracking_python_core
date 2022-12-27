@@ -1131,11 +1131,16 @@ def pre_arrive(request):
 
                         status = request.data.get('status')
                         student_id = request.data.get('student_id')
+
                         with connections[school_name].cursor() as cursor:
-                            cursor.execute("select  display_name_search from student_student WHERE id = %s",
+                            cursor.execute("select  display_name_search,year_id from student_student WHERE id = %s",
                                            [student_id])
                             columns = (x.name for x in cursor.description)
                             student_name = cursor.fetchall()
+                            cursor.execute(
+                                " select branch_id from res_users where id=%s",
+                                [student_id])
+                            branch_id = cursor.fetchall()
                             cursor.execute(
                                 "select  id,date,state from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                 [student_name[0][0], parent_id])
@@ -1147,8 +1152,8 @@ def pre_arrive(request):
                                     date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                     r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
                                     cursor.execute(
-                                        "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
-                                        [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r])
+                                        "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,write_date,year_id,branch_id,create_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s); ",
+                                        [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r, student_name[0][1] ,branch_id[0][0],r])
                                     cursor.execute(
                                         "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                         [student_name[0][0], parent_id])
@@ -1179,8 +1184,8 @@ def pre_arrive(request):
                                 r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
 
                                 cursor.execute(
-                                    "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,write_date) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
-                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r])
+                                    "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,write_date,year_id,branch_id,create_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s); ",
+                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r,student_name[0][1],branch_id[0][1],r])
                                 cursor.execute(
                                     "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                     [student_name[0][0], parent_id])
