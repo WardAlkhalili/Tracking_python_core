@@ -1561,6 +1561,7 @@ def get_clinic(request, student_id):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
+          
                     with connections[school_name].cursor() as cursor:
                         # academic.year
                         cursor.execute(
@@ -1570,44 +1571,51 @@ def get_clinic(request, student_id):
                         academic_year_ids=[]
                         data=[]
                         cursor.execute(
-                            "select user_id from student_student where id=%s",
+                            "select user_id,year_id from student_student where id=%s",
                             [student_id])
                         user_id_q = cursor.fetchall()
-                        for rec in academic_year:
-                            academic_year_ids.append(rec[0])
+
                         if user_id_q:
-                            cursor.execute(
-                                " select partner_id from res_users where id=%s",
-                                [user_id_q[0][0]])
-                            partner_id_q = cursor.fetchall()
-                            cursor.execute(
-                                " select id,name,date,note,temperature,blood_pressure,prescription from school_clinic where patient_id=%s and year_id in %s",
-                                [partner_id_q[0][0],tuple(academic_year_ids)])
-                            vists = cursor.fetchall()
-                        for v in vists:
+                            for rec in academic_year:
+                                academic_year_ids.append(rec[0])
+                            if user_id_q:
+                                cursor.execute(
+                                    " select partner_id from res_users where id=%s",
+                                    [user_id_q[0][0]])
+                                partner_id_q = cursor.fetchall()
 
-                            try:
-                                date_s = datetime.datetime.strptime(str(v[2]), '%Y-%m-%d %H:%M:%S')
-                                data.append({'visit_id': v[0],
-                                             'name': v[1],
-                                             'date': date_s.strftime("%d %b %Y"),
-                                             'time': date_s.strftime("%I : %M %p"),
-                                             'note': v[3],
-                                             'temperature': v[4],
-                                             'blood_pressure': v[5],
-                                             'prescription': v[6]})
-                            except:
-                                date_s = v[2]
-                                data.append({'visit_id': v[0],
-                                             'name': v[1],
-                                             'date': date_s,
-                                             'time': date_s,
-                                             'note': v[3],
-                                             'temperature': v[4],
-                                             'blood_pressure': v[5],
-                                             'prescription': v[6]})
+                                cursor.execute(
+                                    " select id,name,date,note,temperature,blood_pressure,prescription from school_clinic where patient_id=%s and year_id = %s",
+                                    [partner_id_q[0][0],user_id_q[0][1]])
+                                vists = cursor.fetchall()
 
-                    result = {'result': data}
+                            for v in vists:
+
+                                try:
+                                    date_s = datetime.datetime.strptime(str(v[2]), '%Y-%m-%d %H:%M:%S')
+                                    data.append({'visit_id': v[0],
+                                                 'name': v[1],
+                                                 'date': date_s.strftime("%d %b %Y"),
+                                                 'time': date_s.strftime("%I : %M %p"),
+                                                 'note': v[3],
+                                                 'temperature': v[4],
+                                                 'blood_pressure': v[5],
+                                                 'prescription': v[6]if v[6] else "" })
+                                except:
+                                    date_s = v[2]
+                                    data.append({'visit_id': v[0],
+                                                 'name': v[1],
+                                                 'date': date_s,
+                                                 'time': date_s,
+                                                 'note': v[3],
+                                                 'temperature': v[4],
+                                                 'blood_pressure': v[5],
+                                                 'prescription':  v[6]if v[6] else ""})
+                            result = {'result': data}
+                        else:
+                            result = {'result': data}
+
+
                     return Response(result)
 
 
