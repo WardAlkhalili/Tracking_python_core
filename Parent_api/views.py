@@ -1,3 +1,5 @@
+from selectors import SelectSelector
+
 from django.shortcuts import render
 
 # Create your views here.
@@ -15,11 +17,12 @@ from rest_framework import status
 from itertools import chain
 # from ..Driver_api.models import Manager
 # from yousef.api.Tracking_python_core.Driver_api.models import Manager
+import pandas as pd
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 import json
 import calendar
-from datetime import date
+from datetime import date,timedelta
 import requests
 import datetime
 from rest_framework import status
@@ -1713,65 +1716,293 @@ def calculate_time(time):
         return result_time
 
 
+
 @api_view(['GET'])
 def get_exam(request, student_id):
     if request.method == 'GET':
-        # if request.headers:
-        #     if request.headers.get('Authorization'):
-        #         if 'Bearer' in request.headers.get('Authorization'):
-        #             au = request.headers.get('Authorization').replace('Bearer', '').strip()
-        #             db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
-        #
-        #             if db_name:
-        #                 for e in db_name:
-        #                     school_name = e[0]
-                    with connections['tst'].cursor() as cursor:
-                        # academic.year
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+
+                    with connections[school_name].cursor() as cursor:
+
                         cursor.execute(
                             "select  id  from academic_year WHERE state = %s",
                             ['active'])
                         academic_year = cursor.fetchall()
-                        academic_year_ids=[]
-                        data=[]
+                        academic_year_ids = []
+                        data = []
                         cursor.execute(
-                            "select user_id from student_student where id=%s",
+                            "select user_id,year_id from student_student where id=%s",
                             [student_id])
                         user_id_q = cursor.fetchall()
-                        for rec in academic_year:
-                            academic_year_ids.append(rec[0])
+
                         if user_id_q:
-                            cursor.execute(
-                                " select partner_id from res_users where id=%s",
-                                [user_id_q[0][0]])
-                            partner_id_q = cursor.fetchall()
-                            cursor.execute(
-                                " select id,name,date,note,temperature,blood_pressure,prescription from school_clinic where patient_id=%s and year_id in %s",
-                                [partner_id_q[0][0],tuple(academic_year_ids)])
-                            vists = cursor.fetchall()
-                        for v in vists:
+                            for rec in academic_year:
+                                academic_year_ids.append(rec[0])
+                            if user_id_q:
+                                cursor.execute(
+                                    " select partner_id,branch_id from res_users where id=%s",
+                                    [user_id_q[0][0]])
+                                partner_id_q = cursor.fetchall()
 
-                            try:
-                                date_s = datetime.datetime.strptime(str(v[2]), '%Y-%m-%d %H:%M:%S')
-                                data.append({'visit_id': v[0],
-                                             'name': v[1],
-                                             'date': date_s.strftime("%d %b %Y"),
-                                             'time': date_s.strftime("%I : %M %p"),
-                                             'note': v[3],
-                                             'temperature': v[4],
-                                             'blood_pressure': v[5],
-                                             'prescription': v[6]})
-                            except:
-                                date_s = v[2]
-                                data.append({'visit_id': v[0],
-                                             'name': v[1],
-                                             'date': date_s,
-                                             'time': date_s,
-                                             'note': v[3],
-                                             'temperature': v[4],
-                                             'blood_pressure': v[5],
-                                             'prescription': v[6]})
+                                data = []
+                                state = 'new'
+                                start = False
+                                cursor.execute(
+                                    " select id,survey_id,token,last_displayed_page_id,state from survey_user_input where partner_id=%s and year_id = %s and branch_id =%s   ORDER BY create_date DESC, state DESC",
+                                    [partner_id_q[0][0], user_id_q[0][1], partner_id_q[0][1]])
+                                assignments = cursor.fetchall()
 
-                    result = {'result': data}
+
+                            for assingment in assignments:
+                                cursor.execute(
+                                    " select id,state,deadline,title,access_token,subject_id,allowed_time_to_start,time_limit,mark,exam_names from survey_survey where id=%s and certificate=%s",
+                                    [assingment[1], True])
+                                survey = cursor.fetchall()
+
+
+                                if  survey:
+
+                                    cursor.execute(
+                                        "select  name  from school_subject WHERE id = %s ",
+                                        [survey[0][5]])
+                                    subject_name = cursor.fetchall()
+
+                                    cursor.execute(
+                                        "SELECT * FROM allowed_enter_exam_student_survey_rel WHERE survey_survey_id = %s and student_student_id = %s  ",
+                                        [survey[0][0],student_id])
+                                    allowed_enter_exam_student_survey_rel = cursor.fetchall()
+                                    allowed_to_enter_exam_after_time_limit=True if allowed_enter_exam_student_survey_rel else False
+
+                                    cursor.execute(
+                                        " select id  from survey_question where survey_id=%s",
+                                        [assingment[1]])
+                                    survey_question = cursor.fetchall()
+                                    cursor.execute(
+                                        " select exam_name_english ,exam_name_arabic  from exam_name where id=%s",
+                                        [survey[0][9]])
+                                    exam_name = cursor.fetchall()
+
+                                    cursor.execute(
+                                        " select id  from survey_user_input_line where survey_id=%s",
+                                        [assingment[1]])
+                                    survey_user_input_line = cursor.fetchall()
+                                    if survey[0][1] == 'open':
+                                        if survey[0][2]:
+                                            deadline = survey[0][2]
+                                            date_tz = 'Asia/Kuwait'
+                                            deadline.replace(date_tz)
+                                            deadline = deadline.replace(date_tz)
+                                            deadline = datetime.strptime(deadline, "%d/%m/%Y %H:%M:%S")
+                                            x = datetime.datetime.now().replace(date_tz)
+                                            if start_time <= datetime.strptime(x, "%d/%m/%Y %H:%M:%S"):
+                                                start = True
+                                                state = 'done'
+                                            else:
+                                                if  assingment[4] == 'done':
+                                                    state = 'done'
+                                                    start = False
+                                                else:
+                                                    state =  assingment[4]
+                                                    start = True
+                                        else:
+                                            start_time = ""
+                                            state =  assingment[4]
+                                            start = False
+
+                                        if start_time == '':
+                                            start_time2 = ''
+                                            now_time = ''
+                                            exam_start_sss = ''
+                                            allowed_time_to_start_exams = ''
+                                            late_to_exams = ''
+                                            exam_start_in = ''
+                                            late_time = ''
+                                        else:
+                                            now = datetime.now()
+
+                                            start_time2 = start_time
+                                            dt_string = now.strftime("%Y/%m/%d %H:%M:%S")
+                                            date_time_obj = datetime.strptime(dt_string, '%Y/%m/%d %H:%M:%S')
+                                            now_time = date_time_obj + timedelta(hours=3)
+                                            allowed_time_to_start = survey[6]
+                                            allowed_time_to_start_exam = pd.to_datetime(allowed_time_to_start, format='%M')
+                                            exam_start_sss = start_time2 + timedelta( minutes=allowed_time_to_start_exam.minute)
+
+                                            if type(start_time2) == str:
+                                                print("")
+                                            else:
+                                                if start_time2 <= now_time <= exam_start_sss:
+                                                    allowed_time_to_start_exams = True
+                                                else:
+                                                    allowed_time_to_start_exams = False
+
+                                                if now_time >= exam_start_sss:
+                                                    late_to_exams = True
+                                                else:
+                                                    late_to_exams = False
+
+                                            late_time = now_time - exam_start_sss
+                                            seconds = late_time.seconds
+                                            seconds = seconds % (24 * 3600)
+                                            hour = seconds // 3600
+                                            seconds %= 3600
+                                            minutes = seconds // 60
+                                            seconds %= 60
+                                            late_time = "%d:%02d:%02d" % (hour, minutes, seconds)
+
+                                            exam_start_in = start_time2 - now_time
+                                            seconds = exam_start_in.seconds
+                                            seconds = seconds % (24 * 3600)
+                                            hour = seconds // 3600
+                                            seconds %= 3600
+                                            minutes = seconds // 60
+                                            seconds %= 60
+                                            exam_start_in = "%d:%02d:%02d" % (hour, minutes, seconds)
+
+                                        data.append({
+                                            "id": assingment[0],
+                                            "assignment_id": assingment[1],
+                                            "name": survey[0][3],
+                                            "subject": subject_name[0][0],
+                                            "token": survey[0][4],
+                                            'answer_token': assingment[2],
+                                            'questions_count': len(survey_question),
+                                            "state": state,
+                                            'last_displayed_page': "None",
+                                            'answered_questions': len(survey_user_input_line),
+                                            "ass_state": survey[0][1],
+                                            "start": start,
+                                            'start_time': start_time if start_time else 'None',
+                                            'allowed_time_to_start_exams': allowed_time_to_start_exams if allowed_time_to_start_exams else  'None',
+                                            'allowed_enter_exam_student_ids': allowed_to_enter_exam_after_time_limit[0][0] if allowed_to_enter_exam_after_time_limit else "None" ,
+                                            "exam_name_english": exam_name[0][0] if exam_name else 'None',
+                                            "exam_name_arabic": exam_name[0][1]if exam_name else 'None',
+                                            'mark': int(survey[0][8]),
+                                            'time_limit': survey[0][7]if survey[0][7] else 0 ,
+                                            'allowed_time_to_start': survey[0][6] if survey[0][6] else 0,
+                                            'late_to_exams': late_to_exams if late_to_exams else "None",
+                                            'late_time': late_time if late_time else "None",
+                                            'exam_start_in': exam_start_in if exam_start_in else "None",
+                                            'allowed_to_enter_exam_after_time_limit': True if allowed_to_enter_exam_after_time_limit else True
+                                        })
+
+                        result = {'result': data}
+                        print(result)
                     return Response(result)
+@api_view(['GET'])
+def get_student_assignment(request, student_id):
+    if request.method == 'GET':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+
+                    with connections[school_name].cursor() as cursor:
+
+                        cursor.execute(
+                            "select  id  from academic_year WHERE state = %s",
+                            ['active'])
+                        academic_year = cursor.fetchall()
+                        academic_year_ids = []
+                        data = []
+                        cursor.execute(
+                            "select user_id,year_id from student_student where id=%s",
+                            [student_id])
+                        user_id_q = cursor.fetchall()
+
+                        if user_id_q:
+                            for rec in academic_year:
+                                academic_year_ids.append(rec[0])
+                            if user_id_q:
+                                cursor.execute(
+                                    " select partner_id,branch_id from res_users where id=%s",
+                                    [user_id_q[0][0]])
+                                partner_id_q = cursor.fetchall()
+
+
+
+                                data = []
+                                state = 'new'
+                                start = False
+                                cursor.execute(
+                                    " select id,survey_id,token,last_displayed_page_id,state from survey_user_input where partner_id=%s and year_id = %s and branch_id =%s   ORDER BY create_date DESC, state DESC",
+                                    [partner_id_q[0][0], user_id_q[0][1],partner_id_q[0][1]])
+                                assignments = cursor.fetchall()
+
+
+                            for assingment in assignments:
+                                cursor.execute(
+                                    " select id,state,deadline,title,access_token,subject_id from survey_survey where id=%s and is_assignment=%s",
+                                    [assingment[1],True])
+                                survey = cursor.fetchall()
+
+                                if  survey:
+
+                                    cursor.execute(
+                                        "select  name  from school_subject WHERE id = %s ",
+                                        [survey[0][5]])
+                                    subject_name = cursor.fetchall()
+                                    cursor.execute(
+                                        " select id  from survey_question where survey_id=%s",
+                                        [assingment[1]])
+                                    survey_question = cursor.fetchall()
+                                    cursor.execute(
+                                        " select id  from survey_user_input_line where survey_id=%s",
+                                        [assingment[1]])
+                                    survey_user_input_line = cursor.fetchall()
+                                    if survey[0][1]== 'open':
+                                        if survey[0][2]:
+                                            deadline = survey[0][2]
+                                            date_tz = 'Asia/Amman'
+                                            deadline.replace(date_tz)
+                                            deadline =  deadline.replace(date_tz)
+                                            deadline = datetime.strptime(deadline, "%d/%m/%Y %H:%M:%S")
+                                            x=datetime.datetime.now().replace(date_tz)
+                                            if deadline <= datetime.strptime(x, "%d/%m/%Y %H:%M:%S"):
+                                                start = True
+                                                state = 'done'
+                                            else:
+                                                if assingment[4] == 'done':
+                                                    state = 'done'
+                                                    start = False
+                                                else:
+                                                    state = assingment[4]
+                                                    start = True
+                                        else:
+                                            deadline = ""
+                                            state = assingment[4]
+                                            start = False
+                                        data.append({
+                                            "id": assingment[0],
+                                            "assignment_id": assingment[1],
+                                            "name": survey[0][3],
+                                            "subject": subject_name[0][0],
+                                            "token": survey[0][4],
+                                            'answer_token': assingment[2],
+                                            'questions_count': len(survey_question),
+                                            "state": state,
+                                            'last_displayed_page': assingment[3],
+                                            'answered_questions': len(survey_user_input_line),
+                                            "ass_state": survey[0][1],
+                                            "deadline": deadline,
+                                            "start": start
+                                        })
+
+                        result = {'result': data}
+                    return Response(result)
+
 
 
