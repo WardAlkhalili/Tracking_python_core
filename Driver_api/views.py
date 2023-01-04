@@ -1230,7 +1230,39 @@ def set_round_status(request):
                                             [round_id, round_id, distance, round_info[0][1], round_info[0][2],
                                              datetime.datetime.now(), assistant_id])
                                 elif status == 'end' or status == 'force_end':
+                                    st_id = []
 
+                                    for k in rounds_count_student:
+                                        cursor.execute(
+                                            "select  display_name_search from student_student WHERE id= %s",
+                                            [k[0]])
+
+                                        student_name = cursor.fetchall()
+                                        cursor.execute(
+                                            "select father_id,mother_id,responsible_id_value from student_student WHERE id = %s ",
+                                            [k[0]])
+                                        columns4 = (x.name for x in cursor.description)
+                                        student_student2 = cursor.fetchall()
+                                        for rec in student_student2[0]:
+                                            mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec),
+                                                                                         Q(db_name=school_name),
+                                                                                         Q(is_active=True)).values_list(
+                                                'mobile_token').order_by('-pk')
+                                        mobile_token = []
+                                        for e in mobile_token1:
+                                            mobile_token.append(e[0])
+                                        if round_info[0][3] == 'pick_up':
+                                            push_service = FCMNotification(
+                                                api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                            registration_id = mobile_token
+                                            message_title = " Bus Notification"
+
+                                            message_body = student_name[0][0] + "  has just reached the school."
+                                            if mobile_token and not ("token" in mobile_token):
+                                                notify_single_device = push_service.notify_single_device(
+                                                    registration_id=registration_id[0],
+                                                    message_title=message_title,
+                                                    message_body=message_body)
                                     for k in rounds_count_student:
                                         cursor.execute(
                                             "select  id,round_start from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
