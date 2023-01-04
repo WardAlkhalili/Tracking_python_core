@@ -24,6 +24,7 @@ import json
 import calendar
 from datetime import date,timedelta
 import requests
+import pytz
 import datetime
 from rest_framework import status
 
@@ -1012,30 +1013,36 @@ def kids_hstory(request):
                                             "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and type= %s or from_type =%s ORDER BY ID DESC ",
                                             [rec,'emergency','App\Model\sta'+str(parent_id)])
                                         sh_message_wizard = cursor.fetchall()
+                                       
 
                                         for rec in range(len(sh_message_wizard)):
                                             # print( str(sh_message_wizard[rec][1].year))
-                                            year = str(sh_message_wizard[rec][1].year)
-                                            month = '0' + str(sh_message_wizard[rec][1].month) if int(
-                                                sh_message_wizard[rec][1].month) < 10 else str(sh_message_wizard[rec][1].month)
-                                            day = str(sh_message_wizard[rec][1].day) if len(
-                                                str(sh_message_wizard[rec][1].day)) > 1 else "0" + str(
-                                                sh_message_wizard[rec][1].day)
-                                            hour = str(sh_message_wizard[rec][1].hour) if len(
-                                                str(sh_message_wizard[rec][1].hour)) > 1 else "0" + str(
-                                                sh_message_wizard[rec][1].hour)
+                                            deadline = sh_message_wizard[rec][1]
+                                            date_tz = 'Asia/Amman'
 
-                                            minute = str(sh_message_wizard[rec][1].minute) if len(
-                                                str(sh_message_wizard[rec][1].minute)) > 1 else "0" + str(
-                                                sh_message_wizard[rec][1].minute)
-                                            second = str(sh_message_wizard[rec][1].second) if len(
-                                                str(sh_message_wizard[rec][1].second)) > 1 else "0" + str(
-                                                sh_message_wizard[rec][1].second)
+                                            deadline = deadline.astimezone(pytz.timezone(date_tz))
+
+                                            year = str(deadline.year)
+                                            month = '0' + str(deadline.month) if int(
+                                                deadline.month) < 10 else str(deadline.month)
+                                            day = str(deadline.day) if len(
+                                                str(deadline.day)) > 1 else "0" + str(
+                                                deadline.day)
+                                            hour = str(deadline.hour) if len(
+                                                str(deadline.hour)) > 1 else "0" + str(
+                                                deadline.hour)
+
+                                            minute = str(deadline.minute) if len(
+                                                str(deadline.minute)) > 1 else "0" + str(
+                                                deadline.minute)
+                                            second = str(deadline.second) if len(
+                                                str(deadline.second)) > 1 else "0" + str(
+                                                deadline.second)
 
                                             notifications.append({
                                                 "notifications_text": sh_message_wizard[rec][0],
                                                 "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
-                                                "create_date": sh_message_wizard[rec][1],
+                                                "create_date": deadline,
                                                 "notifications_title": "Message from bus no. "+str(bus_num[0][0])+str(rec1[1]),
                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                             })
@@ -1068,12 +1075,17 @@ def kids_hstory(request):
 
                                     for rec in range(len(school_message1)):
 
-                                        year=str(school_message1[rec][4].year)
-                                        month='0'+str(school_message1[rec][4].month)if int(school_message1[rec][4].month)<10 else str(school_message1[rec][4].month)
-                                        day=str(school_message1[rec][4].day)if len(str( school_message1[rec][4].day))>1 else "0"+str( school_message1[rec][4].day)
-                                        hour =str( school_message1[rec][4].hour) if len(str( school_message1[rec][4].hour))>1 else "0"+str( school_message1[rec][4].hour)
-                                        minute = str(school_message1[rec][4].minute) if len(str(school_message1[rec][4].minute)) > 1 else "0" + str(school_message1[rec][4].minute)
-                                        second = str(school_message1[rec][4].second)if len(str(school_message1[rec][4].second)) > 1 else "0" + str(school_message1[rec][4].second)
+                                        deadline = school_message1[rec][4]
+                                        date_tz = 'Asia/Amman'
+
+                                        deadline = deadline.astimezone(pytz.timezone(date_tz))
+
+                                        year=str(deadline.year)
+                                        month='0'+str(deadline.month)if int(deadline.month)<10 else str(deadline.month)
+                                        day=str(deadline.day)if len(str( deadline.day))>1 else "0"+str( deadline.day)
+                                        hour =str(deadline.hour) if len(str(deadline.hour))>1 else "0"+str( school_message1[rec][4].hour)
+                                        minute = str(deadline.minute) if len(str(deadline.minute)) > 1 else "0" + str(deadline.minute)
+                                        second = str(deadline.second)if len(str(deadline.second)) > 1 else "0" + str(deadline.second)
 
                                         notifications.append({
                                             "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_msg_admin.png",
