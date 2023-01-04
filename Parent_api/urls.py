@@ -18,6 +18,7 @@ urlpatterns = [
     path('api/get_attendance/<int:student_id>', views.get_attendance),
     path('api/get_assignment/<int:student_id>', views.get_student_assignment),
     path('api/get_exam/<int:student_id>', views.get_exam),
+    path('api/get_badges/<int:student_id>', views.get_badge),
 
 
 ]

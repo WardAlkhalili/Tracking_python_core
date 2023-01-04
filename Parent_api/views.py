@@ -1467,7 +1467,7 @@ def get_badge(request, student_id):
 
                         for b in badges:
                             cursor.execute(
-                                "select  name,description  from school_badge WHERE id = %s ",
+                                "select  name,description,image_url  from school_badge WHERE id = %s ",
                                 [b[0]])
                             school_badge = cursor.fetchall()
 
@@ -1483,15 +1483,16 @@ def get_badge(request, student_id):
                                 subject_name = cursor.fetchall()
                             data.append({'name': school_badge[0][0],
                                          'date':b[3].strftime("%d %b %Y"),
-                                         # 'image': school_badge[0][1],
+                                         'image':'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str( school_badge[0][2]) if  school_badge[0][2] else"",
                                          'id': b[5],
                                          'teacher':teacher_name[0][0],
                                          'subject': subject_name[0][0] if subject_name else '',
                                          'description': school_badge[0][1],
                                          'new_badge': b[4],
-                                         # 'disable': b.date.month > fields.date.today().month
+                                         'disable': True
                                          })
                     result = {'result': data}
+                    print(result)
                                                                         # print("childs_attendance")
 
                     return Response(result)
@@ -1895,7 +1896,7 @@ def get_exam(request, student_id):
                                         })
 
                         result = {'result': data}
-                        print(result)
+
                     return Response(result)
 @api_view(['GET'])
 def get_student_assignment(request, student_id):
