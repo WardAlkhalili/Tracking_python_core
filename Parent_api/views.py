@@ -1013,7 +1013,7 @@ def kids_hstory(request):
                                             "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and type= %s or from_type =%s ORDER BY ID DESC ",
                                             [rec,'emergency','App\Model\sta'+str(parent_id)])
                                         sh_message_wizard = cursor.fetchall()
-                                       
+
 
                                         for rec in range(len(sh_message_wizard)):
                                             # print( str(sh_message_wizard[rec][1].year))
@@ -1047,7 +1047,57 @@ def kids_hstory(request):
                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                             })
                             # print(notifications)
+                            list_hist_student=[]
+                            for student_hi in student_id:
+                                cursor.execute(
+                                    " SELECT  notification_id FROM student_history WHERE activity_type='absent-all' or activity_type='absent' and student_id=%s",
+                                    [student_hi])
+                                student_history = cursor.fetchall()
+                                print(student_history)
+                                for mas in student_history:
+                                    if mas[0] in list_hist_student:
+                                        continue
+                                    else:
+                                        list_hist_student.append(mas[0])
 
+                                    cursor.execute(
+                                        "select  message_en,create_date,type from sh_message_wizard WHERE id=%s ORDER BY ID DESC ",
+                                        [mas[0]])
+                                    sh_message_wizard = cursor.fetchall()
+
+                                    for rec in range(len(sh_message_wizard)):
+                                        # print( str(sh_message_wizard[rec][1].year))
+                                        deadline = sh_message_wizard[rec][1]
+                                        date_tz = 'Asia/Amman'
+
+                                        deadline = deadline.astimezone(pytz.timezone(date_tz))
+
+                                        year = str(deadline.year)
+                                        month = '0' + str(deadline.month) if int(
+                                            deadline.month) < 10 else str(deadline.month)
+                                        day = str(deadline.day) if len(
+                                            str(deadline.day)) > 1 else "0" + str(
+                                            deadline.day)
+                                        hour = str(deadline.hour) if len(
+                                            str(deadline.hour)) > 1 else "0" + str(
+                                            deadline.hour)
+
+                                        minute = str(deadline.minute) if len(
+                                            str(deadline.minute)) > 1 else "0" + str(
+                                            deadline.minute)
+                                        second = str(deadline.second) if len(
+                                            str(deadline.second)) > 1 else "0" + str(
+                                            deadline.second)
+
+                                        notifications.append({
+                                            "notifications_text": sh_message_wizard[rec][0],
+                                            "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
+                                            "create_date": deadline,
+                                            "notifications_title": "Message from bus no. " + str(bus_num[0][0]) + str(
+                                                rec1[1]),
+                                            "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                        })
+                            #     SELECT  notification_id FROM student_history WHERE activity_type='absent-all' or activity_type='absent' and student_id=1
                             message_ids = []
                             for rec in school_message:
                                 message_ids.append(rec[0])
@@ -1298,46 +1348,48 @@ def notify(request):
                                 r_id=[]
                                 for rec in round_schedule_id:
                                     r_id.append(rec[0])
-                                cursor.execute(
-                                    "select id,round_id from round_schedule WHERE id in %s and day_id =%s",
-                                    [tuple(r_id), day_id[0][0]])
-                                rounds_details = cursor.fetchall()
-
-                                if target_rounds =='both':
-                                    for res in rounds_details:
-
-                                        cursor.execute(
-                                            "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                            [lat, long, student_id, res[1], when,"absent-all",notification_id[0][0]])
-                                        cursor.execute(
-                                            "INSERT INTO round_student_history(student_id,round_id,datetime)VALUES (%s,%s,%s);",
-                                            [student_id, res[1], when])
-
-                                        cursor.execute(
-                                            "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
-                                            ['absent-all',student_id,res[0]])
-                                else:
-                                    round_id=[]
-                                    for rec in rounds_details:
-                                        round_id.append(rec[1])
+                                if r_id:
 
                                     cursor.execute(
-                                        "select id from transport_round WHERE id in %s and  type=%s",
-                                        [tuple(round_id), 'pick_up'])
+                                        "select id,round_id from round_schedule WHERE id in %s and day_id =%s",
+                                        [tuple(r_id), day_id[0][0]])
                                     rounds_details = cursor.fetchall()
 
-                                    for res in rounds_details:
+                                    if target_rounds =='both':
+                                        for res in rounds_details:
+
+                                            cursor.execute(
+                                                "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                [lat, long, student_id, res[1], when,"absent-all",notification_id[0][0]])
+                                            cursor.execute(
+                                                "INSERT INTO round_student_history(student_id,round_id,datetime)VALUES (%s,%s,%s);",
+                                                [student_id, res[1], when])
+
+                                            cursor.execute(
+                                                "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
+                                                ['absent-all',student_id,res[0]])
+                                    else:
+                                        round_id=[]
+                                        for rec in rounds_details:
+                                            round_id.append(rec[1])
 
                                         cursor.execute(
-                                            "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                            [lat, long, student_id, res[1], when,
-                                             'absent', notification_id[0][0]])
-                                        cursor.execute(
-                                            "INSERT INTO round_student_history( student_id, round_id,datetime)VALUES (%s,%s,%s);",
-                                            [student_id, res[1],when])
-                                        cursor.execute(
-                                            "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
-                                            ['absent', student_id, res[0]])
+                                            "select id from transport_round WHERE id in %s and  type=%s",
+                                            [tuple(round_id), 'pick_up'])
+                                        rounds_details = cursor.fetchall()
+
+                                        for res in rounds_details:
+
+                                            cursor.execute(
+                                                "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                [lat, long, student_id, res[1], when,
+                                                 'absent', notification_id[0][0]])
+                                            cursor.execute(
+                                                "INSERT INTO round_student_history( student_id, round_id,datetime)VALUES (%s,%s,%s);",
+                                                [student_id, res[1],when])
+                                            cursor.execute(
+                                                "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
+                                                ['absent', student_id, res[0]])
                                 result = {'result': "ok"}
 
                                 return Response(result)
