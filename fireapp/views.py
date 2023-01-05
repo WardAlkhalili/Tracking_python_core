@@ -167,7 +167,7 @@ def send_school_message(request):
 
 
 def twoArgs(message_id,school_name):
-    with connections[school_name].cursor() as cursor:
+    with connections['tst'].cursor() as cursor:
         # print(message_id)
 
         cursor.execute(
@@ -208,7 +208,7 @@ def twoArgs(message_id,school_name):
         # for rec in parent:
         #     parent_id.append(rec[0])
         #
-        mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id), Q(db_name=school_name),
+        mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id), Q(db_name='tst'),
                                                     Q(is_active=True)).values_list(
             'mobile_token').order_by('-pk')
 
@@ -226,6 +226,7 @@ def twoArgs(message_id,school_name):
         result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
                                                       registration_ids=registration_id,
                                                       data_message={})
+
 
         result1 = {
             "route": 'Ok'
