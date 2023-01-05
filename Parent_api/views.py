@@ -1070,7 +1070,7 @@ def kids_hstory(request):
                                     "select  datetime,id,time_out,bus_check_in from round_student_history WHERE round_id in %s and student_id in %s and history_id in %s  ORDER BY ID DESC LIMIT 1 ",
                                     [tuple(student_round_h),tuple(student_id), tuple(history_round)])
                                 student_history = cursor.fetchall()
-                                print(student_history)
+
                                 if student_history:
                                 #     if round_info[0][3] == 'pick_up':
                                     for student_history1 in student_history:
@@ -1079,7 +1079,8 @@ def kids_hstory(request):
                                                 "select time_out,student_id from round_student_history WHERE id = %s  ",
                                                 [ student_history1[1]])
                                             time_out = cursor.fetchall()
-                                          
+
+
                                             for time_out1 in time_out:
                                                 cursor.execute(
                                                     "select  display_name_search from student_student WHERE  id = %s",
@@ -1625,7 +1626,7 @@ def get_badge(request, student_id):
                                          'disable': True
                                          })
                     result = {'result': data}
-                    print(result)
+
                                                                         # print("childs_attendance")
 
                     return Response(result)
@@ -1655,18 +1656,20 @@ def get_calendar(request, student_id):
                                 [user_id_q[0][0]])
                             partner_id_q = cursor.fetchall()
                             cursor.execute(
-                                " select calendar_event_id from calendar_event_res_partner_rel where res_partner_id = %s",
+                                " select calendar_event_id from calendar_event_res_partner_rel where res_partner_id = %s ORDER BY calendar_event_id DESC",
                                 [partner_id_q[0][0]])
                             calendar_event_id = cursor.fetchall()
+
                         data=[]
                         for f_data in calendar_event_id:
 
                             cursor.execute(
-                                " select id,name,start_datetime from calendar_event where id = %s",
+                                " select id,name,start_datetime from calendar_event where id = %s ",
                                 [f_data[0]])
                             event = cursor.fetchall()
 
-                            if type(event[0][2]) == bool:
+                            if event[0][2]==None:
+
                                 data.append({'id': event[0][0],
                                              'name': event[0][1],
                                              'start_date': event[0][2].strftime(
@@ -1674,6 +1677,7 @@ def get_calendar(request, student_id):
                                              'year': event[0][2].strftime("%Y") if event[0][2] else ''
                                              })
                             else:
+
                                 data.append({'id': event[0][0],
                                              'name':event[0][1],
                                              'start_date': event[0][2].strftime("%d %b %Y"),
