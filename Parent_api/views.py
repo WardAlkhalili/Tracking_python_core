@@ -207,9 +207,11 @@ def settings(request):
                             y = json.dumps(notifications['notifications'])
 
                             settings = "{\"notifications\":" + y + "}"
+
                             cursor.execute(
                                 "UPDATE public.school_parent SET settings=%s WHERE id=%s;",
                                 [settings, parent_id])
+
                             result = {
                                 'status': 'ok', }
 
@@ -244,6 +246,7 @@ def settings(request):
                             cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                             columns = (x.name for x in cursor.description)
                             data_id_bus = cursor.fetchall()
+
                             if data_id_bus[0][0]:
 
                                 data = json.loads(data_id_bus[0][0])
@@ -1267,14 +1270,15 @@ def pre_arrive(request):
                         student_id = request.data.get('student_id')
 
                         with connections[school_name].cursor() as cursor:
-                            cursor.execute("select  display_name_search,year_id from student_student WHERE id = %s",
+                            cursor.execute("select  display_name_search,year_id,user_id from student_student WHERE id = %s",
                                            [student_id])
                             columns = (x.name for x in cursor.description)
                             student_name = cursor.fetchall()
                             cursor.execute(
                                 " select branch_id from res_users where id=%s",
-                                [student_id])
+                                [student_name[0][2]])
                             branch_id = cursor.fetchall()
+
                             cursor.execute(
                                 "select  id,date,state from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                 [student_name[0][0], parent_id])
