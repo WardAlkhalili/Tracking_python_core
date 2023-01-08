@@ -572,6 +572,15 @@ def kids_list(request):
                                             is_active_round = is_active[0][0]
 
                                 x = {
+                                    "Exams": {
+                                        # "url": "https://" + school_name + ".staging.trackware.com/my/Badges/",tst.tracking.trackware.com
+                                        # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Badges/",
+                                        "url": "https://tst.tracking.trackware.com/my/Exams/",
+                                        "arabic_url": "tst.tracking.trackware.com/ar_SY/my/Exams/",
+                                        "name": "Exams",
+                                        "name_ar": "امتحانات",
+                                        "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png"
+                                    },
                                     "Badges": {
                                         # "url": "https://" + school_name + ".staging.trackware.com/my/Badges/",tst.tracking.trackware.com
                                         # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Badges/",
@@ -649,7 +658,7 @@ def kids_list(request):
                                 url_m = {}
                                 model_list = (
                                     "Badges", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
-                                    "Weekly Plans")
+                                    "Weekly Plans",'Online Exams')
                                 cursor.execute("select name from ir_ui_menu where name in %s", [model_list])
                                 list = cursor.fetchall()
                                 res = []
@@ -657,6 +666,7 @@ def kids_list(request):
                                 model = []
                                 show_absence = False
                                 for rec1 in res:
+
                                     if 'Weekly Plans' == rec1:
                                         x['Weeklyplans']['arabic_url'] = x['Weeklyplans']['arabic_url'] + str(
                                             student1[rec]['user_id'])
@@ -669,6 +679,12 @@ def kids_list(request):
                                             student1[rec]['user_id'])
                                         x['Events']['url'] = x['Events']['url'] + str(student1[rec]['user_id'])
                                         model.append(x['Events'])
+                                    if 'Online Exams' == rec1:
+                                        # print("ssssss")
+                                        x['Exams']['arabic_url'] = x['Exams']['arabic_url'] + str(
+                                            student1[rec]['user_id'])
+                                        x['Exams']['url'] = x['Exams']['url'] + str(student1[rec]['user_id'])
+                                        model.append(x['Exams'])
 
                                     if 'Online Assignments' == rec1:
                                         x['Assignments']['arabic_url'] = x['Assignments']['arabic_url'] + str(
@@ -1454,13 +1470,14 @@ def notify(request):
 
                                         for res in rounds_details:
 
+
                                             cursor.execute(
                                                 "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                [lat, long, student_id, res[1], when,
+                                                [lat, long, student_id, res[0], when,
                                                  'absent', notification_id[0][0]])
                                             cursor.execute(
                                                 "INSERT INTO round_student_history( student_id, round_id,datetime)VALUES (%s,%s,%s);",
-                                                [student_id, res[1],when])
+                                                [student_id, res[0],when])
                                             cursor.execute(
                                                 "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
                                                 ['absent', student_id, res[0]])

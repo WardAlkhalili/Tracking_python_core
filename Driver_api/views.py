@@ -597,6 +597,7 @@ def student_list(request, round_id):
                                                     "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
                                                     [round_id, student_student12[0]['id'], round_history[0][0]])
                                                 student_history = cursor.fetchall()
+                                                # print(student_history)
                                                 if student_history:
                                                     lat = student_history[0][1]
                                                     long = student_history[0][2]
@@ -697,10 +698,11 @@ def student_list(request, round_id):
                                                     "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and datetime >= %s and datetime <= %s   ORDER BY ID DESC LIMIT 1 ",
                                                     [round_id, student_student12[0]['id'],start,datetime.datetime.now()])
                                                 student_history1 = cursor.fetchall()
-
+                                                # print(student_history1)
                                                 if student_history1:
+                                                    # print(round_info1[0][1])
                                                     if round_info1[0][1] == 'pick_up':
-                                                        if student_history1[0][0]=='absent' or student_history1[0][0]=='absent_all':
+                                                        if student_history1[0][0]=='absent' or student_history1[0][0]=='absent-all':
 
                                                             in_round = False
                                                             out_round = False
@@ -708,7 +710,7 @@ def student_list(request, round_id):
                                                             no_show = False
                                                     else:
                                                         if student_history1[0][0] == 'absent' or student_history1[0][
-                                                            0] == 'absent_all':
+                                                            0] == 'absent-all':
                                                             in_round = False
                                                             out_round = False
                                                             abs = False
