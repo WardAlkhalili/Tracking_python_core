@@ -2164,4 +2164,163 @@ def get_student_assignment(request, student_id):
                     return Response(result)
 
 
+@api_view(['GET'])
+def get_all_weekly_plans(request, student_id):
 
+    if request.method == 'GET':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+
+                    with connections[school_name].cursor() as cursor:
+
+                        cursor.execute(
+                            "select  id  from academic_year WHERE state = %s",
+                            ['active'])
+                        academic_year = cursor.fetchall()
+                        academic_year_ids = []
+                        data = []
+                        cursor.execute(
+                            "select user_id,year_id from student_student where id=%s",
+                            [student_id])
+                        user_id_q = cursor.fetchall()
+                        if user_id_q:
+                            for rec in academic_year:
+                                academic_year_ids.append(rec[0])
+                            if user_id_q:
+                                cursor.execute(
+                                    " select partner_id,branch_id from res_users where id=%s",
+                                    [user_id_q[0][0]])
+                                partner_id_q = cursor.fetchall()
+
+                                cursor.execute(
+                                    " select id,name,date_from,date_to from week_plan where state='puplished' and year_id = %s and branch_id =%s   ORDER BY create_date DESC",
+                                    [ user_id_q[0][1],partner_id_q[0][1]])
+                                week_plan = cursor.fetchall()
+                                for p in week_plan:
+
+                                    data.append({'id': p[0],
+                                                 'plan_name': p[1],
+                                                 'start_date': str(p[2].strftime("%d %b %Y")),
+                                                 'end_date': str(p[3].strftime("%d %b %Y"))
+                                                 })
+                                result = {'result': data}
+                                print(result)
+                                return Response(result)
+@api_view(['GET'])
+def get_weekly_plan_lines(request, plan_id, student_id,week_name):
+    if request.method == 'GET':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+
+                    with connections[school_name].cursor() as cursor:
+
+                        data = {}
+                        days = []
+                        cursor.execute(
+                            "select user_id,year_id from student_student where id=%s",
+                            [student_id])
+                        student = cursor.fetchall()
+                        if student:
+                            cursor.execute(
+                                " select partner_id from res_users where id=%s",
+                                [student[0][0]])
+                            partner_id = cursor.fetchall()
+                            if partner_id:
+                                cursor.execute(
+                                    "select class_id from res_partner where id=%s",
+                                    [partner_id[0][0]])
+                                class_id = cursor.fetchall()
+                                cursor.execute(
+                                    "select enable_saturday,enable_sunday,enable_monday,enable_tuesday,enable_wednesday,enable_thursday,enable_friday,subject_id,notes,description_saturday,"
+                                    "description_sunday,description_monday,description_tuesday,description_wednesday,description_thursday,description_friday from week_plan_lines where week_id=%s and state ='approved' and class_id =%s",
+                                    [plan_id,class_id[0][0]])
+                                lines = cursor.fetchall()
+
+                                data['plan_name'] = week_name
+                                for line in lines:
+                                    if line[0] and 'Saturday' not in days:
+                                        days.append('Saturday')
+                                    if line[1] and 'Sunday' not in days:
+                                        days.append('Sunday')
+                                    if line[2] and 'Monday' not in days:
+                                        days.append('Monday')
+                                    if line[3] and 'Tuesday' not in days:
+                                        days.append('Tuesday')
+                                    if line[4] and 'Wednesday' not in days:
+                                        days.append('Wednesday')
+                                    if line[5] and 'Thursday' not in days:
+                                        days.append('Thursday')
+                                    if line[6] and 'Friday' not in days:
+                                        days.append('Friday')
+                                days = list(set(days))
+
+                                columns = {'days': {}}
+
+                                for day in days:
+                                    if day == 'Saturday':
+                                        columns['days'][0] = 'Saturday'
+                                    if day == 'Sunday':
+                                        columns['days'][1] = 'Sunday'
+                                    if day == 'Monday':
+                                        columns['days'][2] = 'Monday'
+                                    if day == 'Tuesday':
+                                        columns['days'][3] = 'Tuesday'
+                                    if day == 'Wednesday':
+                                        columns['days'][4] = 'Wednesday'
+                                    if day == 'Thursday':
+                                        columns['days'][5] = 'Thursday'
+                                    if day == 'Friday':
+                                        columns['days'][6] = 'Friday'
+                                columns = sorted(columns['days'].items())
+                                data['columns'] = columns
+
+                                subject_lines = []
+                                for l in lines:
+                                    cursor.execute(
+                                        "select  name  from school_subject WHERE id = %s ",
+                                        [l[7]])
+                                    subject_name = cursor.fetchall()
+                                    line = {'subject_id': l[7], 'subject_name': subject_name[0][0], 'notes': l[8],
+                                            'attachments': []}
+                                    if l[0]:
+                                        line['Saturday'] = l[9]
+                                    if l[1]:
+                                        line['Sunday'] = l[10]
+                                    if l[2]:
+                                        line['Monday'] = l[11]
+                                    if l[3]:
+                                        line['Tuesday'] = l[12]
+                                    if l[4]:
+                                        line['Wednesday'] = l[13]
+                                    if l[5]:
+                                        line['Thursday'] = l[14]
+                                    if l[6]:
+                                        line['Friday'] = l[15]
+                                    subject_lines.append(line)
+                                    # for att in l.sudo().file_ids:
+                                    line['attachments'].append({'id': 1, 'name': 'att.name', 'datas': 'att.url'})
+                                data['lines'] = subject_lines
+
+                                notes = ''
+                                # for note in week.week_note_ids:
+                                #     if cls.id in note.class_ids.ids:
+                                #         notes += note.note + ','
+                                # if notes:
+                                #     notes = notes[:-1] + '.'
+                                data['notes'] = notes
+                        result = {'result': data}
+                        return Response(result)
