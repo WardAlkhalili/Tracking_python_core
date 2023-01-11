@@ -2211,7 +2211,7 @@ def get_all_weekly_plans(request, student_id):
                                                  'end_date': str(p[3].strftime("%d %b %Y"))
                                                  })
                                 result = {'result': data}
-                                print(result)
+
                                 return Response(result)
 @api_view(['GET'])
 def get_weekly_plan_lines(request, plan_id, student_id,week_name):
@@ -2246,10 +2246,11 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                                 class_id = cursor.fetchall()
                                 cursor.execute(
                                     "select enable_saturday,enable_sunday,enable_monday,enable_tuesday,enable_wednesday,enable_thursday,enable_friday,subject_id,notes,description_saturday,"
-                                    "description_sunday,description_monday,description_tuesday,description_wednesday,description_thursday,description_friday from week_plan_lines where week_id=%s and state ='approved' and class_id =%s",
+                                    "description_sunday,description_monday,description_tuesday,description_wednesday,description_thursday,description_friday,id from week_plan_lines where week_id=%s and state ='approved' and class_id =%s",
                                     [plan_id,class_id[0][0]])
                                 lines = cursor.fetchall()
-
+                                print(lines)
+                                # 16
                                 data['plan_name'] = week_name
                                 for line in lines:
                                     if line[0] and 'Saturday' not in days:
@@ -2286,7 +2287,13 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                                     if day == 'Friday':
                                         columns['days'][6] = 'Friday'
                                 columns = sorted(columns['days'].items())
-                                data['columns'] = columns
+                                dayss=[]
+                                for col in columns:
+                                    dayss.append({
+                                        "id":col[0],
+                                        "day": col[1]
+                                    })
+                                data['columns'] = dayss
 
                                 subject_lines = []
                                 for l in lines:
@@ -2294,25 +2301,53 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                                         "select  name  from school_subject WHERE id = %s ",
                                         [l[7]])
                                     subject_name = cursor.fetchall()
-                                    line = {'subject_id': l[7], 'subject_name': subject_name[0][0], 'notes': l[8],
+                                    line = {'subject_id': l[7], 'subject_name': subject_name[0][0], 'notes': l[8] if l[8] else '',
                                             'attachments': []}
                                     if l[0]:
                                         line['Saturday'] = l[9]
+                                    else:
+                                        line['Saturday'] = ''
                                     if l[1]:
                                         line['Sunday'] = l[10]
+                                    else:
+                                        line['Sunday'] = ''
                                     if l[2]:
                                         line['Monday'] = l[11]
+                                    else:
+                                        line['Monday'] = ''
                                     if l[3]:
                                         line['Tuesday'] = l[12]
+                                    else:
+                                        line['Tuesday'] = ''
                                     if l[4]:
                                         line['Wednesday'] = l[13]
+                                    else:
+                                        line['Wednesday'] = ''
                                     if l[5]:
                                         line['Thursday'] = l[14]
+                                    else:
+                                        line['Thursday'] = ''
                                     if l[6]:
                                         line['Friday'] = l[15]
+                                    else:
+                                        line['Friday'] = ''
                                     subject_lines.append(line)
-                                    # for att in l.sudo().file_ids:
-                                    line['attachments'].append({'id': 1, 'name': 'att.name', 'datas': 'att.url'})
+                                    cursor.execute(
+                                        "select id,name,url from ir_attachment where week_plan_line_id=%s",
+                                        [l[16]])
+                                    print(l[16])
+                                    ir_attachment = cursor.fetchall()
+                                    print(ir_attachment)
+                                    if ir_attachment:
+                                        for att in ir_attachment:
+                                            print(att)
+                                            if att[2]:
+
+                                                line['attachments'].append({'id': att[0], 'name': att[1], 'datas': att[2]})
+                                            # else:
+                                                # line['attachments'].append({'id': 1, 'name': '', 'datas': ''})
+                                    # else:
+                                        # line['attachments'].append({'id': 1, 'name': '', 'datas': ''})
                                 data['lines'] = subject_lines
 
                                 notes = ''
