@@ -945,6 +945,7 @@ def kids_hstory(request):
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
+
                     db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
                     parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
 
@@ -1073,67 +1074,68 @@ def kids_hstory(request):
                                                 "notifications_title": "Message from bus no. "+str(bus_num[0][0])+str(rec1[1]),
                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                             })
-                            # print(notifications)
+
                             list_hist_student=[]
-                            cursor.execute(
-                                "select  id,round_start from round_history WHERE round_id in %s and round_name in %s ORDER BY ID DESC LIMIT 1 ",
-                                [tuple(student_round_h), tuple(student_round_h)])
-                            round_history = cursor.fetchall()
-                            print(round_history)
-                            if round_history:
-                                history_round=[]
-                                for round_h in round_history:
-                                    history_round.append(round_h[0])
-
+                            if student_round_h:
                                 cursor.execute(
-                                    "select  datetime,id,time_out,bus_check_in from round_student_history WHERE round_id in %s and student_id in %s and history_id in %s  ORDER BY ID DESC LIMIT 1 ",
-                                    [tuple(student_round_h),tuple(student_id), tuple(history_round)])
-                                student_history = cursor.fetchall()
+                                    "select  id,round_start from round_history WHERE round_id in %s and round_name in %s ORDER BY ID DESC LIMIT 1 ",
+                                    [tuple(student_round_h), tuple(student_round_h)])
+                                round_history = cursor.fetchall()
+                           
+                                if round_history:
+                                    history_round=[]
+                                    for round_h in round_history:
+                                        history_round.append(round_h[0])
 
-                                if student_history:
-                                #     if round_info[0][3] == 'pick_up':
-                                    for student_history1 in student_history:
-                                        if student_history1[3]:
-                                            cursor.execute(
-                                                "select time_out,student_id from round_student_history WHERE id = %s  ",
-                                                [ student_history1[1]])
-                                            time_out = cursor.fetchall()
+                                    cursor.execute(
+                                        "select  datetime,id,time_out,bus_check_in from round_student_history WHERE round_id in %s and student_id in %s and history_id in %s  ORDER BY ID DESC LIMIT 1 ",
+                                        [tuple(student_round_h),tuple(student_id), tuple(history_round)])
+                                    student_history = cursor.fetchall()
 
-
-                                            for time_out1 in time_out:
+                                    if student_history:
+                                    #     if round_info[0][3] == 'pick_up':
+                                        for student_history1 in student_history:
+                                            if student_history1[3]:
                                                 cursor.execute(
-                                                    "select  display_name_search from student_student WHERE  id = %s",
-                                                    [time_out1])
-                                                name = cursor.fetchall()
-                                                deadline = time_out1[0]
-                                                date_tz = 'Asia/Amman'
+                                                    "select time_out,student_id from round_student_history WHERE id = %s  ",
+                                                    [ student_history1[1]])
+                                                time_out = cursor.fetchall()
 
-                                                deadline = deadline.astimezone(pytz.timezone(date_tz))
 
-                                                year = str(deadline.year)
-                                                month = '0' + str(deadline.month) if int(
-                                                    deadline.month) < 10 else str(deadline.month)
-                                                day = str(deadline.day) if len(
-                                                    str(deadline.day)) > 1 else "0" + str(
-                                                    deadline.day)
-                                                hour = str(deadline.hour) if len(
-                                                    str(deadline.hour)) > 1 else "0" + str(
-                                                    deadline.hour)
+                                                for time_out1 in time_out:
+                                                    cursor.execute(
+                                                        "select  display_name_search from student_student WHERE  id = %s",
+                                                        [time_out1])
+                                                    name = cursor.fetchall()
+                                                    deadline = time_out1[0]
+                                                    date_tz = 'Asia/Amman'
 
-                                                minute = str(deadline.minute) if len(
-                                                    str(deadline.minute)) > 1 else "0" + str(
-                                                    deadline.minute)
-                                                second = str(deadline.second) if len(
-                                                    str(deadline.second)) > 1 else "0" + str(
-                                                    deadline.second)
+                                                    deadline = deadline.astimezone(pytz.timezone(date_tz))
 
-                                                notifications.append({
-                                                    "notifications_text": "Bus Notification",
-                                                    "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
-                                                    "create_date": deadline,
-                                                    "notifications_title":name[0][0] +" has just reached the school.  " ,
-                                                    "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                                })
+                                                    year = str(deadline.year)
+                                                    month = '0' + str(deadline.month) if int(
+                                                        deadline.month) < 10 else str(deadline.month)
+                                                    day = str(deadline.day) if len(
+                                                        str(deadline.day)) > 1 else "0" + str(
+                                                        deadline.day)
+                                                    hour = str(deadline.hour) if len(
+                                                        str(deadline.hour)) > 1 else "0" + str(
+                                                        deadline.hour)
+
+                                                    minute = str(deadline.minute) if len(
+                                                        str(deadline.minute)) > 1 else "0" + str(
+                                                        deadline.minute)
+                                                    second = str(deadline.second) if len(
+                                                        str(deadline.second)) > 1 else "0" + str(
+                                                        deadline.second)
+
+                                                    notifications.append({
+                                                        "notifications_text": "Bus Notification",
+                                                        "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
+                                                        "create_date": deadline,
+                                                        "notifications_title":name[0][0] +" has just reached the school.  " ,
+                                                        "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                    })
 
 
                             for student_hi in student_id:
@@ -2226,6 +2228,7 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                         for e in db_name:
                             school_name = e[0]
 
+
                     with connections[school_name].cursor() as cursor:
 
                         data = {}
@@ -2359,3 +2362,4 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                                 data['notes'] = notes
                         result = {'result': data}
                         return Response(result)
+
