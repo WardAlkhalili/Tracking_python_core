@@ -242,6 +242,7 @@ def round_list(request):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
+                            print(school_name)
                         with connections[school_name].cursor() as cursor:
                             curr_date = date.today()
                             cursor.execute(
@@ -1817,8 +1818,8 @@ def reordered_students(request):
                                     date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                     r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
                                     cursor.execute(
-                                        "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
-                                        [r, 'App\Model\Driver', 'route_changed', message_en, driver_id[0][0]])
+                                        "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s,%s);",
+                                        [round_id,r, 'App\Model\Driver', 'route_changed', message_en, driver_id[0][0]])
                                 result = {"status": "ok"}
                                 return Response(result)
                     else:
