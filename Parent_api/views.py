@@ -988,7 +988,7 @@ def kids_hstory(request):
                             student = cursor.fetchall()
                             # print(student)
                             student_id = []
-                            student_round_h = []
+                            round_schedules = []
                             for rec1 in student:
 
                                 student_id.append(rec1[0])
@@ -1006,8 +1006,8 @@ def kids_hstory(request):
                                         [tuple(round_schedule_ids)])
                                     round_schedule = cursor.fetchall()
 
-                                    round_schedules = []
 
+                                    student_round_h=[]
                                     for rec in round_schedule:
 
                                         if rec[0] in  student_round:
@@ -1152,51 +1152,52 @@ def kids_hstory(request):
                                         list_hist_student.append(mas[0])
 
                                     cursor.execute(
-                                        "select  message_en,create_date,type from sh_message_wizard WHERE id=%s ORDER BY ID DESC ",
+                                        "select  message_en,create_date,type,round_id from sh_message_wizard WHERE id=%s ORDER BY ID DESC ",
                                         [mas[0]])
                                     sh_message_wizard = cursor.fetchall()
-                                    cursor.execute(
-                                        "select  vehicle_id from transport_round WHERE id in %s",
-                                        [tuple(round_schedules)])
-
-                                    vehicle_id = cursor.fetchall()
-                                    cursor.execute(
-                                        "select bus_no from fleet_vehicle WHERE id = %s  ",
-                                        [vehicle_id[0][0]])
-                                    bus_num = cursor.fetchall()
 
                                     for rec in range(len(sh_message_wizard)):
-                                        # print( str(sh_message_wizard[rec][1].year))
-                                        deadline = sh_message_wizard[rec][1]
-                                        date_tz = 'Asia/Amman'
 
-                                        deadline = deadline.astimezone(pytz.timezone(date_tz))
+                                        if sh_message_wizard[rec][3]:
+                                            cursor.execute(
+                                                "select  vehicle_id from transport_round WHERE id in %s",
+                                                [sh_message_wizard[rec][3]])
 
-                                        year = str(deadline.year)
-                                        month = '0' + str(deadline.month) if int(
-                                            deadline.month) < 10 else str(deadline.month)
-                                        day = str(deadline.day) if len(
-                                            str(deadline.day)) > 1 else "0" + str(
-                                            deadline.day)
-                                        hour = str(deadline.hour) if len(
-                                            str(deadline.hour)) > 1 else "0" + str(
-                                            deadline.hour)
+                                            vehicle_id = cursor.fetchall()
+                                            cursor.execute(
+                                                "select bus_no from fleet_vehicle WHERE id = %s  ",
+                                                [vehicle_id[0][0]])
+                                            bus_num = cursor.fetchall()
+                                            deadline = sh_message_wizard[rec][1]
+                                            date_tz = 'Asia/Amman'
 
-                                        minute = str(deadline.minute) if len(
-                                            str(deadline.minute)) > 1 else "0" + str(
-                                            deadline.minute)
-                                        second = str(deadline.second) if len(
-                                            str(deadline.second)) > 1 else "0" + str(
-                                            deadline.second)
+                                            deadline = deadline.astimezone(pytz.timezone(date_tz))
 
-                                        notifications.append({
-                                            "notifications_text": sh_message_wizard[rec][0],
-                                            "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
-                                            "create_date": deadline,
-                                            "notifications_title": "Message from bus no. " + str(bus_num[0][0]) + str(
-                                                rec1[1]),
-                                            "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                        })
+                                            year = str(deadline.year)
+                                            month = '0' + str(deadline.month) if int(
+                                                deadline.month) < 10 else str(deadline.month)
+                                            day = str(deadline.day) if len(
+                                                str(deadline.day)) > 1 else "0" + str(
+                                                deadline.day)
+                                            hour = str(deadline.hour) if len(
+                                                str(deadline.hour)) > 1 else "0" + str(
+                                                deadline.hour)
+
+                                            minute = str(deadline.minute) if len(
+                                                str(deadline.minute)) > 1 else "0" + str(
+                                                deadline.minute)
+                                            second = str(deadline.second) if len(
+                                                str(deadline.second)) > 1 else "0" + str(
+                                                deadline.second)
+
+                                            notifications.append({
+                                                "notifications_text": sh_message_wizard[rec][0],
+                                                "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
+                                                "create_date": deadline,
+                                                "notifications_title": "Message from bus no. " + str(bus_num[0][0]) + str(
+                                                    rec1[1]),
+                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                            })
                             #     SELECT  notification_id FROM student_history WHERE activity_type='absent-all' or activity_type='absent' and student_id=1
                             message_ids = []
                             for rec in school_message:
