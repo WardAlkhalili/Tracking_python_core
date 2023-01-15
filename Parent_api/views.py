@@ -988,6 +988,7 @@ def kids_hstory(request):
                             student = cursor.fetchall()
                             # print(student)
                             student_id = []
+                            student_round_h = []
                             for rec1 in student:
 
                                 student_id.append(rec1[0])
@@ -1006,7 +1007,7 @@ def kids_hstory(request):
                                     round_schedule = cursor.fetchall()
 
                                     round_schedules = []
-                                    student_round_h=[]
+
                                     for rec in round_schedule:
 
                                         if rec[0] in  student_round:
@@ -1081,7 +1082,7 @@ def kids_hstory(request):
                                     "select  id,round_start from round_history WHERE round_id in %s and round_name in %s ORDER BY ID DESC LIMIT 1 ",
                                     [tuple(student_round_h), tuple(student_round_h)])
                                 round_history = cursor.fetchall()
-                           
+
                                 if round_history:
                                     history_round=[]
                                     for round_h in round_history:
