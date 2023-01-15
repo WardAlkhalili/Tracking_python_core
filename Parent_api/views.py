@@ -1069,7 +1069,7 @@ def kids_hstory(request):
                                                         for time_out1 in time_out:
                                                             cursor.execute(
                                                                 "select  display_name_search from student_student WHERE  id = %s",
-                                                                [time_out1])
+                                                                [time_out1[1]])
                                                             name = cursor.fetchall()
                                                             deadline = time_out1[0]
                                                             date_tz = 'Asia/Amman'
