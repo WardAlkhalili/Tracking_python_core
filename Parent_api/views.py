@@ -1040,13 +1040,17 @@ def kids_hstory(request):
 
                                         cursor.execute(
                                             "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and type= %s or from_type =%s ORDER BY ID DESC ",
-                                            [rec,'emergency','App\Model\sta'+str(parent_id)])
+                                            [rec,'emergency','App\Model\Driver'])
                                         sh_message_wizard = cursor.fetchall()
+                                        # cursor.execute(
+                                        #     "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and type= %s or from_type =%s ORDER BY ID DESC ",
+                                        #     [rec, 'emergency', 'App\Model\sta' + str(parent_id)])
+                                        # sh_message_wizard = cursor.fetchall()
                                         cursor.execute(
                                             "select  id,round_start from round_history WHERE round_id in %s and round_name in %s ORDER BY ID DESC LIMIT 1 ",
                                             [tuple(student_round_h), tuple(student_round_h)])
                                         round_history = cursor.fetchall()
-                                        print(round_history)
+                                    
                                         if round_history:
                                             history_round = []
                                             for round_h in round_history:
