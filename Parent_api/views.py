@@ -1155,6 +1155,15 @@ def kids_hstory(request):
                                         "select  message_en,create_date,type from sh_message_wizard WHERE id=%s ORDER BY ID DESC ",
                                         [mas[0]])
                                     sh_message_wizard = cursor.fetchall()
+                                    cursor.execute(
+                                        "select  vehicle_id from transport_round WHERE id in %s",
+                                        [tuple(round_schedules)])
+
+                                    vehicle_id = cursor.fetchall()
+                                    cursor.execute(
+                                        "select bus_no from fleet_vehicle WHERE id = %s  ",
+                                        [vehicle_id[0][0]])
+                                    bus_num = cursor.fetchall()
 
                                     for rec in range(len(sh_message_wizard)):
                                         # print( str(sh_message_wizard[rec][1].year))
