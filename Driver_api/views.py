@@ -710,11 +710,12 @@ def student_list(request, round_id):
                                                             abs = True
                                                             no_show = False
                                                     else:
+                                                     
                                                         if student_history1[0][0] == 'absent' or student_history1[0][
                                                             0] == 'absent-all':
                                                             in_round = False
                                                             out_round = False
-                                                            abs = False
+                                                            abs = True
                                                             no_show = True
 
 
