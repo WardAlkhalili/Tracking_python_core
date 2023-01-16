@@ -1042,10 +1042,10 @@ def kids_hstory(request):
                                             "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and type= %s or from_type =%s ORDER BY ID DESC ",
                                             [rec,'emergency','App\Model\Driver'])
                                         sh_message_wizard = cursor.fetchall()
-                                        # cursor.execute(
-                                        #     "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and type= %s or from_type =%s ORDER BY ID DESC ",
-                                        #     [rec, 'emergency', 'App\Model\sta' + str(parent_id)])
-                                        # sh_message_wizard = cursor.fetchall()
+                                        cursor.execute(
+                                            "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and type= %s or from_type =%s ORDER BY ID DESC ",
+                                            [rec, 'emergency', 'App\Model\sta' + str(parent_id)])
+                                        sh_message_wizard_parent_id = cursor.fetchall()
                                         cursor.execute(
                                             "select  id,round_start from round_history WHERE round_id in %s and round_name in %s ORDER BY ID DESC LIMIT 1 ",
                                             [tuple(student_round_h), tuple(student_round_h)])
@@ -1137,6 +1137,40 @@ def kids_hstory(request):
                                                 "notifications_title": "Message from bus no. "+str(bus_num[0][0])+str(rec1[1]),
                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                             })
+                                            # ---------------------------------------------------------------------
+                                            for rec_parent_id in range(len(sh_message_wizard_parent_id)):
+                                                # print( str(sh_message_wizard[rec][1].year))
+                                                deadline = sh_message_wizard[rec_parent_id][1]
+                                                date_tz = 'Asia/Amman'
+
+                                                deadline = deadline.astimezone(pytz.timezone(date_tz))
+
+                                                year = str(deadline.year)
+                                                month = '0' + str(deadline.month) if int(
+                                                    deadline.month) < 10 else str(deadline.month)
+                                                day = str(deadline.day) if len(
+                                                    str(deadline.day)) > 1 else "0" + str(
+                                                    deadline.day)
+                                                hour = str(deadline.hour) if len(
+                                                    str(deadline.hour)) > 1 else "0" + str(
+                                                    deadline.hour)
+
+                                                minute = str(deadline.minute) if len(
+                                                    str(deadline.minute)) > 1 else "0" + str(
+                                                    deadline.minute)
+                                                second = str(deadline.second) if len(
+                                                    str(deadline.second)) > 1 else "0" + str(
+                                                    deadline.second)
+
+                                                notifications.append({
+                                                    "notifications_text": sh_message_wizard[rec_parent_id][0],
+                                                    "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
+                                                    "create_date": deadline,
+                                                    "notifications_title": "Message from bus no. " + str(
+                                                        bus_num[0][0]) + str(rec1[1]),
+                                                    "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                })
+                            #                     ----------------------------------------------
                             # print(notifications)
                                         list_hist_student=[]
 
