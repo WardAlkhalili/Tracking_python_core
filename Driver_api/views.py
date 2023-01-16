@@ -1254,19 +1254,19 @@ def set_round_status(request):
                                         mobile_token = []
                                         for e in mobile_token1:
                                             mobile_token.append(e[0])
-                                        if round_info[0][3] == 'pick_up':
-                                            push_service = FCMNotification(
-                                                api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                            registration_id = mobile_token
-                                            message_title = " Bus Notification"
-
-                                            message_body = student_name[0][0] + "  has just reached the school."
-                                            if mobile_token and not ("token" in mobile_token):
-                                                notify_single_device = push_service.notify_single_device(
-                                                    registration_id=registration_id[0],
-                                                    message_title=message_title,
-                                                    message_body=message_body)
-                                    for k in rounds_count_student:
+                                        # if round_info[0][3] == 'pick_up':
+                                            # push_service = FCMNotification(
+                                            #     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                            # registration_id = mobile_token
+                                            # message_title = " Bus Notification"
+                                            #
+                                            # message_body = student_name[0][0] + "  has just reached the school."
+                                            # if mobile_token and not ("token" in mobile_token):
+                                            #     notify_single_device = push_service.notify_single_device(
+                                            #         registration_id=registration_id[0],
+                                            #         message_title=message_title,
+                                            #         message_body=message_body)
+                                    # for k in rounds_count_student:
                                         cursor.execute(
                                             "select  id,round_start from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
                                             [round_id, round_info[0][2], round_info[0][1], round_id])
@@ -1284,6 +1284,18 @@ def set_round_status(request):
                                                             cursor.execute(
                                                                 "UPDATE public.round_student_history SET time_out = %s WHERE id =%s ",
                                                                 [datetime.datetime.now(), student_history[0][1]])
+                                                            push_service = FCMNotification(
+                                                                api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                                            registration_id = mobile_token
+                                                            message_title = " Bus Notification"
+
+                                                            message_body = student_name[0][
+                                                                               0] + "  has just reached the school."
+                                                            if mobile_token and not ("token" in mobile_token):
+                                                                notify_single_device = push_service.notify_single_device(
+                                                                    registration_id=registration_id[0],
+                                                                    message_title=message_title,
+                                                                    message_body=message_body)
                                                     else:
                                                         if student_history[0][2]:
                                                             cursor.execute(
@@ -2016,6 +2028,7 @@ def notify(request):
                                 emergency_text = request.data.get('emergency_text')
                                 students_ids = request.data.get('students_ids')
                                 with connections[school_name].cursor() as cursor:
+                                    print(students_ids)
                                     driver_id = Manager.objects.filter(token=au).values_list('driver_id')
                                     for e in driver_id:
                                         driver_id = e[0]
