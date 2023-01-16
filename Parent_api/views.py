@@ -1050,7 +1050,7 @@ def kids_hstory(request):
                                             "select  id,round_start from round_history WHERE round_id in %s and round_name in %s ORDER BY ID DESC LIMIT 1 ",
                                             [tuple(student_round_h), tuple(student_round_h)])
                                         round_history = cursor.fetchall()
-                                    
+
                                         if round_history:
                                             history_round = []
                                             for round_h in round_history:
@@ -1098,11 +1098,11 @@ def kids_hstory(request):
                                                                 deadline.second)
 
                                                             notifications.append({
-                                                                "notifications_text": "Bus Notification",
+                                                                "notifications_text":name[0][
+                                                                                           0] + " has just reached the school.  ",
                                                                 "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
                                                                 "create_date": deadline,
-                                                                "notifications_title": name[0][
-                                                                                           0] + " has just reached the school.  ",
+                                                                "notifications_title":  "Bus Notification",
                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                             })
 
