@@ -23,7 +23,7 @@ from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 import json
 import calendar
-from datetime import date,timedelta
+from datetime import date, timedelta, datetime
 import requests
 import pytz
 import datetime
@@ -1679,6 +1679,15 @@ def get_badge(request, student_id):
                                     "select  name  from school_subject WHERE id = %s ",
                                     [b[2]])
                                 subject_name = cursor.fetchall()
+                                cursor.execute(
+                                    "select badge_duration from res_company",
+                                    [])
+                                badge_duration = cursor.fetchall()
+
+                                d0 = date(b[3].year, b[3].month, b[3].day)
+                                d1 = date(datetime.datetime.now().year, datetime.datetime.now().month, datetime.datetime.now().day)
+                                delta = d1 - d0
+
                             data.append({'name': school_badge[0][0],
                                          'date':b[3].strftime("%d %b %Y"),
                                          'image':'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str( school_badge[0][2]) if  school_badge[0][2] else"",
@@ -1687,7 +1696,7 @@ def get_badge(request, student_id):
                                          'subject': subject_name[0][0] if subject_name else '',
                                          'description': school_badge[0][1],
                                          'new_badge': b[4],
-                                         'disable': True
+                                         'disable': delta.days<badge_duration[0][0]
                                          })
                     result = {'result': data}
 
@@ -1953,7 +1962,7 @@ def post_attendance(request):
 
                             response1 = requests.request("POST", "https://tst.tracking.trackware.com/check_user_type1",
                                                          headers=headers, data=body)
-                   
+
 
                         #     cursor.execute(
                         #         "select display_name_search,year_id,user_id from student_student where id=%s",
@@ -2469,12 +2478,12 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                                     cursor.execute(
                                         "select id,name,url from ir_attachment where week_plan_line_id=%s",
                                         [l[16]])
-                                    print(l[16])
+
                                     ir_attachment = cursor.fetchall()
-                                    print(ir_attachment)
+
                                     if ir_attachment:
                                         for att in ir_attachment:
-                                            print(att)
+
                                             if att[2]:
 
                                                 line['attachments'].append({'id': att[0], 'name': att[1], 'datas': att[2]})
