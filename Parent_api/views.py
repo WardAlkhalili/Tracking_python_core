@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import *
 from django.db import connections
+from django.core.files.base import ContentFile
 from django.http.response import Http404, JsonResponse
 from django.http import HttpResponse
 from django.core.serializers import serialize
@@ -204,6 +205,7 @@ def settings(request):
 
                         # school_name = ManagerParent.pincode('iks')
                         with connections[school_name].cursor() as cursor:
+
                             y = json.dumps(notifications['notifications'])
 
                             settings = "{\"notifications\":" + y + "}"
@@ -1837,8 +1839,6 @@ def get_attendance(request, student_id):
                         for e in db_name:
                             school_name = e[0]
                     with connections[school_name].cursor() as cursor:
-
-
                         absence_request=[]
                         daily_attendance=[]
                         cursor.execute(
@@ -1876,7 +1876,7 @@ def get_attendance(request, student_id):
                                                  'end_date': '30 Sep 2021',
                                                  'reason': 'Death of A Relative' if s[3] == 'death' else s[3],
                                                  'type': s[4],
-                                                 'arrival_time': s[5]
+                                                 'arrival_time': s[5] if s[5] else "0"
                                                  })
                                 else:
                                     daily_attendance.append({'leave_id':  s[1],
@@ -1885,7 +1885,7 @@ def get_attendance(request, student_id):
                                                  'end_date': '30 Sep 2021',
                                                  'reason': 'Death of A Relative' if s[3] == 'death' else s[3],
                                                  'type': s[4],
-                                                 'arrival_time': s[5]
+                                                 'arrival_time': s[5] if s[5] else "0"
                                                  })
                             for st in studentleaves:
                                 # print(st[7])
@@ -1893,17 +1893,109 @@ def get_attendance(request, student_id):
 
                                 absence_request.append({'leave_id': st[0],
                                              'name': st[1],
-                                             'start_date': st[2],
+                                             'start_date': st[2].strftime("%d %b %Y"),
                                              'end_date': st[3],
                                              'reason': 'Death of A Relative' if st[4] == 'death' else (
                                                  st[4].capitalize() if st[4] else ""),
                                              'type': st[5].capitalize() if st[5] else "",
                                              'status': st[6].capitalize() if st[6] else "",
-                                             'arrival_time': arrival_time})
+                                             'arrival_time': arrival_time })
 
                     result = {'absence_request': absence_request,
                               'daily_attendance': daily_attendance}
+                    print(result)
                     return Response(result)
+
+
+
+@api_view(['POST'])
+def post_attendance(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+
+
+
+
+                        school_name = ManagerParent.pincode(school_name)
+
+                        # checksum = request.data.get('checksum')
+                        # file_size = request.data.get('file_size')
+                        Session = request.data.get('session')
+                        student_id = request.data.get('student_id')
+                        start_date = request.data.get('start_date')
+                        end_date = request.data.get('end_date')
+                        type = request.data.get('type')
+                        notes = request.data.get('notes')
+                        departure_time = request.data.get('departure_time')
+                        reason= request.data.get('reason')
+                        arrival_time = request.data.get('arrival_time')
+                        with connections[school_name].cursor() as cursor:
+
+                            attached_files = request.data.get("file")
+                            body = json.dumps({"jsonrpc": "2.0",
+                                               "params": {"student_id": int(student_id), "attachments": attached_files,
+                                                          "arrival_time": arrival_time, "departure_time": departure_time, "type": type,
+                                                          "start_date":start_date,"end_date":end_date,"reason":reason,"notes":notes
+
+                                                          }})
+                            headers = {
+                                'X-Openerp-Session-Id': Session,
+                                'Content-Type': 'application/json',
+                            }
+
+                            response1 = requests.request("POST", "https://tst.tracking.trackware.com/check_user_type1",
+                                                         headers=headers, data=body)
+                   
+
+                        #     cursor.execute(
+                        #         "select display_name_search,year_id,user_id from student_student where id=%s",
+                        #         [student_id])
+                        #     user_id_q = cursor.fetchall()
+                        #
+                        #
+                        #     if user_id_q:
+                        #         cursor.execute(
+                        #             " select branch_id,partner_id from res_users where id=%s",
+                        #             [user_id_q[0][2]])
+                        #         branch_id = cursor.fetchall()
+                        #
+                        #         if branch_id:
+                        #             cursor.execute(
+                        #                 "select class_id from res_partner where id=%s",
+                        #                 [branch_id[0][1]])
+                        #             class_id_q = cursor.fetchall()
+                        #
+                        #         name='['+str(user_id_q[0][0])+']'
+                        #         from datetime import datetime as dt
+                        #
+                        #         days = (dt.strptime(end_date, "%Y/%m/%d") - dt.strptime(start_date , "%Y/%m/%d")).days
+                        #         cursor.execute(
+                        #             "INSERT INTO student_absence_request(name, student_id, year_id, branch_id, type, arrival_time, class_id, reason, state, start_date, end_date, days, notes,departure_time )VALUES (%s,%s,%s,%s, %s,%s,%s,%s,%s, %s,%s,%s,%s,%s);",
+                        #             [name, student_id, user_id_q[0][1], branch_id[0][0], type,arrival_time,class_id_q[0][0],reason,'to_approve',start_date,end_date,days,notes,departure_time])
+                        #         cursor.execute("SELECT currval(pg_get_serial_sequence('student_absence_request','id'))",
+                        #                        [])
+                        #         student_absence_request = cursor.fetchall()
+                        #         cursor.execute(
+                        #             "INSERT INTO ir_attachment(name, res_model, res_field, res_id, company_id, type,store_fname, file_size, checksum,mimetype )VALUES (%s,%s,%s,%s, %s,%s,%s,%s,%s, %s);",
+                        #             ['attachments', 'student.absence.request', 'attachments', student_absence_request[0][0],1, 'binary', store_fname, file_size,
+                        #              checksum, mimetype])
+                            result = {'result':'ok'}
+                            return Response(result)
+                result = {'result': 'Error Authorization'}
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+
+
+
 def calculate_time(time):
 
         if time <= 12:
