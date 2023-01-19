@@ -18,6 +18,7 @@ from rest_framework import status
 from itertools import chain
 # from ..Driver_api.models import Manager
 # from yousef.api.Tracking_python_core.Driver_api.models import Manager
+
 import pandas as pd
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
@@ -2502,4 +2503,70 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                                 data['notes'] = notes
                         result = {'result': data}
                         return Response(result)
+
+
+
+@api_view(['GET'])
+def get_data_worksheets(request, student_id):
+    if request.method == 'GET':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                        with connections[school_name].cursor() as cursor:
+                            data = []
+                            cursor.execute(
+                                "select user_id,year_id from student_student where id=%s",
+                                [student_id])
+                            user_id_q = cursor.fetchall()
+                            if user_id_q:
+                                    cursor.execute(
+                                        " select partner_id,branch_id from res_users where id=%s",
+                                        [user_id_q[0][0]])
+                                    partner_id_q = cursor.fetchall()
+                                    cursor.execute(
+                                        "select  worksheet_id  from student_details WHERE student_id = %s  ",
+                                        [student_id])
+                                    class_worksheet_id = cursor.fetchall()
+                                    worksheet_id=[]
+                                    for rec in class_worksheet_id:
+                                        if rec[0]:
+                                            worksheet_id.append(rec[0])
+                                    if worksheet_id:
+                                        cursor.execute(
+                                            " select id,name,priority,create_date,subject_id,deadline from class_worksheet where state='published' and year_id = %s and branch_id =%s and id in %s  ORDER BY create_date DESC",
+                                            [user_id_q[0][1], partner_id_q[0][1],tuple(worksheet_id)])
+                                        class_worksheet = cursor.fetchall()
+
+                                        for w in class_worksheet:
+                                            if w[4]:
+                                                cursor.execute(
+                                                    "select  name  from school_subject WHERE id = %s ",
+                                                    [w[4]])
+                                                subject_name = cursor.fetchall()
+                                                deadline = None
+
+                                                date_tz = 'Asia/Amman'
+                                                new_timezone = pytz.timezone(date_tz)
+
+                                                date = w[3].astimezone(new_timezone)
+
+                                                if w[5]:
+                                                    deadline = w[5].astimezone(new_timezone)
+                                                data.append({'worksheet_id': w[0],
+                                                             'name': w[1],
+                                                             'date': str(date.strftime("%d %b %Y")),
+                                                             'priority': w[2],
+                                                             'deadline': str(deadline),
+                                                             'subject': subject_name[0][0],
+                                                             })
+                                    result = {'result': data}
+                                    return Response(result)
+                            result = {'result': data}
+                            return Response(result)
 
