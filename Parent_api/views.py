@@ -2569,4 +2569,67 @@ def get_data_worksheets(request, student_id):
                                     return Response(result)
                             result = {'result': data}
                             return Response(result)
+@api_view(['GET'])
+def get_event_data(request, student_id):
+    """
+    Needed parameters student_id, current year_id for the student.
+    Rerun list of dictionaries for student events data for portal event view.
+    """
+    if request.method == 'GET':
+        # if request.headers:
+        #     if request.headers.get('Authorization'):
+        #         if 'Bearer' in request.headers.get('Authorization'):
+        #             au = request.headers.get('Authorization').replace('Bearer', '').strip()
+        #             db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+        #
+        #             if db_name:
+        #                 for e in db_name:
+        #                     school_name = e[0]
+                            with connections['tst'].cursor() as cursor:
+                                data = []
+                                cursor.execute(
+                                "select user_id,year_id from student_student where id=%s",
+                                [student_id])
+                                user_id_q = cursor.fetchall()
+                                if user_id_q:
+                                # cursor.execute(
+                                #     " select partner_id,branch_id from res_users where id=%s",
+                                #     [user_id_q[0][0]])
+                                # partner_id_q = cursor.fetchall()
+                                    cursor.execute(
+                                        "select  worksheet_id  from student_details WHERE student_id = %s  ",
+                                        [student_id])
+                                    class_worksheet_id = cursor.fetchall()
+                                    worksheet_id = []
+                                    for rec in class_worksheet_id:
+                                        if rec[0]:
+                                            worksheet_id.append(rec[0])
+                                    if worksheet_id:
+                                        cursor.execute(
+                                            " select id,event_id,state from school_event_registration where  student_id =%s   ORDER BY create_date DESC",
+                                            [ student_id])
+                                        events = cursor.fetchall()
+
+                                        for ev in events:
+                                            cursor.execute(
+                                                " select name,state,start_date from school_event where id=%s and  year_id = %s",
+                                                [ev[1],user_id_q[0][1]])
+                                            school_event = cursor.fetchall()
+                                            # school.event
+                                            if school_event:
+                                                data.append({'event_id': ev[0],
+                                                             'name': school_event[0][0],
+                                                             'start_date': school_event[0][2].strftime("%d %b %Y"),
+                                                             'state': school_event[0][1],
+                                                             'participant_state': ev[2],
+                                                             })
+                                result = {'result': data}
+                                return Response(result)
+    result = {'result': ''}
+    return Response(result)
+
+
+    # search_filters = self.search(std_dom).portal_filterable_serchable()
+
+    # return {'data': data, 'search_filters': search_filters}
 
