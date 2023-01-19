@@ -2701,5 +2701,86 @@ def remove_html(string):
     import re
     regex = re.compile(r'<[^>]+>')
     return regex.sub('', string)
+@api_view(['GET'])
+def get_event_form_view_data(request, event):
+        """
+        Needed parameters event_id.
+        Rerun list of dictionaries for student events data for portal form view.
+        """
+        if request.method == 'GET':
+            if request.headers:
+                if request.headers.get('Authorization'):
+                    if 'Bearer' in request.headers.get('Authorization'):
+                        au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                        db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                        if db_name:
+                            for e in db_name:
+                                school_name = e[0]
+                                with connections[school_name].cursor() as cursor:
+
+                                    cursor.execute(
+                                        " select id,event_id,state from school_event_registration where  id =%s   ORDER BY create_date DESC",
+                                        [event])
+                                    events = cursor.fetchall()
+
+                                    data = []
+                                    cursor.execute(
+                                        " select name,state,start_date,maximum_participants,maximum_participants,cost,attached_event,attach_files_event,link,contact_id,supervisor_id,start_date,end_date,start_reg_date,last_reg_date,company_id from school_event where id=%s",
+                                        [events[0][1]])
+                                    school_event = cursor.fetchall()
+                                    cursor.execute(
+                                        " select currency_id from res_company where id=%s",
+                                        [school_event[0][15]])
+                                    res_company = cursor.fetchall()
+                                    cursor.execute(
+                                        " select name from res_currency where id=%s",
+                                        [res_company[0][0]])
+                                    res_currency = cursor.fetchall()
+                                    contact_id=''
+                                    if school_event[0][9]:
+                                        cursor.execute(
+                                            "select  id,name,image_url  from hr_employee WHERE id = %s ",
+                                            [school_event[0][9]])
+                                        contact_id = cursor.fetchall()
+                                    cursor.execute(
+                                        "select  id,name,image_url  from hr_employee WHERE id = %s ",
+                                        [school_event[0][10]])
+                                    supervisor_id = cursor.fetchall()
+                                    cursor.execute(
+                                        " select id from school_event_registration where  event_id =%s and  state='confirm'  ORDER BY create_date DESC",
+                                        [event])
+                                    participants = cursor.fetchall()
+                                    available_seats= school_event[0][3] - len(participants)
+
+                                    data.append({'event_id': events[0][0],
+                                                 'name': school_event[0][1],
+                                                 'start_date': str(school_event[0][11].strftime("%d %b %Y")),
+                                                 'end_date': str(school_event[0][12].strftime("%d %b %Y")),
+                                                 'registration_start_date': str(school_event[0][13]),
+                                                 'registration_last_date': str(school_event[0][14]),
+                                                 'maximum_participants':school_event[0][3],
+                                                 'available_seats':available_seats ,
+                                                 'cost': str(school_event[0][5]) + ' ' + str(res_currency[0][0]),
+                                                 'contact_name':contact_id[0][1]if contact_id else '',
+                                                 'contact_id':contact_id[0][0]if contact_id else '',
+                                                 'contact_image':contact_id[0][2]if contact_id else '',
+                                                 'supervisor_name':supervisor_id[0][1]if supervisor_id else '',
+                                                 'event': school_event[0][6],
+                                                 'event_name': school_event[0][7],
+                                                 'link': school_event[0][8],
+                                                 'supervisor_id': supervisor_id[0][0]if supervisor_id else '',
+                                                 'supervisor_image': supervisor_id[0][2]if supervisor_id else '',
+                                                 'state':events[0][2] ,
+                                                 'flag': True if events[0][2] == 'draft' else False,
+                                                 'period': school_event[0][12] - school_event[0][11]})
+
+                                    result = {'result': data}
+                                    return Response(result)
+
+
+# result = {'result': data}
+# return Response(result)
+
 
 
