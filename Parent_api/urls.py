@@ -22,6 +22,8 @@ urlpatterns = [
     path('api/get_badges/<int:student_id>', views.get_badge),
     path('api/get_worksheets/<int:student_id>', views.get_data_worksheets),
     path('api/get_events/<int:student_id>', views.get_event_data),
+    path('api/get_worksheet_view_data/<int:wsheet>', views.get_worksheet_form_view_data),
+    # get_form_view_data
     path('api/get_all_weekly_plans/<int:student_id>', views.get_all_weekly_plans),
     path('api/get_weekly_plan_lines/<int:student_id>/<int:plan_id>/<str:week_name>', views.get_weekly_plan_lines),
 #     get_weekly_plan_lines plan_id, student_id,week_name

@@ -2576,16 +2576,16 @@ def get_event_data(request, student_id):
     Rerun list of dictionaries for student events data for portal event view.
     """
     if request.method == 'GET':
-        # if request.headers:
-        #     if request.headers.get('Authorization'):
-        #         if 'Bearer' in request.headers.get('Authorization'):
-        #             au = request.headers.get('Authorization').replace('Bearer', '').strip()
-        #             db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
-        #
-        #             if db_name:
-        #                 for e in db_name:
-        #                     school_name = e[0]
-                            with connections['tst'].cursor() as cursor:
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                            with connections[school_name].cursor() as cursor:
                                 data = []
                                 cursor.execute(
                                 "select user_id,year_id from student_student where id=%s",
@@ -2596,15 +2596,15 @@ def get_event_data(request, student_id):
                                 #     " select partner_id,branch_id from res_users where id=%s",
                                 #     [user_id_q[0][0]])
                                 # partner_id_q = cursor.fetchall()
-                                    cursor.execute(
-                                        "select  worksheet_id  from student_details WHERE student_id = %s  ",
-                                        [student_id])
-                                    class_worksheet_id = cursor.fetchall()
-                                    worksheet_id = []
-                                    for rec in class_worksheet_id:
-                                        if rec[0]:
-                                            worksheet_id.append(rec[0])
-                                    if worksheet_id:
+                                #     cursor.execute(
+                                #         "select  worksheet_id  from student_details WHERE student_id = %s  ",
+                                #         [student_id])
+                                #     class_worksheet_id = cursor.fetchall()
+                                #     worksheet_id = []
+                                #     for rec in class_worksheet_id:
+                                #         if rec[0]:
+                                #             worksheet_id.append(rec[0])
+                                #     if worksheet_id:
                                         cursor.execute(
                                             " select id,event_id,state from school_event_registration where  student_id =%s   ORDER BY create_date DESC",
                                             [ student_id])
@@ -2632,4 +2632,74 @@ def get_event_data(request, student_id):
     # search_filters = self.search(std_dom).portal_filterable_serchable()
 
     # return {'data': data, 'search_filters': search_filters}
+
+@api_view(['GET'])
+def get_worksheet_form_view_data(request, wsheet):
+        """
+        Needed parameters event_id.
+        Rerun list of dictionaries for student events data for portal form view.
+        """
+        if request.method == 'GET':
+            if request.headers:
+                if request.headers.get('Authorization'):
+                    if 'Bearer' in request.headers.get('Authorization'):
+                        au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                        db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                        if db_name:
+                            for e in db_name:
+                                school_name = e[0]
+                        data = []
+                        with connections[school_name].cursor() as cursor:
+
+
+
+                                    cursor.execute(
+                                        " select id,name,priority,create_date,subject_id,deadline,link,attached_homework,attach_files,description,teacher_id from class_worksheet where  id = %s  ORDER BY create_date DESC",
+                                        [wsheet])
+                                    worksheet = cursor.fetchall()
+                                    date_tz = 'Asia/Amman'
+                                    new_timezone = pytz.timezone(date_tz)
+
+                                    # deadline= format_datetime(request.env, worksheet.deadline, tz=date_tz, dt_format=False)
+
+                                    import datetime
+                                    if worksheet[0][5]:
+                                        deadline = worksheet[0][5]
+                                        date_time_str = deadline
+                                        date_time_obj = datetime.datetime.strptime(str(date_time_str), '%Y-%m-%d %H:%M:%S').astimezone(new_timezone)
+                                    cursor.execute(
+                                        "select  name  from school_subject WHERE id = %s ",
+                                        [worksheet[0][4]])
+                                    subject_name = cursor.fetchall()
+                                    cursor.execute(
+                                        "select  id,name,image_url  from hr_employee WHERE id = %s ",
+                                        [worksheet[0][10]])
+                                    hr_employee = cursor.fetchall()
+
+                                    data.append({'worksheet_id':worksheet[0][0],
+                                                 'name': worksheet[0][1],
+                                                 'date': str(worksheet[0][3]),
+                                                 'teacher_name':hr_employee[0][1],
+                                                 'link': worksheet[0][6],
+                                                 'teacher_id':hr_employee[0][0],
+                                                 'teacher_image': hr_employee[0][2],
+                                                 # 'teacher_position': worksheet.teacher_id.job_id.sudo().name,
+                                                 'subject': subject_name[0][0],
+                                                 'homework': worksheet[0][7],
+                                                 'homework_name':  worksheet[0][8],
+                                                 'description':  remove_html(worksheet[0][9]),
+                                                 'deadline':  str(date_time_obj) if worksheet[0][5] else "",
+                                                 'end':datetime.datetime.now()>=worksheet[0][5] if worksheet[0][5] else ""
+
+                                                 })
+                                    result = {'result': data}
+                                    return Response(result)
+                        result = {'result': data}
+                        return Response(result)
+def remove_html(string):
+    import re
+    regex = re.compile(r'<[^>]+>')
+    return regex.sub('', string)
+
 
