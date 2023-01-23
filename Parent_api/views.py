@@ -1782,7 +1782,7 @@ def get_clinic(request, student_id):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-          
+
                     with connections[school_name].cursor() as cursor:
                         # academic.year
                         cursor.execute(
@@ -2678,36 +2678,39 @@ def get_worksheet_form_view_data(request, wsheet):
                                     # deadline= format_datetime(request.env, worksheet.deadline, tz=date_tz, dt_format=False)
 
                                     import datetime
-                                    if worksheet[0][5]:
-                                        deadline = worksheet[0][5]
-                                        date_time_str = deadline
-                                        date_time_obj = datetime.datetime.strptime(str(date_time_str), '%Y-%m-%d %H:%M:%S').astimezone(new_timezone)
-                                    cursor.execute(
-                                        "select  name  from school_subject WHERE id = %s ",
-                                        [worksheet[0][4]])
-                                    subject_name = cursor.fetchall()
-                                    cursor.execute(
-                                        "select  id,name,image_url  from hr_employee WHERE id = %s ",
-                                        [worksheet[0][10]])
-                                    hr_employee = cursor.fetchall()
+                                  
+                                    if worksheet:
+                                        if worksheet[0][5]:
+                                            deadline = worksheet[0][5]
+                                            date_time_str = deadline
+                                            date_time_obj = datetime.datetime.strptime(str(date_time_str), '%Y-%m-%d %H:%M:%S').astimezone(new_timezone)
+                                        cursor.execute(
+                                            "select  name  from school_subject WHERE id = %s ",
+                                            [worksheet[0][4]])
+                                        subject_name = cursor.fetchall()
+                                        cursor.execute(
+                                            "select  id,name,image_url  from hr_employee WHERE id = %s ",
+                                            [worksheet[0][10]])
+                                        hr_employee = cursor.fetchall()
 
-                                    data.append({'worksheet_id':worksheet[0][0],
-                                                 'name': worksheet[0][1],
-                                                 'date': str(worksheet[0][3]),
-                                                 'teacher_name':hr_employee[0][1],
-                                                 'link': worksheet[0][6],
-                                                 'teacher_id':hr_employee[0][0],
-                                                 'teacher_image': hr_employee[0][2],
-                                                 # 'teacher_position': worksheet.teacher_id.job_id.sudo().name,
-                                                 'subject': subject_name[0][0],
-                                                 'homework': worksheet[0][7],
-                                                 'homework_name':  worksheet[0][8],
-                                                 'description':  worksheet[0][9],
-                                                 'deadline':  str(date_time_obj) if worksheet[0][5] else "",
-                                                 'end':datetime.datetime.now()>=worksheet[0][5] if worksheet[0][5] else ""
+                                        data.append({'worksheet_id':worksheet[0][0],
+                                                     'name': worksheet[0][1],
+                                                     'date': str(worksheet[0][3]),
+                                                     'teacher_name':hr_employee[0][1],
+                                                     'link': worksheet[0][6],
+                                                     'teacher_id':hr_employee[0][0],
+                                                     'teacher_image':  hr_employee[0][2]if hr_employee[0][2] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png" ,
+                                                     'teacher_position': '',
+                                                     'subject': subject_name[0][0],
+                                                     'homework': worksheet[0][7] if worksheet[0][7] else '',
+                                                     'homework_name':  worksheet[0][8],
+                                                     'description':  worksheet[0][9],
+                                                     'deadline':  str(date_time_obj) if worksheet[0][5] else "",
+                                                     'end':datetime.datetime.now()>=worksheet[0][5] if worksheet[0][5] else ""
 
-                                                 })
+                                                     })
                                     result = {'result': data}
+
                                     return Response(result)
                         result = {'result': data}
                         return Response(result)
@@ -2793,8 +2796,6 @@ def get_event_form_view_data(request, event):
                                     return Response(result)
 
 
-# result = {'result': data}
-# return Response(result)
 
 
 
