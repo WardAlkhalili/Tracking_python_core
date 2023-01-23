@@ -1042,13 +1042,16 @@ def kids_hstory(request):
                                         bus_num = cursor.fetchall()
 
                                         cursor.execute(
-                                            "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and type= %s or from_type =%s ORDER BY ID DESC ",
-                                            [rec,'emergency','App\Model\Driver'])
+                                            "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC ",
+                                            [rec,'emergency','App\Model\Driver','App\Model\sta' + str(parent_id)])
                                         sh_message_wizard = cursor.fetchall()
-                                        cursor.execute(
-                                            "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and type= %s or from_type =%s ORDER BY ID DESC ",
-                                            [rec, 'emergency', 'App\Model\sta' + str(parent_id)])
-                                        sh_message_wizard_parent_id = cursor.fetchall()
+                                        # print(len(sh_message_wizard))
+                                        #
+                                        # cursor.execute(
+                                        #     "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and type= %s or from_type =%s ORDER BY ID DESC ",
+                                        #     [rec, 'emergency', 'App\Model\sta' + str(parent_id)])
+                                        # sh_message_wizard_parent_id = cursor.fetchall()
+                                        # print(len(sh_message_wizard_parent_id))
                                         cursor.execute(
                                             "select  id,round_start from round_history WHERE round_id in %s and round_name in %s ORDER BY ID DESC LIMIT 1 ",
                                             [tuple(student_round_h), tuple(student_round_h)])
@@ -1064,21 +1067,23 @@ def kids_hstory(request):
                                                 [tuple(student_round_h), tuple(student_id), tuple(history_round)])
                                             student_history = cursor.fetchall()
 
+
                                             if student_history:
-                                                #     if round_info[0][3] == 'pick_up':
+                            #                     #     if round_info[0][3] == 'pick_up':
                                                 for student_history1 in student_history:
                                                     if student_history1[3]:
+
                                                         cursor.execute(
                                                             "select time_out,student_id from round_student_history WHERE id = %s  ",
                                                             [student_history1[1]])
                                                         time_out = cursor.fetchall()
-
-                                                        for time_out1 in time_out:
+                                                        if time_out:
+                            #                             for time_out1 in time_out:
                                                             cursor.execute(
                                                                 "select  display_name_search from student_student WHERE  id = %s",
-                                                                [time_out1[1]])
+                                                                [time_out[0][1]])
                                                             name = cursor.fetchall()
-                                                            deadline = time_out1[0]
+                                                            deadline = time_out[0][0]
                                                             date_tz = 'Asia/Amman'
 
                                                             deadline = deadline.astimezone(pytz.timezone(date_tz))
@@ -1133,53 +1138,55 @@ def kids_hstory(request):
                                                 str(deadline.second)) > 1 else "0" + str(
                                                 deadline.second)
 
+
                                             notifications.append({
-                                                "notifications_text": sh_message_wizard[rec][0],
+                                                "notifications_text": str(sh_message_wizard[rec][0]) if  sh_message_wizard[rec][0] else '',
                                                 "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
                                                 "create_date": deadline,
                                                 "notifications_title": "Message from bus no. "+str(bus_num[0][0])+str(rec1[1]),
                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                             })
-                                            # ---------------------------------------------------------------------
-                                            for rec_parent_id in range(len(sh_message_wizard_parent_id)):
-                                                # print( str(sh_message_wizard[rec][1].year))
-                                                deadline = sh_message_wizard[rec_parent_id][1]
-                                                date_tz = 'Asia/Amman'
-
-                                                deadline = deadline.astimezone(pytz.timezone(date_tz))
-
-                                                year = str(deadline.year)
-                                                month = '0' + str(deadline.month) if int(
-                                                    deadline.month) < 10 else str(deadline.month)
-                                                day = str(deadline.day) if len(
-                                                    str(deadline.day)) > 1 else "0" + str(
-                                                    deadline.day)
-                                                hour = str(deadline.hour) if len(
-                                                    str(deadline.hour)) > 1 else "0" + str(
-                                                    deadline.hour)
-
-                                                minute = str(deadline.minute) if len(
-                                                    str(deadline.minute)) > 1 else "0" + str(
-                                                    deadline.minute)
-                                                second = str(deadline.second) if len(
-                                                    str(deadline.second)) > 1 else "0" + str(
-                                                    deadline.second)
-
-                                                notifications.append({
-                                                    "notifications_text": sh_message_wizard[rec_parent_id][0],
-                                                    "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
-                                                    "create_date": deadline,
-                                                    "notifications_title": "Message from bus no. " + str(
-                                                        bus_num[0][0]) + str(rec1[1]),
-                                                    "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                                })
-                            #                     ----------------------------------------------
-                            # print(notifications)
+                            #                 # ---------------------------------------------------------------------
+                            #                 print(sh_message_wizard_parent_id)
+                            #                 for rec_parent_id in range(len(sh_message_wizard_parent_id)):
+                            #                    # # print( str(sh_message_wizard[rec][1].year))
+                            #                     deadline = sh_message_wizard[rec_parent_id][1]
+                            #                     date_tz = 'Asia/Amman'
+                            #
+                            #                     deadline = deadline.astimezone(pytz.timezone(date_tz))
+                            #
+                            #                     year = str(deadline.year)
+                            #                     month = '0' + str(deadline.month) if int(
+                            #                         deadline.month) < 10 else str(deadline.month)
+                            #                     day = str(deadline.day) if len(
+                            #                         str(deadline.day)) > 1 else "0" + str(
+                            #                         deadline.day)
+                            #                     hour = str(deadline.hour) if len(
+                            #                         str(deadline.hour)) > 1 else "0" + str(
+                            #                         deadline.hour)
+                            #
+                            #                     minute = str(deadline.minute) if len(
+                            #                         str(deadline.minute)) > 1 else "0" + str(
+                            #                         deadline.minute)
+                            #                     second = str(deadline.second) if len(
+                            #                         str(deadline.second)) > 1 else "0" + str(
+                            #                         deadline.second)
+                            #
+                            #                     notifications.append({
+                            #                         "notifications_text": sh_message_wizard[rec_parent_id][0],
+                            #                         "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
+                            #                         "create_date": deadline,
+                            #                         "notifications_title": "Message from bus no. " + str(
+                            #                             bus_num[0][0]) + str(rec1[1]),
+                            #                         "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                            #                     })
+                            # #                     ----------------------------------------------
+                            # # print(notifications)
                                         list_hist_student=[]
-
-
-
-                            # for student_hi in student_id:
+                            #
+                            #
+                            #
+                            # # for student_hi in student_id:
                                         cursor.execute(
                                             " SELECT  notification_id FROM student_history WHERE (activity_type='absent-all' or activity_type='absent') and student_id=%s",
                                             [rec1[0]])
@@ -1271,16 +1278,15 @@ def kids_hstory(request):
                                         notifications.append({
                                             "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_msg_admin.png",
                                             "date_time": year + "-" + month+ "-" + day + " " + hour + ":" +minute + ":" + second,
-                                            "notifications_text": school_message1[rec][3],
+                                            "notifications_text": school_message1[rec][3] if  school_message1[rec][3] else '',
                                             "create_date": school_message1[rec][5],
-                                            "notifications_title": school_message1[rec][2],
+                                            "notifications_title": school_message1[rec][2] if  school_message1[rec][2] else '',
                                         })
 
 
 
                                         notifications.sort(key=get_year, reverse=True)
                                     result = {"notifications": notifications}
-
                                     return Response(result)
                             notifications = []
                             # notifications.append({
@@ -1437,8 +1443,8 @@ def notify(request):
                                 parent_id = e[0]
                             sender_id = parent_id
                             when = request.data.get('when')
+                            date_absent=when
                             when = datetime.datetime.strptime(when+' 00:00:00', '%d/%m/%Y %H:%M:%S')
-
                             target_rounds=request.data.get('target_rounds')
                             # round_id=request.data.get('status')
                             with connections[school_name].cursor() as cursor:
@@ -1452,7 +1458,7 @@ def notify(request):
 
                                 sender_name = cursor.fetchall()
                                 message_en = "	My child  " + student_name[0][0] + " will be absent on " + str(
-                                    date) + " .So please do not pass by my home for pickup"
+                                    date_absent) + " .So please do not pass by my home for pickup"
                                 date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
 
@@ -2509,6 +2515,7 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
 @api_view(['GET'])
 def get_data_worksheets(request, student_id):
     if request.method == 'GET':
+
         if request.headers:
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
@@ -2558,14 +2565,19 @@ def get_data_worksheets(request, student_id):
 
                                                 if w[5]:
                                                     deadline = w[5].astimezone(new_timezone)
+
+
+
                                                 data.append({'worksheet_id': w[0],
                                                              'name': w[1],
                                                              'date': str(date.strftime("%d %b %Y")),
                                                              'priority': w[2],
-                                                             'deadline': str(deadline),
+                                                             'deadline': str(deadline.strftime("%d %b %Y") +' '+ str(deadline.hour)+':'+str(deadline.minute)+':'+str(deadline.second)) if deadline else '',
                                                              'subject': subject_name[0][0],
+                                                             'finish':str(deadline <datetime.datetime.now().astimezone(new_timezone)) if deadline else ''
                                                              })
                                     result = {'result': data}
+
                                     return Response(result)
                             result = {'result': data}
                             return Response(result)
@@ -2606,7 +2618,7 @@ def get_event_data(request, student_id):
                                 #             worksheet_id.append(rec[0])
                                 #     if worksheet_id:
                                         cursor.execute(
-                                            " select id,event_id,state from school_event_registration where  student_id =%s   ORDER BY create_date DESC",
+                                            " select id,event_id,state,new_added from school_event_registration where  student_id =%s   ORDER BY create_date DESC",
                                             [ student_id])
                                         events = cursor.fetchall()
 
@@ -2622,8 +2634,10 @@ def get_event_data(request, student_id):
                                                              'start_date': school_event[0][2].strftime("%d %b %Y"),
                                                              'state': school_event[0][1],
                                                              'participant_state': ev[2],
+                                                             'new_added':str(ev[3]) if ev[3] else ''
                                                              })
                                 result = {'result': data}
+                                print(result)
                                 return Response(result)
     result = {'result': ''}
     return Response(result)
@@ -2688,7 +2702,7 @@ def get_worksheet_form_view_data(request, wsheet):
                                                  'subject': subject_name[0][0],
                                                  'homework': worksheet[0][7],
                                                  'homework_name':  worksheet[0][8],
-                                                 'description':  remove_html(worksheet[0][9]),
+                                                 'description':  worksheet[0][9],
                                                  'deadline':  str(date_time_obj) if worksheet[0][5] else "",
                                                  'end':datetime.datetime.now()>=worksheet[0][5] if worksheet[0][5] else ""
 
