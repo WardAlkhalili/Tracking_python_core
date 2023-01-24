@@ -2678,7 +2678,7 @@ def get_worksheet_form_view_data(request, wsheet):
                                     # deadline= format_datetime(request.env, worksheet.deadline, tz=date_tz, dt_format=False)
 
                                     import datetime
-                                  
+
                                     if worksheet:
                                         if worksheet[0][5]:
                                             deadline = worksheet[0][5]
@@ -2689,20 +2689,36 @@ def get_worksheet_form_view_data(request, wsheet):
                                             [worksheet[0][4]])
                                         subject_name = cursor.fetchall()
                                         cursor.execute(
-                                            "select  id,name,image_url  from hr_employee WHERE id = %s ",
+                                            "select  id,name,image_url,job_id  from hr_employee WHERE id = %s ",
                                             [worksheet[0][10]])
                                         hr_employee = cursor.fetchall()
-
+                                        cursor.execute(
+                                            "select  name from hr_job WHERE id = %s ",
+                                            [hr_employee[0][3]])
+                                        job_name = cursor.fetchall()
+                                        # hr.job
+                                        if worksheet[0][6]:
+                                            import urllib.request
+                                            import math
+                                            # importing the module
+                                            file = urllib.request.urlopen(worksheet[0][6])
+                                            size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+                                            i = int(math.floor(math.log(file.length, 1024)))
+                                            p = math.pow(1024, i)
+                                            s = round(file.length / p, 2)
+                                            print( "%s %s" % (s, size_name[i]))
+                                            # just a dummy file
+                                            print(file.length)
                                         data.append({'worksheet_id':worksheet[0][0],
                                                      'name': worksheet[0][1],
                                                      'date': str(worksheet[0][3]),
                                                      'teacher_name':hr_employee[0][1],
-                                                     'link': worksheet[0][6],
+                                                     'link': worksheet[0][6] if worksheet[0][6] else '',
                                                      'teacher_id':hr_employee[0][0],
                                                      'teacher_image':  hr_employee[0][2]if hr_employee[0][2] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png" ,
-                                                     'teacher_position': '',
+                                                     'teacher_position': job_name[0][0] if job_name else '',
                                                      'subject': subject_name[0][0],
-                                                     'homework': worksheet[0][7] if worksheet[0][7] else '',
+                                                     'homework':  "%s %s" % (s, size_name[i]) if worksheet[0][7] else '',
                                                      'homework_name':  worksheet[0][8],
                                                      'description':  worksheet[0][9],
                                                      'deadline':  str(date_time_obj) if worksheet[0][5] else "",
@@ -2710,6 +2726,7 @@ def get_worksheet_form_view_data(request, wsheet):
 
                                                      })
                                     result = {'result': data}
+                                    print(result)
 
                                     return Response(result)
                         result = {'result': data}
