@@ -1681,6 +1681,7 @@ def get_badge(request, student_id):
                                 [b[1]])
                             teacher_name = cursor.fetchall()
                             subject_name=''
+                            delta=''
                             if b[2]:
                                 cursor.execute(
                                     "select  name  from school_subject WHERE id = %s ",
@@ -1703,8 +1704,9 @@ def get_badge(request, student_id):
                                          'subject': subject_name[0][0] if subject_name else '',
                                          'description': school_badge[0][1],
                                          'new_badge': b[4],
-                                         'disable': delta.days<badge_duration[0][0]
+                                         'disable': delta.days<badge_duration[0][0] if delta else True
                                          })
+
                     result = {'result': data}
 
                                                                         # print("childs_attendance")
@@ -1953,6 +1955,7 @@ def post_attendance(request):
                         departure_time = request.data.get('departure_time')
                         reason= request.data.get('reason')
                         arrival_time = request.data.get('arrival_time')
+                        base_url = request.data.get('base_url')
                         with connections[school_name].cursor() as cursor:
 
                             attached_files = request.data.get("file")
@@ -1966,43 +1969,11 @@ def post_attendance(request):
                                 'X-Openerp-Session-Id': Session,
                                 'Content-Type': 'application/json',
                             }
-
-                            response1 = requests.request("POST", "https://tst.tracking.trackware.com/check_user_type1",
+                            url = base_url + "check_user_type1"
+                            response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
 
 
-                        #     cursor.execute(
-                        #         "select display_name_search,year_id,user_id from student_student where id=%s",
-                        #         [student_id])
-                        #     user_id_q = cursor.fetchall()
-                        #
-                        #
-                        #     if user_id_q:
-                        #         cursor.execute(
-                        #             " select branch_id,partner_id from res_users where id=%s",
-                        #             [user_id_q[0][2]])
-                        #         branch_id = cursor.fetchall()
-                        #
-                        #         if branch_id:
-                        #             cursor.execute(
-                        #                 "select class_id from res_partner where id=%s",
-                        #                 [branch_id[0][1]])
-                        #             class_id_q = cursor.fetchall()
-                        #
-                        #         name='['+str(user_id_q[0][0])+']'
-                        #         from datetime import datetime as dt
-                        #
-                        #         days = (dt.strptime(end_date, "%Y/%m/%d") - dt.strptime(start_date , "%Y/%m/%d")).days
-                        #         cursor.execute(
-                        #             "INSERT INTO student_absence_request(name, student_id, year_id, branch_id, type, arrival_time, class_id, reason, state, start_date, end_date, days, notes,departure_time )VALUES (%s,%s,%s,%s, %s,%s,%s,%s,%s, %s,%s,%s,%s,%s);",
-                        #             [name, student_id, user_id_q[0][1], branch_id[0][0], type,arrival_time,class_id_q[0][0],reason,'to_approve',start_date,end_date,days,notes,departure_time])
-                        #         cursor.execute("SELECT currval(pg_get_serial_sequence('student_absence_request','id'))",
-                        #                        [])
-                        #         student_absence_request = cursor.fetchall()
-                        #         cursor.execute(
-                        #             "INSERT INTO ir_attachment(name, res_model, res_field, res_id, company_id, type,store_fname, file_size, checksum,mimetype )VALUES (%s,%s,%s,%s, %s,%s,%s,%s,%s, %s);",
-                        #             ['attachments', 'student.absence.request', 'attachments', student_absence_request[0][0],1, 'binary', store_fname, file_size,
-                        #              checksum, mimetype])
                             result = {'result':'ok'}
                             return Response(result)
                 result = {'result': 'Error Authorization'}
@@ -2010,7 +1981,104 @@ def post_attendance(request):
             result = {'result': 'Not Authorization'}
             return Response(result)
 
+@api_view(['POST'])
+def post_workSheet(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
 
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+
+
+
+
+                        school_name = ManagerParent.pincode(school_name)
+
+
+                        Session = request.data.get('session')
+                        student_id = request.data.get('student_id')
+                        wk_id = request.data.get('wk_id')
+                        base_url = request.data.get('base_url')
+                        with connections[school_name].cursor() as cursor:
+                            cursor.execute(
+                                "select user_id from student_student where id=%s",
+                                [student_id])
+                            user_id_q = cursor.fetchall()
+
+                            attached_files = request.data.get("file")
+                            body = json.dumps({"jsonrpc": "2.0",
+                                               "params": {"student_id": int(user_id_q[0][0]), "attachments": attached_files,
+                                                          "wk_id": wk_id,
+
+                                                          }})
+                            headers = {
+                                'X-Openerp-Session-Id': Session,
+                                'Content-Type': 'application/json',
+                            }
+
+                            url = str(base_url) + "upload_worksheet"
+
+                            response1 = requests.request("POST", url,
+                                                         headers=headers, data=body)
+
+
+                            result = {'result':'ok'}
+                            return Response(result)
+                result = {'result': 'Error Authorization'}
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+@api_view(['POST'])
+def post_Event(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+
+                        school_name = ManagerParent.pincode(school_name)
+                        Session = request.data.get('session')
+                        student_id = request.data.get('student_id')
+                        wk_id = request.data.get('wk_id')
+                        base_url=request.data.get('base_url')
+                        with connections[school_name].cursor() as cursor:
+                            cursor.execute(
+                                "select user_id from student_student where id=%s",
+                                [student_id])
+                            user_id_q = cursor.fetchall()
+
+                            attached_files = request.data.get("file")
+                            body = json.dumps({"jsonrpc": "2.0",
+                                               "params": {"stu_id": int(user_id_q[0][0]), "attachments": attached_files,
+                                                          "wk_id": wk_id,
+
+                                                          }})
+                            headers = {
+                                'X-Openerp-Session-Id': 'e0887cd15bba9e912f11239901be656967c66511',
+                                'Content-Type': 'application/json',
+                            }
+                            url =base_url+"upload_worksheet"
+
+                            response1 = requests.request("POST", "http://192.168.1.150:9098/upload_worksheet",
+                                                         headers=headers, data=body)
+
+
+                            result = {'result':'ok'}
+                            return Response(result)
+                result = {'result': 'Error Authorization'}
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
 
 def calculate_time(time):
 
@@ -2706,9 +2774,7 @@ def get_worksheet_form_view_data(request, wsheet):
                                             i = int(math.floor(math.log(file.length, 1024)))
                                             p = math.pow(1024, i)
                                             s = round(file.length / p, 2)
-                                            print( "%s %s" % (s, size_name[i]))
-                                            # just a dummy file
-                                            print(file.length)
+
                                         data.append({'worksheet_id':worksheet[0][0],
                                                      'name': worksheet[0][1],
                                                      'date': str(worksheet[0][3]),
@@ -2716,7 +2782,7 @@ def get_worksheet_form_view_data(request, wsheet):
                                                      'link': worksheet[0][6] if worksheet[0][6] else '',
                                                      'teacher_id':hr_employee[0][0],
                                                      'teacher_image':  hr_employee[0][2]if hr_employee[0][2] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png" ,
-                                                     'teacher_position': job_name[0][0] if job_name else '',
+                                                     'teacher_position': job_name[0][0] if job_name else 'Teacher',
                                                      'subject': subject_name[0][0],
                                                      'homework':  "%s %s" % (s, size_name[i]) if worksheet[0][7] else '',
                                                      'homework_name':  worksheet[0][8],
@@ -2726,8 +2792,6 @@ def get_worksheet_form_view_data(request, wsheet):
 
                                                      })
                                     result = {'result': data}
-                                    print(result)
-
                                     return Response(result)
                         result = {'result': data}
                         return Response(result)
