@@ -948,7 +948,7 @@ def kids_hstory(request):
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
-                    print(request.headers.get('Authorization'))
+
                     db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
                     parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
 
@@ -1921,7 +1921,7 @@ def get_attendance(request, student_id):
 
                     result = {'absence_request': absence_request,
                               'daily_attendance': daily_attendance}
-                    print(result)
+
                     return Response(result)
 
 
@@ -2059,17 +2059,17 @@ def post_Event(request):
 
                             attached_files = request.data.get("file")
                             body = json.dumps({"jsonrpc": "2.0",
-                                               "params": {"stu_id": int(user_id_q[0][0]), "attachments": attached_files,
+                                               "params": {"stu_id": int(student_id), "attachments": attached_files,"user_id":int(user_id_q[0][0]),
                                                           "wk_id": wk_id,
 
                                                           }})
                             headers = {
-                                'X-Openerp-Session-Id': 'e0887cd15bba9e912f11239901be656967c66511',
+                                'X-Openerp-Session-Id': Session,
                                 'Content-Type': 'application/json',
                             }
-                            url =base_url+"upload_worksheet"
+                            url =base_url+"upload_events_flutter"
 
-                            response1 = requests.request("POST", "http://192.168.1.150:9098/upload_worksheet",
+                            response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
 
 
@@ -2079,7 +2079,29 @@ def post_Event(request):
                 return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
-
+@api_view(['POST'])
+def cancel_event(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                        school_name = ManagerParent.pincode(school_name)
+                        wk_id = request.data.get('wk_id')
+                        with connections[school_name].cursor() as cursor:
+                            cursor.execute(
+                                "Update school_event_registration SET state = 'cancel'  WHERE id=%s",
+                                [wk_id])
+                            result = {'result':'ok'}
+                            return Response(result)
+                result = {'result': 'Error Authorization'}
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
 def calculate_time(time):
 
         if time <= 12:
@@ -2467,7 +2489,7 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                                     "description_sunday,description_monday,description_tuesday,description_wednesday,description_thursday,description_friday,id from week_plan_lines where week_id=%s and state ='approved' and class_id =%s",
                                     [plan_id,class_id[0][0]])
                                 lines = cursor.fetchall()
-                                print(lines)
+
                                 # 16
                                 data['plan_name'] = week_name
                                 for line in lines:
@@ -2705,7 +2727,7 @@ def get_event_data(request, student_id):
                                                              'new_added':str(ev[3]) if ev[3] else ''
                                                              })
                                 result = {'result': data}
-                                print(result)
+
                                 return Response(result)
     result = {'result': ''}
     return Response(result)
@@ -2716,12 +2738,13 @@ def get_event_data(request, student_id):
     # return {'data': data, 'search_filters': search_filters}
 
 @api_view(['GET'])
-def get_worksheet_form_view_data(request, wsheet):
+def get_worksheet_form_view_data(request, wsheet,std):
         """
         Needed parameters event_id.
         Rerun list of dictionaries for student events data for portal form view.
         """
         if request.method == 'GET':
+
             if request.headers:
                 if request.headers.get('Authorization'):
                     if 'Bearer' in request.headers.get('Authorization'):
@@ -2746,6 +2769,7 @@ def get_worksheet_form_view_data(request, wsheet):
                                     # deadline= format_datetime(request.env, worksheet.deadline, tz=date_tz, dt_format=False)
 
                                     import datetime
+
 
                                     if worksheet:
                                         if worksheet[0][5]:
@@ -2774,6 +2798,34 @@ def get_worksheet_form_view_data(request, wsheet):
                                             i = int(math.floor(math.log(file.length, 1024)))
                                             p = math.pow(1024, i)
                                             s = round(file.length / p, 2)
+                                        cursor.execute(
+                                            "select id from student_student where id=%s",
+                                            [std])
+                                        user_id_q = cursor.fetchall()
+                                        student_solution=[]
+                                        if user_id_q:
+                                            cursor.execute(
+                                                "select id from student_details where worksheet_id=%s and student_id=%s",
+                                                [worksheet[0][0],std])
+                                            detail = cursor.fetchall()
+                                            cursor.execute(
+                                                "SELECT * FROM public.ir_attachment_student_details_rel where student_details_id=%s ",
+                                                [detail[0][0]])
+                                            ir_attachment_student_details_rel = cursor.fetchall()
+                                            if ir_attachment_student_details_rel:
+                                                for rec in ir_attachment_student_details_rel:
+                                                    cursor.execute(
+                                                        "SELECT name,file_size  FROM public.ir_attachment where id=%s ",
+                                                        [rec[1]])
+                                                    ir_attachment = cursor.fetchall()
+                                                    for res in ir_attachment:
+
+
+                                                        student_solution.append({
+                                                            'name':str(res[0]),
+                                                            'file_size':str(res[1])
+                                                        })
+
 
                                         data.append({'worksheet_id':worksheet[0][0],
                                                      'name': worksheet[0][1],
@@ -2788,8 +2840,8 @@ def get_worksheet_form_view_data(request, wsheet):
                                                      'homework_name':  worksheet[0][8],
                                                      'description':  worksheet[0][9],
                                                      'deadline':  str(date_time_obj) if worksheet[0][5] else "",
-                                                     'end':datetime.datetime.now()>=worksheet[0][5] if worksheet[0][5] else ""
-
+                                                     'end':str(datetime.datetime.now()>=worksheet[0][5]) if worksheet[0][5] else "",
+                                                     'student_solution':student_solution
                                                      })
                                     result = {'result': data}
                                     return Response(result)
@@ -2800,7 +2852,7 @@ def remove_html(string):
     regex = re.compile(r'<[^>]+>')
     return regex.sub('', string)
 @api_view(['GET'])
-def get_event_form_view_data(request, event):
+def get_event_form_view_data(request, event,std):
         """
         Needed parameters event_id.
         Rerun list of dictionaries for student events data for portal form view.
@@ -2836,7 +2888,9 @@ def get_event_form_view_data(request, event):
                                         [res_company[0][0]])
                                     res_currency = cursor.fetchall()
                                     contact_id=''
+
                                     if school_event[0][9]:
+
                                         cursor.execute(
                                             "select  id,name,image_url  from hr_employee WHERE id = %s ",
                                             [school_event[0][9]])
@@ -2850,30 +2904,70 @@ def get_event_form_view_data(request, event):
                                         [event])
                                     participants = cursor.fetchall()
                                     available_seats= school_event[0][3] - len(participants)
+                                    cursor.execute(
+                                        "select user_id from student_student where id=%s",
+                                        [std])
+                                    user_id_q = cursor.fetchall()
+                                    student_solution = []
+                                    if user_id_q:
+                                                import math
+                                                cursor.execute(
+                                                    "SELECT name,file_size  FROM public.ir_attachment where res_model='school.event' and res_id =%s and student_idq =%s",
+                                                    [events[0][1],user_id_q[0][0]])
+                                                ir_attachment = cursor.fetchall()
+                                                for res in ir_attachment:
+                                                    size_name = (
+                                                        "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+                                                    i1 = int(math.floor(math.log(res[1], 1024)))
+                                                    p1 = math.pow(1024, i1)
+                                                    s1 = round(res[1] / p1, 2)
+                                                    student_solution.append({
+                                                        'name': str(res[0]),
+                                                        'file_size': str(s1)
+                                                    })
+                                    contact_name=''
+                                    supervisor_name=''
+                                    supervisor_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png'
+                                    contact_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png'
+                                    contact_id_id=0
+                                    supervisor_id_id=0
+
+                                    if contact_id :
+                                        contact_name = contact_id[0][1] if contact_id[0][1] else ""
+                                        contact_image =contact_id[0][2]if contact_id[0][2] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png"
+                                        contact_id_id  =contact_id[0][0]if contact_id[0][0] else 0
+
+                                    if supervisor_id:
+                                        supervisor_name = supervisor_id[0][1] if supervisor_id[0][1] else ""
+                                        supervisor_image   = supervisor_id[0][2] if supervisor_id[0][2] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png"
+                                        supervisor_id_id = supervisor_id[0][0] if supervisor_id[0][0] else 0
 
                                     data.append({'event_id': events[0][0],
-                                                 'name': school_event[0][1],
+                                                 'name': school_event[0][0],
                                                  'start_date': str(school_event[0][11].strftime("%d %b %Y")),
                                                  'end_date': str(school_event[0][12].strftime("%d %b %Y")),
-                                                 'registration_start_date': str(school_event[0][13]),
-                                                 'registration_last_date': str(school_event[0][14]),
+                                                 'registration_start_date': str(school_event[0][13]) if school_event[0][13] else '' ,
+                                                 'registration_last_date': str(school_event[0][14])if school_event[0][14] else '',
                                                  'maximum_participants':school_event[0][3],
                                                  'available_seats':available_seats ,
                                                  'cost': str(school_event[0][5]) + ' ' + str(res_currency[0][0]),
-                                                 'contact_name':contact_id[0][1]if contact_id else '',
-                                                 'contact_id':contact_id[0][0]if contact_id else '',
-                                                 'contact_image':contact_id[0][2]if contact_id else '',
-                                                 'supervisor_name':supervisor_id[0][1]if supervisor_id else '',
-                                                 'event': school_event[0][6],
-                                                 'event_name': school_event[0][7],
-                                                 'link': school_event[0][8],
-                                                 'supervisor_id': supervisor_id[0][0]if supervisor_id else '',
-                                                 'supervisor_image': supervisor_id[0][2]if supervisor_id else '',
+                                                 'contact_name':contact_name,
+                                                 'contact_id':contact_id_id,
+                                                 'contact_image':contact_image,
+                                                 'supervisor_name':supervisor_name,
+                                                 'event': school_event[0][6]if school_event[0][6] else '',
+                                                 'event_name': school_event[0][7] if school_event[0][7] else '',
+                                                 'link': school_event[0][8] if school_event[0][8] else '',
+                                                 'supervisor_id': supervisor_id_id,
+                                                 'supervisor_image': supervisor_image,
                                                  'state':events[0][2] ,
-                                                 'flag': True if events[0][2] == 'draft' else False,
-                                                 'period': school_event[0][12] - school_event[0][11]})
+                                                 'flag': str(True) if events[0][2] == 'draft' else str(False),
+                                                 'period': str(school_event[0][12] - school_event[0][11]),
+                                                 'student_solution':student_solution})
+
 
                                     result = {'result': data}
+
                                     return Response(result)
 
 
