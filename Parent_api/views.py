@@ -1666,7 +1666,7 @@ def get_badge(request, student_id):
                         for rec in academic_year:
                             academic_year_ids.append(rec[0])
                         cursor.execute(
-                            "select  school_badge_id,teacher_id,subject_id,date,new_badge,id  from badge_badge WHERE student_id = %s AND year_id in %s",
+                            "select  school_badge_id,teacher_id,subject_id,date,new_badge,id  from badge_badge WHERE student_id = %s AND year_id in %s  ORDER BY ID DESC",
                             [student_id, tuple(academic_year_ids)])
                         badges = cursor.fetchall()
 
