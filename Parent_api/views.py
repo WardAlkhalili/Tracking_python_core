@@ -2475,19 +2475,27 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                             [student_id])
                         student = cursor.fetchall()
                         if student:
+
                             cursor.execute(
                                 " select partner_id from res_users where id=%s",
                                 [student[0][0]])
                             partner_id = cursor.fetchall()
                             if partner_id:
+
                                 cursor.execute(
                                     "select class_id from res_partner where id=%s",
                                     [partner_id[0][0]])
                                 class_id = cursor.fetchall()
+
+                                # cursor.execute(
+                                #     "select enable_saturday,enable_sunday,enable_monday,enable_tuesday,enable_wednesday,enable_thursday,enable_friday,subject_id,notes,description_saturday,"
+                                #     "description_sunday,description_monday,description_tuesday,description_wednesday,description_thursday,description_friday,id from week_plan_lines where week_id=%s and state ='approved' and class_id =%s",
+                                #     [plan_id,class_id[0][0]])
+                                # lines = cursor.fetchall()
                                 cursor.execute(
                                     "select enable_saturday,enable_sunday,enable_monday,enable_tuesday,enable_wednesday,enable_thursday,enable_friday,subject_id,notes,description_saturday,"
-                                    "description_sunday,description_monday,description_tuesday,description_wednesday,description_thursday,description_friday,id from week_plan_lines where week_id=%s and state ='approved' and class_id =%s",
-                                    [plan_id,class_id[0][0]])
+                                    "description_sunday,description_monday,description_tuesday,description_wednesday,description_thursday,description_friday,id from week_plan_lines where week_id=%s ",
+                                    [plan_id])
                                 lines = cursor.fetchall()
 
                                 # 16
@@ -2528,6 +2536,7 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                                         columns['days'][6] = 'Friday'
                                 columns = sorted(columns['days'].items())
                                 dayss=[]
+
                                 for col in columns:
                                     dayss.append({
                                         "id":col[0],
