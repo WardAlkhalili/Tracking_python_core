@@ -525,7 +525,8 @@ def kids_list(request):
                             setting = cursor.fetchall()
 
                             show_map=True
-                            if (setting[0][4]==True and parent_show_map[0][0]==None) or (setting[0][4]==False and parent_show_map[0][0]==True) or (setting[0][4]and parent_show_map[0][0]) :
+                            if (parent_show_map[0][0] == True):
+                            # if (setting[0][4]==True and parent_show_map[0][0]==None) or (setting[0][4]==False and parent_show_map[0][0]==True) or (setting[0][4]and parent_show_map[0][0]) :
                                 show_map =True
                             else:
                                 show_map=False
