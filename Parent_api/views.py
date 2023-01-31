@@ -2487,6 +2487,7 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                                     "select class_id from res_partner where id=%s",
                                     [partner_id[0][0]])
                                 class_id = cursor.fetchall()
+                             
 
                                 # cursor.execute(
                                 #     "select enable_saturday,enable_sunday,enable_monday,enable_tuesday,enable_wednesday,enable_thursday,enable_friday,subject_id,notes,description_saturday,"
@@ -2495,8 +2496,8 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                                 # lines = cursor.fetchall()
                                 cursor.execute(
                                     "select enable_saturday,enable_sunday,enable_monday,enable_tuesday,enable_wednesday,enable_thursday,enable_friday,subject_id,notes,description_saturday,"
-                                    "description_sunday,description_monday,description_tuesday,description_wednesday,description_thursday,description_friday,id from week_plan_lines where week_id=%s ",
-                                    [plan_id])
+                                    "description_sunday,description_monday,description_tuesday,description_wednesday,description_thursday,description_friday,id from week_plan_lines where week_id=%s and class_id=%s and state ='approved'",
+                                    [plan_id,class_id[0][0]])
                                 lines = cursor.fetchall()
 
                                 # 16
