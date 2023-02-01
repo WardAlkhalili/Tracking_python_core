@@ -49,6 +49,7 @@ def parent_login(request):
             headers = {
                 'Content-Type': 'application/json',
             }
+
             response1 = requests.request("POST", url, headers=headers, data=body)
             # print(response1)
 
@@ -1085,7 +1086,7 @@ def kids_hstory(request):
                                                                 [time_out[0][1]])
                                                             name = cursor.fetchall()
                                                             deadline = time_out[0][0]
-                                                            date_tz = 'Asia/Amman'
+                                                            date_tz = 'Asia/Kuwait'
 
                                                             deadline = deadline.astimezone(pytz.timezone(date_tz))
 
@@ -1118,7 +1119,7 @@ def kids_hstory(request):
                                         for rec in range(len(sh_message_wizard)):
                                             # print( str(sh_message_wizard[rec][1].year))
                                             deadline = sh_message_wizard[rec][1]
-                                            date_tz = 'Asia/Amman'
+                                            date_tz = 'Asia/Kuwait'
 
                                             deadline = deadline.astimezone(pytz.timezone(date_tz))
 
@@ -1208,7 +1209,7 @@ def kids_hstory(request):
                                             for rec in range(len(sh_message_wizard)):
                                                 # print( str(sh_message_wizard[rec][1].year))
                                                 deadline = sh_message_wizard[rec][1]
-                                                date_tz = 'Asia/Amman'
+                                                date_tz = 'Asia/Kuwait'
 
                                                 deadline = deadline.astimezone(pytz.timezone(date_tz))
 
@@ -1265,7 +1266,7 @@ def kids_hstory(request):
                                     for rec in range(len(school_message1)):
 
                                         deadline = school_message1[rec][4]
-                                        date_tz = 'Asia/Amman'
+                                        date_tz = 'Asia/Kuwait'
 
                                         deadline = deadline.astimezone(pytz.timezone(date_tz))
 
@@ -1431,7 +1432,6 @@ def notify(request):
 
                         school_name = ManagerParent.pincode(school_name)
                         type = request.data.get('location_type')
-
                         date = request.data.get('date')
                         student_id = request.data.get('student_id')
                         name = request.data.get('name')
@@ -2365,7 +2365,7 @@ def get_student_assignment(request, student_id):
                                     if survey[0][1]== 'open':
                                         if survey[0][2]:
                                             deadline = survey[0][2]
-                                            date_tz = 'Asia/Amman'
+                                            date_tz = 'Asia/Kuwait'
                                             deadline.replace(date_tz)
                                             deadline =  deadline.replace(date_tz)
                                             deadline = datetime.strptime(deadline, "%d/%m/%Y %H:%M:%S")
@@ -2659,7 +2659,7 @@ def get_data_worksheets(request, student_id):
                                                 subject_name = cursor.fetchall()
                                                 deadline = None
 
-                                                date_tz = 'Asia/Amman'
+                                                date_tz = 'Asia/Kuwait'
                                                 new_timezone = pytz.timezone(date_tz)
 
                                                 date = w[3].astimezone(new_timezone)
@@ -2774,7 +2774,7 @@ def get_worksheet_form_view_data(request, wsheet,std):
                                         " select id,name,priority,create_date,subject_id,deadline,link,attached_homework,attach_files,description,teacher_id from class_worksheet where  id = %s  ORDER BY create_date DESC",
                                         [wsheet])
                                     worksheet = cursor.fetchall()
-                                    date_tz = 'Asia/Amman'
+                                    date_tz = 'Asia/Kuwait'
                                     new_timezone = pytz.timezone(date_tz)
 
                                     # deadline= format_datetime(request.env, worksheet.deadline, tz=date_tz, dt_format=False)
