@@ -118,6 +118,7 @@ def Get_round_locations(request):
         start_unix_time = request.data.get('start_unix_time')
         fullRound = school_name + "-stg-round-" + str(round_id)
         date = request.data.get('date').split('-')
+        # print()
         currentDate = datetime.strptime(date[0] + "/" + date[1] + "/" + date[2], '%d/%m/%Y').date()
 
         route = []
@@ -167,14 +168,11 @@ def send_school_message(request):
 
 
 def twoArgs(message_id,school_name):
-    with connections['tst'].cursor() as cursor:
-        # print(message_id)
-
+    with connections[school_name].cursor() as cursor:
         cursor.execute(
             "select  message,title  from school_message where id = %s",
             [message_id])
         school_message = cursor.fetchall()
-
         cursor.execute(
             "select  student_student_id  from school_message_student_student where school_message_id = %s",
             [message_id])
@@ -187,7 +185,6 @@ def twoArgs(message_id,school_name):
             [tuple(r_id)])
         columns = (x.name for x in cursor.description)
         student = cursor.fetchall()
-        # print(student)
         id = []
         for rec in student:
             if rec[0]:
@@ -197,7 +194,6 @@ def twoArgs(message_id,school_name):
             if rec[2]:
                 id.append(rec[2])
         id = list(dict.fromkeys(id))
-        # print(id)
 
         # cursor.execute(
         #     "select  user_id from school_parent WHERE id in %s ",
@@ -208,11 +204,12 @@ def twoArgs(message_id,school_name):
         # for rec in parent:
         #     parent_id.append(rec[0])
         #
-        mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id), Q(db_name='tst'),
+        mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id), Q(db_name=school_name),
                                                     Q(is_active=True)).values_list(
             'mobile_token').order_by('-pk')
 
         token = []
+
         for tok in mobile_token:
             token.append(tok[0])
 
@@ -220,12 +217,16 @@ def twoArgs(message_id,school_name):
             api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
         registration_id = token
 
+
         message_title = school_message[0][1]
         # print(message_title)
         message_body = school_message[0][0]
         result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
                                                       registration_ids=registration_id,
                                                       data_message={})
+        print(result)
+
+
 
 
         result1 = {
