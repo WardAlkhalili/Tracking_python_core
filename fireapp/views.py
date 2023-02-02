@@ -185,6 +185,7 @@ def twoArgs(message_id,school_name):
             [tuple(r_id)])
         columns = (x.name for x in cursor.description)
         student = cursor.fetchall()
+        print(student)
         id = []
         for rec in student:
             if rec[0]:
@@ -211,7 +212,9 @@ def twoArgs(message_id,school_name):
         token = []
 
         for tok in mobile_token:
+
             token.append(tok[0])
+        print(token)
 
         push_service = FCMNotification(
             api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
