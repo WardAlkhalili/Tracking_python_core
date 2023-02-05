@@ -169,24 +169,29 @@ def send_school_message(request):
 
 def twoArgs(message_id,school_name):
     with connections[school_name].cursor() as cursor:
+
         cursor.execute(
             "select  message,title  from school_message where id = %s",
             [message_id])
         school_message = cursor.fetchall()
+
         cursor.execute(
             "select  student_student_id  from school_message_student_student where school_message_id = %s",
             [message_id])
         school_message_student_student = cursor.fetchall()
+
         r_id = []
         for id in school_message_student_student:
             r_id.append(id[0])
 
         if r_id:
+
             cursor.execute(
                 "select  mother_id,father_id,responsible_id_value from student_student WHERE id in %s ",
                 [tuple(r_id)])
             columns = (x.name for x in cursor.description)
             student = cursor.fetchall()
+
             id = []
             for rec in student:
                 if rec[0]:
@@ -196,6 +201,7 @@ def twoArgs(message_id,school_name):
                 if rec[2]:
                     id.append(rec[2])
             id = list(dict.fromkeys(id))
+
 
             # cursor.execute(
             #     "select  user_id from school_parent WHERE id in %s ",
