@@ -966,6 +966,11 @@ def kids_hstory(request):
                         # print(start_date,end_date)
                         student_round=[]
                         with connections[school_name].cursor() as cursor:
+                            # cursor.execute("""select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
+                            # transport_setting = cursor.fetchall()
+                            # date_tz = transport_setting[0][0]
+                            # print(date_tz)
+
                             if start_date and end_date:
                                 cursor.execute(
                                     "select  id  from school_message WHERE create_date >= %s AND create_date <= %s",
@@ -1086,7 +1091,11 @@ def kids_hstory(request):
                                                                 [time_out[0][1]])
                                                             name = cursor.fetchall()
                                                             deadline = time_out[0][0]
+                                                            # cursor.execute("""select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
+                                                            # transport_setting = cursor.fetchall()
+                                                            # date_tz = transport_setting[0][0]
                                                             date_tz = 'Asia/Kuwait'
+
 
                                                             deadline = deadline.astimezone(pytz.timezone(date_tz))
 
@@ -1119,6 +1128,10 @@ def kids_hstory(request):
                                         for rec in range(len(sh_message_wizard)):
                                             # print( str(sh_message_wizard[rec][1].year))
                                             deadline = sh_message_wizard[rec][1]
+                                            # cursor.execute(
+                                            #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
+                                            # transport_setting = cursor.fetchall()
+                                            # date_tz = transport_setting[0][0]
                                             date_tz = 'Asia/Kuwait'
 
                                             deadline = deadline.astimezone(pytz.timezone(date_tz))
@@ -1209,6 +1222,10 @@ def kids_hstory(request):
                                             for rec in range(len(sh_message_wizard)):
                                                 # print( str(sh_message_wizard[rec][1].year))
                                                 deadline = sh_message_wizard[rec][1]
+                                                # cursor.execute(
+                                                #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
+                                                # transport_setting = cursor.fetchall()
+                                                # date_tz = transport_setting[0][0]
                                                 date_tz = 'Asia/Kuwait'
 
                                                 deadline = deadline.astimezone(pytz.timezone(date_tz))
@@ -1266,6 +1283,11 @@ def kids_hstory(request):
                                     for rec in range(len(school_message1)):
 
                                         deadline = school_message1[rec][4]
+                                        # cursor.execute(
+                                        #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
+                                        # transport_setting = cursor.fetchall()
+                                        # date_tz = transport_setting[0][0]
+
                                         date_tz = 'Asia/Kuwait'
 
                                         deadline = deadline.astimezone(pytz.timezone(date_tz))
@@ -2052,6 +2074,7 @@ def post_Event(request):
                         student_id = request.data.get('student_id')
                         wk_id = request.data.get('wk_id')
                         base_url=request.data.get('base_url')
+                        print(request.data.get('base_url'))
                         with connections[school_name].cursor() as cursor:
                             cursor.execute(
                                 "select user_id from student_student where id=%s",
@@ -2072,6 +2095,7 @@ def post_Event(request):
 
                             response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
+                            print(response1)
 
 
                             result = {'result':'ok'}
@@ -2196,6 +2220,10 @@ def get_exam(request, student_id):
                                     if survey[0][1] == 'open':
                                         if survey[0][2]:
                                             deadline = survey[0][2]
+                                            # cursor.execute(
+                                            #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
+                                            # transport_setting = cursor.fetchall()
+                                            # date_tz = transport_setting[0][0]
                                             date_tz = 'Asia/Kuwait'
                                             deadline.replace(date_tz)
                                             deadline = deadline.replace(date_tz)
@@ -2365,6 +2393,10 @@ def get_student_assignment(request, student_id):
                                     if survey[0][1]== 'open':
                                         if survey[0][2]:
                                             deadline = survey[0][2]
+                                            # cursor.execute(
+                                            #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
+                                            # transport_setting = cursor.fetchall()
+                                            # date_tz = transport_setting[0][0]
                                             date_tz = 'Asia/Kuwait'
                                             deadline.replace(date_tz)
                                             deadline =  deadline.replace(date_tz)
@@ -2658,7 +2690,10 @@ def get_data_worksheets(request, student_id):
                                                     [w[4]])
                                                 subject_name = cursor.fetchall()
                                                 deadline = None
-
+                                                # cursor.execute(
+                                                #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
+                                                # transport_setting = cursor.fetchall()
+                                                # date_tz = transport_setting[0][0]
                                                 date_tz = 'Asia/Kuwait'
                                                 new_timezone = pytz.timezone(date_tz)
 
@@ -2774,6 +2809,10 @@ def get_worksheet_form_view_data(request, wsheet,std):
                                         " select id,name,priority,create_date,subject_id,deadline,link,attached_homework,attach_files,description,teacher_id from class_worksheet where  id = %s  ORDER BY create_date DESC",
                                         [wsheet])
                                     worksheet = cursor.fetchall()
+                                    # cursor.execute(
+                                    #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
+                                    # transport_setting = cursor.fetchall()
+                                    # date_tz = transport_setting[0][0]
                                     date_tz = 'Asia/Kuwait'
                                     new_timezone = pytz.timezone(date_tz)
 
@@ -2819,6 +2858,7 @@ def get_worksheet_form_view_data(request, wsheet,std):
                                                 "select id from student_details where worksheet_id=%s and student_id=%s",
                                                 [worksheet[0][0],std])
                                             detail = cursor.fetchall()
+
                                             cursor.execute(
                                                 "SELECT * FROM public.ir_attachment_student_details_rel where student_details_id=%s ",
                                                 [detail[0][0]])
@@ -2966,9 +3006,9 @@ def get_event_form_view_data(request, event,std):
                                                  'contact_id':contact_id_id,
                                                  'contact_image':contact_image,
                                                  'supervisor_name':supervisor_name,
-                                                 'event': school_event[0][6]if school_event[0][6] else '',
-                                                 'event_name': school_event[0][7] if school_event[0][7] else '',
-                                                 'link': school_event[0][8] if school_event[0][8] else '',
+                                                 'event': str(school_event[0][6])if school_event[0][6] else '',
+                                                 'event_name': str(school_event[0][7]) if school_event[0][7] else '',
+                                                 'link': str(school_event[0][8]) if school_event[0][8] else '',
                                                  'supervisor_id': supervisor_id_id,
                                                  'supervisor_image': supervisor_image,
                                                  'state':events[0][2] ,
