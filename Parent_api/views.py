@@ -2471,7 +2471,7 @@ def get_all_weekly_plans(request, student_id):
                                 partner_id_q = cursor.fetchall()
 
                                 cursor.execute(
-                                    " select id,name,date_from,date_to from week_plan where state='puplished' and year_id = %s and branch_id =%s   ORDER BY id ASC",
+                                    " select id,name,date_from,date_to from week_plan where state='puplished' and year_id = %s and branch_id =%s   ORDER BY id DESC",
                                     [ user_id_q[0][1],partner_id_q[0][1]])
                                 week_plan = cursor.fetchall()
                                 for p in week_plan:
