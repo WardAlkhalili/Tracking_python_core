@@ -2074,7 +2074,6 @@ def post_Event(request):
                         student_id = request.data.get('student_id')
                         wk_id = request.data.get('wk_id')
                         base_url=request.data.get('base_url')
-                        print(request.data.get('base_url'))
                         with connections[school_name].cursor() as cursor:
                             cursor.execute(
                                 "select user_id from student_student where id=%s",
@@ -2091,11 +2090,11 @@ def post_Event(request):
                                 'X-Openerp-Session-Id': Session,
                                 'Content-Type': 'application/json',
                             }
-                            url =base_url+"upload_events_flutter"
-
+                            # url ="http://192.168.1.150:9098/upload_events_flutter"
+                            url = str(base_url) + "upload_events_flutter"
                             response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
-                            print(response1)
+                            print("uuuuuuuuuuuuuuuuuuu",response1)
 
 
                             result = {'result':'ok'}
