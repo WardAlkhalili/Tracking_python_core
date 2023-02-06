@@ -1014,6 +1014,7 @@ def kids_hstory(request):
                                         "select  round_id from round_schedule WHERE id in %s",
                                         [tuple(round_schedule_ids)])
                                     round_schedule = cursor.fetchall()
+                                    print(rec)
 
                                     round_schedules = []
                                     student_round_h=[]
@@ -1035,6 +1036,7 @@ def kids_hstory(request):
                                     round_schedules = list(dict.fromkeys(round_schedules))
 
 
+
                                     # for rec in round_schedules:
 
                                     if round_schedules:
@@ -1049,9 +1051,10 @@ def kids_hstory(request):
                                         bus_num = cursor.fetchall()
 
                                         cursor.execute(
-                                            "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC ",
-                                            [rec,'emergency','App\Model\Driver','App\Model\sta' + str(parent_id)])
+                                            "select  message_ar,create_date,type from sh_message_wizard WHERE round_id in %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC ",
+                                            [tuple(student_round),'emergency','App\Model\Driver','App\Model\sta' + str(parent_id)])
                                         sh_message_wizard = cursor.fetchall()
+                               
                                         # print(len(sh_message_wizard))
                                         #
                                         # cursor.execute(
