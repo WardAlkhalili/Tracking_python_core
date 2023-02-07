@@ -2085,7 +2085,7 @@ def post_Event(request):
 
                             attached_files = request.data.get("file")
                             body = json.dumps({"jsonrpc": "2.0",
-                                               "params": {"stu_id": int(student_id), "attachments": attached_files,"user_id":int(user_id_q[0][0]),
+                                               "params": {"stu_id": int(student_id), "attachments": attached_files,"user_id":int(student_id),
                                                           "wk_id": wk_id,
 
                                                           }})
