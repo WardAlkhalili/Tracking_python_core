@@ -2966,7 +2966,7 @@ def get_event_form_view_data(request, event,std):
                                                 import math
                                                 cursor.execute(
                                                     "SELECT name,file_size  FROM public.ir_attachment where res_model='school.event' and res_id =%s and student_idq =%s",
-                                                    [events[0][1],user_id_q[0][0]])
+                                                    [events[0][1],std])
                                                 ir_attachment = cursor.fetchall()
                                                 for res in ir_attachment:
                                                     size_name = (
