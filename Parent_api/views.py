@@ -999,9 +999,7 @@ def kids_hstory(request):
                             # print(student)
                             student_id = []
                             for rec1 in student:
-
                                 student_id.append(rec1[0])
-
                                 cursor.execute(
                                     "select  round_schedule_id from transport_participant WHERE student_id = %s",
                                     [rec1[0]])
@@ -1014,8 +1012,6 @@ def kids_hstory(request):
                                         "select  round_id from round_schedule WHERE id in %s",
                                         [tuple(round_schedule_ids)])
                                     round_schedule = cursor.fetchall()
-                                    print(rec)
-
                                     round_schedules = []
                                     student_round_h=[]
                                     for rec in round_schedule:
@@ -1032,11 +1028,10 @@ def kids_hstory(request):
                                             if type[0][0] =='pick_up':
                                                 student_round_h.append(rec[0])
                                             student_round.append(rec[0])
+
                                             round_schedules.append(rec[0])
-                                    round_schedules = list(dict.fromkeys(round_schedules))
 
-
-
+                                    round_schedules = list(dict.fromkeys(student_round))
                                     # for rec in round_schedules:
 
                                     if round_schedules:
@@ -1050,10 +1045,19 @@ def kids_hstory(request):
                                             [vehicle_id[0][0]])
                                         bus_num = cursor.fetchall()
 
-                                        cursor.execute(
-                                            "select  message_ar,create_date,type from sh_message_wizard WHERE round_id in %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC ",
-                                            [tuple(student_round),'emergency','App\Model\Driver','App\Model\sta' + str(parent_id)])
-                                        sh_message_wizard = cursor.fetchall()
+                                        for round_id_student in student_round:
+                                            cursor.execute(
+                                                "select  name,vehicle_id,driver_id from transport_round WHERE id = %s  ",
+                                                [round_id_student])
+                                            round_info = cursor.fetchall()
+
+
+                                            cursor.execute(
+                                                "select  message_ar,create_date,type from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC ",
+                                                [round_id_student,'emergency','App\Model\Driver','App\Model\sta' + str(parent_id)])
+                                            sh_message_wizard = cursor.fetchall()
+
+                                        # print("kkkooo",sh_message_wizard)
                                
                                         # print(len(sh_message_wizard))
                                         #
@@ -1062,108 +1066,123 @@ def kids_hstory(request):
                                         #     [rec, 'emergency', 'App\Model\sta' + str(parent_id)])
                                         # sh_message_wizard_parent_id = cursor.fetchall()
                                         # print(len(sh_message_wizard_parent_id))
-                                        cursor.execute(
-                                            "select  id,round_start from round_history WHERE round_id in %s and round_name in %s ORDER BY ID DESC LIMIT 1 ",
-                                            [tuple(student_round_h), tuple(student_round_h)])
-                                        round_history = cursor.fetchall()
+                                            for rec in range(len(sh_message_wizard)):
+                                                # cursor.execute(
+                                                #     "select id from round_history WHERE round_id = %s ",
+                                                #     [ round_id_student])
+                                                # round_history = cursor.fetchall()
+                                                # for his in round_history:
+                                                #     cursor.execute(
+                                                #         "select  datetime,id,time_out,bus_check_in from round_student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
+                                                #         [round_id_student, rec1[0], his[0]])
+                                                #     student_history = cursor.fetchall()
 
-                                        if round_history:
-                                            history_round = []
-                                            for round_h in round_history:
-                                                history_round.append(round_h[0])
 
+                                                # print( str(sh_message_wizard[rec][1].year))
+                                                deadline = sh_message_wizard[rec][1]
+                                                # cursor.execute(
+                                                #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
+                                                # transport_setting = cursor.fetchall()
+                                                # date_tz = transport_setting[0][0]
+                                                date_tz = 'Asia/Kuwait'
+
+                                                deadline = deadline.astimezone(pytz.timezone(date_tz))
+
+                                                year = str(deadline.year)
+                                                month = '0' + str(deadline.month) if int(
+                                                    deadline.month) < 10 else str(deadline.month)
+                                                day = str(deadline.day) if len(
+                                                    str(deadline.day)) > 1 else "0" + str(
+                                                    deadline.day)
+                                                hour = str(deadline.hour) if len(
+                                                    str(deadline.hour)) > 1 else "0" + str(
+                                                    deadline.hour)
+
+                                                minute = str(deadline.minute) if len(
+                                                    str(deadline.minute)) > 1 else "0" + str(
+                                                    deadline.minute)
+                                                second = str(deadline.second) if len(
+                                                    str(deadline.second)) > 1 else "0" + str(
+                                                    deadline.second)
+
+                                                notifications.append({
+                                                    "notifications_text": str(sh_message_wizard[rec][0]) if
+                                                    sh_message_wizard[rec][0] else '',
+                                                    "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
+                                                    "create_date": deadline,
+                                                    "notifications_title": "Message from bus no. " + str(
+                                                        bus_num[0][0]) + str(rec1[1]),
+                                                    "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                })
+
+                                        if student_round_h:
                                             cursor.execute(
-                                                "select  datetime,id,time_out,bus_check_in from round_student_history WHERE round_id in %s and student_id in %s and history_id in %s  ORDER BY ID DESC LIMIT 1 ",
-                                                [tuple(student_round_h), tuple(student_id), tuple(history_round)])
-                                            student_history = cursor.fetchall()
+                                                "select  id,round_start from round_history WHERE round_id in %s and round_name in %s ORDER BY ID DESC LIMIT 1 ",
+                                                [tuple(student_round_h), tuple(student_round_h)])
+                                            round_history = cursor.fetchall()
+
+                                            if round_history:
+                                                history_round = []
+                                                for round_h in round_history:
+                                                    history_round.append(round_h[0])
+
+                                                cursor.execute(
+                                                    "select  datetime,id,time_out,bus_check_in from round_student_history WHERE round_id in %s and student_id in %s and history_id in %s  ORDER BY ID DESC LIMIT 1 ",
+                                                    [tuple(student_round_h), tuple(student_id), tuple(history_round)])
+                                                student_history = cursor.fetchall()
 
 
-                                            if student_history:
-                            #                     #     if round_info[0][3] == 'pick_up':
-                                                for student_history1 in student_history:
-                                                    if student_history1[3]:
+                                                if student_history:
+                                #                     #     if round_info[0][3] == 'pick_up':
+                                                    for student_history1 in student_history:
+                                                        if student_history1[3]:
 
-                                                        cursor.execute(
-                                                            "select time_out,student_id from round_student_history WHERE id = %s  ",
-                                                            [student_history1[1]])
-                                                        time_out = cursor.fetchall()
-                                                        if time_out:
-                            #                             for time_out1 in time_out:
                                                             cursor.execute(
-                                                                "select  display_name_search from student_student WHERE  id = %s",
-                                                                [time_out[0][1]])
-                                                            name = cursor.fetchall()
-                                                            deadline = time_out[0][0]
-                                                            # cursor.execute("""select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
-                                                            # transport_setting = cursor.fetchall()
-                                                            # date_tz = transport_setting[0][0]
-                                                            date_tz = 'Asia/Kuwait'
+                                                                "select time_out,student_id from round_student_history WHERE id = %s  ",
+                                                                [student_history1[1]])
+                                                            time_out = cursor.fetchall()
+                                                            if time_out:
+                                #                             for time_out1 in time_out:
+                                                                cursor.execute(
+                                                                    "select  display_name_search from student_student WHERE  id = %s",
+                                                                    [time_out[0][1]])
+                                                                name = cursor.fetchall()
+                                                                deadline = time_out[0][0]
+                                                                # cursor.execute("""select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
+                                                                # transport_setting = cursor.fetchall()
+                                                                # date_tz = transport_setting[0][0]
+                                                                date_tz = 'Asia/Kuwait'
 
 
-                                                            deadline = deadline.astimezone(pytz.timezone(date_tz))
+                                                                deadline = deadline.astimezone(pytz.timezone(date_tz))
 
-                                                            year = str(deadline.year)
-                                                            month = '0' + str(deadline.month) if int(
-                                                                deadline.month) < 10 else str(deadline.month)
-                                                            day = str(deadline.day) if len(
-                                                                str(deadline.day)) > 1 else "0" + str(
-                                                                deadline.day)
-                                                            hour = str(deadline.hour) if len(
-                                                                str(deadline.hour)) > 1 else "0" + str(
-                                                                deadline.hour)
+                                                                year = str(deadline.year)
+                                                                month = '0' + str(deadline.month) if int(
+                                                                    deadline.month) < 10 else str(deadline.month)
+                                                                day = str(deadline.day) if len(
+                                                                    str(deadline.day)) > 1 else "0" + str(
+                                                                    deadline.day)
+                                                                hour = str(deadline.hour) if len(
+                                                                    str(deadline.hour)) > 1 else "0" + str(
+                                                                    deadline.hour)
 
-                                                            minute = str(deadline.minute) if len(
-                                                                str(deadline.minute)) > 1 else "0" + str(
-                                                                deadline.minute)
-                                                            second = str(deadline.second) if len(
-                                                                str(deadline.second)) > 1 else "0" + str(
-                                                                deadline.second)
+                                                                minute = str(deadline.minute) if len(
+                                                                    str(deadline.minute)) > 1 else "0" + str(
+                                                                    deadline.minute)
+                                                                second = str(deadline.second) if len(
+                                                                    str(deadline.second)) > 1 else "0" + str(
+                                                                    deadline.second)
 
-                                                            notifications.append({
-                                                                "notifications_text":name[0][
-                                                                                           0] + " has just reached the school.  ",
-                                                                "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
-                                                                "create_date": deadline,
-                                                                "notifications_title":  "Bus Notification",
-                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                                            })
-
-                                        for rec in range(len(sh_message_wizard)):
-                                            # print( str(sh_message_wizard[rec][1].year))
-                                            deadline = sh_message_wizard[rec][1]
-                                            # cursor.execute(
-                                            #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
-                                            # transport_setting = cursor.fetchall()
-                                            # date_tz = transport_setting[0][0]
-                                            date_tz = 'Asia/Kuwait'
-
-                                            deadline = deadline.astimezone(pytz.timezone(date_tz))
-
-                                            year = str(deadline.year)
-                                            month = '0' + str(deadline.month) if int(
-                                                deadline.month) < 10 else str(deadline.month)
-                                            day = str(deadline.day) if len(
-                                                str(deadline.day)) > 1 else "0" + str(
-                                                deadline.day)
-                                            hour = str(deadline.hour) if len(
-                                                str(deadline.hour)) > 1 else "0" + str(
-                                                deadline.hour)
-
-                                            minute = str(deadline.minute) if len(
-                                                str(deadline.minute)) > 1 else "0" + str(
-                                                deadline.minute)
-                                            second = str(deadline.second) if len(
-                                                str(deadline.second)) > 1 else "0" + str(
-                                                deadline.second)
+                                                                notifications.append({
+                                                                    "notifications_text":name[0][
+                                                                                               0] + " has just reached the school.  ",
+                                                                    "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
+                                                                    "create_date": deadline,
+                                                                    "notifications_title":  "Bus Notification",
+                                                                    "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                                })
 
 
-                                            notifications.append({
-                                                "notifications_text": str(sh_message_wizard[rec][0]) if  sh_message_wizard[rec][0] else '',
-                                                "date_time": year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second,
-                                                "create_date": deadline,
-                                                "notifications_title": "Message from bus no. "+str(bus_num[0][0])+str(rec1[1]),
-                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                            })
                             #                 # ---------------------------------------------------------------------
                             #                 print(sh_message_wizard_parent_id)
                             #                 for rec_parent_id in range(len(sh_message_wizard_parent_id)):
@@ -1834,7 +1853,7 @@ def get_clinic(request, student_id):
                                 partner_id_q = cursor.fetchall()
 
                                 cursor.execute(
-                                    " select id,name,date,note,temperature,blood_pressure,prescription from school_clinic where patient_id=%s and year_id = %s",
+                                    " select id,name,date,note,temperature,blood_pressure,prescription from school_clinic where patient_id=%s and year_id = %s ORDER BY ID DESC",
                                     [partner_id_q[0][0],user_id_q[0][1]])
                                 vists = cursor.fetchall()
 
@@ -2089,6 +2108,7 @@ def post_Event(request):
                                                           "wk_id": wk_id,
 
                                                           }})
+
                             headers = {
                                 'X-Openerp-Session-Id': Session,
                                 'Content-Type': 'application/json',
