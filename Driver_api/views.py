@@ -511,7 +511,7 @@ def student_list(request, round_id):
                                 "select  write_date,type,id from transport_round WHERE id = %s  ",
                                 [round_id])
                             round_info1 = cursor.fetchall()
-
+                            print(rounds_details)
                             cursor.execute(
                                 "select student_id,sequence,transfer_state,source_round_id from transport_participant WHERE round_schedule_id = %s ORDER BY sequence ASC",
                                 [rounds_details[0][0]])
@@ -576,6 +576,12 @@ def student_list(request, round_id):
                                         no_show = False
                                         lat = 0
                                         long = 0
+                                        if round_info1[0][1] == 'pick_up':
+                                            lat = student_student12[0]['pick_up_lat']
+                                            long = student_student12[0]['pick_up_lng']
+                                        else:
+                                            lat = student_student12[0]['drop_off_lat']
+                                            long = student_student12[0]['drop_off_lng']
                                         cursor.execute(
                                             "select  name,vehicle_id,driver_id from transport_round WHERE id = %s  ",
                                             [round_id])
@@ -710,7 +716,7 @@ def student_list(request, round_id):
                                                             abs = True
                                                             no_show = False
                                                     else:
-                                                     
+
                                                         if student_history1[0][0] == 'absent' or student_history1[0][
                                                             0] == 'absent-all':
                                                             in_round = False
@@ -1359,6 +1365,7 @@ def students_bus_checks(request):
                             school_name = Manager.pincode(school_name)
                             with connections[school_name].cursor() as cursor:
                                 students = request.data.get('students')
+                                print(students)
                                 for rec in students:
 
                                     round_id = rec['round_id']
@@ -2029,7 +2036,7 @@ def notify(request):
                                 emergency_text = request.data.get('emergency_text')
                                 students_ids = request.data.get('students_ids')
                                 with connections[school_name].cursor() as cursor:
-                                    print(students_ids)
+
                                     driver_id = Manager.objects.filter(token=au).values_list('driver_id')
                                     for e in driver_id:
                                         driver_id = e[0]
