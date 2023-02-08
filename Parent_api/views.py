@@ -1431,10 +1431,11 @@ def pre_arrive(request):
 
                                 date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+                                
 
                                 cursor.execute(
                                     "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,write_date,year_id,branch_id,create_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s); ",
-                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r,student_name[0][1],branch_id[0][1],r])
+                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r,student_name[0][1],branch_id[0][0],r])
                                 cursor.execute(
                                     "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                     [student_name[0][0], parent_id])
