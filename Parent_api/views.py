@@ -1110,6 +1110,7 @@ def kids_hstory(request):
                                                 "select  message_ar,create_date,type,round_id from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
                                                 [rec_s,'emergency','App\Model\Driver','App\Model\sta' + str(parent_id)])
                                             sh_message_wizard = cursor.fetchall()
+                                            # print(sh_message_wizard)
                                             # save bus message
 
                                             for message_wizard in range(len(sh_message_wizard)):
@@ -1117,13 +1118,14 @@ def kids_hstory(request):
                                                 date_mas=[]
                                                 for std in student:
                                                     cursor.execute(
-                                                        "select  id,round_id from round_student_history WHERE student_id = %s AND round_id=%s AND bus_check_in is null AND  datetime >= %s AND  datetime < %s ",
+                                                        "select  id,round_id from round_student_history WHERE student_id = %s AND round_id=%s AND bus_check_in is not null AND  datetime >= %s AND  datetime < %s ",
                                                         [std[0],rec,datetime.datetime(
                                                             sh_message_wizard[message_wizard][1].year, sh_message_wizard[message_wizard][1].month,
                                                             sh_message_wizard[message_wizard][1].day),datetime.datetime(
                                                             sh_message_wizard[message_wizard][1].year, sh_message_wizard[message_wizard][1].month,
                                                             sh_message_wizard[message_wizard][1].day+1)])
                                                     attendance_round = cursor.fetchall()
+                                             
                                                     if not attendance_round:
                                                         continue
 
