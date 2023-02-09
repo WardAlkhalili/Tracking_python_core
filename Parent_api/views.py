@@ -1125,7 +1125,7 @@ def kids_hstory(request):
                                                             sh_message_wizard[message_wizard][1].year, sh_message_wizard[message_wizard][1].month,
                                                             sh_message_wizard[message_wizard][1].day+1)])
                                                     attendance_round = cursor.fetchall()
-                                             
+
                                                     if not attendance_round:
                                                         continue
 
@@ -1136,7 +1136,7 @@ def kids_hstory(request):
                                                         "date_time": date_time(deadline),
                                                         "create_date": deadline,
                                                         "notifications_title": "Message from bus no. " + str(
-                                                            bus_num1[0][0]) +"  "+ str(rec1[1]),
+                                                            bus_num1[0][0]) +"  "+ str(std[1]),
                                                         "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                     })
                                         if student_round_h:
