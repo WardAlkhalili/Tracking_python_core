@@ -1130,15 +1130,26 @@ def kids_hstory(request):
                                                         continue
 
                                                     deadline = sh_message_wizard[message_wizard][1]
-                                                    notifications.append({
-                                                        "notifications_text": str(sh_message_wizard[message_wizard][0]) if
-                                                        sh_message_wizard[message_wizard][0] else '',
-                                                        "date_time": date_time(deadline),
-                                                        "create_date": deadline,
-                                                        "notifications_title": "Message from bus no. " + str(
-                                                            bus_num1[0][0]) +"  "+ str(std[1]),
-                                                        "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                                    })
+                                                    notifications_text=str(sh_message_wizard[message_wizard][0]) if sh_message_wizard[message_wizard][0] else ''
+                                                    if " jus been " in notifications_text:
+                                                        if str(std[1]) in notifications_text:
+                                                            notifications.append({
+                                                                "notifications_text":notifications_text ,
+                                                                "date_time": date_time(deadline),
+                                                                "create_date": deadline,
+                                                                "notifications_title": "Message from bus no. " + str(
+                                                                    bus_num1[0][0]) +"  "+ str(std[1]),
+                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                            })
+                                                    else:
+                                                        notifications.append({
+                                                            "notifications_text": notifications_text,
+                                                            "date_time": date_time(deadline),
+                                                            "create_date": deadline,
+                                                            "notifications_title": "Message from bus no. " + str(
+                                                                bus_num1[0][0]) + "  " + str(std[1]),
+                                                            "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                        })
                                         if student_round_h:
                                             cursor.execute(
                                                 "select  id,round_start from round_history WHERE round_id in %s and round_name in %s ORDER BY ID DESC LIMIT 1 ",
@@ -1168,8 +1179,7 @@ def kids_hstory(request):
                                                                 deadline = time_out[0][0]
 
                                                                 notifications.append({
-                                                                    "notifications_text":name[0][
-                                                                                               0] + " has just reached the school.  ",
+                                                                    "notifications_text":name[0][ 0] + " has just reached the school.  ",
                                                                     "date_time":date_time(deadline),
                                                                     "create_date": deadline,
                                                                     "notifications_title":  "Bus Notification",
