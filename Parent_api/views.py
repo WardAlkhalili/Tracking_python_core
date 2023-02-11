@@ -950,7 +950,12 @@ def date_time(deadline):
                         # date_tz = transport_setting[0][0]
     date_tz = 'Asia/Kuwait'
 
-    deadline = deadline.astimezone(pytz.timezone(date_tz))
+
+    if deadline:
+        deadline = deadline.astimezone(pytz.timezone(date_tz))
+    else:
+      
+        deadline = datetime.datetime.now().astimezone(pytz.timezone(date_tz))
 
     year = str(deadline.year)
     month = '0' + str(deadline.month) if int(deadline.month) < 10 else str(
@@ -1181,7 +1186,9 @@ def kids_hstory(request):
 
                                                     deadline = sh_message_wizard[message_wizard][1]
                                                     notifications_text=str(sh_message_wizard[message_wizard][0]) if sh_message_wizard[message_wizard][0] else ''
-                                                    if " jus been " in notifications_text:
+
+                                                    if "just been" in notifications_text:
+
                                                         if str(std[1]) in notifications_text:
                                                             notifications.append({
                                                                 "notifications_text":notifications_text ,
@@ -1218,7 +1225,7 @@ def kids_hstory(request):
                                                     for student_history1 in student_history:
                                                         if student_history1[3]:
                                                             cursor.execute(
-                                                                "select time_out,student_id from round_student_history WHERE id = %s  ",
+                                                                "select time_out,student_id,bus_check_in from round_student_history WHERE id = %s  ",
                                                                 [student_history1[1]])
                                                             time_out = cursor.fetchall()
                                                             if time_out:
@@ -1226,7 +1233,7 @@ def kids_hstory(request):
                                                                     "select  display_name_search from student_student WHERE  id = %s",
                                                                     [time_out[0][1]])
                                                                 name = cursor.fetchall()
-                                                                deadline = time_out[0][0]
+                                                                deadline = time_out[0][0] if time_out[0][0] else time_out[0][2]
 
                                                                 notifications.append({
                                                                     "notifications_text":name[0][ 0] + " has just reached the school.  ",
