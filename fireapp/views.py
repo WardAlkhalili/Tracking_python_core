@@ -180,15 +180,16 @@ def twoArgs(message_id,school_name):
             [message_id])
         school_message_student_student = cursor.fetchall()
 
+
         r_id = []
         for id in school_message_student_student:
             r_id.append(id[0])
 
         if r_id:
-
+           for std in r_id:
             cursor.execute(
-                "select  mother_id,father_id,responsible_id_value from student_student WHERE id in %s ",
-                [tuple(r_id)])
+                "select  mother_id,father_id,responsible_id_value from student_student WHERE id = %s ",
+                [std])
             columns = (x.name for x in cursor.description)
             student = cursor.fetchall()
 
