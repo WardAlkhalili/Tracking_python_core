@@ -52,7 +52,6 @@ def parent_login(request):
             }
 
             response1 = requests.request("POST", url, headers=headers, data=body)
-            # print(response1)
 
             response = response1.json()
             if "error" in response:
@@ -74,11 +73,11 @@ def parent_login(request):
             parent_id = cursor.fetchall()
             user = User.objects.all().first()
             user = User.objects.all().first()
-            # print(user)
+
             token_auth, created = Token.objects.get_or_create(user=user)
             from django.utils.crypto import get_random_string
             unique_id = get_random_string(length=32)
-            # print(unique_id)
+
             ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name, user_id=uid).update(
                 is_active=False)
             cursor.execute(
@@ -489,13 +488,13 @@ def kids_list(request):
 
                     l = []
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
-                    # print(au)
+
                     l.append(au.split(","))
 
                     db_name = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('db_name')
                     parent_id = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('parent_id')
                     school_id = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('school_id')
-                    # print(parent_id)
+
                     for e in parent_id:
                         parent_id = e[0]
                     for e in school_id:
@@ -686,7 +685,7 @@ def kids_list(request):
                                         x['Events']['url'] = x['Events']['url'] + str(student1[rec]['user_id'])
                                         model.append(x['Events'])
                                     if 'Online Exams' == rec1:
-                                        # print("ssssss")
+
                                         x['Exams']['arabic_url'] = x['Exams']['arabic_url'] + str(
                                             student1[rec]['user_id'])
                                         x['Exams']['url'] = x['Exams']['url'] + str(student1[rec]['user_id'])
@@ -776,7 +775,7 @@ def kids_list(request):
                                     drop = True
                                 else:
                                     drop = False
-                                # print("sssssssssssssssssssss",show_absence)
+
                                 student_st=''
                                 assistant_id=0
                                 assistant_name=''
@@ -788,7 +787,7 @@ def kids_list(request):
                                 round_type=''
                                 round_name=''
                                 if bool(is_active_round):
-                                    # print(rounds_count_student)
+
                                     student_st=rounds_count_student[0][1] if rounds_count_student else ""
 
                                     cursor.execute(
@@ -992,6 +991,7 @@ def kids_hstory(request):
                         start_date = request.data.get('start_date')
                         end_date = request.data.get('end_date')
                         student_round=[]
+                        student_history_id = []
                         with connections[school_name].cursor() as cursor:
                             if start_date and end_date:
                                 cursor.execute(
@@ -1064,17 +1064,22 @@ def kids_hstory(request):
                                     [rec1[0]])
                                 round_schedule_id = cursor.fetchall()
 
+
                             #     round_schedule_ids = []
                             #     get bus message
                                 for rec in round_schedule_id:
+
 
                                     cursor.execute(
                                         "select  round_id from round_schedule WHERE id = %s",
                                         [rec[0]])
                                     round_schedule = cursor.fetchall()
+
+
                                     round_schedules = []
                                     student_round_h=[]
                                     for rec in round_schedule:
+
 
                                         if rec[0] in  student_round:
 
@@ -1085,6 +1090,7 @@ def kids_hstory(request):
                                                 [rec[0]])
 
                                             type = cursor.fetchall()
+
                                             if type[0][0] =='pick_up':
                                                 student_round_h.append(rec[0])
                                             student_round.append(rec[0])
@@ -1092,6 +1098,7 @@ def kids_hstory(request):
 
                                             round_schedules.append(rec[0])
                                     round_schedules = list(dict.fromkeys(student_round))
+
                                     for rec_s in round_schedules:
                                         cursor.execute(
                                             "select  vehicle_id from transport_round WHERE id = %s",
@@ -1115,7 +1122,7 @@ def kids_hstory(request):
                                                 "select  message_ar,create_date,type,round_id from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
                                                 [rec_s,'emergency','App\Model\Driver','App\Model\sta' + str(parent_id)])
                                             sh_message_wizard = cursor.fetchall()
-                                            # print(sh_message_wizard)
+
                                             # save bus message
 
                                             for message_wizard in range(len(sh_message_wizard)):
@@ -1162,7 +1169,7 @@ def kids_hstory(request):
                                                                     notifications_text = str(
                                                                         sh_message_wizard[message_wizard][0]) if \
                                                                     sh_message_wizard[message_wizard][0] else ''
-                                                                    if " jus been " in notifications_text:
+                                                                    if " just been " in notifications_text:
                                                                         if str(std[1]) in notifications_text:
                                                                             notifications.append({
                                                                                 "notifications_text": notifications_text,
@@ -1208,40 +1215,53 @@ def kids_hstory(request):
                                                             "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                         })
                                         if student_round_h:
+
                                             cursor.execute(
                                                 "select  id,round_start from round_history WHERE round_id in %s and round_name in %s ORDER BY ID DESC LIMIT 1 ",
                                                 [tuple(student_round_h), tuple(student_round_h)])
                                             round_history = cursor.fetchall()
+
                                             if round_history:
                                                 history_round = []
+
                                                 for round_h in round_history:
                                                     history_round.append(round_h[0])
-                                                cursor.execute(
-                                                    "select  datetime,id,time_out,bus_check_in from round_student_history WHERE round_id in %s and student_id = %s and history_id in %s  ORDER BY ID DESC LIMIT 1 ",
-                                                    [tuple(student_round_h), rec1[0], tuple(history_round)])
-                                                student_history = cursor.fetchall()
-                            #
-                                                if student_history:
-                                                    for student_history1 in student_history:
-                                                        if student_history1[3]:
-                                                            cursor.execute(
-                                                                "select time_out,student_id,bus_check_in from round_student_history WHERE id = %s  ",
-                                                                [student_history1[1]])
-                                                            time_out = cursor.fetchall()
-                                                            if time_out:
-                                                                cursor.execute(
-                                                                    "select  display_name_search from student_student WHERE  id = %s",
-                                                                    [time_out[0][1]])
-                                                                name = cursor.fetchall()
-                                                                deadline = time_out[0][0] if time_out[0][0] else time_out[0][2]
+                                                for std in student:
+                                                    cursor.execute(
+                                                        "select  datetime,id,time_out,bus_check_in from round_student_history WHERE round_id in %s and student_id = %s and history_id in %s  ORDER BY ID DESC LIMIT 1 ",
+                                                        [tuple(student_round_h), std[0], tuple(history_round)])
+                                                    student_history = cursor.fetchall()
 
-                                                                notifications.append({
-                                                                    "notifications_text":name[0][ 0] + " has just reached the school.  ",
-                                                                    "date_time":date_time(deadline),
-                                                                    "create_date": deadline,
-                                                                    "notifications_title":  "Bus Notification",
-                                                                    "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                                                })
+                                #
+                                                    if student_history:
+
+
+                                                        for student_history1 in student_history:
+                                                            if student_history1[3]:
+
+                                                                if student_history1[1] in student_history_id:
+                                                                    continue
+                                                                else:
+                                                                    student_history_id.append(student_history1[1])
+
+                                                                    cursor.execute(
+                                                                        "select time_out,student_id,bus_check_in from round_student_history WHERE id = %s  ",
+                                                                        [student_history1[1]])
+                                                                    time_out = cursor.fetchall()
+                                                                    if time_out:
+                                                                        cursor.execute(
+                                                                            "select  display_name_search from student_student WHERE  id = %s",
+                                                                            [time_out[0][1]])
+                                                                        name = cursor.fetchall()
+                                                                        deadline = time_out[0][0] if time_out[0][0] else time_out[0][2]
+
+                                                                        notifications.append({
+                                                                            "notifications_text":name[0][ 0] + " has just reached the school.  ",
+                                                                            "date_time":date_time(deadline),
+                                                                            "create_date": deadline,
+                                                                            "notifications_title":  "Bus Notification",
+                                                                            "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                                        })
                                         list_hist_student = []
                                         cursor.execute(
                                             " SELECT  notification_id FROM student_history WHERE (activity_type='absent-all' or activity_type='absent') and student_id=%s",
@@ -1377,7 +1397,7 @@ def pre_arrive(request):
                                     [pickup_id[0][0], student_id])
 
                                 result = {'result': True}
-                                # print("pre_arrive")
+
                                 return Response(result)
                     else:
                         result = {'status': 'error'}
@@ -1523,7 +1543,7 @@ def notify(request):
                                     cursor.execute("UPDATE   student_student SET drop_off_lat=%s ,drop_off_lng=%s WHERE id = %s",
                                                    [lat,long,student_id])
                                     result = {'result': "ok"}
-                                    # print("changed_location")
+
                                     return Response(result)
                                 elif type == 'pick-up':
 
@@ -1687,7 +1707,7 @@ def get_badge(request, student_id):
 
                     result = {'result': data}
 
-                                                                        # print("childs_attendance")
+
 
                     return Response(result)
 
@@ -1884,7 +1904,7 @@ def get_attendance(request, student_id):
                                                  'arrival_time': s[5] if s[5] else "0"
                                                  })
                             for st in studentleaves:
-                                # print(st[7])
+
                                 arrival_time = calculate_time(st[7])
 
                                 absence_request.append({'leave_id': st[0],
@@ -2050,7 +2070,7 @@ def post_Event(request):
                             url = str(base_url) + "upload_events_flutter"
                             response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
-                            print("uuuuuuuuuuuuuuuuuuu",response1)
+
 
 
                             result = {'result':'ok'}
