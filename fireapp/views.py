@@ -181,9 +181,12 @@ def twoArgs(message_id,school_name):
         school_message_student_student = cursor.fetchall()
 
 
+
         r_id = []
         for id in school_message_student_student:
             r_id.append(id[0])
+        r_id = list(dict.fromkeys(r_id))
+
 
         if r_id:
            for std in r_id:
