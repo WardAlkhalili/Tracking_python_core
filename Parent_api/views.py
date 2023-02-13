@@ -495,6 +495,7 @@ def kids_list(request):
                     parent_id = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('parent_id')
                     school_id = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('school_id')
 
+
                     for e in parent_id:
                         parent_id = e[0]
                     for e in school_id:
@@ -1175,8 +1176,30 @@ def kids_hstory(request):
                                                                                 "notifications_text": notifications_text,
                                                                                 "date_time": date_time(deadline),
                                                                                 "create_date": deadline,
+                                                                                "notifications_title": 'Bus notification',
+                                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                                            })
+                                                                    elif "has not checked into the bus" in notifications_text:
+
+                                                                        if str(std[1]) in notifications_text:
+                                                                            notifications.append({
+                                                                                "notifications_text": notifications_text,
+                                                                                "date_time": date_time(deadline),
+                                                                                "create_date": deadline,
                                                                                 "notifications_title": "Message from bus no. " + str(
-                                                                                    bus_num1[0][0]) + "  " + str(std[1]),
+                                                                                bus_num1[0][0]) + "  " + str(std[1]),
+                                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                                            })
+                                                                    elif "just reached" in notifications_text:
+
+                                                                        if str(std[1]) in notifications_text:
+                                                                            notifications.append({
+                                                                                "notifications_text": notifications_text,
+                                                                                "date_time": date_time(deadline),
+                                                                                "create_date": deadline,
+                                                                                "notifications_title": "Message from bus no. " + str(
+                                                                                    bus_num1[0][0]) + "  " + str(
+                                                                                    std[1]),
                                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                             })
                                                                     else:
@@ -1201,8 +1224,29 @@ def kids_hstory(request):
                                                                 "notifications_text":notifications_text ,
                                                                 "date_time": date_time(deadline),
                                                                 "create_date": deadline,
+                                                                "notifications_title": 'Bus notification',
+                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                            })
+                                                    elif "has not checked into the bus" in notifications_text:
+
+                                                        if str(std[1]) in notifications_text:
+                                                            notifications.append({
+                                                                "notifications_text":notifications_text ,
+                                                                "date_time": date_time(deadline),
+                                                                "create_date": deadline,
                                                                 "notifications_title": "Message from bus no. " + str(
-                                                                    bus_num1[0][0]) +"  "+ str(std[1]),
+                                                                                bus_num1[0][0]) + "  " + str(std[1]),
+                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                            })
+                                                    elif "just reached" in notifications_text:
+
+                                                        if str(std[1]) in notifications_text:
+                                                            notifications.append({
+                                                                "notifications_text": notifications_text,
+                                                                "date_time": date_time(deadline),
+                                                                "create_date": deadline,
+                                                                "notifications_title": "Message from bus no. " + str(
+                                                                    bus_num1[0][0]) + "  " + str(std[1]),
                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                             })
                                                     else:
@@ -1214,6 +1258,7 @@ def kids_hstory(request):
                                                                 bus_num1[0][0]) + "  " + str(std[1]),
                                                             "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                         })
+
                                         if student_round_h:
 
                                             cursor.execute(
@@ -1292,6 +1337,7 @@ def kids_hstory(request):
                                                 })
 
                             notifications.sort(key=get_year, reverse=True)
+
                             result = {"notifications": notifications}
                             return Response(result)
                         # notifications = []
@@ -2851,7 +2897,7 @@ def get_worksheet_form_view_data(request, wsheet,std):
                                                             'name':str(res[0]),
                                                             'file_size':str(res[1])
                                                         })
-
+                                        print("ssssssssssssssssss",worksheet[0][9])
                                         data.append({'worksheet_id':worksheet[0][0],
                                                      'name': worksheet[0][1],
                                                      'date': str(worksheet[0][3]),
