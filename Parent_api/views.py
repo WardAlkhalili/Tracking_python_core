@@ -1186,7 +1186,17 @@ def kids_hstory(request):
                                                                                 "notifications_text": notifications_text,
                                                                                 "date_time": date_time(deadline),
                                                                                 "create_date": deadline,
-                                                                                "notifications_title": "Bus notification",
+                                                                                "notifications_title": "Absence notification",
+                                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                                            })
+                                                                    elif "did not check into the bus today" in notifications_text:
+
+                                                                        if str(std[1]) in notifications_text:
+                                                                            notifications.append({
+                                                                                "notifications_text": notifications_text,
+                                                                                "date_time": date_time(deadline),
+                                                                                "create_date": deadline,
+                                                                                "notifications_title": "No Show Notification",
                                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                             })
                                                                     elif "just reached" in notifications_text:
@@ -1200,6 +1210,7 @@ def kids_hstory(request):
                                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                             })
                                                                     else:
+
                                                                         notifications.append({
                                                                             "notifications_text": notifications_text,
                                                                             "date_time": date_time(deadline),
@@ -1224,6 +1235,16 @@ def kids_hstory(request):
                                                                 "notifications_title": 'Bus notification',
                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                             })
+                                                    elif "did not check into the bus today" in notifications_text:
+
+                                                        if str(std[1]) in notifications_text:
+                                                            notifications.append({
+                                                                "notifications_text": notifications_text,
+                                                                "date_time": date_time(deadline),
+                                                                "create_date": deadline,
+                                                                "notifications_title": "No Show Notification",
+                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                            })
                                                     elif "has not checked into the bus" in notifications_text:
 
                                                         if str(std[1]) in notifications_text:
@@ -1231,7 +1252,7 @@ def kids_hstory(request):
                                                                 "notifications_text":notifications_text ,
                                                                 "date_time": date_time(deadline),
                                                                 "create_date": deadline,
-                                                                "notifications_title": "Bus notification",
+                                                                "notifications_title": "Absence notification",
                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                             })
                                                     elif "just reached" in notifications_text:
