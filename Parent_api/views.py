@@ -1186,8 +1186,7 @@ def kids_hstory(request):
                                                                                 "notifications_text": notifications_text,
                                                                                 "date_time": date_time(deadline),
                                                                                 "create_date": deadline,
-                                                                                "notifications_title": "Message from bus no. " + str(
-                                                                                bus_num1[0][0]) + "  " + str(std[1]),
+                                                                                "notifications_title": "Bus notification",
                                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                             })
                                                                     elif "just reached" in notifications_text:
@@ -1197,9 +1196,7 @@ def kids_hstory(request):
                                                                                 "notifications_text": notifications_text,
                                                                                 "date_time": date_time(deadline),
                                                                                 "create_date": deadline,
-                                                                                "notifications_title": "Message from bus no. " + str(
-                                                                                    bus_num1[0][0]) + "  " + str(
-                                                                                    std[1]),
+                                                                                "notifications_title": "Bus notification",
                                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                             })
                                                                     else:
@@ -1234,8 +1231,7 @@ def kids_hstory(request):
                                                                 "notifications_text":notifications_text ,
                                                                 "date_time": date_time(deadline),
                                                                 "create_date": deadline,
-                                                                "notifications_title": "Message from bus no. " + str(
-                                                                                bus_num1[0][0]) + "  " + str(std[1]),
+                                                                "notifications_title": "Bus notification",
                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                             })
                                                     elif "just reached" in notifications_text:
@@ -1245,8 +1241,7 @@ def kids_hstory(request):
                                                                 "notifications_text": notifications_text,
                                                                 "date_time": date_time(deadline),
                                                                 "create_date": deadline,
-                                                                "notifications_title": "Message from bus no. " + str(
-                                                                    bus_num1[0][0]) + "  " + str(std[1]),
+                                                                "notifications_title": "Bus notification",
                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                             })
                                                     else:
