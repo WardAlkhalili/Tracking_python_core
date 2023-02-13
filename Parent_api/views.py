@@ -1,4 +1,4 @@
-
+from builtins import str
 from selectors import SelectSelector
 
 from django.shortcuts import render
@@ -1120,18 +1120,19 @@ def kids_hstory(request):
                                         else:
                                             student_round_id.append(rec_s)
                                             cursor.execute(
-                                                "select  message_ar,create_date,type,round_id from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
+                                                "select  message_ar,create_date,type,round_id,id from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
                                                 [rec_s,'emergency','App\Model\Driver','App\Model\sta' + str(parent_id)])
                                             sh_message_wizard = cursor.fetchall()
 
                                             # save bus message
 
                                             for message_wizard in range(len(sh_message_wizard)):
-                                                test_round_id=[]
+                                                sh_message_wizard_id=[]
                                                 date_mas=[]
                                                 for std in student:
+
                                                     cursor.execute(
-                                                        "select  id,round_id from round_student_history WHERE student_id = %s AND round_id=%s AND bus_check_in is not null AND  datetime >= %s AND  datetime < %s ",
+                                                        "select  id,round_id,bus_check_in,time_out from round_student_history WHERE student_id = %s AND round_id=%s AND bus_check_in is not null AND  datetime >= %s AND  datetime < %s ",
                                                         [std[0],rec,datetime.datetime(
                                                             sh_message_wizard[message_wizard][1].year, sh_message_wizard[message_wizard][1].month,
                                                             sh_message_wizard[message_wizard][1].day),datetime.datetime(
@@ -1139,17 +1140,19 @@ def kids_hstory(request):
                                                             sh_message_wizard[message_wizard][1].day+1)])
                                                     attendance_round = cursor.fetchall()
 
-                                                    if not attendance_round:
 
+                                                    if not attendance_round:
                                                         cursor.execute(
-                                                            "select  is_active from transport_round WHERE id = %s  ",
+                                                            "select  is_active,type from transport_round WHERE id = %s  ",
                                                             [rec_s])
                                                         is_active = cursor.fetchall()
                                                         date_time_message=datetime.datetime(
                                                             sh_message_wizard[message_wizard][1].year, sh_message_wizard[message_wizard][1].month,
                                                             sh_message_wizard[message_wizard][1].day)
                                                         car_time=datetime.datetime(datetime.datetime.now().year,datetime.datetime.now().month,datetime.datetime.now().day)
+
                                                         if is_active[0][0] and car_time==date_time_message:
+
                                                             cursor.execute(
                                                                 "select  round_schedule_id from transport_participant WHERE student_id = %s",
                                                                 [std[0]])
@@ -1172,6 +1175,7 @@ def kids_hstory(request):
                                                                     sh_message_wizard[message_wizard][0] else ''
                                                                     if " just been " in notifications_text:
                                                                         if str(std[1]) in notifications_text:
+                                                                            print(sh_message_wizard[message_wizard])
                                                                             notifications.append({
                                                                                 "notifications_text": notifications_text,
                                                                                 "date_time": date_time(deadline),
@@ -1181,7 +1185,11 @@ def kids_hstory(request):
                                                                             })
                                                                     elif "has not checked into the bus" in notifications_text:
 
+
+
                                                                         if str(std[1]) in notifications_text:
+
+                                                                            sh_message_wizard_id.append(sh_message_wizard[message_wizard][3])
                                                                             notifications.append({
                                                                                 "notifications_text": notifications_text,
                                                                                 "date_time": date_time(deadline),
@@ -1206,21 +1214,40 @@ def kids_hstory(request):
                                                                                 "notifications_text": notifications_text,
                                                                                 "date_time": date_time(deadline),
                                                                                 "create_date": deadline,
-                                                                                "notifications_title": "Bus notification",
+                                                                                "notifications_title": "Bus notification1230",
                                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                             })
                                                                     else:
+                                                                        curr_date = date.today()
+                                                                        cursor.execute(
+                                                                            "select  id  from school_day where name = %s",
+                                                                            [calendar.day_name[curr_date.weekday()]])
+                                                                        day_name = cursor.fetchall()
+                                                                        cursor.execute(
+                                                                            "select id,day_id from round_schedule WHERE round_id = %s and day_id = %s",
+                                                                            [rec_s, day_name[0][0]])
+
+                                                                        rounds_details = cursor.fetchall()
+                                                                        cursor.execute(
+                                                                            "select  transport_state from transport_participant WHERE student_id = %s  AND round_schedule_id= %s",
+                                                                            [std[0],rounds_details[0][0]])
+                                                                        round_id_tst = cursor.fetchall()
+
+                                                                        if round_id_tst[0][0]=='absent-all' or round_id_tst[0][0]=='absent' or round_id_tst[0][0]=='no-show':
+                                                                            continue
 
                                                                         notifications.append({
                                                                             "notifications_text": notifications_text,
                                                                             "date_time": date_time(deadline),
                                                                             "create_date": deadline,
-                                                                            "notifications_title": "Message from bus no. " + str(
+                                                                            "notifications_title": "Message from bus no." + str(
                                                                                 bus_num1[0][0]) + "  " + str(std[1]),
                                                                             "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                         })
 
+
                                                         continue
+
 
                                                     deadline = sh_message_wizard[message_wizard][1]
                                                     notifications_text=str(sh_message_wizard[message_wizard][0]) if sh_message_wizard[message_wizard][0] else ''
@@ -1256,7 +1283,6 @@ def kids_hstory(request):
                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                             })
                                                     elif "just reached" in notifications_text:
-
                                                         if str(std[1]) in notifications_text:
                                                             notifications.append({
                                                                 "notifications_text": notifications_text,
@@ -1266,14 +1292,30 @@ def kids_hstory(request):
                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                             })
                                                     else:
-                                                        notifications.append({
-                                                            "notifications_text": notifications_text,
-                                                            "date_time": date_time(deadline),
-                                                            "create_date": deadline,
-                                                            "notifications_title": "Message from bus no. " + str(
-                                                                bus_num1[0][0]) + "  " + str(std[1]),
-                                                            "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                                        })
+
+                                                       if is_active[0][1]=='pick_up':
+                                                           time=attendance_round[0][2]
+                                                       else:
+                                                           time = attendance_round[0][3]
+                                                       if  time:
+                                                           if time>deadline :
+                                                                notifications.append({
+                                                                    "notifications_text": notifications_text,
+                                                                    "date_time": date_time(deadline),
+                                                                    "create_date": deadline,
+                                                                    "notifications_title": "Message from bus no. " + str(
+                                                                        bus_num1[0][0]) + "  " + str(std[1]),
+                                                                    "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                                })
+                                                       else:
+                                                           notifications.append({
+                                                               "notifications_text": notifications_text,
+                                                               "date_time": date_time(deadline),
+                                                               "create_date": deadline,
+                                                               "notifications_title": "Message from bus no." + str(
+                                                                   bus_num1[0][0]) + "  " + str(std[1]),
+                                                               "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                           })
 
                                         if student_round_h:
 
@@ -1314,15 +1356,17 @@ def kids_hstory(request):
                                                                             "select  display_name_search from student_student WHERE  id = %s",
                                                                             [time_out[0][1]])
                                                                         name = cursor.fetchall()
-                                                                        deadline = time_out[0][0] if time_out[0][0] else time_out[0][2]
 
-                                                                        notifications.append({
-                                                                            "notifications_text":name[0][ 0] + " has just reached the school.  ",
-                                                                            "date_time":date_time(deadline),
-                                                                            "create_date": deadline,
-                                                                            "notifications_title":  "Bus Notification",
-                                                                            "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                                                        })
+                                                                        if time_out[0][0] and time_out[0][2]:
+                                                                            deadline = time_out[0][0] if time_out[0][
+                                                                                    0] else time_out[0][2]
+                                                                            notifications.append({
+                                                                                "notifications_text":name[0][ 0] + " has just reached the school.  ",
+                                                                                "date_time":date_time(deadline),
+                                                                                "create_date": deadline,
+                                                                                "notifications_title":  "Bus Notification",
+                                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                                            })
                                         list_hist_student = []
                                         cursor.execute(
                                             " SELECT  notification_id FROM student_history WHERE (activity_type='absent-all' or activity_type='absent') and student_id=%s",
@@ -2132,6 +2176,7 @@ def post_Event(request):
                             url = str(base_url) + "upload_events_flutter"
                             response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
+
 
 
 
