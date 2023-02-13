@@ -46,7 +46,8 @@ def parent_login(request):
         url = 'https://tst.tracking.trackware.com/web/session/authenticate'
         # url = 'http://127.0.0.1:9098/web/session/authenticate'
         try:
-            body = json.dumps({"jsonrpc": "2.0", "params": {"db": school_name, "login": user_name, "password": password}})
+            body = json.dumps(
+                {"jsonrpc": "2.0", "params": {"db": school_name, "login": user_name, "password": password}})
             headers = {
                 'Content-Type': 'application/json',
             }
@@ -257,14 +258,14 @@ def settings(request):
 
                                 if type(data['notifications']) is str:
                                     li = list(data['notifications'].split(","))
-                                    result={
-                                              "notifications": {
-                                                "locale": "ar" if "ar" in li[3] else 'en' ,
-                                                "nearby": True if "true"in li[0] else False ,
-                                                "check_in": True if "true" in li[1] else False ,
-                                                "check_out": True if "true" in li[2] else False
-                                              }
-                                            }
+                                    result = {
+                                        "notifications": {
+                                            "locale": "ar" if "ar" in li[3] else 'en',
+                                            "nearby": True if "true" in li[0] else False,
+                                            "check_in": True if "true" in li[1] else False,
+                                            "check_out": True if "true" in li[2] else False
+                                        }
+                                    }
                                 elif type(data['notifications']) is dict:
                                     result = {
                                         "notifications": {
@@ -495,7 +496,6 @@ def kids_list(request):
                     parent_id = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('parent_id')
                     school_id = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('school_id')
 
-
                     for e in parent_id:
                         parent_id = e[0]
                     for e in school_id:
@@ -526,12 +526,12 @@ def kids_list(request):
                             columns = (x.name for x in cursor.description)
                             setting = cursor.fetchall()
 
-                            show_map=True
+                            show_map = True
                             if (parent_show_map[0][0] == True):
-                            # if (setting[0][4]==True and parent_show_map[0][0]==None) or (setting[0][4]==False and parent_show_map[0][0]==True) or (setting[0][4]and parent_show_map[0][0]) :
-                                show_map =True
+                                # if (setting[0][4]==True and parent_show_map[0][0]==None) or (setting[0][4]==False and parent_show_map[0][0]==True) or (setting[0][4]and parent_show_map[0][0]) :
+                                show_map = True
                             else:
-                                show_map=False
+                                show_map = False
                             cursor.execute(
                                 "select  name,phone from res_company WHERE id = %s ",
                                 [school_id])
@@ -664,7 +664,7 @@ def kids_list(request):
                                 url_m = {}
                                 model_list = (
                                     "Badges", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
-                                    "Weekly Plans",'Online Exams')
+                                    "Weekly Plans", 'Online Exams')
                                 cursor.execute("select name from ir_ui_menu where name in %s", [model_list])
                                 list = cursor.fetchall()
                                 res = []
@@ -686,7 +686,6 @@ def kids_list(request):
                                         x['Events']['url'] = x['Events']['url'] + str(student1[rec]['user_id'])
                                         model.append(x['Events'])
                                     if 'Online Exams' == rec1:
-
                                         x['Exams']['arabic_url'] = x['Exams']['arabic_url'] + str(
                                             student1[rec]['user_id'])
                                         x['Exams']['url'] = x['Exams']['url'] + str(student1[rec]['user_id'])
@@ -777,45 +776,44 @@ def kids_list(request):
                                 else:
                                     drop = False
 
-                                student_st=''
-                                assistant_id=0
-                                assistant_name=''
-                                assistant_mobile_number=''
-                                driver_mobile_token=''
-                                driver_mobile_number=''
-                                driver_name=''
-                                bus_id=0
-                                round_type=''
-                                round_name=''
+                                student_st = ''
+                                assistant_id = 0
+                                assistant_name = ''
+                                assistant_mobile_number = ''
+                                driver_mobile_token = ''
+                                driver_mobile_number = ''
+                                driver_name = ''
+                                bus_id = 0
+                                round_type = ''
+                                round_name = ''
                                 if bool(is_active_round):
-
-                                    student_st=rounds_count_student[0][1] if rounds_count_student else ""
+                                    student_st = rounds_count_student[0][1] if rounds_count_student else ""
 
                                     cursor.execute(
                                         "select name,type,attendant_id,vehicle_id,driver_id from transport_round WHERE id = %s",
-                                        [ int(student_round_id)])
+                                        [int(student_round_id)])
                                     round_info = cursor.fetchall()
-                                    round_type=round_info[0][1]
-                                    round_name=round_info[0][0]
-                                    assistant_id=int(round_info[0][2])
+                                    round_type = round_info[0][1]
+                                    round_name = round_info[0][0]
+                                    assistant_id = int(round_info[0][2])
                                     cursor.execute(
                                         "select name,mobile_phone from hr_employee WHERE id = %s",
                                         [assistant_id])
                                     assistant = cursor.fetchall()
-                                    assistant_mobile_number=assistant[0][1]
+                                    assistant_mobile_number = assistant[0][1]
                                     assistant_name = assistant[0][0]
 
                                     cursor.execute(
                                         "select name,mobile from res_partner WHERE id = %s",
                                         [round_info[0][4]])
                                     driver_info = cursor.fetchall()
-                                    driver_name=driver_info[0][0]
+                                    driver_name = driver_info[0][0]
                                     driver_mobile_number = driver_info[0][1]
                                     cursor.execute(
                                         "select bus_no from fleet_vehicle WHERE id = %s",
                                         [round_info[0][3]])
                                     fleet_info = cursor.fetchall()
-                                    bus_id=int(fleet_info[0][0])
+                                    bus_id = int(fleet_info[0][0])
                                     # fleet.vehicle
 
                                 student_grade = None
@@ -835,8 +833,8 @@ def kids_list(request):
                                             "SELECT name FROM public.academic_grade WHERE id = %s",
                                             [student_distribution_line[0][0]])
                                         academic_grade = cursor.fetchall()
-                                        student_grade=academic_grade[0][0]
-                                if student_grade==None:
+                                        student_grade = academic_grade[0][0]
+                                if student_grade == None:
                                     cursor.execute(
                                         "select user_id from student_student where id=%s",
                                         [student1[rec]['id']])
@@ -868,7 +866,9 @@ def kids_list(request):
                                     "name": student1[rec]['display_name_search'],
                                     "id": student1[rec]['id'],
                                     "user_id": student1[rec]['user_id'],
-                                    "avatar":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(student1[rec]['image_url']) if student1[rec]['image_url'] else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
+                                    "avatar": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
+                                        student1[rec]['image_url']) if student1[rec][
+                                        'image_url'] else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
                                     "school_id": int(school_id),
                                     "student_grade": student_grade,
                                     "drop_off_by_parent": drop,
@@ -907,10 +907,10 @@ def kids_list(request):
                                     "change_location": bool(setting[0][3]),
                                     "pickup_request_distance": int(setting[0][2]),
 
-                                    "show_absence":show_absence,
+                                    "show_absence": show_absence,
                                     "student_status": {
                                         "activity_type": str(student_st),
-                                        "round_id":int(student_round_id) ,
+                                        "round_id": int(student_round_id),
                                         "datetime": ""
                                     },
                                     # "mobile_numbers": [
@@ -932,7 +932,7 @@ def kids_list(request):
                                     # ],
                                     "features": model,
                                 })
-                            result = {'message':'','students': studen_list, "parent_id": int(parent_id)}
+                            result = {'message': '', 'students': studen_list, "parent_id": int(parent_id)}
 
                             return Response(result)
                     result = {'status': 'error'}
@@ -943,18 +943,18 @@ def kids_list(request):
         result = {'status': 'error'}
         return Response(result)
 
-def date_time(deadline):
-                        # cursor.execute(
-                        #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
-                        # transport_setting = cursor.fetchall()
-                        # date_tz = transport_setting[0][0]
-    date_tz = 'Asia/Kuwait'
 
+def date_time(deadline):
+    # cursor.execute(
+    #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
+    # transport_setting = cursor.fetchall()
+    # date_tz = transport_setting[0][0]
+    date_tz = 'Asia/Kuwait'
 
     if deadline:
         deadline = deadline.astimezone(pytz.timezone(date_tz))
     else:
-      
+
         deadline = datetime.datetime.now().astimezone(pytz.timezone(date_tz))
 
     year = str(deadline.year)
@@ -991,7 +991,7 @@ def kids_hstory(request):
                         school_name = ManagerParent.pincode(school_name)
                         start_date = request.data.get('start_date')
                         end_date = request.data.get('end_date')
-                        student_round=[]
+                        student_round = []
                         student_history_id = []
                         with connections[school_name].cursor() as cursor:
                             if start_date and end_date:
@@ -1021,7 +1021,6 @@ def kids_hstory(request):
                             student_round_id = []
 
                             for rec1 in student:
-
 
                                 message_ids = []
                                 for rec in school_message:
@@ -1059,30 +1058,26 @@ def kids_hstory(request):
                                             })
 
                                         #
-                            #     student_id.append(rec1[0])
+                                #     student_id.append(rec1[0])
                                 cursor.execute(
                                     "select  round_schedule_id from transport_participant WHERE student_id = %s",
                                     [rec1[0]])
                                 round_schedule_id = cursor.fetchall()
 
-
-                            #     round_schedule_ids = []
-                            #     get bus message
+                                #     round_schedule_ids = []
+                                #     get bus message
                                 for rec in round_schedule_id:
-
 
                                     cursor.execute(
                                         "select  round_id from round_schedule WHERE id = %s",
                                         [rec[0]])
                                     round_schedule = cursor.fetchall()
 
-
                                     round_schedules = []
-                                    student_round_h=[]
+                                    student_round_h = []
                                     for rec in round_schedule:
 
-
-                                        if rec[0] in  student_round:
+                                        if rec[0] in student_round:
 
                                             continue
                                         else:
@@ -1092,7 +1087,7 @@ def kids_hstory(request):
 
                                             type = cursor.fetchall()
 
-                                            if type[0][0] =='pick_up':
+                                            if type[0][0] == 'pick_up':
                                                 student_round_h.append(rec[0])
                                             student_round.append(rec[0])
                                             # student_round_id.append(rec[0])
@@ -1121,43 +1116,51 @@ def kids_hstory(request):
                                             student_round_id.append(rec_s)
                                             cursor.execute(
                                                 "select  message_ar,create_date,type,round_id,id from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
-                                                [rec_s,'emergency','App\Model\Driver','App\Model\sta' + str(parent_id)])
+                                                [rec_s, 'emergency', 'App\Model\Driver',
+                                                 'App\Model\sta' + str(parent_id)])
                                             sh_message_wizard = cursor.fetchall()
 
                                             # save bus message
 
                                             for message_wizard in range(len(sh_message_wizard)):
-                                                sh_message_wizard_id=[]
-                                                date_mas=[]
+                                                sh_message_wizard_id = []
+                                                date_mas = []
                                                 for std in student:
 
                                                     cursor.execute(
                                                         "select  id,round_id,bus_check_in,time_out from round_student_history WHERE student_id = %s AND round_id=%s AND bus_check_in is not null AND  datetime >= %s AND  datetime < %s ",
-                                                        [std[0],rec,datetime.datetime(
-                                                            sh_message_wizard[message_wizard][1].year, sh_message_wizard[message_wizard][1].month,
-                                                            sh_message_wizard[message_wizard][1].day),datetime.datetime(
-                                                            sh_message_wizard[message_wizard][1].year, sh_message_wizard[message_wizard][1].month,
-                                                            sh_message_wizard[message_wizard][1].day+1)])
+                                                        [std[0], rec, datetime.datetime(
+                                                            sh_message_wizard[message_wizard][1].year,
+                                                            sh_message_wizard[message_wizard][1].month,
+                                                            sh_message_wizard[message_wizard][1].day),
+                                                         datetime.datetime(
+                                                             sh_message_wizard[message_wizard][1].year,
+                                                             sh_message_wizard[message_wizard][1].month,
+                                                             sh_message_wizard[message_wizard][1].day + 1)])
                                                     attendance_round = cursor.fetchall()
-
 
                                                     if not attendance_round:
                                                         cursor.execute(
                                                             "select  is_active,type from transport_round WHERE id = %s  ",
                                                             [rec_s])
                                                         is_active = cursor.fetchall()
-                                                        date_time_message=datetime.datetime(
-                                                            sh_message_wizard[message_wizard][1].year, sh_message_wizard[message_wizard][1].month,
+                                                        date_time_message = datetime.datetime(
+                                                            sh_message_wizard[message_wizard][1].year,
+                                                            sh_message_wizard[message_wizard][1].month,
                                                             sh_message_wizard[message_wizard][1].day)
-                                                        car_time=datetime.datetime(datetime.datetime.now().year,datetime.datetime.now().month,datetime.datetime.now().day)
 
-                                                        if is_active[0][0] and car_time==date_time_message:
+                                                        car_time = datetime.datetime(datetime.datetime.now().year,
+                                                                                     datetime.datetime.now().month,
+                                                                                     datetime.datetime.now().day)
+
+                                                        if (is_active[0][0] and car_time == date_time_message) or (
+                                                                not is_active[0][0] and car_time == date_time_message):
 
                                                             cursor.execute(
                                                                 "select  round_schedule_id from transport_participant WHERE student_id = %s",
                                                                 [std[0]])
                                                             round_schedule_id_tst = cursor.fetchall()
-                                                            schedule_id=[]
+                                                            schedule_id = []
                                                             for cha_round_s in round_schedule_id_tst:
                                                                 schedule_id.append(cha_round_s[0])
                                                             if schedule_id:
@@ -1165,17 +1168,16 @@ def kids_hstory(request):
                                                                     "select  round_id from round_schedule WHERE id in %s",
                                                                     [tuple(schedule_id)])
                                                                 round_id_tst = cursor.fetchall()
-                                                                round_id_student=[]
+                                                                round_id_student = []
                                                                 for r_id in round_id_tst:
                                                                     round_id_student.append(r_id[0])
-                                                                if  rec_s in round_id_student:
+                                                                if rec_s in round_id_student:
                                                                     deadline = sh_message_wizard[message_wizard][1]
                                                                     notifications_text = str(
                                                                         sh_message_wizard[message_wizard][0]) if \
-                                                                    sh_message_wizard[message_wizard][0] else ''
+                                                                        sh_message_wizard[message_wizard][0] else ''
                                                                     if " just been " in notifications_text:
                                                                         if str(std[1]) in notifications_text:
-                                                                            print(sh_message_wizard[message_wizard])
                                                                             notifications.append({
                                                                                 "notifications_text": notifications_text,
                                                                                 "date_time": date_time(deadline),
@@ -1185,11 +1187,9 @@ def kids_hstory(request):
                                                                             })
                                                                     elif "has not checked into the bus" in notifications_text:
 
-
-
                                                                         if str(std[1]) in notifications_text:
-
-                                                                            sh_message_wizard_id.append(sh_message_wizard[message_wizard][3])
+                                                                            sh_message_wizard_id.append(
+                                                                                sh_message_wizard[message_wizard][3])
                                                                             notifications.append({
                                                                                 "notifications_text": notifications_text,
                                                                                 "date_time": date_time(deadline),
@@ -1218,6 +1218,7 @@ def kids_hstory(request):
                                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                             })
                                                                     else:
+
                                                                         curr_date = date.today()
                                                                         cursor.execute(
                                                                             "select  id  from school_day where name = %s",
@@ -1229,34 +1230,62 @@ def kids_hstory(request):
 
                                                                         rounds_details = cursor.fetchall()
                                                                         cursor.execute(
-                                                                            "select  transport_state from transport_participant WHERE student_id = %s  AND round_schedule_id= %s",
-                                                                            [std[0],rounds_details[0][0]])
+                                                                            "select  transport_state,write_date from transport_participant WHERE student_id = %s  AND round_schedule_id= %s",
+                                                                            [std[0], rounds_details[0][0]])
                                                                         round_id_tst = cursor.fetchall()
+                                                                        if is_active[0][1] == 'pick_up':
 
-                                                                        if round_id_tst[0][0]=='absent-all' or round_id_tst[0][0]=='absent' or round_id_tst[0][0]=='no-show':
-                                                                            continue
+                                                                            if (round_id_tst[0][0] == 'absent-all' or
+                                                                                round_id_tst[0][0] == 'in' or
+                                                                                round_id_tst[0][0] == 'Onboard' or
+                                                                                round_id_tst[0][0] == 'absent' or
+                                                                                round_id_tst[0][0] == 'no-show') and \
+                                                                                    round_id_tst[0][1] < \
+                                                                                    sh_message_wizard[message_wizard][
+                                                                                        1]:
+                                                                                continue
 
-                                                                        notifications.append({
-                                                                            "notifications_text": notifications_text,
-                                                                            "date_time": date_time(deadline),
-                                                                            "create_date": deadline,
-                                                                            "notifications_title": "Message from bus no." + str(
-                                                                                bus_num1[0][0]) + "  " + str(std[1]),
-                                                                            "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                                                        })
+                                                                            notifications.append({
+                                                                                "notifications_text": notifications_text,
+                                                                                "date_time": date_time(deadline),
+                                                                                "create_date": deadline,
+                                                                                "notifications_title": "Message from bus no. " + str(
+                                                                                    bus_num1[0][0]) + "  " + str(
+                                                                                    std[1]),
+                                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                                            })
+                                                                        else:
+                                                                            if (round_id_tst[0][0] == 'absent-all' or
+                                                                                round_id_tst[0][0] == 'out' or
+                                                                                round_id_tst[0][0] == 'Offboard' or
+                                                                                round_id_tst[0][0] == 'absent' or
+                                                                                round_id_tst[0][0] == 'no-show') and \
+                                                                                    round_id_tst[0][1] < \
+                                                                                    sh_message_wizard[message_wizard][
+                                                                                        1]:
+                                                                                continue
 
+                                                                            notifications.append({
+                                                                                "notifications_text": notifications_text,
+                                                                                "date_time": date_time(deadline),
+                                                                                "create_date": deadline,
+                                                                                "notifications_title": "Message from bus no. " + str(
+                                                                                    bus_num1[0][0]) + "  " + str(
+                                                                                    std[1]),
+                                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                                            })
 
                                                         continue
 
-
                                                     deadline = sh_message_wizard[message_wizard][1]
-                                                    notifications_text=str(sh_message_wizard[message_wizard][0]) if sh_message_wizard[message_wizard][0] else ''
+                                                    notifications_text = str(sh_message_wizard[message_wizard][0]) if \
+                                                        sh_message_wizard[message_wizard][0] else ''
 
                                                     if "just been" in notifications_text:
 
                                                         if str(std[1]) in notifications_text:
                                                             notifications.append({
-                                                                "notifications_text":notifications_text ,
+                                                                "notifications_text": notifications_text,
                                                                 "date_time": date_time(deadline),
                                                                 "create_date": deadline,
                                                                 "notifications_title": 'Bus notification',
@@ -1276,7 +1305,7 @@ def kids_hstory(request):
 
                                                         if str(std[1]) in notifications_text:
                                                             notifications.append({
-                                                                "notifications_text":notifications_text ,
+                                                                "notifications_text": notifications_text,
                                                                 "date_time": date_time(deadline),
                                                                 "create_date": deadline,
                                                                 "notifications_title": "Absence notification",
@@ -1293,12 +1322,12 @@ def kids_hstory(request):
                                                             })
                                                     else:
 
-                                                       if is_active[0][1]=='pick_up':
-                                                           time=attendance_round[0][2]
-                                                       else:
-                                                           time = attendance_round[0][3]
-                                                       if  time:
-                                                           if time>deadline :
+                                                        if is_active[0][1] == 'pick_up':
+                                                            time = attendance_round[0][2]
+                                                        else:
+                                                            time = attendance_round[0][3]
+                                                        if time:
+                                                            if time > deadline:
                                                                 notifications.append({
                                                                     "notifications_text": notifications_text,
                                                                     "date_time": date_time(deadline),
@@ -1307,15 +1336,15 @@ def kids_hstory(request):
                                                                         bus_num1[0][0]) + "  " + str(std[1]),
                                                                     "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                 })
-                                                       else:
-                                                           notifications.append({
-                                                               "notifications_text": notifications_text,
-                                                               "date_time": date_time(deadline),
-                                                               "create_date": deadline,
-                                                               "notifications_title": "Message from bus no." + str(
-                                                                   bus_num1[0][0]) + "  " + str(std[1]),
-                                                               "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                                           })
+                                                        else:
+                                                            notifications.append({
+                                                                "notifications_text": notifications_text,
+                                                                "date_time": date_time(deadline),
+                                                                "create_date": deadline,
+                                                                "notifications_title": "Message from bus no." + str(
+                                                                    bus_num1[0][0]) + "  " + str(std[1]),
+                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                            })
 
                                         if student_round_h:
 
@@ -1335,9 +1364,8 @@ def kids_hstory(request):
                                                         [tuple(student_round_h), std[0], tuple(history_round)])
                                                     student_history = cursor.fetchall()
 
-                                #
+                                                    #
                                                     if student_history:
-
 
                                                         for student_history1 in student_history:
                                                             if student_history1[3]:
@@ -1359,12 +1387,13 @@ def kids_hstory(request):
 
                                                                         if time_out[0][0] and time_out[0][2]:
                                                                             deadline = time_out[0][0] if time_out[0][
-                                                                                    0] else time_out[0][2]
+                                                                                0] else time_out[0][2]
                                                                             notifications.append({
-                                                                                "notifications_text":name[0][ 0] + " has just reached the school.  ",
-                                                                                "date_time":date_time(deadline),
+                                                                                "notifications_text": name[0][
+                                                                                                          0] + " has just reached the school.  ",
+                                                                                "date_time": date_time(deadline),
                                                                                 "create_date": deadline,
-                                                                                "notifications_title":  "Bus Notification",
+                                                                                "notifications_title": "Bus Notification",
                                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                             })
                                         list_hist_student = []
@@ -1372,7 +1401,6 @@ def kids_hstory(request):
                                             " SELECT  notification_id FROM student_history WHERE (activity_type='absent-all' or activity_type='absent') and student_id=%s",
                                             [rec1[0]])
                                         student_history = cursor.fetchall()
-
 
                                         for mas in student_history:
                                             if mas[0] in list_hist_student:
@@ -1391,14 +1419,22 @@ def kids_hstory(request):
                                                     "notifications_text": sh_message_wizard1[sh_message_bus][0],
                                                     "date_time": date_time(deadline),
                                                     "create_date": deadline,
-                                                    "notifications_title": "Message from bus no. " + str(bus_num1[0][0]) +"   "+ str(
+                                                    "notifications_title": "Message from bus no. " + str(
+                                                        bus_num1[0][0]) + "   " + str(
                                                         rec1[1]),
                                                     "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                 })
 
                             notifications.sort(key=get_year, reverse=True)
+                            notifications_not_d = []
+                            seen = set()
+                            for d in notifications:
+                                t = tuple(d.items())
+                                if t not in seen:
+                                    seen.add(t)
+                                    notifications_not_d.append(d)
 
-                            result = {"notifications": notifications}
+                            result = {"notifications": notifications_not_d}
                             return Response(result)
                         # notifications = []
                         # result = {"notifications": notifications}
@@ -1416,8 +1452,11 @@ def kids_hstory(request):
             result = {'status': 'error'}
             return Response(result)
 
+
 def get_year(element):
-        return element['date_time']
+    return element['date_time']
+
+
 @api_view(['POST'])
 def pre_arrive(request):
     if request.method == 'POST':
@@ -1439,8 +1478,9 @@ def pre_arrive(request):
                         student_id = request.data.get('student_id')
 
                         with connections[school_name].cursor() as cursor:
-                            cursor.execute("select  display_name_search,year_id,user_id from student_student WHERE id = %s",
-                                           [student_id])
+                            cursor.execute(
+                                "select  display_name_search,year_id,user_id from student_student WHERE id = %s",
+                                [student_id])
                             columns = (x.name for x in cursor.description)
                             student_name = cursor.fetchall()
                             cursor.execute(
@@ -1460,7 +1500,8 @@ def pre_arrive(request):
                                     r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
                                     cursor.execute(
                                         "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,write_date,year_id,branch_id,create_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s); ",
-                                        [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r, student_name[0][1] ,branch_id[0][0],r])
+                                        [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r,
+                                         student_name[0][1], branch_id[0][0], r])
                                     cursor.execute(
                                         "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                         [student_name[0][0], parent_id])
@@ -1490,10 +1531,10 @@ def pre_arrive(request):
                                 date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                 r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
 
-
                                 cursor.execute(
                                     "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,write_date,year_id,branch_id,create_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s); ",
-                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r,student_name[0][1],branch_id[0][0],r])
+                                    [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r,
+                                     student_name[0][1], branch_id[0][0], r])
                                 cursor.execute(
                                     "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                     [student_name[0][0], parent_id])
@@ -1532,7 +1573,6 @@ def notify(request):
                         for e in db_name:
                             school_name = e[0]
 
-
                         school_name = ManagerParent.pincode(school_name)
                         type = request.data.get('location_type')
                         date = request.data.get('date')
@@ -1547,12 +1587,12 @@ def notify(request):
                                 parent_id = e[0]
                             sender_id = parent_id
                             when = request.data.get('when')
-                            date_absent=when
-                            when = datetime.datetime.strptime(when+' 00:00:00', '%d/%m/%Y %H:%M:%S')
-                            target_rounds=request.data.get('target_rounds')
+                            date_absent = when
+                            when = datetime.datetime.strptime(when + ' 00:00:00', '%d/%m/%Y %H:%M:%S')
+                            target_rounds = request.data.get('target_rounds')
                             # round_id=request.data.get('status')
                             with connections[school_name].cursor() as cursor:
-                                type="absent-all" if target_rounds=='both' else "absent"
+                                type = "absent-all" if target_rounds == 'both' else "absent"
                                 cursor.execute("select  display_name_search from student_student WHERE id = %s",
                                                [student_id])
 
@@ -1589,7 +1629,7 @@ def notify(request):
                                     "select  round_schedule_id from transport_participant WHERE student_id = %s",
                                     [student_id])
                                 round_schedule_id = cursor.fetchall()
-                                r_id=[]
+                                r_id = []
                                 for rec in round_schedule_id:
                                     r_id.append(rec[0])
                                 if r_id:
@@ -1599,21 +1639,21 @@ def notify(request):
                                         [tuple(r_id), day_id[0][0]])
                                     rounds_details = cursor.fetchall()
 
-                                    if target_rounds =='both':
+                                    if target_rounds == 'both':
                                         for res in rounds_details:
-
                                             cursor.execute(
                                                 "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                [lat, long, student_id, res[1], when,"absent-all",notification_id[0][0]])
+                                                [lat, long, student_id, res[1], when, "absent-all",
+                                                 notification_id[0][0]])
                                             cursor.execute(
                                                 "INSERT INTO round_student_history(student_id,round_id,datetime)VALUES (%s,%s,%s);",
                                                 [student_id, res[1], when])
 
                                             cursor.execute(
                                                 "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
-                                                ['absent-all',student_id,res[0]])
+                                                ['absent-all', student_id, res[0]])
                                     else:
-                                        round_id=[]
+                                        round_id = []
                                         for rec in rounds_details:
                                             round_id.append(rec[1])
 
@@ -1623,15 +1663,13 @@ def notify(request):
                                         rounds_details = cursor.fetchall()
 
                                         for res in rounds_details:
-
-
                                             cursor.execute(
                                                 "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                                 [lat, long, student_id, res[0], when,
                                                  'absent', notification_id[0][0]])
                                             cursor.execute(
                                                 "INSERT INTO round_student_history( student_id, round_id,datetime)VALUES (%s,%s,%s);",
-                                                [student_id, res[0],when])
+                                                [student_id, res[0], when])
                                             cursor.execute(
                                                 "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
                                                 ['absent', student_id, res[0]])
@@ -1644,10 +1682,11 @@ def notify(request):
                                 for e in parent_id:
                                     parent_id = e[0]
                                 sender_id = parent_id
-                                if type =='drop-off':
+                                if type == 'drop-off':
 
-                                    cursor.execute("UPDATE   student_student SET drop_off_lat=%s ,drop_off_lng=%s WHERE id = %s",
-                                                   [lat,long,student_id])
+                                    cursor.execute(
+                                        "UPDATE   student_student SET drop_off_lat=%s ,drop_off_lng=%s WHERE id = %s",
+                                        [lat, long, student_id])
                                     result = {'result': "ok"}
 
                                     return Response(result)
@@ -1658,10 +1697,10 @@ def notify(request):
                                         [lat, long, student_id])
                                     result = {'result': "ok"}
                                     return Response(result)
-                                elif type =='both':
+                                elif type == 'both':
                                     cursor.execute(
                                         "UPDATE  student_student SET pick_up_lat=%s ,pick_up_lng=%s,drop_off_lat=%s,drop_off_lng=%s WHERE id = %s",
-                                        [lat, long,lat, long, student_id])
+                                        [lat, long, lat, long, student_id])
                                     result = {'result': "ok"}
                                     return Response(result)
                         elif name == 'confirmed_pick':
@@ -1680,11 +1719,11 @@ def notify(request):
                                 columns = (x.name for x in cursor.description)
                                 date_t = cursor.fetchall()
                                 if date_t:
-                                            cursor.execute(
-                                                "UPDATE public.pickup_request SET picked_up_par=%s WHERE id=%s",
-                                                ['confirmed', date_t[0][0]])
-                                            result = {'result': True}
-                                            return Response(result)
+                                    cursor.execute(
+                                        "UPDATE public.pickup_request SET picked_up_par=%s WHERE id=%s",
+                                        ['confirmed', date_t[0][0]])
+                                    result = {'result': True}
+                                    return Response(result)
 
                         #         driver_id = Manager.objects.filter(token=au).values_list('driver_id')
                         #         for e in driver_id:
@@ -1746,7 +1785,6 @@ def notify(request):
                         #
 
 
-
 @api_view(['GET'])
 def get_badge(request, student_id):
     if request.method == 'GET':
@@ -1765,8 +1803,8 @@ def get_badge(request, student_id):
                             "select  id  from academic_year WHERE state = %s",
                             ['active'])
                         academic_year = cursor.fetchall()
-                        academic_year_ids=[]
-                        data=[]
+                        academic_year_ids = []
+                        data = []
                         for rec in academic_year:
                             academic_year_ids.append(rec[0])
                         cursor.execute(
@@ -1784,8 +1822,8 @@ def get_badge(request, student_id):
                                 "select  name  from hr_employee WHERE id = %s ",
                                 [b[1]])
                             teacher_name = cursor.fetchall()
-                            subject_name=''
-                            delta=''
+                            subject_name = ''
+                            delta = ''
                             if b[2]:
                                 cursor.execute(
                                     "select  name  from school_subject WHERE id = %s ",
@@ -1797,25 +1835,26 @@ def get_badge(request, student_id):
                                 badge_duration = cursor.fetchall()
 
                                 d0 = date(b[3].year, b[3].month, b[3].day)
-                                d1 = date(datetime.datetime.now().year, datetime.datetime.now().month, datetime.datetime.now().day)
+                                d1 = date(datetime.datetime.now().year, datetime.datetime.now().month,
+                                          datetime.datetime.now().day)
                                 delta = d1 - d0
 
                             data.append({'name': school_badge[0][0],
-                                         'date':b[3].strftime("%d %b %Y"),
-                                         'image':'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str( school_badge[0][2]) if  school_badge[0][2] else"",
+                                         'date': b[3].strftime("%d %b %Y"),
+                                         'image': 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
+                                             school_badge[0][2]) if school_badge[0][2] else "",
                                          'id': b[5],
-                                         'teacher':teacher_name[0][0],
+                                         'teacher': teacher_name[0][0],
                                          'subject': subject_name[0][0] if subject_name else '',
                                          'description': school_badge[0][1],
                                          'new_badge': b[4],
-                                         'disable': delta.days<badge_duration[0][0] if delta else True
+                                         'disable': delta.days < badge_duration[0][0] if delta else True
                                          })
 
                     result = {'result': data}
 
-
-
                     return Response(result)
+
 
 @api_view(['GET'])
 def get_calendar(request, student_id):
@@ -1831,7 +1870,6 @@ def get_calendar(request, student_id):
                             school_name = e[0]
                     with connections[school_name].cursor() as cursor:
 
-
                         cursor.execute(
                             "select user_id from student_student where id=%s",
                             [student_id])
@@ -1846,7 +1884,7 @@ def get_calendar(request, student_id):
                                 [partner_id_q[0][0]])
                             calendar_event_id = cursor.fetchall()
 
-                        data=[]
+                        data = []
                         for f_data in calendar_event_id:
 
                             cursor.execute(
@@ -1854,7 +1892,7 @@ def get_calendar(request, student_id):
                                 [f_data[0]])
                             event = cursor.fetchall()
 
-                            if event[0][2]==None:
+                            if event[0][2] == None:
 
                                 data.append({'id': event[0][0],
                                              'name': event[0][1],
@@ -1865,16 +1903,15 @@ def get_calendar(request, student_id):
                             else:
 
                                 data.append({'id': event[0][0],
-                                             'name':event[0][1],
+                                             'name': event[0][1],
                                              'start_date': event[0][2].strftime("%d %b %Y"),
                                              'year': event[0][2],
                                              })
 
-
                     result = {'result': data}
 
-
                     return Response(result)
+
 
 @api_view(['GET'])
 def get_clinic(request, student_id):
@@ -1895,8 +1932,8 @@ def get_clinic(request, student_id):
                             "select  id  from academic_year WHERE state = %s",
                             ['active'])
                         academic_year = cursor.fetchall()
-                        academic_year_ids=[]
-                        data=[]
+                        academic_year_ids = []
+                        data = []
                         cursor.execute(
                             "select user_id,year_id from student_student where id=%s",
                             [student_id])
@@ -1913,7 +1950,7 @@ def get_clinic(request, student_id):
 
                                 cursor.execute(
                                     " select id,name,date,note,temperature,blood_pressure,prescription from school_clinic where patient_id=%s and year_id = %s ORDER BY ID DESC",
-                                    [partner_id_q[0][0],user_id_q[0][1]])
+                                    [partner_id_q[0][0], user_id_q[0][1]])
                                 vists = cursor.fetchall()
 
                             for v in vists:
@@ -1927,7 +1964,7 @@ def get_clinic(request, student_id):
                                                  'note': v[3],
                                                  'temperature': v[4],
                                                  'blood_pressure': v[5],
-                                                 'prescription': v[6]if v[6] else "" })
+                                                 'prescription': v[6] if v[6] else ""})
                                 except:
                                     date_s = v[2]
                                     data.append({'visit_id': v[0],
@@ -1937,15 +1974,12 @@ def get_clinic(request, student_id):
                                                  'note': v[3],
                                                  'temperature': v[4],
                                                  'blood_pressure': v[5],
-                                                 'prescription':  v[6]if v[6] else ""})
+                                                 'prescription': v[6] if v[6] else ""})
                             result = {'result': data}
                         else:
                             result = {'result': data}
 
-
                     return Response(result)
-
-
 
 
 @api_view(['GET'])
@@ -1961,8 +1995,8 @@ def get_attendance(request, student_id):
                         for e in db_name:
                             school_name = e[0]
                     with connections[school_name].cursor() as cursor:
-                        absence_request=[]
-                        daily_attendance=[]
+                        absence_request = []
+                        daily_attendance = []
                         cursor.execute(
                             "select display_name_search,year_id,user_id from student_student where id=%s",
                             [student_id])
@@ -1974,7 +2008,7 @@ def get_attendance(request, student_id):
                         if user_id_q:
                             cursor.execute(
                                 " select id,name,start_date,end_date,reason,type,state,arrival_time from student_absence_request where student_id=%s and year_id=%s and branch_id=%s ORDER BY id DESC",
-                                [student_id,user_id_q[0][1],branch_id[0][0]])
+                                [student_id, user_id_q[0][1], branch_id[0][0]])
                             studentleaves = cursor.fetchall()
                             cursor.execute(
                                 "SELECT daily_attendance_id,id,note,reason,attendance_status,arrival_time FROM daily_attendance_line WHERE student_id=%s ORDER BY id DESC",
@@ -1993,41 +2027,41 @@ def get_attendance(request, student_id):
                                     continue
                                 if s[2] != False:
                                     daily_attendance.append({'leave_id': s[1],
-                                                 'name': user_id_q[0][0],
-                                                 'start_date': daily[0][1].strftime("%d %b %Y"),
-                                                 'end_date': '30 Sep 2021',
-                                                 'reason': 'Death of A Relative' if s[3] == 'death' else s[3],
-                                                 'type': s[4],
-                                                 'arrival_time': s[5] if s[5] else "0"
-                                                 })
+                                                             'name': user_id_q[0][0],
+                                                             'start_date': daily[0][1].strftime("%d %b %Y"),
+                                                             'end_date': '30 Sep 2021',
+                                                             'reason': 'Death of A Relative' if s[3] == 'death' else s[
+                                                                 3],
+                                                             'type': s[4],
+                                                             'arrival_time': s[5] if s[5] else "0"
+                                                             })
                                 else:
-                                    daily_attendance.append({'leave_id':  s[1],
-                                                 'name':user_id_q[0][0],
-                                                 'start_date': None,
-                                                 'end_date': '30 Sep 2021',
-                                                 'reason': 'Death of A Relative' if s[3] == 'death' else s[3],
-                                                 'type': s[4],
-                                                 'arrival_time': s[5] if s[5] else "0"
-                                                 })
+                                    daily_attendance.append({'leave_id': s[1],
+                                                             'name': user_id_q[0][0],
+                                                             'start_date': None,
+                                                             'end_date': '30 Sep 2021',
+                                                             'reason': 'Death of A Relative' if s[3] == 'death' else s[
+                                                                 3],
+                                                             'type': s[4],
+                                                             'arrival_time': s[5] if s[5] else "0"
+                                                             })
                             for st in studentleaves:
-
                                 arrival_time = calculate_time(st[7])
 
                                 absence_request.append({'leave_id': st[0],
-                                             'name': st[1],
-                                             'start_date': st[2].strftime("%d %b %Y"),
-                                             'end_date': st[3],
-                                             'reason': 'Death of A Relative' if st[4] == 'death' else (
-                                                 st[4].capitalize() if st[4] else ""),
-                                             'type': st[5].capitalize() if st[5] else "",
-                                             'status': st[6].capitalize() if st[6] else "",
-                                             'arrival_time': arrival_time })
+                                                        'name': st[1],
+                                                        'start_date': st[2].strftime("%d %b %Y"),
+                                                        'end_date': st[3],
+                                                        'reason': 'Death of A Relative' if st[4] == 'death' else (
+                                                            st[4].capitalize() if st[4] else ""),
+                                                        'type': st[5].capitalize() if st[5] else "",
+                                                        'status': st[6].capitalize() if st[6] else "",
+                                                        'arrival_time': arrival_time})
 
                     result = {'absence_request': absence_request,
                               'daily_attendance': daily_attendance}
 
                     return Response(result)
-
 
 
 @api_view(['POST'])
@@ -2043,9 +2077,6 @@ def post_attendance(request):
                         for e in db_name:
                             school_name = e[0]
 
-
-
-
                         school_name = ManagerParent.pincode(school_name)
 
                         # checksum = request.data.get('checksum')
@@ -2057,7 +2088,7 @@ def post_attendance(request):
                         type = request.data.get('type')
                         notes = request.data.get('notes')
                         departure_time = request.data.get('departure_time')
-                        reason= request.data.get('reason')
+                        reason = request.data.get('reason')
                         arrival_time = request.data.get('arrival_time')
                         base_url = request.data.get('base_url')
                         with connections[school_name].cursor() as cursor:
@@ -2065,8 +2096,10 @@ def post_attendance(request):
                             attached_files = request.data.get("file")
                             body = json.dumps({"jsonrpc": "2.0",
                                                "params": {"student_id": int(student_id), "attachments": attached_files,
-                                                          "arrival_time": arrival_time, "departure_time": departure_time, "type": type,
-                                                          "start_date":start_date,"end_date":end_date,"reason":reason,"notes":notes
+                                                          "arrival_time": arrival_time,
+                                                          "departure_time": departure_time, "type": type,
+                                                          "start_date": start_date, "end_date": end_date,
+                                                          "reason": reason, "notes": notes
 
                                                           }})
                             headers = {
@@ -2077,13 +2110,13 @@ def post_attendance(request):
                             response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
 
-
-                            result = {'result':'ok'}
+                            result = {'result': 'ok'}
                             return Response(result)
                 result = {'result': 'Error Authorization'}
                 return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
+
 
 @api_view(['POST'])
 def post_workSheet(request):
@@ -2098,11 +2131,7 @@ def post_workSheet(request):
                         for e in db_name:
                             school_name = e[0]
 
-
-
-
                         school_name = ManagerParent.pincode(school_name)
-
 
                         Session = request.data.get('session')
                         student_id = request.data.get('student_id')
@@ -2116,7 +2145,8 @@ def post_workSheet(request):
 
                             attached_files = request.data.get("file")
                             body = json.dumps({"jsonrpc": "2.0",
-                                               "params": {"student_id": int(user_id_q[0][0]), "attachments": attached_files,
+                                               "params": {"student_id": int(user_id_q[0][0]),
+                                                          "attachments": attached_files,
                                                           "wk_id": wk_id,
 
                                                           }})
@@ -2130,13 +2160,14 @@ def post_workSheet(request):
                             response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
 
-
-                            result = {'result':'ok'}
+                            result = {'result': 'ok'}
                             return Response(result)
                 result = {'result': 'Error Authorization'}
                 return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
+
+
 @api_view(['POST'])
 def post_Event(request):
     if request.method == 'POST':
@@ -2154,7 +2185,7 @@ def post_Event(request):
                         Session = request.data.get('session')
                         student_id = request.data.get('student_id')
                         wk_id = request.data.get('wk_id')
-                        base_url=request.data.get('base_url')
+                        base_url = request.data.get('base_url')
                         with connections[school_name].cursor() as cursor:
                             cursor.execute(
                                 "select user_id from student_student where id=%s",
@@ -2163,7 +2194,8 @@ def post_Event(request):
 
                             attached_files = request.data.get("file")
                             body = json.dumps({"jsonrpc": "2.0",
-                                               "params": {"stu_id": int(student_id), "attachments": attached_files,"user_id":int(student_id),
+                                               "params": {"stu_id": int(student_id), "attachments": attached_files,
+                                                          "user_id": int(student_id),
                                                           "wk_id": wk_id,
 
                                                           }})
@@ -2177,15 +2209,14 @@ def post_Event(request):
                             response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
 
-
-
-
-                            result = {'result':'ok'}
+                            result = {'result': 'ok'}
                             return Response(result)
                 result = {'result': 'Error Authorization'}
                 return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
+
+
 @api_view(['POST'])
 def cancel_event(request):
     if request.method == 'POST':
@@ -2203,23 +2234,23 @@ def cancel_event(request):
                             cursor.execute(
                                 "Update school_event_registration SET state = 'cancel'  WHERE id=%s",
                                 [wk_id])
-                            result = {'result':'ok'}
+                            result = {'result': 'ok'}
                             return Response(result)
                 result = {'result': 'Error Authorization'}
                 return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
+
+
 def calculate_time(time):
-
-        if time <= 12:
-            result_time = '{0:02.0f}:{1:02.0f}'.format(*divmod(time * 60, 60))
-            result_time = result_time + '  am'
-        else:
-            time = time - 12
-            result_time = '{0:02.0f}:{1:02.0f}'.format(*divmod(time * 60, 60))
-            result_time = result_time + '  pm'
-        return result_time
-
+    if time <= 12:
+        result_time = '{0:02.0f}:{1:02.0f}'.format(*divmod(time * 60, 60))
+        result_time = result_time + '  am'
+    else:
+        time = time - 12
+        result_time = '{0:02.0f}:{1:02.0f}'.format(*divmod(time * 60, 60))
+        result_time = result_time + '  pm'
+    return result_time
 
 
 @api_view(['GET'])
@@ -2265,15 +2296,13 @@ def get_exam(request, student_id):
                                     [partner_id_q[0][0], user_id_q[0][1], partner_id_q[0][1]])
                                 assignments = cursor.fetchall()
 
-
                             for assingment in assignments:
                                 cursor.execute(
                                     " select id,state,deadline,title,access_token,subject_id,allowed_time_to_start,time_limit,mark,exam_names from survey_survey where id=%s and certificate=%s",
                                     [assingment[1], True])
                                 survey = cursor.fetchall()
 
-
-                                if  survey:
+                                if survey:
 
                                     cursor.execute(
                                         "select  name  from school_subject WHERE id = %s ",
@@ -2282,9 +2311,9 @@ def get_exam(request, student_id):
 
                                     cursor.execute(
                                         "SELECT * FROM allowed_enter_exam_student_survey_rel WHERE survey_survey_id = %s and student_student_id = %s  ",
-                                        [survey[0][0],student_id])
+                                        [survey[0][0], student_id])
                                     allowed_enter_exam_student_survey_rel = cursor.fetchall()
-                                    allowed_to_enter_exam_after_time_limit=True if allowed_enter_exam_student_survey_rel else False
+                                    allowed_to_enter_exam_after_time_limit = True if allowed_enter_exam_student_survey_rel else False
 
                                     cursor.execute(
                                         " select id  from survey_question where survey_id=%s",
@@ -2315,15 +2344,15 @@ def get_exam(request, student_id):
                                                 start = True
                                                 state = 'done'
                                             else:
-                                                if  assingment[4] == 'done':
+                                                if assingment[4] == 'done':
                                                     state = 'done'
                                                     start = False
                                                 else:
-                                                    state =  assingment[4]
+                                                    state = assingment[4]
                                                     start = True
                                         else:
                                             start_time = ""
-                                            state =  assingment[4]
+                                            state = assingment[4]
                                             start = False
 
                                         if start_time == '':
@@ -2342,8 +2371,10 @@ def get_exam(request, student_id):
                                             date_time_obj = datetime.strptime(dt_string, '%Y/%m/%d %H:%M:%S')
                                             now_time = date_time_obj + timedelta(hours=3)
                                             allowed_time_to_start = survey[6]
-                                            allowed_time_to_start_exam = pd.to_datetime(allowed_time_to_start, format='%M')
-                                            exam_start_sss = start_time2 + timedelta( minutes=allowed_time_to_start_exam.minute)
+                                            allowed_time_to_start_exam = pd.to_datetime(allowed_time_to_start,
+                                                                                        format='%M')
+                                            exam_start_sss = start_time2 + timedelta(
+                                                minutes=allowed_time_to_start_exam.minute)
 
                                             if type(start_time2) == str:
                                                 print("")
@@ -2390,12 +2421,13 @@ def get_exam(request, student_id):
                                             "ass_state": survey[0][1],
                                             "start": start,
                                             'start_time': start_time if start_time else 'None',
-                                            'allowed_time_to_start_exams': allowed_time_to_start_exams if allowed_time_to_start_exams else  'None',
-                                            'allowed_enter_exam_student_ids': allowed_to_enter_exam_after_time_limit[0][0] if allowed_to_enter_exam_after_time_limit else "None" ,
+                                            'allowed_time_to_start_exams': allowed_time_to_start_exams if allowed_time_to_start_exams else 'None',
+                                            'allowed_enter_exam_student_ids': allowed_to_enter_exam_after_time_limit[0][
+                                                0] if allowed_to_enter_exam_after_time_limit else "None",
                                             "exam_name_english": exam_name[0][0] if exam_name else 'None',
-                                            "exam_name_arabic": exam_name[0][1]if exam_name else 'None',
+                                            "exam_name_arabic": exam_name[0][1] if exam_name else 'None',
                                             'mark': int(survey[0][8]),
-                                            'time_limit': survey[0][7]if survey[0][7] else 0 ,
+                                            'time_limit': survey[0][7] if survey[0][7] else 0,
                                             'allowed_time_to_start': survey[0][6] if survey[0][6] else 0,
                                             'late_to_exams': late_to_exams if late_to_exams else "None",
                                             'late_time': late_time if late_time else "None",
@@ -2406,6 +2438,8 @@ def get_exam(request, student_id):
                         result = {'result': data}
 
                     return Response(result)
+
+
 @api_view(['GET'])
 def get_student_assignment(request, student_id):
     if request.method == 'GET':
@@ -2441,24 +2475,21 @@ def get_student_assignment(request, student_id):
                                     [user_id_q[0][0]])
                                 partner_id_q = cursor.fetchall()
 
-
-
                                 data = []
                                 state = 'new'
                                 start = False
                                 cursor.execute(
                                     " select id,survey_id,token,last_displayed_page_id,state from survey_user_input where partner_id=%s and year_id = %s and branch_id =%s   ORDER BY create_date DESC, state DESC",
-                                    [partner_id_q[0][0], user_id_q[0][1],partner_id_q[0][1]])
+                                    [partner_id_q[0][0], user_id_q[0][1], partner_id_q[0][1]])
                                 assignments = cursor.fetchall()
-
 
                             for assingment in assignments:
                                 cursor.execute(
                                     " select id,state,deadline,title,access_token,subject_id from survey_survey where id=%s and is_assignment=%s",
-                                    [assingment[1],True])
+                                    [assingment[1], True])
                                 survey = cursor.fetchall()
 
-                                if  survey:
+                                if survey:
 
                                     cursor.execute(
                                         "select  name  from school_subject WHERE id = %s ",
@@ -2472,7 +2503,7 @@ def get_student_assignment(request, student_id):
                                         " select id  from survey_user_input_line where survey_id=%s",
                                         [assingment[1]])
                                     survey_user_input_line = cursor.fetchall()
-                                    if survey[0][1]== 'open':
+                                    if survey[0][1] == 'open':
                                         if survey[0][2]:
                                             deadline = survey[0][2]
                                             # cursor.execute(
@@ -2481,9 +2512,9 @@ def get_student_assignment(request, student_id):
                                             # date_tz = transport_setting[0][0]
                                             date_tz = 'Asia/Kuwait'
                                             deadline.replace(date_tz)
-                                            deadline =  deadline.replace(date_tz)
+                                            deadline = deadline.replace(date_tz)
                                             deadline = datetime.strptime(deadline, "%d/%m/%Y %H:%M:%S")
-                                            x=datetime.datetime.now().replace(date_tz)
+                                            x = datetime.datetime.now().replace(date_tz)
                                             if deadline <= datetime.strptime(x, "%d/%m/%Y %H:%M:%S"):
                                                 start = True
                                                 state = 'done'
@@ -2520,7 +2551,6 @@ def get_student_assignment(request, student_id):
 
 @api_view(['GET'])
 def get_all_weekly_plans(request, student_id):
-
     if request.method == 'GET':
         if request.headers:
             if request.headers.get('Authorization'):
@@ -2555,10 +2585,9 @@ def get_all_weekly_plans(request, student_id):
 
                                 cursor.execute(
                                     " select id,name,date_from,date_to from week_plan where state='puplished' and year_id = %s and branch_id =%s   ORDER BY id DESC",
-                                    [ user_id_q[0][1],partner_id_q[0][1]])
+                                    [user_id_q[0][1], partner_id_q[0][1]])
                                 week_plan = cursor.fetchall()
                                 for p in week_plan:
-
                                     data.append({'id': p[0],
                                                  'plan_name': p[1],
                                                  'start_date': str(p[2].strftime("%d %b %Y")),
@@ -2567,8 +2596,10 @@ def get_all_weekly_plans(request, student_id):
                                 result = {'result': data}
 
                                 return Response(result)
+
+
 @api_view(['GET'])
-def get_weekly_plan_lines(request, plan_id, student_id,week_name):
+def get_weekly_plan_lines(request, plan_id, student_id, week_name):
     if request.method == 'GET':
         if request.headers:
             if request.headers.get('Authorization'):
@@ -2579,7 +2610,6 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-
 
                     with connections[school_name].cursor() as cursor:
 
@@ -2601,7 +2631,6 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                                     "select class_id from res_partner where id=%s",
                                     [partner_id[0][0]])
                                 class_id = cursor.fetchall()
-                             
 
                                 # cursor.execute(
                                 #     "select enable_saturday,enable_sunday,enable_monday,enable_tuesday,enable_wednesday,enable_thursday,enable_friday,subject_id,notes,description_saturday,"
@@ -2611,7 +2640,7 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                                 cursor.execute(
                                     "select enable_saturday,enable_sunday,enable_monday,enable_tuesday,enable_wednesday,enable_thursday,enable_friday,subject_id,notes,description_saturday,"
                                     "description_sunday,description_monday,description_tuesday,description_wednesday,description_thursday,description_friday,id from week_plan_lines where week_id=%s and class_id=%s and state ='approved'",
-                                    [plan_id,class_id[0][0]])
+                                    [plan_id, class_id[0][0]])
                                 lines = cursor.fetchall()
 
                                 # 16
@@ -2651,11 +2680,11 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                                     if day == 'Friday':
                                         columns['days'][6] = 'Friday'
                                 columns = sorted(columns['days'].items())
-                                dayss=[]
+                                dayss = []
 
                                 for col in columns:
                                     dayss.append({
-                                        "id":col[0],
+                                        "id": col[0],
                                         "day": col[1]
                                     })
                                 data['columns'] = dayss
@@ -2666,7 +2695,8 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                                         "select  name  from school_subject WHERE id = %s ",
                                         [l[7]])
                                     subject_name = cursor.fetchall()
-                                    line = {'subject_id': l[7], 'subject_name': subject_name[0][0], 'notes': l[8] if l[8] else '',
+                                    line = {'subject_id': l[7], 'subject_name': subject_name[0][0],
+                                            'notes': l[8] if l[8] else '',
                                             'attachments': []}
                                     if l[0]:
                                         line['Saturday'] = l[9]
@@ -2707,12 +2737,12 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                                         for att in ir_attachment:
 
                                             if att[2]:
-
-                                                line['attachments'].append({'id': att[0], 'name': att[1], 'datas': att[2]})
+                                                line['attachments'].append(
+                                                    {'id': att[0], 'name': att[1], 'datas': att[2]})
                                             # else:
-                                                # line['attachments'].append({'id': 1, 'name': '', 'datas': ''})
+                                            # line['attachments'].append({'id': 1, 'name': '', 'datas': ''})
                                     # else:
-                                        # line['attachments'].append({'id': 1, 'name': '', 'datas': ''})
+                                    # line['attachments'].append({'id': 1, 'name': '', 'datas': ''})
                                 data['lines'] = subject_lines
 
                                 notes = ''
@@ -2724,7 +2754,6 @@ def get_weekly_plan_lines(request, plan_id, student_id,week_name):
                                 data['notes'] = notes
                         result = {'result': data}
                         return Response(result)
-
 
 
 @api_view(['GET'])
@@ -2747,58 +2776,61 @@ def get_data_worksheets(request, student_id):
                                 [student_id])
                             user_id_q = cursor.fetchall()
                             if user_id_q:
+                                cursor.execute(
+                                    " select partner_id,branch_id from res_users where id=%s",
+                                    [user_id_q[0][0]])
+                                partner_id_q = cursor.fetchall()
+                                cursor.execute(
+                                    "select  worksheet_id  from student_details WHERE student_id = %s  ",
+                                    [student_id])
+                                class_worksheet_id = cursor.fetchall()
+                                worksheet_id = []
+                                for rec in class_worksheet_id:
+                                    if rec[0]:
+                                        worksheet_id.append(rec[0])
+                                if worksheet_id:
                                     cursor.execute(
-                                        " select partner_id,branch_id from res_users where id=%s",
-                                        [user_id_q[0][0]])
-                                    partner_id_q = cursor.fetchall()
-                                    cursor.execute(
-                                        "select  worksheet_id  from student_details WHERE student_id = %s  ",
-                                        [student_id])
-                                    class_worksheet_id = cursor.fetchall()
-                                    worksheet_id=[]
-                                    for rec in class_worksheet_id:
-                                        if rec[0]:
-                                            worksheet_id.append(rec[0])
-                                    if worksheet_id:
-                                        cursor.execute(
-                                            " select id,name,priority,create_date,subject_id,deadline from class_worksheet where state='published' and year_id = %s and branch_id =%s and id in %s  ORDER BY create_date DESC",
-                                            [user_id_q[0][1], partner_id_q[0][1],tuple(worksheet_id)])
-                                        class_worksheet = cursor.fetchall()
+                                        " select id,name,priority,create_date,subject_id,deadline from class_worksheet where state='published' and year_id = %s and branch_id =%s and id in %s  ORDER BY create_date DESC",
+                                        [user_id_q[0][1], partner_id_q[0][1], tuple(worksheet_id)])
+                                    class_worksheet = cursor.fetchall()
 
-                                        for w in class_worksheet:
-                                            if w[4]:
-                                                cursor.execute(
-                                                    "select  name  from school_subject WHERE id = %s ",
-                                                    [w[4]])
-                                                subject_name = cursor.fetchall()
-                                                deadline = None
-                                                # cursor.execute(
-                                                #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
-                                                # transport_setting = cursor.fetchall()
-                                                # date_tz = transport_setting[0][0]
-                                                date_tz = 'Asia/Kuwait'
-                                                new_timezone = pytz.timezone(date_tz)
+                                    for w in class_worksheet:
+                                        if w[4]:
+                                            cursor.execute(
+                                                "select  name  from school_subject WHERE id = %s ",
+                                                [w[4]])
+                                            subject_name = cursor.fetchall()
+                                            deadline = None
+                                            # cursor.execute(
+                                            #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
+                                            # transport_setting = cursor.fetchall()
+                                            # date_tz = transport_setting[0][0]
+                                            date_tz = 'Asia/Kuwait'
+                                            new_timezone = pytz.timezone(date_tz)
 
-                                                date = w[3].astimezone(new_timezone)
+                                            date = w[3].astimezone(new_timezone)
 
-                                                if w[5]:
-                                                    deadline = w[5].astimezone(new_timezone)
+                                            if w[5]:
+                                                deadline = w[5].astimezone(new_timezone)
 
+                                            data.append({'worksheet_id': w[0],
+                                                         'name': w[1],
+                                                         'date': str(date.strftime("%d %b %Y")),
+                                                         'priority': w[2],
+                                                         'deadline': str(deadline.strftime("%d %b %Y") + ' ' + str(
+                                                             deadline.hour) + ':' + str(deadline.minute) + ':' + str(
+                                                             deadline.second)) if deadline else '',
+                                                         'subject': subject_name[0][0],
+                                                         'finish': str(deadline < datetime.datetime.now().astimezone(
+                                                             new_timezone)) if deadline else ''
+                                                         })
+                                result = {'result': data}
 
-
-                                                data.append({'worksheet_id': w[0],
-                                                             'name': w[1],
-                                                             'date': str(date.strftime("%d %b %Y")),
-                                                             'priority': w[2],
-                                                             'deadline': str(deadline.strftime("%d %b %Y") +' '+ str(deadline.hour)+':'+str(deadline.minute)+':'+str(deadline.second)) if deadline else '',
-                                                             'subject': subject_name[0][0],
-                                                             'finish':str(deadline <datetime.datetime.now().astimezone(new_timezone)) if deadline else ''
-                                                             })
-                                    result = {'result': data}
-
-                                    return Response(result)
+                                return Response(result)
                             result = {'result': data}
                             return Response(result)
+
+
 @api_view(['GET'])
 def get_event_data(request, student_id):
     """
@@ -2818,291 +2850,290 @@ def get_event_data(request, student_id):
                             with connections[school_name].cursor() as cursor:
                                 data = []
                                 cursor.execute(
-                                "select user_id,year_id from student_student where id=%s",
-                                [student_id])
+                                    "select user_id,year_id from student_student where id=%s",
+                                    [student_id])
                                 user_id_q = cursor.fetchall()
                                 if user_id_q:
-                                # cursor.execute(
-                                #     " select partner_id,branch_id from res_users where id=%s",
-                                #     [user_id_q[0][0]])
-                                # partner_id_q = cursor.fetchall()
-                                #     cursor.execute(
-                                #         "select  worksheet_id  from student_details WHERE student_id = %s  ",
-                                #         [student_id])
-                                #     class_worksheet_id = cursor.fetchall()
-                                #     worksheet_id = []
-                                #     for rec in class_worksheet_id:
-                                #         if rec[0]:
-                                #             worksheet_id.append(rec[0])
-                                #     if worksheet_id:
-                                        cursor.execute(
-                                            " select id,event_id,state,new_added from school_event_registration where  student_id =%s   ORDER BY create_date DESC",
-                                            [ student_id])
-                                        events = cursor.fetchall()
+                                    # cursor.execute(
+                                    #     " select partner_id,branch_id from res_users where id=%s",
+                                    #     [user_id_q[0][0]])
+                                    # partner_id_q = cursor.fetchall()
+                                    #     cursor.execute(
+                                    #         "select  worksheet_id  from student_details WHERE student_id = %s  ",
+                                    #         [student_id])
+                                    #     class_worksheet_id = cursor.fetchall()
+                                    #     worksheet_id = []
+                                    #     for rec in class_worksheet_id:
+                                    #         if rec[0]:
+                                    #             worksheet_id.append(rec[0])
+                                    #     if worksheet_id:
+                                    cursor.execute(
+                                        " select id,event_id,state,new_added from school_event_registration where  student_id =%s   ORDER BY create_date DESC",
+                                        [student_id])
+                                    events = cursor.fetchall()
 
-                                        for ev in events:
-                                            cursor.execute(
-                                                " select name,state,start_date from school_event where id=%s and  year_id = %s",
-                                                [ev[1],user_id_q[0][1]])
-                                            school_event = cursor.fetchall()
-                                            # school.event
-                                            if school_event:
-                                                data.append({'event_id': ev[0],
-                                                             'name': school_event[0][0],
-                                                             'start_date': school_event[0][2].strftime("%d %b %Y"),
-                                                             'state': school_event[0][1],
-                                                             'participant_state': ev[2],
-                                                             'new_added':str(ev[3]) if ev[3] else ''
-                                                             })
+                                    for ev in events:
+                                        cursor.execute(
+                                            " select name,state,start_date from school_event where id=%s and  year_id = %s",
+                                            [ev[1], user_id_q[0][1]])
+                                        school_event = cursor.fetchall()
+                                        # school.event
+                                        if school_event:
+                                            data.append({'event_id': ev[0],
+                                                         'name': school_event[0][0],
+                                                         'start_date': school_event[0][2].strftime("%d %b %Y"),
+                                                         'state': school_event[0][1],
+                                                         'participant_state': ev[2],
+                                                         'new_added': str(ev[3]) if ev[3] else ''
+                                                         })
                                 result = {'result': data}
 
                                 return Response(result)
     result = {'result': ''}
     return Response(result)
 
-
     # search_filters = self.search(std_dom).portal_filterable_serchable()
 
     # return {'data': data, 'search_filters': search_filters}
 
+
 @api_view(['GET'])
-def get_worksheet_form_view_data(request, wsheet,std):
-        """
-        Needed parameters event_id.
-        Rerun list of dictionaries for student events data for portal form view.
-        """
-        if request.method == 'GET':
+def get_worksheet_form_view_data(request, wsheet, std):
+    """
+    Needed parameters event_id.
+    Rerun list of dictionaries for student events data for portal form view.
+    """
+    if request.method == 'GET':
 
-            if request.headers:
-                if request.headers.get('Authorization'):
-                    if 'Bearer' in request.headers.get('Authorization'):
-                        au = request.headers.get('Authorization').replace('Bearer', '').strip()
-                        db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
 
-                        if db_name:
-                            for e in db_name:
-                                school_name = e[0]
-                        data = []
-                        with connections[school_name].cursor() as cursor:
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                    data = []
+                    with connections[school_name].cursor() as cursor:
 
+                        cursor.execute(
+                            " select id,name,priority,create_date,subject_id,deadline,link,attached_homework,attach_files,description,teacher_id from class_worksheet where  id = %s  ORDER BY create_date DESC",
+                            [wsheet])
+                        worksheet = cursor.fetchall()
+                        # cursor.execute(
+                        #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
+                        # transport_setting = cursor.fetchall()
+                        # date_tz = transport_setting[0][0]
+                        date_tz = 'Asia/Kuwait'
+                        new_timezone = pytz.timezone(date_tz)
 
+                        # deadline= format_datetime(request.env, worksheet.deadline, tz=date_tz, dt_format=False)
 
-                                    cursor.execute(
-                                        " select id,name,priority,create_date,subject_id,deadline,link,attached_homework,attach_files,description,teacher_id from class_worksheet where  id = %s  ORDER BY create_date DESC",
-                                        [wsheet])
-                                    worksheet = cursor.fetchall()
-                                    # cursor.execute(
-                                    #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
-                                    # transport_setting = cursor.fetchall()
-                                    # date_tz = transport_setting[0][0]
-                                    date_tz = 'Asia/Kuwait'
-                                    new_timezone = pytz.timezone(date_tz)
+                        import datetime
 
-                                    # deadline= format_datetime(request.env, worksheet.deadline, tz=date_tz, dt_format=False)
+                        if worksheet:
+                            if worksheet[0][5]:
+                                deadline = worksheet[0][5]
+                                date_time_str = deadline
+                                date_time_obj = datetime.datetime.strptime(str(date_time_str),
+                                                                           '%Y-%m-%d %H:%M:%S').astimezone(new_timezone)
+                            cursor.execute(
+                                "select  name  from school_subject WHERE id = %s ",
+                                [worksheet[0][4]])
+                            subject_name = cursor.fetchall()
+                            cursor.execute(
+                                "select  id,name,image_url,job_id  from hr_employee WHERE id = %s ",
+                                [worksheet[0][10]])
+                            hr_employee = cursor.fetchall()
+                            cursor.execute(
+                                "select  name from hr_job WHERE id = %s ",
+                                [hr_employee[0][3]])
+                            job_name = cursor.fetchall()
+                            # hr.job
+                            if worksheet[0][6]:
+                                import urllib.request
+                                import math
+                                # importing the module
+                                file = urllib.request.urlopen(worksheet[0][6])
+                                size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+                                i = int(math.floor(math.log(file.length, 1024)))
+                                p = math.pow(1024, i)
+                                s = round(file.length / p, 2)
+                            cursor.execute(
+                                "select id from student_student where id=%s",
+                                [std])
+                            user_id_q = cursor.fetchall()
+                            student_solution = []
+                            if user_id_q:
+                                cursor.execute(
+                                    "select id from student_details where worksheet_id=%s and student_id=%s",
+                                    [worksheet[0][0], std])
+                                detail = cursor.fetchall()
 
-                                    import datetime
-
-
-                                    if worksheet:
-                                        if worksheet[0][5]:
-                                            deadline = worksheet[0][5]
-                                            date_time_str = deadline
-                                            date_time_obj = datetime.datetime.strptime(str(date_time_str), '%Y-%m-%d %H:%M:%S').astimezone(new_timezone)
+                                cursor.execute(
+                                    "SELECT * FROM public.ir_attachment_student_details_rel where student_details_id=%s ",
+                                    [detail[0][0]])
+                                ir_attachment_student_details_rel = cursor.fetchall()
+                                if ir_attachment_student_details_rel:
+                                    for rec in ir_attachment_student_details_rel:
                                         cursor.execute(
-                                            "select  name  from school_subject WHERE id = %s ",
-                                            [worksheet[0][4]])
-                                        subject_name = cursor.fetchall()
-                                        cursor.execute(
-                                            "select  id,name,image_url,job_id  from hr_employee WHERE id = %s ",
-                                            [worksheet[0][10]])
-                                        hr_employee = cursor.fetchall()
-                                        cursor.execute(
-                                            "select  name from hr_job WHERE id = %s ",
-                                            [hr_employee[0][3]])
-                                        job_name = cursor.fetchall()
-                                        # hr.job
-                                        if worksheet[0][6]:
-                                            import urllib.request
-                                            import math
-                                            # importing the module
-                                            file = urllib.request.urlopen(worksheet[0][6])
-                                            size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-                                            i = int(math.floor(math.log(file.length, 1024)))
-                                            p = math.pow(1024, i)
-                                            s = round(file.length / p, 2)
-                                        cursor.execute(
-                                            "select id from student_student where id=%s",
-                                            [std])
-                                        user_id_q = cursor.fetchall()
-                                        student_solution=[]
-                                        if user_id_q:
-                                            cursor.execute(
-                                                "select id from student_details where worksheet_id=%s and student_id=%s",
-                                                [worksheet[0][0],std])
-                                            detail = cursor.fetchall()
+                                            "SELECT name,file_size  FROM public.ir_attachment where id=%s ",
+                                            [rec[1]])
+                                        ir_attachment = cursor.fetchall()
+                                        for res in ir_attachment:
+                                            student_solution.append({
+                                                'name': str(res[0]),
+                                                'file_size': str(res[1])
+                                            })
 
-                                            cursor.execute(
-                                                "SELECT * FROM public.ir_attachment_student_details_rel where student_details_id=%s ",
-                                                [detail[0][0]])
-                                            ir_attachment_student_details_rel = cursor.fetchall()
-                                            if ir_attachment_student_details_rel:
-                                                for rec in ir_attachment_student_details_rel:
-                                                    cursor.execute(
-                                                        "SELECT name,file_size  FROM public.ir_attachment where id=%s ",
-                                                        [rec[1]])
-                                                    ir_attachment = cursor.fetchall()
-                                                    for res in ir_attachment:
-
-
-                                                        student_solution.append({
-                                                            'name':str(res[0]),
-                                                            'file_size':str(res[1])
-                                                        })
-
-                                        data.append({'worksheet_id':worksheet[0][0],
-                                                     'name': worksheet[0][1],
-                                                     'date': str(worksheet[0][3]),
-                                                     'teacher_name':hr_employee[0][1],
-                                                     'link': worksheet[0][6] if worksheet[0][6] else '',
-                                                     'teacher_id':hr_employee[0][0],
-                                                     'teacher_image':  hr_employee[0][2]if hr_employee[0][2] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png" ,
-                                                     'teacher_position': job_name[0][0] if job_name else 'Teacher',
-                                                     'subject': subject_name[0][0],
-                                                     'homework':  "%s %s" % (s, size_name[i]) if worksheet[0][7] else '',
-                                                     'homework_name':  worksheet[0][8],
-                                                     'description':  worksheet[0][9],
-                                                     'deadline':  str(date_time_obj) if worksheet[0][5] else "",
-                                                     'end':str(datetime.datetime.now()>=worksheet[0][5]) if worksheet[0][5] else "",
-                                                     'student_solution':student_solution
-                                                     })
-                                    result = {'result': data}
-                                    return Response(result)
+                            data.append({'worksheet_id': worksheet[0][0],
+                                         'name': worksheet[0][1],
+                                         'date': str(worksheet[0][3]),
+                                         'teacher_name': hr_employee[0][1],
+                                         'link': worksheet[0][6] if worksheet[0][6] else '',
+                                         'teacher_id': hr_employee[0][0],
+                                         'teacher_image': hr_employee[0][2] if hr_employee[0][
+                                             2] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png",
+                                         'teacher_position': job_name[0][0] if job_name else 'Teacher',
+                                         'subject': subject_name[0][0],
+                                         'homework': "%s %s" % (s, size_name[i]) if worksheet[0][7] else '',
+                                         'homework_name': worksheet[0][8],
+                                         'description': worksheet[0][9],
+                                         'deadline': str(date_time_obj) if worksheet[0][5] else "",
+                                         'end': str(datetime.datetime.now() >= worksheet[0][5]) if worksheet[0][
+                                             5] else "",
+                                         'student_solution': student_solution
+                                         })
                         result = {'result': data}
                         return Response(result)
+                    result = {'result': data}
+                    return Response(result)
+
+
 def remove_html(string):
     import re
     regex = re.compile(r'<[^>]+>')
     return regex.sub('', string)
+
+
 @api_view(['GET'])
-def get_event_form_view_data(request, event,std):
-        """
-        Needed parameters event_id.
-        Rerun list of dictionaries for student events data for portal form view.
-        """
-        if request.method == 'GET':
-            if request.headers:
-                if request.headers.get('Authorization'):
-                    if 'Bearer' in request.headers.get('Authorization'):
-                        au = request.headers.get('Authorization').replace('Bearer', '').strip()
-                        db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+def get_event_form_view_data(request, event, std):
+    """
+    Needed parameters event_id.
+    Rerun list of dictionaries for student events data for portal form view.
+    """
+    if request.method == 'GET':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
 
-                        if db_name:
-                            for e in db_name:
-                                school_name = e[0]
-                                with connections[school_name].cursor() as cursor:
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                            with connections[school_name].cursor() as cursor:
 
-                                    cursor.execute(
-                                        " select id,event_id,state from school_event_registration where  id =%s   ORDER BY create_date DESC",
-                                        [event])
-                                    events = cursor.fetchall()
+                                cursor.execute(
+                                    " select id,event_id,state from school_event_registration where  id =%s   ORDER BY create_date DESC",
+                                    [event])
+                                events = cursor.fetchall()
 
-                                    data = []
-                                    cursor.execute(
-                                        " select name,state,start_date,maximum_participants,maximum_participants,cost,attached_event,attach_files_event,link,contact_id,supervisor_id,start_date,end_date,start_reg_date,last_reg_date,company_id from school_event where id=%s",
-                                        [events[0][1]])
-                                    school_event = cursor.fetchall()
-                                    cursor.execute(
-                                        " select currency_id from res_company where id=%s",
-                                        [school_event[0][15]])
-                                    res_company = cursor.fetchall()
-                                    cursor.execute(
-                                        " select name from res_currency where id=%s",
-                                        [res_company[0][0]])
-                                    res_currency = cursor.fetchall()
-                                    contact_id=''
+                                data = []
+                                cursor.execute(
+                                    " select name,state,start_date,maximum_participants,maximum_participants,cost,attached_event,attach_files_event,link,contact_id,supervisor_id,start_date,end_date,start_reg_date,last_reg_date,company_id from school_event where id=%s",
+                                    [events[0][1]])
+                                school_event = cursor.fetchall()
+                                cursor.execute(
+                                    " select currency_id from res_company where id=%s",
+                                    [school_event[0][15]])
+                                res_company = cursor.fetchall()
+                                cursor.execute(
+                                    " select name from res_currency where id=%s",
+                                    [res_company[0][0]])
+                                res_currency = cursor.fetchall()
+                                contact_id = ''
 
-                                    if school_event[0][9]:
-
-                                        cursor.execute(
-                                            "select  id,name,image_url  from hr_employee WHERE id = %s ",
-                                            [school_event[0][9]])
-                                        contact_id = cursor.fetchall()
+                                if school_event[0][9]:
                                     cursor.execute(
                                         "select  id,name,image_url  from hr_employee WHERE id = %s ",
-                                        [school_event[0][10]])
-                                    supervisor_id = cursor.fetchall()
+                                        [school_event[0][9]])
+                                    contact_id = cursor.fetchall()
+                                cursor.execute(
+                                    "select  id,name,image_url  from hr_employee WHERE id = %s ",
+                                    [school_event[0][10]])
+                                supervisor_id = cursor.fetchall()
+                                cursor.execute(
+                                    " select id from school_event_registration where  event_id =%s and  state='confirm'  ORDER BY create_date DESC",
+                                    [event])
+                                participants = cursor.fetchall()
+                                available_seats = school_event[0][3] - len(participants)
+                                cursor.execute(
+                                    "select user_id from student_student where id=%s",
+                                    [std])
+                                user_id_q = cursor.fetchall()
+                                student_solution = []
+                                if user_id_q:
+                                    import math
                                     cursor.execute(
-                                        " select id from school_event_registration where  event_id =%s and  state='confirm'  ORDER BY create_date DESC",
-                                        [event])
-                                    participants = cursor.fetchall()
-                                    available_seats= school_event[0][3] - len(participants)
-                                    cursor.execute(
-                                        "select user_id from student_student where id=%s",
-                                        [std])
-                                    user_id_q = cursor.fetchall()
-                                    student_solution = []
-                                    if user_id_q:
-                                                import math
-                                                cursor.execute(
-                                                    "SELECT name,file_size  FROM public.ir_attachment where res_model='school.event' and res_id =%s and student_idq =%s",
-                                                    [events[0][1],std])
-                                                ir_attachment = cursor.fetchall()
-                                                for res in ir_attachment:
-                                                    size_name = (
-                                                        "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-                                                    i1 = int(math.floor(math.log(res[1], 1024)))
-                                                    p1 = math.pow(1024, i1)
-                                                    s1 = round(res[1] / p1, 2)
-                                                    student_solution.append({
-                                                        'name': str(res[0]),
-                                                        'file_size': str(s1)
-                                                    })
-                                    contact_name=''
-                                    supervisor_name=''
-                                    supervisor_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png'
-                                    contact_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png'
-                                    contact_id_id=0
-                                    supervisor_id_id=0
+                                        "SELECT name,file_size  FROM public.ir_attachment where res_model='school.event' and res_id =%s and student_idq =%s",
+                                        [events[0][1], std])
+                                    ir_attachment = cursor.fetchall()
+                                    for res in ir_attachment:
+                                        size_name = (
+                                            "B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
+                                        i1 = int(math.floor(math.log(res[1], 1024)))
+                                        p1 = math.pow(1024, i1)
+                                        s1 = round(res[1] / p1, 2)
+                                        student_solution.append({
+                                            'name': str(res[0]),
+                                            'file_size': str(s1)
+                                        })
+                                contact_name = ''
+                                supervisor_name = ''
+                                supervisor_image = 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png'
+                                contact_image = 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png'
+                                contact_id_id = 0
+                                supervisor_id_id = 0
 
-                                    if contact_id :
-                                        contact_name = contact_id[0][1] if contact_id[0][1] else ""
-                                        contact_image =contact_id[0][2]if contact_id[0][2] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png"
-                                        contact_id_id  =contact_id[0][0]if contact_id[0][0] else 0
+                                if contact_id:
+                                    contact_name = contact_id[0][1] if contact_id[0][1] else ""
+                                    contact_image = contact_id[0][2] if contact_id[0][
+                                        2] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png"
+                                    contact_id_id = contact_id[0][0] if contact_id[0][0] else 0
 
-                                    if supervisor_id:
-                                        supervisor_name = supervisor_id[0][1] if supervisor_id[0][1] else ""
-                                        supervisor_image   = supervisor_id[0][2] if supervisor_id[0][2] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png"
-                                        supervisor_id_id = supervisor_id[0][0] if supervisor_id[0][0] else 0
+                                if supervisor_id:
+                                    supervisor_name = supervisor_id[0][1] if supervisor_id[0][1] else ""
+                                    supervisor_image = supervisor_id[0][2] if supervisor_id[0][
+                                        2] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png"
+                                    supervisor_id_id = supervisor_id[0][0] if supervisor_id[0][0] else 0
 
-                                    data.append({'event_id': events[0][0],
-                                                 'name': school_event[0][0],
-                                                 'start_date': str(school_event[0][11].strftime("%d %b %Y")),
-                                                 'end_date': str(school_event[0][12].strftime("%d %b %Y")),
-                                                 'registration_start_date': str(school_event[0][13]) if school_event[0][13] else '' ,
-                                                 'registration_last_date': str(school_event[0][14])if school_event[0][14] else '',
-                                                 'maximum_participants':school_event[0][3],
-                                                 'available_seats':available_seats ,
-                                                 'cost': str(school_event[0][5]) + ' ' + str(res_currency[0][0]),
-                                                 'contact_name':contact_name,
-                                                 'contact_id':contact_id_id,
-                                                 'contact_image':contact_image,
-                                                 'supervisor_name':supervisor_name,
-                                                 'event': str(school_event[0][6])if school_event[0][6] else '',
-                                                 'event_name': str(school_event[0][7]) if school_event[0][7] else '',
-                                                 'link': str(school_event[0][8]) if school_event[0][8] else '',
-                                                 'supervisor_id': supervisor_id_id,
-                                                 'supervisor_image': supervisor_image,
-                                                 'state':events[0][2] ,
-                                                 'flag': str(True) if events[0][2] == 'draft' else str(False),
-                                                 'period': str(school_event[0][12] - school_event[0][11]),
-                                                 'student_solution':student_solution})
+                                data.append({'event_id': events[0][0],
+                                             'name': school_event[0][0],
+                                             'start_date': str(school_event[0][11].strftime("%d %b %Y")),
+                                             'end_date': str(school_event[0][12].strftime("%d %b %Y")),
+                                             'registration_start_date': str(school_event[0][13]) if school_event[0][
+                                                 13] else '',
+                                             'registration_last_date': str(school_event[0][14]) if school_event[0][
+                                                 14] else '',
+                                             'maximum_participants': school_event[0][3],
+                                             'available_seats': available_seats,
+                                             'cost': str(school_event[0][5]) + ' ' + str(res_currency[0][0]),
+                                             'contact_name': contact_name,
+                                             'contact_id': contact_id_id,
+                                             'contact_image': contact_image,
+                                             'supervisor_name': supervisor_name,
+                                             'event': str(school_event[0][6]) if school_event[0][6] else '',
+                                             'event_name': str(school_event[0][7]) if school_event[0][7] else '',
+                                             'link': str(school_event[0][8]) if school_event[0][8] else '',
+                                             'supervisor_id': supervisor_id_id,
+                                             'supervisor_image': supervisor_image,
+                                             'state': events[0][2],
+                                             'flag': str(True) if events[0][2] == 'draft' else str(False),
+                                             'period': str(school_event[0][12] - school_event[0][11]),
+                                             'student_solution': student_solution})
 
+                                result = {'result': data}
 
-                                    result = {'result': data}
-
-                                    return Response(result)
-
-
-
-
-
+                                return Response(result)
