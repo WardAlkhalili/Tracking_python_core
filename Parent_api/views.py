@@ -1929,11 +1929,11 @@ def get_attendance(request, student_id):
                         branch_id = cursor.fetchall()
                         if user_id_q:
                             cursor.execute(
-                                " select id,name,start_date,end_date,reason,type,state,arrival_time from student_absence_request where student_id=%s and year_id=%s and branch_id=%s",
+                                " select id,name,start_date,end_date,reason,type,state,arrival_time from student_absence_request where student_id=%s and year_id=%s and branch_id=%s ORDER BY id DESC",
                                 [student_id,user_id_q[0][1],branch_id[0][0]])
                             studentleaves = cursor.fetchall()
                             cursor.execute(
-                                "SELECT daily_attendance_id,id,note,reason,attendance_status,arrival_time FROM daily_attendance_line WHERE student_id=%s ",
+                                "SELECT daily_attendance_id,id,note,reason,attendance_status,arrival_time FROM daily_attendance_line WHERE student_id=%s ORDER BY id DESC",
                                 [student_id])
                             daily_attendance_line = cursor.fetchall()
                             for s in daily_attendance_line:
@@ -2913,7 +2913,7 @@ def get_worksheet_form_view_data(request, wsheet,std):
                                                             'name':str(res[0]),
                                                             'file_size':str(res[1])
                                                         })
-                                        print("ssssssssssssssssss",worksheet[0][9])
+
                                         data.append({'worksheet_id':worksheet[0][0],
                                                      'name': worksheet[0][1],
                                                      'date': str(worksheet[0][3]),
