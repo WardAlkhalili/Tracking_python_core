@@ -968,7 +968,7 @@ def date_time(deadline):
         str(deadline.minute)) > 1 else "0" + str(deadline.minute)
     second = str(deadline.second) if len(
         str(deadline.second)) > 1 else "0" + str(deadline.second)
-    return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second
+    return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + "00"
 
 
 @api_view(['POST'])
@@ -1044,15 +1044,17 @@ def kids_hstory(request):
                                             [tuple(list(dict.fromkeys(message_id)))])
                                         school_message1 = cursor.fetchall()
 
+
                                         for rec in range(len(school_message1)):
                                             deadline = school_message1[rec][4]
+
 
                                             notifications.append({
                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_msg_admin.png",
                                                 "date_time": date_time(deadline),
                                                 "notifications_text": school_message1[rec][3] if school_message1[rec][
                                                     3] else '',
-                                                "create_date": school_message1[rec][5],
+                                                "create_date": school_message1[rec][4].replace(second=0) if school_message1[rec][4] else '',
                                                 "notifications_title": school_message1[rec][2] if school_message1[rec][
                                                     2] else '',
                                             })
@@ -1178,11 +1180,16 @@ def kids_hstory(request):
                                                                         sh_message_wizard[message_wizard][0] else ''
                                                                     if " just been " in notifications_text:
                                                                         if str(std[1]) in notifications_text:
+                                                                            if sh_message_wizard[message_wizard][
+                                                                                2] == 'School Departure':
+                                                                                notifications_title = 'School Departure'
+                                                                            else:
+                                                                                notifications_title = 'Bus notification'
                                                                             notifications.append({
                                                                                 "notifications_text": notifications_text,
                                                                                 "date_time": date_time(deadline),
-                                                                                "create_date": deadline,
-                                                                                "notifications_title": 'Bus notification',
+                                                                                "create_date":deadline.replace(second=0) if deadline else '' ,
+                                                                                "notifications_title": notifications_title,
                                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                             })
                                                                     elif "has not checked into the bus" in notifications_text:
@@ -1193,7 +1200,7 @@ def kids_hstory(request):
                                                                             notifications.append({
                                                                                 "notifications_text": notifications_text,
                                                                                 "date_time": date_time(deadline),
-                                                                                "create_date": deadline,
+                                                                                "create_date": deadline.replace(second=0) if deadline else '' ,
                                                                                 "notifications_title": "Absence notification",
                                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                             })
@@ -1203,7 +1210,7 @@ def kids_hstory(request):
                                                                             notifications.append({
                                                                                 "notifications_text": notifications_text,
                                                                                 "date_time": date_time(deadline),
-                                                                                "create_date": deadline,
+                                                                                "create_date":deadline.replace(second=0) if deadline else '' ,
                                                                                 "notifications_title": "No Show Notification",
                                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                             })
@@ -1213,7 +1220,7 @@ def kids_hstory(request):
                                                                             notifications.append({
                                                                                 "notifications_text": notifications_text,
                                                                                 "date_time": date_time(deadline),
-                                                                                "create_date": deadline,
+                                                                                "create_date": deadline.replace(second=0) if deadline else '' ,
                                                                                 "notifications_title": "Bus notification1230",
                                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                             })
@@ -1248,7 +1255,7 @@ def kids_hstory(request):
                                                                             notifications.append({
                                                                                 "notifications_text": notifications_text,
                                                                                 "date_time": date_time(deadline),
-                                                                                "create_date": deadline,
+                                                                                "create_date": deadline.replace(second=0) if deadline else '' ,
                                                                                 "notifications_title": "Message from bus no. " + str(
                                                                                     bus_num1[0][0]) + "  " + str(
                                                                                     std[1]),
@@ -1268,7 +1275,7 @@ def kids_hstory(request):
                                                                             notifications.append({
                                                                                 "notifications_text": notifications_text,
                                                                                 "date_time": date_time(deadline),
-                                                                                "create_date": deadline,
+                                                                                "create_date": deadline.replace(second=0) if deadline else '' ,
                                                                                 "notifications_title": "Message from bus no. " + str(
                                                                                     bus_num1[0][0]) + "  " + str(
                                                                                     std[1]),
@@ -1284,11 +1291,16 @@ def kids_hstory(request):
                                                     if "just been" in notifications_text:
 
                                                         if str(std[1]) in notifications_text:
+
+                                                            if sh_message_wizard[message_wizard][2]=='School Departure':
+                                                                notifications_title='School Departure'
+                                                            else:
+                                                                notifications_title = 'Bus notification'
                                                             notifications.append({
                                                                 "notifications_text": notifications_text,
                                                                 "date_time": date_time(deadline),
-                                                                "create_date": deadline,
-                                                                "notifications_title": 'Bus notification',
+                                                                "create_date":deadline.replace(second=0) if deadline else '' ,
+                                                                "notifications_title": notifications_title,
                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                             })
                                                     elif "did not check into the bus today" in notifications_text:
@@ -1307,7 +1319,7 @@ def kids_hstory(request):
                                                             notifications.append({
                                                                 "notifications_text": notifications_text,
                                                                 "date_time": date_time(deadline),
-                                                                "create_date": deadline,
+                                                                "create_date": deadline.replace(second=0) if deadline else '' ,
                                                                 "notifications_title": "Absence notification",
                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                             })
@@ -1331,7 +1343,7 @@ def kids_hstory(request):
                                                                 notifications.append({
                                                                     "notifications_text": notifications_text,
                                                                     "date_time": date_time(deadline),
-                                                                    "create_date": deadline,
+                                                                    "create_date": deadline.replace(second=0) if deadline else '' ,
                                                                     "notifications_title": "Message from bus no. " + str(
                                                                         bus_num1[0][0]) + "  " + str(std[1]),
                                                                     "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
@@ -1340,7 +1352,7 @@ def kids_hstory(request):
                                                             notifications.append({
                                                                 "notifications_text": notifications_text,
                                                                 "date_time": date_time(deadline),
-                                                                "create_date": deadline,
+                                                                "create_date": deadline.replace(second=0) if deadline else '' ,
                                                                 "notifications_title": "Message from bus no." + str(
                                                                     bus_num1[0][0]) + "  " + str(std[1]),
                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
@@ -1392,7 +1404,7 @@ def kids_hstory(request):
                                                                                 "notifications_text": name[0][
                                                                                                           0] + " has just reached the school.  ",
                                                                                 "date_time": date_time(deadline),
-                                                                                "create_date": deadline,
+                                                                                "create_date": deadline.replace(second=0) if deadline else '' ,
                                                                                 "notifications_title": "Bus Notification",
                                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                             })
@@ -1418,7 +1430,7 @@ def kids_hstory(request):
                                                 notifications.append({
                                                     "notifications_text": sh_message_wizard1[sh_message_bus][0],
                                                     "date_time": date_time(deadline),
-                                                    "create_date": deadline,
+                                                    "create_date":deadline.replace(second=0) if deadline else '' ,
                                                     "notifications_title": "Message from bus no. " + str(
                                                         bus_num1[0][0]) + "   " + str(
                                                         rec1[1]),
@@ -1428,6 +1440,7 @@ def kids_hstory(request):
                             notifications.sort(key=get_year, reverse=True)
                             notifications_not_d = []
                             seen = set()
+
                             for d in notifications:
                                 t = tuple(d.items())
                                 if t not in seen:
