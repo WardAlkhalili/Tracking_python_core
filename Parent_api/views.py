@@ -983,6 +983,8 @@ def kids_hstory(request):
                     parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
 
                     notifications = []
+                    notifications_not_d = []
+                    seen = set()
                     for e in parent_id:
                         parent_id = e[0]
                     if db_name:
@@ -1057,6 +1059,7 @@ def kids_hstory(request):
                                                 "create_date": school_message1[rec][4].replace(second=0) if school_message1[rec][4] else '',
                                                 "notifications_title": school_message1[rec][2] if school_message1[rec][
                                                     2] else '',
+                                                "student_name":rec1[1]
                                             })
 
                                         #
@@ -1438,8 +1441,7 @@ def kids_hstory(request):
                                                 })
 
                             notifications.sort(key=get_year, reverse=True)
-                            notifications_not_d = []
-                            seen = set()
+
 
                             for d in notifications:
                                 t = tuple(d.items())
