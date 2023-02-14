@@ -1054,8 +1054,7 @@ def kids_hstory(request):
                                             notifications.append({
                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_msg_admin.png",
                                                 "date_time": date_time(deadline),
-                                                "notifications_text": school_message1[rec][3] if school_message1[rec][
-                                                    3] else '',
+                                                "notifications_text": school_message1[rec][3] if school_message1[rec][3] else '',
                                                 "create_date": school_message1[rec][4].replace(second=0) if school_message1[rec][4] else '',
                                                 "notifications_title": school_message1[rec][2] if school_message1[rec][
                                                     2] else '',
@@ -1217,6 +1216,28 @@ def kids_hstory(request):
                                                                                 "notifications_title": "No Show Notification",
                                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                             })
+                                                                    elif "has arrived at your home and" in notifications_text:
+
+                                                                        if str(std[1]) in notifications_text:
+                                                                            notifications.append({
+                                                                                "notifications_text": notifications_text,
+                                                                                "date_time": date_time(deadline),
+                                                                                "create_date": deadline.replace(
+                                                                                    second=0) if deadline else '',
+                                                                                "notifications_title": "Checkout Notification",
+                                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                                            })
+                                                                    elif "has arrived at your home and" in notifications_text:
+
+                                                                        if str(std[1]) in notifications_text:
+                                                                            notifications.append({
+                                                                                "notifications_text": notifications_text,
+                                                                                "date_time": date_time(deadline),
+                                                                                "create_date": deadline.replace(
+                                                                                    second=0) if deadline else '',
+                                                                                "notifications_title": "Checkout Notification",
+                                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                                            })
                                                                     elif "just reached" in notifications_text:
 
                                                                         if str(std[1]) in notifications_text:
@@ -1326,6 +1347,17 @@ def kids_hstory(request):
                                                                 "notifications_title": "Absence notification",
                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                             })
+                                                    elif "has arrived at your home and" in notifications_text:
+
+                                                        if str(std[1]) in notifications_text:
+                                                            notifications.append({
+                                                                "notifications_text": notifications_text,
+                                                                "date_time": date_time(deadline),
+                                                                "create_date": deadline.replace(
+                                                                    second=0) if deadline else '',
+                                                                "notifications_title": "Checkout Notification",
+                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                            })
                                                     elif "just reached" in notifications_text:
                                                         if str(std[1]) in notifications_text:
                                                             notifications.append({
@@ -1336,7 +1368,10 @@ def kids_hstory(request):
                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                             })
                                                     else:
-
+                                                        cursor.execute(
+                                                            "select  is_active,type from transport_round WHERE id = %s  ",
+                                                            [rec_s])
+                                                        is_active = cursor.fetchall()
                                                         if is_active[0][1] == 'pick_up':
                                                             time = attendance_round[0][2]
                                                         else:
@@ -1448,8 +1483,8 @@ def kids_hstory(request):
                                 if t not in seen:
                                     seen.add(t)
                                     notifications_not_d.append(d)
-
                             result = {"notifications": notifications_not_d}
+
                             return Response(result)
                         # notifications = []
                         # result = {"notifications": notifications}
