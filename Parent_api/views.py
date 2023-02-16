@@ -19,6 +19,7 @@ from rest_framework import status
 from itertools import chain
 # from ..Driver_api.models import Manager
 # from yousef.api.Tracking_python_core.Driver_api.models import Manager
+from multiprocessing import Process
 
 import pandas as pd
 from rest_framework.authtoken.models import Token
@@ -969,6 +970,174 @@ def date_time(deadline):
     second = str(deadline.second) if len(
         str(deadline.second)) > 1 else "0" + str(deadline.second)
     return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + "00"
+def get_info_message(deadline,notifications_text,avatar,create_date,notifications_title,student_name):
+    if student_name:
+        return {
+                            "avatar":avatar,
+                            "date_time": date_time(deadline),
+                            "notifications_text": notifications_text,
+                            "create_date": create_date,
+                            "notifications_title": notifications_title,
+                            "student_name": student_name
+                        }
+    else:
+        return {
+            "avatar": avatar,
+            "date_time": date_time(deadline),
+            "notifications_text": notifications_text,
+            "create_date": create_date,
+            "notifications_title": notifications_title
+        }
+ # get school message
+def get_school_message(student_id,school_name,school_message,student_name):
+    notifications = []
+    with connections[school_name].cursor() as cursor:
+        message_ids = []
+        for rec in school_message:
+            message_ids.append(rec[0])
+        message_ids = list(dict.fromkeys(message_ids))
+
+        if message_ids:
+            # cursor.execute(
+            #     "select  student_student_id  from school_message_student_student where school_message_id in %s",
+            #     [tuple(message_ids)])
+            # school_message_student_student = cursor.fetchall()
+            cursor.execute(
+                "select  school_message_id from school_message_student_student WHERE school_message_id in %s AND student_student_id = %s",
+                [tuple(message_ids), student_id])
+            message_student = cursor.fetchall()
+            message_id = []
+            for rec in message_student:
+                message_id.append(rec[0])
+
+            if message_id:
+
+                cursor.execute(
+                    "select  id,search_type,title,message,create_date,date from school_message WHERE id in %s",
+                    [tuple(list(dict.fromkeys(message_id)))])
+                school_message1 = cursor.fetchall()
+
+                for rec in range(len(school_message1)):
+                    deadline = school_message1[rec][4]
+                    notifications_text=school_message1[rec][3] if school_message1[rec][3] else ''
+                    avatar ="https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_msg_admin.png"
+                    create_date=school_message1[rec][4].replace(second=0) if school_message1[rec][4] else ''
+                    notifications_title=school_message1[rec][2] if school_message1[rec][2] else ''
+                    notifications.append(get_info_message(deadline,notifications_text,avatar,create_date,notifications_title,student_name))
+
+    return notifications
+def get_student_history(student_id,school_name,student_name):
+    notifications = []
+    with connections[school_name].cursor() as cursor:
+        list_hist_student = []
+        cursor.execute(
+            " SELECT  notification_id,round_id FROM student_history WHERE (activity_type='absent-all' or activity_type='absent') and student_id=%s",
+            [student_id])
+        student_history = cursor.fetchall()
+
+        for mas in student_history:
+            cursor.execute(
+                "select  vehicle_id from transport_round WHERE id = %s",
+                [mas[1]])
+
+            vehicle_id = cursor.fetchall()
+            cursor.execute(
+                "select bus_no from fleet_vehicle WHERE id = %s  ",
+                [vehicle_id[0][0]])
+            bus_num = cursor.fetchall()
+
+            if mas[0] in list_hist_student:
+                continue
+            else:
+                list_hist_student.append(mas[0])
+
+            cursor.execute(
+                "select  message_en,create_date,type,id from sh_message_wizard WHERE id=%s ORDER BY ID DESC LIMIT 50",
+                [mas[0]])
+            sh_message_wizard1 = cursor.fetchall()
+
+            for sh_message_bus in range(len(sh_message_wizard1)):
+                deadline = sh_message_wizard1[sh_message_bus][1]
+
+                notifications_text = sh_message_wizard1[sh_message_bus][0]
+                avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                create_date = deadline.replace(second=0) if deadline else ''
+                notifications_title = "Message from bus no. " + str(bus_num) + "   " +student_name
+                notifications.append(get_info_message(deadline, notifications_text, avatar, create_date, notifications_title,None))
+    return notifications
+
+def get_bus_notifition_student(school_name,student_name,notifications_text,notifications_title,deadline,round_id,attendance_round):
+    notifications = []
+    avatar="https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+    with connections[school_name].cursor() as cursor:
+        create_date=deadline.replace( second=0) if deadline else ''
+        cursor.execute(
+            "select  vehicle_id from transport_round WHERE id = %s",
+            [round_id])
+
+        vehicle_id = cursor.fetchall()
+        cursor.execute(
+            "select bus_no from fleet_vehicle WHERE id = %s  ",
+            [vehicle_id[0][0]])
+        bus_num = cursor.fetchall()
+        if "just been" in notifications_text:
+
+            if str(student_name) in notifications_text:
+
+                if notifications_title == 'School Departure':
+                    notifications_title = 'School Departure'
+                else:
+                    notifications_title = 'Bus notification'
+                notifications.append(get_info_message(deadline, notifications_text, avatar, create_date, notifications_title,None))
+        elif "did not check into the bus today" in notifications_text:
+
+            if str(student_name) in notifications_text:
+                notifications.append(
+                    get_info_message(deadline, notifications_text, avatar, create_date, "No Show Notification", None))
+
+        elif "has not checked into the bus" in notifications_text:
+
+            if str(student_name) in notifications_text:
+                notifications.append(
+                    get_info_message(deadline, notifications_text, avatar, create_date, "Absence notification", None))
+
+
+        elif "has arrived at your home and" in notifications_text:
+
+            if str(student_name) in notifications_text:
+                notifications.append(
+                    get_info_message(deadline, notifications_text, avatar, create_date, "Checkout Notification", None))
+
+        elif "just reached" in notifications_text:
+            if str(student_name) in notifications_text:
+                notifications.append(
+                    get_info_message(deadline, notifications_text, avatar, create_date, "Bus notification", None))
+
+        else:
+            cursor.execute(
+                "select  is_active,type from transport_round WHERE id = %s  ",
+                [round_id])
+            is_active = cursor.fetchall()
+
+            time=''
+            if attendance_round:
+                if is_active[0][1] == 'pick_up':
+                    time = attendance_round[0][2]
+                else:
+                    time = attendance_round[0][3]
+            if time:
+                if time > deadline:
+                    notifications.append(
+                        get_info_message(deadline, notifications_text, avatar, create_date, "Message from bus no. " + str(
+                            bus_num[0][0]) + "  " + str(student_name), None))
+
+
+            else:
+                notifications.append(
+                    get_info_message(deadline, notifications_text, avatar, create_date, "Message from bus no. " + str(
+                        bus_num[0][0]) + "  " + str(student_name), None))
+    return notifications
+
 
 
 @api_view(['POST'])
@@ -1164,6 +1333,7 @@ def kids_hstory(request):
                                                                 "select  round_schedule_id from transport_participant WHERE student_id = %s",
                                                                 [std[0]])
                                                             round_schedule_id_tst = cursor.fetchall()
+
                                                             schedule_id = []
                                                             for cha_round_s in round_schedule_id_tst:
                                                                 schedule_id.append(cha_round_s[0])
@@ -1172,6 +1342,7 @@ def kids_hstory(request):
                                                                     "select  round_id from round_schedule WHERE id in %s",
                                                                     [tuple(schedule_id)])
                                                                 round_id_tst = cursor.fetchall()
+
                                                                 round_id_student = []
                                                                 for r_id in round_id_tst:
                                                                     round_id_student.append(r_id[0])
@@ -1263,15 +1434,14 @@ def kids_hstory(request):
                                                                         cursor.execute(
                                                                             "select  transport_state,write_date from transport_participant WHERE student_id = %s  AND round_schedule_id= %s",
                                                                             [std[0], rounds_details[0][0]])
-                                                                        round_id_tst = cursor.fetchall()
+                                                                        round_id_tst1 = cursor.fetchall()
                                                                         if is_active[0][1] == 'pick_up':
-
-                                                                            if (round_id_tst[0][0] == 'absent-all' or
-                                                                                round_id_tst[0][0] == 'in' or
-                                                                                round_id_tst[0][0] == 'Onboard' or
-                                                                                round_id_tst[0][0] == 'absent' or
-                                                                                round_id_tst[0][0] == 'no-show') and \
-                                                                                    round_id_tst[0][1] < \
+                                                                            if (round_id_tst1[0][0] == 'absent-all' or
+                                                                                round_id_tst1[0][0] == 'in' or
+                                                                                round_id_tst1[0][0] == 'Onboard' or
+                                                                                round_id_tst1[0][0] == 'absent' or
+                                                                                round_id_tst1[0][0] == 'no-show') and \
+                                                                                    round_id_tst1[0][1] > \
                                                                                     sh_message_wizard[message_wizard][
                                                                                         1]:
                                                                                 continue
@@ -1286,12 +1456,12 @@ def kids_hstory(request):
                                                                                 "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                                             })
                                                                         else:
-                                                                            if (round_id_tst[0][0] == 'absent-all' or
-                                                                                round_id_tst[0][0] == 'out' or
-                                                                                round_id_tst[0][0] == 'Offboard' or
-                                                                                round_id_tst[0][0] == 'absent' or
-                                                                                round_id_tst[0][0] == 'no-show') and \
-                                                                                    round_id_tst[0][1] < \
+                                                                            if (round_id_tst1[0][0] == 'absent-all' or
+                                                                                round_id_tst1[0][0] == 'out' or
+                                                                                round_id_tst1[0][0] == 'Offboard' or
+                                                                                round_id_tst1[0][0] == 'absent' or
+                                                                                round_id_tst1[0][0] == 'no-show') and \
+                                                                                    round_id_tst1[0][1] > \
                                                                                     sh_message_wizard[message_wizard][
                                                                                         1]:
                                                                                 continue
@@ -1377,6 +1547,7 @@ def kids_hstory(request):
                                                         else:
                                                             time = attendance_round[0][3]
                                                         if time:
+
                                                             if time > deadline:
                                                                 notifications.append({
                                                                     "notifications_text": notifications_text,
@@ -1501,6 +1672,246 @@ def kids_hstory(request):
         else:
             result = {'status': 'error'}
             return Response(result)
+
+# @api_view(['POST'])
+# def kids_hstory(request):
+#     if request.method == 'POST':
+#         if request.headers:
+#             if request.headers.get('Authorization'):
+#                 if 'Bearer' in request.headers.get('Authorization'):
+#                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
+#
+#                     db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+#                     parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+#
+#                     notifications = []
+#                     notifications_not_d = []
+#                     seen = set()
+#                     for e in parent_id:
+#                         parent_id = e[0]
+#                     if db_name:
+#                         for e in db_name:
+#                             school_name = e[0]
+#                         school_name = ManagerParent.pincode(school_name)
+#                         start_date = request.data.get('start_date')
+#                         end_date = request.data.get('end_date')
+#                         student_round = []
+#                         student_history_id = []
+#                         with connections[school_name].cursor() as cursor:
+#                             if start_date and end_date:
+#                                 cursor.execute(
+#                                     "select  id  from school_message WHERE create_date >= %s AND create_date <= %s",
+#                                     [start_date, end_date])
+#                                 school_message = cursor.fetchall()
+#                             elif start_date and not end_date:
+#                                 cursor.execute(
+#                                     "select  id  from school_message WHERE create_date >= %s ",
+#                                     [start_date])
+#
+#                                 school_message = cursor.fetchall()
+#                             elif not start_date and end_date:
+#                                 cursor.execute(
+#                                     "select  id  from school_message WHERE  create_date <= %s",
+#                                     [end_date])
+#
+#                                 school_message = cursor.fetchall()
+#                             elif not start_date and not end_date:
+#                                 cursor.execute("select  id  from school_message ")
+#                                 school_message = cursor.fetchall()
+#                             cursor.execute(
+#                                 "select  id,display_name_search,image_url from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
+#                                 [parent_id, parent_id, parent_id])
+#                             student_info = cursor.fetchall()
+#                             student_round_id = []
+#
+#
+#                             for student in student_info:
+#                                 student_round = []
+#                                 notifications+=get_school_message(student[0],school_name,school_message,student[1])
+#                                 notifications+=get_student_history(student[0],school_name,student[1])
+#                                 cursor.execute(
+#                                     "select  round_schedule_id from transport_participant WHERE student_id = %s",
+#                                     [student[0]])
+#                                 round_schedule_id = cursor.fetchall()
+#                                 #     get bus message
+#                                 for rec in round_schedule_id:
+#
+#                                     cursor.execute(
+#                                         "select  round_id from round_schedule WHERE id = %s",
+#                                         [rec[0]])
+#                                     round_schedule = cursor.fetchall()
+#
+#                                     round_schedules = []
+#                                     student_round_h = []
+#                                     for rec in round_schedule:
+#
+#                                         if rec[0] in student_round:
+#
+#                                             continue
+#                                         else:
+#                                             cursor.execute(
+#                                                 "select  type from transport_round WHERE id = %s",
+#                                                 [rec[0]])
+#
+#                                             type = cursor.fetchall()
+#
+#                                             if type[0][0] == 'pick_up':
+#                                                 student_round_h.append(rec[0])
+#                                             student_round.append(rec[0])
+#                                             round_schedules.append(rec[0])
+#                                     round_schedules = list(dict.fromkeys(student_round))
+#
+#                                     for rec_s in round_schedules:
+#                                         if rec_s in student_round_id:
+#                                             pass
+#                                         else:
+#                                             student_round_id.append(rec_s)
+#                                             cursor.execute(
+#                                                 "select  message_ar,create_date,type,round_id,id from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
+#                                                 [rec_s, 'emergency', 'App\Model\Driver',
+#                                                  'App\Model\sta' + str(parent_id)])
+#                                             sh_message_wizard = cursor.fetchall()
+#                                             # save bus message
+#                                             for message_wizard in range(len(sh_message_wizard)):
+#                                                 avatar= "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+#                                                 for std in student_info:
+#
+#                                                     cursor.execute("select  id,round_id,bus_check_in,time_out from round_student_history WHERE student_id = %s AND round_id=%s AND bus_check_in is not null AND  datetime >= %s AND  datetime < %s ",
+#                                                         [std[0], rec, datetime.datetime(
+#                                                             sh_message_wizard[message_wizard][1].year,
+#                                                             sh_message_wizard[message_wizard][1].month,
+#                                                             sh_message_wizard[message_wizard][1].day),
+#                                                          datetime.datetime(
+#                                                              sh_message_wizard[message_wizard][1].year,
+#                                                              sh_message_wizard[message_wizard][1].month,
+#                                                              sh_message_wizard[message_wizard][1].day + 1)])
+#                                                     attendance_round = cursor.fetchall()
+#
+#                                                     if not attendance_round:
+#                                                         cursor.execute(
+#                                                             "select  is_active,type from transport_round WHERE id = %s  ",
+#                                                             [rec_s])
+#                                                         is_active = cursor.fetchall()
+#                                                         date_time_message = datetime.datetime(
+#                                                             sh_message_wizard[message_wizard][1].year,
+#                                                             sh_message_wizard[message_wizard][1].month,
+#                                                             sh_message_wizard[message_wizard][1].day)
+#
+#                                                         car_time = datetime.datetime(datetime.datetime.now().year,
+#                                                                                      datetime.datetime.now().month,
+#                                                                                      datetime.datetime.now().day)
+#
+#                                                         if (is_active[0][0] and car_time == date_time_message) or (
+#                                                                 not is_active[0][0] and car_time == date_time_message):
+#
+#                                                             cursor.execute(
+#                                                                 "select  round_schedule_id from transport_participant WHERE student_id = %s",
+#                                                                 [std[0]])
+#                                                             round_schedule_id_tst = cursor.fetchall()
+#                                                             schedule_id = []
+#                                                             for cha_round_s in round_schedule_id_tst:
+#                                                                 schedule_id.append(cha_round_s[0])
+#                                                             if schedule_id:
+#                                                                 cursor.execute(
+#                                                                     "select  round_id from round_schedule WHERE id in %s",
+#                                                                     [tuple(schedule_id)])
+#                                                                 round_id_tst = cursor.fetchall()
+#                                                                 round_id_student = []
+#                                                                 for r_id in round_id_tst:
+#                                                                     round_id_student.append(r_id[0])
+#                                                                 if rec_s in round_id_student:
+#                                                                     deadline = sh_message_wizard[message_wizard][1]
+#                                                                     notifications_text = str(
+#                                                                         sh_message_wizard[message_wizard][0]) if \
+#                                                                         sh_message_wizard[message_wizard][0] else ''
+#                                                                     notifications += get_bus_notifition_student(school_name, std[1],
+#                                                                                                notifications_text,
+#                                                                                                sh_message_wizard[message_wizard][2],
+#                                                                                                deadline, rec_s,
+#                                                                                                attendance_round)
+#
+#                                                         continue
+#
+#                                                     deadline = sh_message_wizard[message_wizard][1]
+#                                                     notifications_text = str(sh_message_wizard[message_wizard][0]) if \
+#                                                         sh_message_wizard[message_wizard][0] else ''
+#
+#                                                     notifications+=get_bus_notifition_student(school_name, std[1],
+#                                                                                notifications_text,
+#                                                                                sh_message_wizard[message_wizard][2],
+#                                                                                deadline, rec_s,
+#                                                                                attendance_round)
+#
+#
+#                                         if student_round_h:
+#
+#                                             cursor.execute(
+#                                                 "select  id,round_start from round_history WHERE round_id in %s and round_name in %s ORDER BY ID DESC LIMIT 1 ",
+#                                                 [tuple(student_round_h), tuple(student_round_h)])
+#                                             round_history = cursor.fetchall()
+#
+#                                             if round_history:
+#                                                 history_round = []
+#
+#                                                 for round_h in round_history:
+#                                                     history_round.append(round_h[0])
+#                                                 for std in student_info:
+#
+#                                                     cursor.execute(
+#                                                         "select  datetime,id,time_out,bus_check_in from round_student_history WHERE round_id in %s and student_id = %s and history_id in %s  ORDER BY ID DESC LIMIT 1 ",
+#                                                         [tuple(student_round_h), std[0], tuple(history_round)])
+#                                                     student_history = cursor.fetchall()
+#
+#                                                     #
+#                                                     if student_history:
+#
+#                                                         for student_history1 in student_history:
+#                                                             if student_history1[3]:
+#
+#                                                                 if student_history1[1] in student_history_id:
+#                                                                     continue
+#                                                                 else:
+#                                                                     student_history_id.append(student_history1[1])
+#
+#                                                                     cursor.execute(
+#                                                                         "select time_out,student_id,bus_check_in from round_student_history WHERE id = %s  ",
+#                                                                         [student_history1[1]])
+#                                                                     time_out = cursor.fetchall()
+#                                                                     if time_out:
+#                                                                         cursor.execute(
+#                                                                             "select  display_name_search from student_student WHERE  id = %s",
+#                                                                             [time_out[0][1]])
+#                                                                         name = cursor.fetchall()
+#
+#                                                                         if time_out[0][0] and time_out[0][2]:
+#                                                                             deadline = time_out[0][0] if time_out[0][
+#                                                                                 0] else time_out[0][2]
+#                                                                             notifications.append( get_info_message(deadline, name[0][
+#                                                                                                           0] + " has just reached the school.  ", avatar, deadline.replace(
+#                                                                                     second=0) if deadline else '', "Bus notification", None))
+#
+#                             notifications.sort(key=get_year, reverse=True)
+#
+#
+#                             for d in notifications:
+#                                 t = tuple(d.items())
+#                                 if t not in seen:
+#                                     seen.add(t)
+#                                     notifications_not_d.append(d)
+#                             result = {"notifications": notifications_not_d}
+#                             return Response(result)
+#                     else:
+#                         result = {'status': 'error'}
+#                         return Response(result)
+#                 else:
+#                     result = {'status': 'error Authorization'}
+#                     return Response(result)
+#             else:
+#                 result = {'status': 'Not found Authorization'}
+#                 return Response(result)
+#         else:
+#             result = {'status': 'Not found headers'}
+#             return Response(result)
 
 
 def get_year(element):
