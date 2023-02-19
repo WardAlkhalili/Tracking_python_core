@@ -140,7 +140,7 @@ def parent_login(request):
 import datetime
 
 
-# from ..Driver_api.models import *
+
 
 
 @api_view(['POST', 'GET'])
@@ -1427,54 +1427,112 @@ def kids_hstory(request):
                                                                             [calendar.day_name[curr_date.weekday()]])
                                                                         day_name = cursor.fetchall()
                                                                         cursor.execute(
-                                                                            "select id,day_id from round_schedule WHERE round_id = %s and day_id = %s",
+                                                                            "select id,day_id,write_date from round_schedule WHERE round_id = %s and day_id = %s",
                                                                             [rec_s, day_name[0][0]])
 
                                                                         rounds_details = cursor.fetchall()
                                                                         cursor.execute(
+                                                                            "select write_date from transport_round WHERE id = %s ",
+                                                                            [rec_s])
+
+                                                                        write_date_round = cursor.fetchall()
+                                                                        cursor.execute(
                                                                             "select  transport_state,write_date from transport_participant WHERE student_id = %s  AND round_schedule_id= %s",
                                                                             [std[0], rounds_details[0][0]])
                                                                         round_id_tst1 = cursor.fetchall()
-                                                                        if is_active[0][1] == 'pick_up':
-                                                                            if (round_id_tst1[0][0] == 'absent-all' or
-                                                                                round_id_tst1[0][0] == 'in' or
-                                                                                round_id_tst1[0][0] == 'Onboard' or
-                                                                                round_id_tst1[0][0] == 'absent' or
-                                                                                round_id_tst1[0][0] == 'no-show') and \
-                                                                                    round_id_tst1[0][1] > \
-                                                                                    sh_message_wizard[message_wizard][
-                                                                                        1]:
-                                                                                continue
 
-                                                                            notifications.append({
-                                                                                "notifications_text": notifications_text,
-                                                                                "date_time": date_time(deadline),
-                                                                                "create_date": deadline.replace(second=0) if deadline else '' ,
-                                                                                "notifications_title": "Message from bus no. " + str(
-                                                                                    bus_num1[0][0]) + "  " + str(
-                                                                                    std[1]),
-                                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                                                            })
+                                                                        if write_date_round[0][0] >sh_message_wizard[message_wizard][1]:
+
+                                                                                if is_active[0][1] == 'pick_up':
+                                                                                    if (round_id_tst1[0][0] == 'absent-all' or
+                                                                                        round_id_tst1[0][0] == 'in' or
+                                                                                        round_id_tst1[0][0] == 'Onboard' or
+                                                                                        round_id_tst1[0][0] == 'absent' or
+                                                                                        round_id_tst1[0][0] == 'no-show') and \
+                                                                                            round_id_tst1[0][1] < \
+                                                                                            sh_message_wizard[message_wizard][
+                                                                                                1]:
+                                                                                        continue
+
+                                                                                    notifications.append({
+                                                                                        "notifications_text": notifications_text,
+                                                                                        "date_time": date_time(deadline),
+                                                                                        "create_date": deadline.replace(second=0) if deadline else '' ,
+                                                                                        "notifications_title": "Message from bus no. " + str(
+                                                                                            bus_num1[0][0]) + "  " + str(
+                                                                                            std[1]),
+                                                                                        "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                                                    })
+                                                                                else:
+                                                                                    if (round_id_tst1[0][0] == 'absent-all' or
+                                                                                        round_id_tst1[0][0] == 'out' or
+                                                                                        round_id_tst1[0][0] == 'Offboard' or
+                                                                                        round_id_tst1[0][0] == 'absent' or
+                                                                                        round_id_tst1[0][0] == 'no-show') and \
+                                                                                            round_id_tst1[0][1] < \
+                                                                                            sh_message_wizard[message_wizard][
+                                                                                                1]:
+                                                                                        continue
+
+                                                                                    notifications.append({
+                                                                                        "notifications_text": notifications_text,
+                                                                                        "date_time": date_time(deadline),
+                                                                                        "create_date": deadline.replace(second=0) if deadline else '' ,
+                                                                                        "notifications_title": "Message from bus no. " + str(
+                                                                                            bus_num1[0][0]) + "  " + str(
+                                                                                            std[1]),
+                                                                                        "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                                                    })
                                                                         else:
-                                                                            if (round_id_tst1[0][0] == 'absent-all' or
-                                                                                round_id_tst1[0][0] == 'out' or
-                                                                                round_id_tst1[0][0] == 'Offboard' or
-                                                                                round_id_tst1[0][0] == 'absent' or
-                                                                                round_id_tst1[0][0] == 'no-show') and \
-                                                                                    round_id_tst1[0][1] > \
-                                                                                    sh_message_wizard[message_wizard][
-                                                                                        1]:
-                                                                                continue
 
-                                                                            notifications.append({
-                                                                                "notifications_text": notifications_text,
-                                                                                "date_time": date_time(deadline),
-                                                                                "create_date": deadline.replace(second=0) if deadline else '' ,
-                                                                                "notifications_title": "Message from bus no. " + str(
-                                                                                    bus_num1[0][0]) + "  " + str(
-                                                                                    std[1]),
-                                                                                "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                                                            })
+                                                                            if is_active[0][1] == 'pick_up':
+                                                                                if (round_id_tst1[0][
+                                                                                        0] == 'absent-all' or
+                                                                                    round_id_tst1[0][0] == 'in' or
+                                                                                    round_id_tst1[0][0] == 'Onboard' or
+                                                                                    round_id_tst1[0][0] == 'absent' or
+                                                                                    round_id_tst1[0][
+                                                                                        0] == 'no-show') and \
+                                                                                        round_id_tst1[0][1] < \
+                                                                                        sh_message_wizard[
+                                                                                            message_wizard][
+                                                                                            1]:
+                                                                                    continue
+
+                                                                                notifications.append({
+                                                                                    "notifications_text": notifications_text,
+                                                                                    "date_time": date_time(deadline),
+                                                                                    "create_date": deadline.replace(
+                                                                                        second=0) if deadline else '',
+                                                                                    "notifications_title": "Message from bus no. " + str(
+                                                                                        bus_num1[0][0]) + "  " + str(
+                                                                                        std[1]),
+                                                                                    "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                                                })
+                                                                            else:
+                                                                                if (round_id_tst1[0][
+                                                                                        0] == 'absent-all' or
+                                                                                    round_id_tst1[0][0] == 'out' or
+                                                                                    round_id_tst1[0][0] == 'Offboard' or
+                                                                                    round_id_tst1[0][0] == 'absent' or
+                                                                                    round_id_tst1[0][
+                                                                                        0] == 'no-show') and \
+                                                                                        round_id_tst1[0][1] < \
+                                                                                        sh_message_wizard[
+                                                                                            message_wizard][
+                                                                                            1]:
+                                                                                    continue
+
+                                                                                notifications.append({
+                                                                                    "notifications_text": notifications_text,
+                                                                                    "date_time": date_time(deadline),
+                                                                                    "create_date": deadline.replace(
+                                                                                        second=0) if deadline else '',
+                                                                                    "notifications_title": "Message from bus no. " + str(
+                                                                                        bus_num1[0][0]) + "  " + str(
+                                                                                        std[1]),
+                                                                                    "avatar": "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                                                                })
 
                                                         continue
 
@@ -1672,6 +1730,8 @@ def kids_hstory(request):
         else:
             result = {'status': 'error'}
             return Response(result)
+
+
 
 # @api_view(['POST'])
 # def kids_hstory(request):

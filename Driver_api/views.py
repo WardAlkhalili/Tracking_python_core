@@ -1353,8 +1353,8 @@ def set_round_status(request):
                                                 "UPDATE public.round_history SET na= %s WHERE id=%s",
                                                 ['cancel', round_history[0][1]])
                                 cursor.execute(
-                                    "UPDATE public.transport_round SET is_active= not(is_active), pick_up_lat=%s ,pick_up_lng=%s ,drop_off_lat=%s ,drop_off_lng=%s WHERE id=%s",
-                                    [lat, long, lat, long, round_id])
+                                    "UPDATE public.transport_round SET is_active= not(is_active), pick_up_lat=%s ,pick_up_lng=%s ,drop_off_lat=%s ,drop_off_lng=%s,write_date=%s WHERE id=%s",
+                                    [lat, long, lat, long,datetime.datetime.now(), round_id])
                                 result = {'status': 'OK'}
                                 return Response(result)
                     else:
