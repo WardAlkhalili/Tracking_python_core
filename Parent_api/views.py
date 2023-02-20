@@ -551,25 +551,22 @@ def kids_list(request):
                                 cursor.execute(
                                     "select id from round_schedule WHERE  day_id = %s",
                                     [day_name[0][0]])
-                                columns3 = (x.name for x in cursor.description)
                                 rounds_details = cursor.fetchall()
                                 for rou in range(len(rounds_details)):
                                     cursor.execute(
                                         "select round_schedule_id,transport_state from transport_participant WHERE round_schedule_id = %s and student_id = %s",
                                         [rounds_details[rou][0], student1[rec]['id']])
-                                    columns4 = (x.name for x in cursor.description)
+
                                     rounds_count_student = cursor.fetchall()
 
                                     if rounds_count_student:
                                         cursor.execute(
                                             "select round_id from round_schedule WHERE  id = %s",
                                             [rounds_count_student[0][0]])
-                                        columns3 = (x.name for x in cursor.description)
                                         rounds = cursor.fetchall()
                                         cursor.execute(
                                             "select is_active from transport_round WHERE  id = %s",
                                             [rounds[0][0]])
-                                        columns3 = (x.name for x in cursor.description)
                                         is_active = cursor.fetchall()
                                         if is_active[0][0]:
                                             student_round_id = rounds[0][0]
@@ -2596,13 +2593,22 @@ def kids_hstory(request):
                                                                              sh_message_wizard[message_wizard][
                                                                                  1].day + 1)])
                                                                     attendance_round_yousef = cursor.fetchall()
+                                                                    start = datetime.datetime(
+                                                                        sh_message_wizard[message_wizard][1].year,
+                                                                        sh_message_wizard[message_wizard][1].month,
+                                                                        sh_message_wizard[message_wizard][1].day)
+                                                                    end = datetime.datetime(
+                                                                        sh_message_wizard[message_wizard][1].year,
+                                                                        sh_message_wizard[message_wizard][1].month,
+                                                                        sh_message_wizard[message_wizard][1].day + 1)
                                                                     if attendance_round_yousef:
+
                                                                         cursor.execute(
                                                                             "select  id,round_start,round_end,na from round_history WHERE id=%s",
                                                                             [attendance_round_yousef[0][4]])
                                                                         round_history = cursor.fetchall()
                                                                         cursor.execute(
-                                                                            "select  activity_type,lat,long,datetime from student_history WHERE round_id = %s and student_id=%s and history_id = %s ORDER BY ID DESC LIMIT 1 ",
+                                                                            "select  activity_type,lat,long,datetime from student_history WHERE round_id = %s and student_id=%s and history_id = %s ORDER BY ID DESC  ",
                                                                             [rec_s, std[0], round_history[0][0]])
                                                                         student_history = cursor.fetchall()
 
@@ -2610,17 +2616,32 @@ def kids_hstory(request):
                                                                             "select  is_active,type,write_date from transport_round WHERE id = %s  ",
                                                                             [rec_s])
                                                                         is_active = cursor.fetchall()
+                                                                        cursor.execute(
+                                                                            "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and datetime >= %s and datetime <= %s   ORDER BY ID DESC LIMIT 1 ",
+                                                                            [rec_s, std[0],
+                                                                             start, end])
+                                                                        student_history1 = cursor.fetchall()
+                                                                        print("didididi",student_history1)
                                                                     # if is_active[0][1] == 'pick_up':
+                                                                    #     print("ssssssssssss222",student_history,std[1])
                                                                     #     if (student_history[0][0] == 'absent-all' or
                                                                     #         student_history[0][0] == 'in' or
                                                                     #         student_history[0][0] == 'Onboard' or
                                                                     #         student_history[0][0] == 'absent' or
                                                                     #         student_history[0][0] == 'no-show') and (
-                                                                    #             sh_message_wizard[message_wizard][1] >
+                                                                    #             sh_message_wizard[message_wizard][1] <
                                                                     #             student_history[0][3]):
                                                                     #         continue
 
+                                                                    cursor.execute(
+                                                                        "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and datetime >= %s and datetime <= %s   ORDER BY ID DESC LIMIT 1 ",
+                                                                        [rec_s, std[0],
+                                                                         start, end])
+                                                                    student_history1 = cursor.fetchall()
 
+                                                                    if student_history1:
+                                                                        if student_history1[0][0]=='absent' or student_history1[0][0]=='absent-all':
+                                                                            continue
 
                                                                     deadline = sh_message_wizard[message_wizard][1]
                                                                     notifications_text = str(

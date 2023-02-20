@@ -1200,7 +1200,8 @@ def set_round_status(request):
                                             [round_id, r, 'App\Model\sta' + str(rec), message_title,
                                              message_body, message_body,
                                              driver_name[0][0]])
-                                        if round_info1[0][1] == 'pick_up':
+                                        # if round_info1[0][1] == 'pick_up' :
+                                        if round_info1[0][1]:
                                                 cursor.execute(
                                                     "select  name,vehicle_id,driver_id from transport_round WHERE id = %s  ",
                                                     [round_id])
@@ -1230,6 +1231,19 @@ def set_round_status(request):
                                                         if student_history1:
                                                             if student_history1[0][0] == 'absent' or student_history1[0][0] == 'absent-all' or student_history1[0][0] ==  'no-show':
                                                                 continue
+                                                    else:
+                                                        cursor.execute(
+                                                            "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and datetime >= %s and datetime <= %s   ORDER BY ID DESC LIMIT 1 ",
+                                                            [round_id, student_name[0][1], start,
+                                                             datetime.datetime.now()])
+                                                        student_history1 = cursor.fetchall()
+
+                                                        if student_history1:
+                                                            if student_history1[0][0] == 'absent' or \
+                                                                    student_history1[0][0] == 'absent-all' or \
+                                                                    student_history1[0][0] == 'no-show':
+                                                                continue
+
 
 
                                                 push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
@@ -1239,6 +1253,7 @@ def set_round_status(request):
                                                         registration_id=registration_id[0],
                                                         message_title=message_title,
                                                         message_body=message_body)
+
                                     cursor.execute(
                                         "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
                                         [round_id, round_info[0][2], round_info[0][1], round_id])
