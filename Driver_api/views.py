@@ -1604,11 +1604,13 @@ def students_bus_checks(request):
                                                                 r = datetime.datetime.strptime(date_string,
                                                                                                '%Y-%m-%d %H:%M:%S')
 
-                                                                cursor.execute(
-                                                                    "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                                    [round_id, r, 'App\Model\sta'+str(rec), 'Bus notification',
-                                                                     message, message,
-                                                                     driver_name[0][0]])
+                                                                if round_info[0][3]=='pick_up':
+
+                                                                    cursor.execute(
+                                                                        "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                                        [round_id, r, 'App\Model\sta'+str(rec), 'Bus notification',
+                                                                         message, message,
+                                                                         driver_name[0][0]])
 
 
                                                             elif data['notifications']['check_out'] and status == 'out':
@@ -1698,12 +1700,12 @@ def students_bus_checks(request):
                                                                    "%Y-%m-%d %H:%M:%S")
                                                                r = datetime.datetime.strptime(date_string,
                                                                                               '%Y-%m-%d %H:%M:%S')
-
-                                                               cursor.execute(
-                                                                   "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                                   [round_id, r, 'App\Model\sta'+str(rec), 'Bus notification',
-                                                                    message, message,
-                                                                    driver_name[0][0]])
+                                                               if round_info[0][3]=="pick_up":
+                                                                   cursor.execute(
+                                                                       "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                                       [round_id, r, 'App\Model\sta'+str(rec), 'Bus notification',
+                                                                        message, message,
+                                                                        driver_name[0][0]])
 
 
                                                            elif notifications[4]=="true," and status == 'out':
@@ -1759,6 +1761,8 @@ def students_bus_checks(request):
                                                                        message = ' You are next on the route. ' + \
                                                                                  student_name[0][
                                                                                      0] + ' is about to arrive.'
+                                                    if not(round_info[0][3] == 'pick_up') and status == 'in':
+                                                        continue
 
                                                     if mobile_token1:
                                                         mobile_token = []
@@ -1801,9 +1805,10 @@ def students_bus_checks(request):
                                                             "%Y-%m-%d %H:%M:%S")
                                                         r = datetime.datetime.strptime(date_string,
                                                                                        '%Y-%m-%d %H:%M:%S')
-                                                        cursor.execute(
-                                                            "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                            [round_id, r, 'App\Model\sta'+str(rec), 'Checkout Notification',message, message,driver_name[0][0]])
+                                                        if round_info[0][3] == 'pick_up':
+                                                            cursor.execute(
+                                                                "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                                [round_id, r, 'App\Model\sta'+str(rec), 'Checkout Notification',message, message,driver_name[0][0]])
                                                     else:
                                                         if status == 'no-show':
                                                             mobile_token.append(e[0])
@@ -1835,7 +1840,8 @@ def students_bus_checks(request):
                                                                  message, message,
                                                                  driver_name[0][0]])
 
-
+                                                    if not(round_info[0][3] == 'pick_up') and status == 'in':
+                                                        continue
                                                     if mobile_token:
                                                         mobile_token = []
 
