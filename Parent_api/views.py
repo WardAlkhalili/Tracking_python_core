@@ -870,7 +870,7 @@ def kids_list(request):
                                     "school_id": int(school_id),
                                     "student_grade": student_grade,
                                     "drop_off_by_parent": drop,
-                                    "pickup_by_parent": drop,
+                                    "pickup_by_parent": pick,
                                     "father_id": student1[rec]['father_id'],
                                     "mother_id": student1[rec]['mother_id'],
                                     "other_1": 0,
