@@ -161,11 +161,20 @@ def feed_back(request):
                         student_id = request.data.get('student_id')
                         feed_back = request.data.get('feed_back')
                         impression = request.data.get('impression')
+                     
                         # school_name = ManagerParent.pincode('iks')
+                        impression1=3
+                        if impression == "Good":
+
+                            impression1 = 1
+                        elif  impression in "Very Good":
+                            impression1 = 2
+                        elif impression in "Excellent":
+                            impression1 = 3
                         with connections[school_name].cursor() as cursor:
                             cursor.execute(
                                 "INSERT INTO feed_back(model_id, model_type, feed_back, impression, student_id)VALUES (%s, %s,%s,%s,%s);",
-                                [25, 'App\Model\Parents', feed_back, 3, student_id])
+                                [25, 'App\Model\Parents', feed_back, impression1, student_id])
                             # cursor.execute("INSERT INTO feed_back(feed_back, impression, student_id)VALUES (%s, %s, %s);", [feed_back,impression,student_id])
                             # columns = (x.name for x in cursor.description)
                             # data_id_bus = cursor.fetchall()
