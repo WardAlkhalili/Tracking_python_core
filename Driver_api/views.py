@@ -1195,11 +1195,7 @@ def set_round_status(request):
                                             "%Y-%m-%d %H:%M:%S")
                                         r = datetime.datetime.strptime(date_string,
                                                                        '%Y-%m-%d %H:%M:%S')
-                                        cursor.execute(
-                                            "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                            [round_id, r, 'App\Model\sta' + str(rec), message_title,
-                                             message_body, message_body,
-                                             driver_name[0][0]])
+
                                         # if round_info1[0][1] == 'pick_up' :
                                         if round_info1[0][1]:
                                                 cursor.execute(
@@ -1246,6 +1242,11 @@ def set_round_status(request):
 
 
 
+                                                cursor.execute(
+                                                    "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                    [round_id, r, 'App\Model\sta' + str(rec), message_title,
+                                                     message_body, message_body,
+                                                     driver_name[0][0]])
                                                 push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
 
                                                 if mobile_token and not("token" in mobile_token):
@@ -1424,6 +1425,7 @@ def set_round_status(request):
 
 @api_view(['POST'])
 def students_bus_checks(request):
+
     if request.method == 'POST':
         if request.headers:
             if request.headers.get('Authorization'):
@@ -1708,13 +1710,14 @@ def students_bus_checks(request):
                                                                         driver_name[0][0]])
 
 
-                                                           elif notifications[4]=="true," and status == 'out':
+                                                           elif notifications[5]=="true," and status == 'out':
                                                                mobile_token.append(e[0])
                                                                title = 'Checkout Notification'
-                                                               message = 'The bus ' + bus_num[
-                                                                   0] + 'has arrived at your home and ' + \
+                                                               message = 'The bus ' + str(bus_num[
+                                                                   0][0]) + 'has arrived at your home and ' + \
                                                                          student_name[0][
                                                                              0] + ' has been checked out of the bus. '
+
                                                                cursor.execute(
                                                                    "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                                                    [round_id, r, 'App\Model\sta'+str(rec),
@@ -1722,6 +1725,8 @@ def students_bus_checks(request):
                                                                     message, message,
                                                                     driver_name[0][0]])
                                                            else:
+
+
                                                                if status == 'no-show':
                                                                    mobile_token.append(e[0])
                                                                    title = ' No Show Notification'
@@ -1748,6 +1753,19 @@ def students_bus_checks(request):
                                                                        "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                                                        [round_id, r, 'App\Model\sta'+str(rec),
                                                                         'Absence notification',
+                                                                        message, message,
+                                                                        driver_name[0][0]])
+                                                               elif status == 'out':
+                                                                   title = 'Checkout Notification'
+                                                                   message = 'The bus ' + str(bus_num[
+                                                                       0][0]) + 'has arrived at your home and ' + \
+                                                                             student_name[0][
+                                                                                 0] + ' has been checked out of the bus. '
+
+                                                                   cursor.execute(
+                                                                       "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                                       [round_id, r, 'App\Model\sta' + str(rec),
+                                                                        'Checkout Notification',
                                                                         message, message,
                                                                         driver_name[0][0]])
                                                                elif status == 'near':
@@ -1801,11 +1819,13 @@ def students_bus_checks(request):
                                                         title = 'Checkout Notification'
                                                         message = 'The bus ' +str(bus_num[0]) + 'has arrived at your home and ' + \
                                                                   student_name[0][0] + ' has been checked out of the bus. '
+
                                                         date_string = datetime.datetime.now().strftime(
                                                             "%Y-%m-%d %H:%M:%S")
                                                         r = datetime.datetime.strptime(date_string,
                                                                                        '%Y-%m-%d %H:%M:%S')
                                                         if round_info[0][3] == 'pick_up':
+
                                                             cursor.execute(
                                                                 "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                                                 [round_id, r, 'App\Model\sta'+str(rec), 'Checkout Notification',message, message,driver_name[0][0]])

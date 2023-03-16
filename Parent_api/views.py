@@ -161,7 +161,7 @@ def feed_back(request):
                         student_id = request.data.get('student_id')
                         feed_back = request.data.get('feed_back')
                         impression = request.data.get('impression')
-                     
+
                         # school_name = ManagerParent.pincode('iks')
                         impression1=3
                         if impression == "Good":
@@ -522,7 +522,7 @@ def kids_list(request):
                             columns = (x.name for x in cursor.description)
                             parent_show_map = cursor.fetchall()
                             cursor.execute(
-                                "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
+                                "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type,name,name_ar from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
                             columns = (x.name for x in cursor.description)
                             student = cursor.fetchall()
@@ -537,6 +537,16 @@ def kids_list(request):
                             setting = cursor.fetchall()
 
                             show_map = True
+                            cursor.execute(
+                                "select first_lang  from res_company  ORDER BY ID DESC LIMIT 1")
+
+                            first_lang = cursor.fetchall()
+                            cursor.execute(
+                                "select name from res_lang WHERE id = %s ",
+                                [first_lang[0][0]])
+
+                            lang = cursor.fetchall()
+
                             if (parent_show_map[0][0] == True):
                                 # if (setting[0][4]==True and parent_show_map[0][0]==None) or (setting[0][4]==False and parent_show_map[0][0]==True) or (setting[0][4]and parent_show_map[0][0]) :
                                 show_map = True
@@ -592,7 +602,8 @@ def kids_list(request):
                                         "arabic_url": "tst.tracking.trackware.com/ar_SY/my/Exams/",
                                         "name": "Exams",
                                         "name_ar": "امتحانات",
-                                        "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png"
+                                        "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png",
+                                        "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg"
                                     },
                                     "Badges": {
                                         # "url": "https://" + school_name + ".staging.trackware.com/my/Badges/",tst.tracking.trackware.com
@@ -601,7 +612,8 @@ def kids_list(request):
                                         "arabic_url": "tst.tracking.trackware.com/ar_SY/my/Badges/",
                                         "name": "Badges",
                                         "name_ar": "الشارات",
-                                        "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Badge.png"
+                                        "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Badge.png",
+                                        "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Badge.svg"
                                     },
                                     "Weeklyplans":
                                         {
@@ -611,7 +623,8 @@ def kids_list(request):
                                             "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Weekly-plans/",
                                             "name": "Weeklyplans",
                                             "name_ar": "الخطط الأسبوعية",
-                                            "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Weekly+Plans.png"
+                                            "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Weekly+Plans.png",
+                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg"
                                         },
                                     "Assignments": {
                                         "url": "https://tst.tracking.trackware.com/my/Assignments/",
@@ -620,7 +633,8 @@ def kids_list(request):
                                         # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Assignments/",
                                         "name": "Assignments",
                                         "name_ar": "الواجبات الالكترونية",
-                                        "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png"
+                                        "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png",
+                                        "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg"
                                     },
                                     # "Exam": {
                                     #     "url": "my/exam/",
@@ -636,7 +650,8 @@ def kids_list(request):
                                          "url": "https://tst.tracking.trackware.com/my/Events/",
                                          "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Events/",
                                          "arabic_name": "الفعاليات و الانشطة",
-                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Events.png"
+                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Events.png",
+                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg"
                                          },
                                     "Homeworks":
                                         {"name": "Homeworks",
@@ -645,7 +660,8 @@ def kids_list(request):
                                          "url": "https://tst.tracking.trackware.com/my/Homeworks/",
                                          "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Homeworks/",
                                          "name_ar": "الواجبات المنزلية",
-                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/worksheets.png"
+                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/worksheets.png",
+                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg"
                                          },
                                     "Calendar":
                                         {"name": "Calendar",
@@ -654,7 +670,8 @@ def kids_list(request):
                                          # "url": "https://" + school_name + ".staging.trackware.com/my/Calendar/",
                                          # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Calendar/",
                                          "name_ar": "التقويم",
-                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/School+Calendar.png"
+                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/School+Calendar.png",
+                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg"
                                          },
 
                                     "Clinic":
@@ -665,7 +682,8 @@ def kids_list(request):
                                          "url": "https://tst.tracking.trackware.com/my/Clinic/",
                                          "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Clinic/",
                                          "arabic_name": "العيادة",
-                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png"
+                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
+                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg"
                                          }
                                 }
                                 url_m = {}
@@ -745,7 +763,8 @@ def kids_list(request):
                                             student1[rec]['user_id']),
                                         "name": "Absence",
                                         "name_ar": "الغياب",
-                                        "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png"
+                                        "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png",
+                                        "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg"
                                     }
                                     )
                                     show_absence = True
@@ -768,7 +787,8 @@ def kids_list(request):
                                                     student1[rec]['user_id']),
                                                 "name": "Absence",
                                                 "name_ar": "الغياب",
-                                                "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png"
+                                                "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png",
+                                                "icon_svg":"https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg"
                                             }
 
                                     }
@@ -868,9 +888,17 @@ def kids_list(request):
                                                     academic_grade_q = cursor.fetchall()
                                                     student_grade = academic_grade_q[0][0]
                                     # ---------------------
+                                fname = student1[rec]['display_name_search']
+                                if "Arabic" not in lang:
+                                    fname= student1[rec]['name']
+
+                                else:
+                                    fname=student1[rec]['name_ar']
+
                                 studen_list.append({
 
                                     "name": student1[rec]['display_name_search'],
+                                    "fname": fname,
                                     "id": student1[rec]['id'],
                                     "user_id": student1[rec]['user_id'],
                                     "avatar": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
@@ -939,6 +967,7 @@ def kids_list(request):
                                     # ],
                                     "features": model,
                                 })
+
                             result = {'message': '', 'students': studen_list, "parent_id": int(parent_id)}
 
                             return Response(result)
@@ -958,6 +987,7 @@ def date_time(deadline):
     # date_tz = transport_setting[0][0]
     date_tz = 'Asia/Kuwait'
 
+
     if deadline:
         deadline = deadline.astimezone(pytz.timezone(date_tz))
     else:
@@ -976,7 +1006,9 @@ def date_time(deadline):
     second = str(deadline.second) if len(
         str(deadline.second)) > 1 else "0" + str(deadline.second)
     return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + "00"
-def get_info_message(deadline,notifications_text,avatar,create_date,notifications_title,student_name):
+def get_info_message(deadline,notifications_text,avatar,create_date,notifications_title,student_name,student_id):
+
+
     if student_name:
         return {
                             "avatar":avatar,
@@ -984,7 +1016,9 @@ def get_info_message(deadline,notifications_text,avatar,create_date,notification
                             "notifications_text": notifications_text,
                             "create_date": create_date,
                             "notifications_title": notifications_title,
-                            "student_name": student_name
+                            "student_name": student_name,
+            "student_id": str(student_id),
+
                         }
     else:
         return {
@@ -992,7 +1026,8 @@ def get_info_message(deadline,notifications_text,avatar,create_date,notification
             "date_time": date_time(deadline),
             "notifications_text": notifications_text,
             "create_date": create_date,
-            "notifications_title": notifications_title
+            "notifications_title": notifications_title,
+            "student_id":  str(student_id),
         }
  # get school message
 def get_school_message(student_id,school_name,school_message,student_name):
@@ -1029,7 +1064,7 @@ def get_school_message(student_id,school_name,school_message,student_name):
                     avatar ="https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_msg_admin.png"
                     create_date=school_message1[rec][4].replace(second=0) if school_message1[rec][4] else ''
                     notifications_title=school_message1[rec][2] if school_message1[rec][2] else ''
-                    notifications.append(get_info_message(deadline,notifications_text,avatar,create_date,notifications_title,student_name))
+                    notifications.append(get_info_message(deadline,notifications_text,avatar,create_date,notifications_title,student_name,student_id))
 
     return notifications
 def get_student_history(student_id,school_name,student_name):
@@ -1068,11 +1103,11 @@ def get_student_history(student_id,school_name,student_name):
                 notifications_text = sh_message_wizard1[sh_message_bus][0]
                 avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                 create_date = deadline.replace(second=0) if deadline else ''
-                notifications_title = "Message from bus no. " + str(bus_num) + "   " +student_name
-                notifications.append(get_info_message(deadline, notifications_text, avatar, create_date, notifications_title,None))
+                notifications_title = "Message from bus no. " + str(bus_num) + "   " +str(student_name)
+                notifications.append(get_info_message(deadline, notifications_text, avatar, create_date, notifications_title,student_name,student_id))
     return notifications
 
-def get_bus_notifition_student(school_name,student_name,notifications_text,notifications_title,deadline,round_id,attendance_round):
+def get_bus_notifition_student(school_name,student_name,notifications_text,notifications_title,deadline,round_id,attendance_round,student_id):
     notifications = []
 
 
@@ -1088,7 +1123,9 @@ def get_bus_notifition_student(school_name,student_name,notifications_text,notif
             "select bus_no from fleet_vehicle WHERE id = %s  ",
             [vehicle_id[0][0]])
         bus_num = cursor.fetchall()
+
         if "just been" in notifications_text:
+
 
             if str(student_name) in notifications_text:
 
@@ -1096,32 +1133,34 @@ def get_bus_notifition_student(school_name,student_name,notifications_text,notif
                     notifications_title = 'School Departure'
                 else:
                     notifications_title = 'Bus notification'
-                notifications.append(get_info_message(deadline, notifications_text, avatar, create_date, notifications_title,None))
+                notifications.append(get_info_message(deadline, notifications_text, avatar, create_date, notifications_title,student_name,student_id))
         elif "did not check into the bus today" in notifications_text:
 
             if str(student_name) in notifications_text:
                 notifications.append(
-                    get_info_message(deadline, notifications_text, avatar, create_date, "No Show Notification", None))
+                    get_info_message(deadline, notifications_text, avatar, create_date, "No Show Notification", student_name,student_id))
 
         elif "has not checked into the bus" in notifications_text:
 
             if str(student_name) in notifications_text:
                 notifications.append(
-                    get_info_message(deadline, notifications_text, avatar, create_date, "Absence notification", None))
+                    get_info_message(deadline, notifications_text, avatar, create_date, "Absence notification", student_name,student_id))
 
 
         elif "has arrived at your home and" in notifications_text:
 
+
             if str(student_name) in notifications_text:
                 notifications.append(
-                    get_info_message(deadline, notifications_text, avatar, create_date, "Checkout Notification", None))
+                    get_info_message(deadline, notifications_text, avatar, create_date, "Checkout Notification", student_name,student_id))
 
         elif "just reached" in notifications_text:
             if str(student_name) in notifications_text:
                 notifications.append(
-                    get_info_message(deadline, notifications_text, avatar, create_date, "Bus notification", None))
+                    get_info_message(deadline, notifications_text, avatar, create_date, "Bus notification", student_name,student_id))
 
         else:
+
             cursor.execute(
                 "select  is_active,type from transport_round WHERE id = %s  ",
                 [round_id])
@@ -1137,13 +1176,13 @@ def get_bus_notifition_student(school_name,student_name,notifications_text,notif
                 if time > deadline:
                     notifications.append(
                         get_info_message(deadline, notifications_text, avatar, create_date, "Message from bus no. " + str(
-                            bus_num[0][0]) + "  " + str(student_name), None))
+                            bus_num[0][0]) + "  " + str(student_name), student_name,student_id))
 
 
             else:
                 notifications.append(
                     get_info_message(deadline, notifications_text, avatar, create_date, "Message from bus no. " + str(
-                        bus_num[0][0]) + "  " + str(student_name), None))
+                        bus_num[0][0]) + "  " + str(student_name), student_name,student_id))
     return notifications
 
 
@@ -2487,16 +2526,33 @@ def kids_hstory(request):
                                 cursor.execute("select  id  from school_message ")
                                 school_message = cursor.fetchall()
                             cursor.execute(
-                                "select  id,display_name_search,image_url from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
+                                "select  id,display_name_search,image_url,name,name_ar from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
                             student_info = cursor.fetchall()
                             student_round_id = []
+                            cursor.execute(
+                                "select first_lang  from res_company  ORDER BY ID DESC LIMIT 1")
+
+                            first_lang = cursor.fetchall()
+                            cursor.execute(
+                                "select name from res_lang WHERE id = %s ",
+                                [first_lang[0][0]])
+
+                            lang = cursor.fetchall()
+                            fname=''
+
 
 
                             for student in student_info:
+
                                 student_round = []
-                                notifications+=get_school_message(student[0],school_name,school_message,student[1])
-                                notifications+=get_student_history(student[0],school_name,student[1])
+                                if "Arabic" not in lang:
+                                    fname = student[3]
+
+                                else:
+                                    fname = student[4]
+                                notifications+=get_school_message(student[0],school_name,school_message,fname)
+                                notifications+=get_student_history(student[0],school_name,fname)
                                 cursor.execute(
                                     "select  round_schedule_id from transport_participant WHERE student_id = %s",
                                     [student[0]])
@@ -2543,6 +2599,11 @@ def kids_hstory(request):
                                             for message_wizard in range(len(sh_message_wizard)):
                                                 avatar= "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                 for std in student_info:
+                                                    if "Arabic" not in lang:
+                                                        fname = std[3]
+
+                                                    else:
+                                                        fname = std[4]
 
                                                     cursor.execute("select  id,round_id,bus_check_in,time_out,history_id from round_student_history WHERE student_id = %s And driver_waiting is not  null  AND round_id=%s AND bus_check_in is  null AND  datetime >= %s AND  datetime < %s ",
                                                         [std[0], rec, datetime.datetime(
@@ -2630,7 +2691,7 @@ def kids_hstory(request):
                                                                             [rec_s, std[0],
                                                                              start, end])
                                                                         student_history1 = cursor.fetchall()
-                                                                        print("didididi",student_history1)
+
                                                                     # if is_active[0][1] == 'pick_up':
                                                                     #     print("ssssssssssss222",student_history,std[1])
                                                                     #     if (student_history[0][0] == 'absent-all' or
@@ -2656,11 +2717,11 @@ def kids_hstory(request):
                                                                     notifications_text = str(
                                                                         sh_message_wizard[message_wizard][0]) if \
                                                                         sh_message_wizard[message_wizard][0] else ''
-                                                                    notifications += get_bus_notifition_student(school_name, std[1],
+                                                                    notifications += get_bus_notifition_student(school_name, fname,
                                                                                                notifications_text,
                                                                                                sh_message_wizard[message_wizard][2],
                                                                                                deadline, rec_s,
-                                                                                               attendance_round_yousef)
+                                                                                               attendance_round_yousef,std[0])
 
                                                         continue
                                                     cursor.execute(
@@ -2682,11 +2743,11 @@ def kids_hstory(request):
                                                             notifications_text = str(sh_message_wizard[message_wizard][0]) if \
                                                                 sh_message_wizard[message_wizard][0] else ''
 
-                                                            notifications+=get_bus_notifition_student(school_name, std[1],
+                                                            notifications+=get_bus_notifition_student(school_name, fname,
                                                                                        notifications_text,
                                                                                        sh_message_wizard[message_wizard][2],
                                                                                        deadline, rec_s,
-                                                                                       attendance_round)
+                                                                                       attendance_round,std[0])
                                                         if is_active[0][1] == 'pick_up':
                                                             if (student_history[0][0] == 'absent-all' or
                                                                     student_history[0][0] == 'in' or
@@ -2700,13 +2761,13 @@ def kids_hstory(request):
                                                                 sh_message_wizard[message_wizard][0] else ''
 
                                                             notifications += get_bus_notifition_student(school_name,
-                                                                                                        std[1],
+                                                                                                        fname,
                                                                                                         notifications_text ,
                                                                                                         sh_message_wizard[
                                                                                                             message_wizard][
                                                                                                             2],
                                                                                                         deadline, rec_s,
-                                                                                                        attendance_round)
+                                                                                                        attendance_round,std[0])
                                                         else:
                                                             if (student_history[0][0]== 'absent-all' or
                                                                 student_history[0][0] == 'out' or
@@ -2715,22 +2776,23 @@ def kids_hstory(request):
                                                                 student_history[0][0] == 'no-show') and (sh_message_wizard[message_wizard][1]>student_history[0][3]):
                                                                 continue
                                                             notifications += get_bus_notifition_student(school_name,
-                                                                                                        std[1],
+                                                                                                        fname,
                                                                                                         notifications_text,
                                                                                                         sh_message_wizard[
                                                                                                             message_wizard][
                                                                                                             2],
                                                                                                         deadline, rec_s,
-                                                                                                        attendance_round)
+                                                                                                        attendance_round,std[0])
                                                     else:
                                                         if sh_message_wizard[message_wizard][1] < is_active[0][2]:
                                                             deadline = sh_message_wizard[message_wizard][1]
                                                             notifications_text = str(sh_message_wizard[message_wizard][0]) if sh_message_wizard[message_wizard][0] else ''
+
                                                             if (sh_message_wizard[message_wizard][1]<student_history[0][3]):
-                                                                notifications += get_bus_notifition_student(school_name,std[1], notifications_text ,
+                                                                notifications += get_bus_notifition_student(school_name,fname, notifications_text ,
                                                                                                             sh_message_wizard[message_wizard][2],
                                                                                                             deadline, rec_s,
-                                                                                                            attendance_round)
+                                                                                                            attendance_round,std[0])
 
 
                                         if student_round_h:
@@ -2769,18 +2831,32 @@ def kids_hstory(request):
                                                                     time_out = cursor.fetchall()
                                                                     if time_out:
                                                                         cursor.execute(
-                                                                            "select  display_name_search from student_student WHERE  id = %s",
+                                                                            "select  display_name_search,name,name_ar from student_student WHERE  id = %s",
                                                                             [time_out[0][1]])
                                                                         name = cursor.fetchall()
 
                                                                         if time_out[0][0] and time_out[0][2]:
+                                                                            if "Arabic" not in lang:
+                                                                                if  name[0][1]:
+                                                                                    fname = name[0][1]
+                                                                                else:
+                                                                                    fname = name[0][2]
+
+                                                                            else:
+                                                                                if not name[0][2]:
+                                                                                    fname = name[0][1]
+                                                                                else:
+                                                                                    fname = name[0][2]
+
                                                                             deadline = time_out[0][0] if time_out[0][
                                                                                 0] else time_out[0][2]
-                                                                            notifications.append( get_info_message(deadline, name[0][
-                                                                                                          0] + " has just reached the school.  ", avatar, deadline.replace(
-                                                                                    second=0) if deadline else '', "Bus notification", None))
+
+
+
+                                                                            notifications.append( get_info_message(deadline, fname + " has just reached the school.  ", avatar, deadline.replace(second=0) if deadline else '', "Bus notification", fname,time_out[0][1]))
 
                             notifications.sort(key=get_year, reverse=True)
+
 
 
                             for d in notifications:
