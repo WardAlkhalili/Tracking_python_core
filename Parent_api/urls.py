@@ -10,12 +10,15 @@ urlpatterns = [
     path('parents/student-pick-up-status/', views.student_pick_up),
     path('parents/kids_list', views.kids_list),
     path('parents/kids-history', views.kids_hstory),
+    # hide_message
+    path('parents/hide-message', views.hide_message),
+    path('parents/read-message', views.read_message),
+    path('parents/kids-history-new', views.kids_hstory_new),
     path('parents/pre-arrive', views.pre_arrive),
     path('parents/post-attendance', views.post_attendance),
     path('parents/post-worksheet', views.post_workSheet),
     path('parents/post-Event', views.post_Event),
     path('parents/cancel-event', views.cancel_event),
-
     path('notify', views.notify),
     path('api/get_calendar/<int:student_id>', views.get_calendar),
     path('api/get_badge/<int:student_id>', views.get_badge),
@@ -28,10 +31,9 @@ urlpatterns = [
     path('api/get_events/<int:student_id>', views.get_event_data),
     path('api/get_worksheet_view_data/<int:wsheet>/<int:std>', views.get_worksheet_form_view_data),
     path('api/get_event_form_view_data/<int:event>/<int:std>', views.get_event_form_view_data),
-    # cancel_event
     path('api/get_all_weekly_plans/<int:student_id>', views.get_all_weekly_plans),
     path('api/get_weekly_plan_lines/<int:student_id>/<int:plan_id>/<str:week_name>', views.get_weekly_plan_lines),
-#     get_weekly_plan_lines plan_id, student_id,week_name
+
 
 
 ]
