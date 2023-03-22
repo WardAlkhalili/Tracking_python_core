@@ -13,6 +13,8 @@ urlpatterns = [
     # hide_message
     path('parents/hide-message', views.hide_message),
     path('parents/read-message', views.read_message),
+    path('parents/hide-survey', views.hide_survey),
+    path('parents/read-survey', views.read_survey),
     path('parents/kids-history-new', views.kids_hstory_new),
     path('parents/pre-arrive', views.pre_arrive),
     path('parents/post-attendance', views.post_attendance),

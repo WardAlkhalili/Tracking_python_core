@@ -1004,7 +1004,85 @@ def date_time(deadline):
     return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + "00"
 
 
+@api_view(['POST'])
+def read_survey(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+                    parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
 
+                    for e in parent_id:
+                        parent_id = e[0]
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                        school_name = ManagerParent.pincode(school_name)
+                        message_id = request.data.get('message_id')
+
+                        with connections[school_name].cursor() as cursor:
+
+
+                            cursor.execute(
+                                "UPDATE public.survey_user_input SET read_message=not(read_message) WHERE id=%s;",
+                                [ message_id])
+
+
+                            result = {
+                                'status': 'ok', }
+
+                            return Response(result)
+                    else:
+                        result = {'result': 'error1'}
+                        return Response(result)
+                else:
+                    result = {'result': 'error2'}
+                    return Response(result)
+            else:
+                result = {'result': 'error3'}
+                return Response(result)
+        else:
+            result = {'result': 'error4'}
+            return Response(result)
+
+@api_view(['POST'])
+def hide_survey(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+                    parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                    for e in parent_id:
+                        parent_id = e[0]
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                        school_name = ManagerParent.pincode(school_name)
+                        message_id = request.data.get('message_id')
+
+                        with connections[school_name].cursor() as cursor:
+                            cursor.execute(
+                                "UPDATE public.survey_user_input SET show_message=not(show_message) WHERE id=%s;",
+                                [ message_id])
+                            result = {'status': 'ok', }
+                            return Response(result)
+                    else:
+                        result = {'result': 'error1'}
+                        return Response(result)
+                else:
+                    result = {'result': 'error2'}
+                    return Response(result)
+            else:
+                result = {'result': 'error3'}
+                return Response(result)
+        else:
+            result = {'result': 'error4'}
+            return Response(result)
 @api_view(['POST'])
 def read_message(request):
     if request.method == 'POST':
@@ -1122,6 +1200,9 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-shuttle-bus.svg'
     else:
         notificationsType = 'announcement'
+        if (notifications_title == 'survey'):
+            icon_tracking=show_notif
+
     if student_name:
         return {
             "avatar": avatar,
@@ -1187,19 +1268,87 @@ def get_school_message_new(student_id, school_name, school_message, student_name
                     create_date = school_message1[rec][4].replace(second=0) if school_message1[rec][4] else ''
                     notifications_title = school_message1[rec][2] if school_message1[rec][2] else ''
                     if res[4]:
-
+                        # if('Survey' in notifications_title):
+                        #     cursor.execute(
+                        #         " select id,survey_id,token,last_displayed_page_id,state from survey_user_input where partner_id=%s and year_id = %s and branch_id =%s   ORDER BY create_date DESC, state DESC",
+                        #         [partner_id_q[0][0], user_id_q[0][1], partner_id_q[0][1]])
+                        #     assignments = cursor.fetchall()
+                        #     cursor.execute(
+                        #         " select access_token from survey_survey where id=%s and is_survey=%s",
+                        #         [res[4], True])
+                        #     survey = cursor.fetchall()
                         if ('Event' in notifications_title):
                             cursor.execute(
                                 " select id,event_id,state,new_added from school_event_registration where  student_id =%s and  event_id =%s  ORDER BY create_date DESC",
                                 [student_id,res[4]])
                             events = cursor.fetchall()
+
                             if events:
                                 action_id=events[0][0]
                     notifications.append(
                         get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title,
                                              student_name, student_id,res[1],"Read" if res[2] else 'UnRead',"show" if res[3] else 'not show' ,action_id))
     return notifications
+def get_survey(student_id, school_name):
+    notifications = []
+    with connections[school_name].cursor() as cursor:
+        message_ids = []
+        cursor.execute(
+            "select user_id,id,display_name_search from school_parent where id=%s",
+            [student_id])
+        user_id_q = cursor.fetchall()
 
+        if user_id_q:
+            cursor.execute(
+                " select partner_id,branch_id from res_users where id=%s",
+                [user_id_q[0][0]])
+            partner_id_q = cursor.fetchall()
+
+            state = 'new'
+            start = False
+            cursor.execute(
+                " select id,survey_id,token,last_displayed_page_id,state,read_message from survey_user_input where partner_id=%s AND show_message=true   ORDER BY create_date DESC, state DESC",
+                [partner_id_q[0][0]])
+            assignments = cursor.fetchall()
+
+
+        for assingment in assignments:
+            cursor.execute(
+                " select id,state,deadline,title,access_token,subject_id,allowed_time_to_start,time_limit,mark,exam_names,create_date from survey_survey where id=%s",
+                [assingment[1]])
+            survey = cursor.fetchall()
+            if survey:
+                avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_msg_admin.png"
+                if survey[0][1] == 'open':
+                    if survey[0][2]:
+                        deadline = survey[0][2]
+                        date_tz = 'Asia/Kuwait'
+                        deadline.replace(date_tz)
+                        deadline = deadline.replace(date_tz)
+                        deadline = datetime.strptime(deadline, "%d/%m/%Y %H:%M:%S")
+                        x = datetime.datetime.now().replace(date_tz)
+                        if deadline <= datetime.strptime(x, "%d/%m/%Y %H:%M:%S"):
+                            start = True
+                            state = 'done'
+                        else:
+                            if assingment[4] == 'done':
+                                state = 'done'
+                                start = False
+                            else:
+                                state = assingment[4]
+                                start = True
+                    else:
+                        deadline = ""
+                        state = assingment[4]
+                        start = False
+                    if not state == "done":
+                        school_base="https://"+school_name+".tracking.trackware.com/"+"/survey/start/"+survey[0][4]+"?answer_token="+assingment[2]
+                        read = "Read" if assingment[5] else 'UnRead'
+                        notifications.append(
+                            get_info_message_new(survey[0][10], survey[0][3], avatar, survey[0][10], "survey",
+                                                 user_id_q[0][2], student_id, assingment[0],read,school_base))
+
+    return notifications
 
 def get_student_history_new(student_id, school_name, student_name):
     notifications = []
@@ -1375,6 +1524,7 @@ def kids_hstory_new(request):
                             elif not start_date and not end_date:
                                 cursor.execute("select  id  from school_message ")
                                 school_message = cursor.fetchall()
+                            notifications +=get_survey(parent_id,school_name)
                             cursor.execute(
                                 "select  id,display_name_search,image_url,name,name_ar from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
@@ -1792,6 +1942,7 @@ def get_info_message(deadline, notifications_text, avatar, create_date, notifica
         else:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-shuttle-bus.svg'
     else:
+
         notificationsType = 'announcement'
     if student_name:
         return {
@@ -1854,6 +2005,7 @@ def get_school_message(student_id, school_name, school_message, student_name):
                     avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_msg_admin.png"
                     create_date = school_message1[rec][4].replace(second=0) if school_message1[rec][4] else ''
                     notifications_title = school_message1[rec][2] if school_message1[rec][2] else ''
+
                     notifications.append(
                         get_info_message(deadline, notifications_text, avatar, create_date, notifications_title,
                                          student_name, student_id))
@@ -4562,6 +4714,7 @@ def get_exam(request, student_id):
                                 survey = cursor.fetchall()
 
                                 if survey:
+
 
                                     cursor.execute(
                                         "select  name  from school_subject WHERE id = %s ",

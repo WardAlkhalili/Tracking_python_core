@@ -6,6 +6,8 @@ from datetime import date
 from pyfcm import FCMNotification
 from django.db import connections
 from Parent_api.models import ManagerParent
+from Driver_api.models import Manager
+
 from django.db.models import Q
 from datetime import datetime
 import calendar
@@ -152,6 +154,7 @@ def send_school_message(request):
     # except Exception as e:
     #     print(e)
     if request.method == 'POST':
+
         school_name = request.data.get('school_name')
         message_id = request.data.get('message_id')
 
@@ -232,13 +235,14 @@ def twoArgs(message_id,school_name):
             registration_id = token
 
 
+
             message_title = school_message[0][1]
             # print(message_title)
             message_body = school_message[0][0]
             result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
                                                           registration_ids=registration_id,
                                                           data_message={})
-            # print(token,result)
+
 
 
 
@@ -288,140 +292,182 @@ def send_confirmation_message_to_parent(request):
 
 
 @api_view(['POST'])
-def push_notification(request):
+def send_survey_message_to_parent(request):
     if request.method == 'POST':
-        action = request.data.get('action')
-        avatar = request.data.get('avatar')
-        endpoint_arn = request.data.get('endpoint_arn')
-        message = request.data.get('message')
-
-        platform = request.data.get('platform')
-        round_id = request.data.get('round_id')
-        school_id = request.data.get('school_id')
-        title = request.data.get('title')
-        user_id = request.data.get('user_id')
-        user_ids = request.data.get('user_ids')
+        school_name = request.data.get('school_name')
+        message_body = request.data.get('message')
         parent_id = request.data.get('parent_id')
+        mobile_token = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
+                                                    Q(is_active=True)).values_list(
+            'mobile_token').order_by('-pk')
+        for e in mobile_token:
+            mobile_token = e[0]
 
-        mobile_token = []
-        school_name = ManagerParent.objects.filter(school_id=school_id).values_list('db_name').order_by('-pk')
-        # print(school_name[0][0])
-        school_name=school_name[0][0]
+        push_service = FCMNotification(
+            api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+        # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
+        registration_id = mobile_token
 
-        # for rec in parent_id:
-        with connections[str(school_name)].cursor() as cursor:
-                if  user_id != 0:
-                    cursor.execute("select  father_id,mother_id,responsible_id_value from student_student WHERE id= %s",
-                                   [user_id])
-                    student_info = cursor.fetchall()
-                    if student_info:
-                        for rec in student_info[0]:
+        message_title = "Survey"
+        message_body = message_body
 
-
-                            cursor.execute("select  settings from school_parent WHERE id = %s", [rec])
-                            settings = cursor.fetchall()
-                            mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec), Q(db_name=school_name),Q(is_active=True)).values_list('mobile_token').order_by('-pk')
-                            if settings:
-                                if settings[0] == 'None':
-                                    data = json.loads(settings[0][0])
-                                    for e in mobile_token1:
-                                        if data['notifications']['nearby'] and (action == 'near' or action == 'driver'):
-                                            mobile_token.append(e[0])
-                                        elif data['notifications']['check_in'] and (
-                                                action == 'near' or action == 'driver'):
-                                            mobile_token.append(e[0])
-                                        elif data['notifications']['check_out'] and (
-                                                action == 'near' or action == 'driver'):
-                                            mobile_token.append(e[0])
-                                        else:
-                                            mobile_token.append(e[0])
-                            else:
-                                for e in mobile_token1:
-                                    mobile_token.append(e[0])
-                            if mobile_token1:
-                                push_service = FCMNotification(
-                                    api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
-                                registration_id = mobile_token1[0][0]
-                                message_title = title
-                                message_body = message
-
-                                result = push_service.notify_single_device(registration_id=registration_id,
-                                                                           message_title=message_title,
-                                                                           message_body=message_body)
-
-                                result1 = {
-                                    "route": 'Ok'
-                                }
-                                return Response(result1)
-                    result1 = {
-                        "route": 'Ok'
-                    }
-                    return Response(result1)
-
-                    # if settings:
-                    #     parent_id=settings[0][1]
-                else:
-                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-                    settings = cursor.fetchall()
-
-                mobile_token1 = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
-                                                             Q(is_active=True)).values_list(
-                    'mobile_token').order_by('-pk')
-
-
-            # print(rec,school_id, ManagerParent.objects.filter(Q(user_id=rec) , Q(db_name=school_name),Q(is_active=True)).values_list(
-            #     'mobile_token').order_by('-pk'))
-
-        if settings:
-            if settings[0]=='None':
-                data = json.loads(settings[0][0])
-                for e in mobile_token1:
-                    if data['notifications']['nearby'] and (action =='near' or action =='driver'):
-                        mobile_token.append(e[0])
-                    elif    data['notifications']['check_in'] and (action =='near' or action =='driver'):
-                        mobile_token.append(e[0])
-                    elif data['notifications']['check_out'] and (action =='near' or action =='driver'):
-                        mobile_token.append(e[0])
-                    else:
-                         mobile_token.append(e[0])
-            for e in mobile_token1:
-                mobile_token.append(e[0])
-            if mobile_token:
-                push_service = FCMNotification(
-                    api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
-                registration_id = mobile_token
-                message_title = title
-                message_body = message
-                result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
-                                                           message_body=message_body)
-                result1 = {
-                    "route": 'Ok'
-                }
-                return Response(result1)
-
-        else:
-            for e in mobile_token1:
-                mobile_token.append(e[0])
-                # for e in mobile_token:
-                #     mobile_token = e[0]
-                # print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token)
-                push_service = FCMNotification(
-                    api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
-                if mobile_token:
-                    registration_id = mobile_token[0]
-                    message_title = title
-                    message_body = message
-                    result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
-                                                               message_body=message_body)
-                    result1 = {
-                        "route": 'Ok'
-                    }
-
-                    return Response(result1)
+        result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
+                                                   message_body=message_body,
+                                                   )
+        # #
+        # print(result)
         result1 = {
             "route": 'Ok'
         }
+
         return Response(result1)
+@api_view(['POST'])
+def push_notification(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = Manager.objects.filter(token=au).values_list('db_name')
+                    driver_id = Manager.objects.filter(token=au).values_list('driver_id')
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                            school_name = Manager.pincode(school_name)
+                            action = request.data.get('action')
+                            avatar = request.data.get('avatar')
+                            endpoint_arn = request.data.get('endpoint_arn')
+                            message = request.data.get('message')
+
+                            platform = request.data.get('platform')
+                            round_id = request.data.get('round_id')
+                            school_id = request.data.get('school_id')
+                            title = request.data.get('title')
+                            user_id = request.data.get('user_id')
+                            user_ids = request.data.get('user_ids')
+                            parent_id = request.data.get('parent_id')
+
+
+                            mobile_token = []
+                            school_name = ManagerParent.objects.filter(school_id=school_id).values_list('db_name').order_by('-pk')
+                            # print(school_name[0][0])
+                            school_name=school_name[0][0]
+
+                            # for rec in parent_id:
+
+                            with connections[str(school_name)].cursor() as cursor:
+                                    if  user_id != 0:
+                                        cursor.execute("select  father_id,mother_id,responsible_id_value from student_student WHERE id= %s",
+                                                       [user_id])
+                                        student_info = cursor.fetchall()
+                                        if student_info:
+                                            for rec in student_info[0]:
+
+
+                                                cursor.execute("select  settings from school_parent WHERE id = %s", [rec])
+                                                settings = cursor.fetchall()
+                                                mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec), Q(db_name=school_name),Q(is_active=True)).values_list('mobile_token').order_by('-pk')
+                                                if settings:
+                                                    if settings[0] == 'None':
+                                                        data = json.loads(settings[0][0])
+                                                        for e in mobile_token1:
+                                                            if data['notifications']['nearby'] and (action == 'near' or action == 'driver'):
+                                                                mobile_token.append(e[0])
+                                                            elif data['notifications']['check_in'] and (
+                                                                    action == 'near' or action == 'driver'):
+                                                                mobile_token.append(e[0])
+                                                            elif data['notifications']['check_out'] and (
+                                                                    action == 'near' or action == 'driver'):
+                                                                mobile_token.append(e[0])
+                                                            else:
+                                                                mobile_token.append(e[0])
+                                                else:
+                                                    for e in mobile_token1:
+                                                        mobile_token.append(e[0])
+                                                if mobile_token1:
+                                                    push_service = FCMNotification(
+                                                        api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                                    # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
+                                                    registration_id = mobile_token1[0][0]
+                                                    message_title = title
+                                                    message_body = message
+
+                                                    result = push_service.notify_single_device(registration_id=registration_id,
+                                                                                               message_title=message_title,
+                                                                                               message_body=message_body)
+
+                                                    result1 = {
+                                                        "route": 'Ok'
+                                                    }
+                                                    return Response(result1)
+                                        result1 = {
+                                            "route": 'Ok111'
+                                        }
+                                        return Response(result1)
+
+                                        # if settings:
+                                        #     parent_id=settings[0][1]
+                                    else:
+                                        cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                                        settings = cursor.fetchall()
+
+                                    mobile_token1 = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
+                                                                                 Q(is_active=True)).values_list(
+                                        'mobile_token').order_by('-pk')
+
+
+                                # print(rec,school_id, ManagerParent.objects.filter(Q(user_id=rec) , Q(db_name=school_name),Q(is_active=True)).values_list(
+                                #     'mobile_token').order_by('-pk'))
+
+                            if settings:
+                                if settings[0]=='None':
+                                    data = json.loads(settings[0][0])
+                                    for e in mobile_token1:
+                                        if data['notifications']['nearby'] and (action =='near' or action =='driver'):
+                                            mobile_token.append(e[0])
+                                        elif    data['notifications']['check_in'] and (action =='near' or action =='driver'):
+                                            mobile_token.append(e[0])
+                                        elif data['notifications']['check_out'] and (action =='near' or action =='driver'):
+                                            mobile_token.append(e[0])
+                                        else:
+                                             mobile_token.append(e[0])
+                                for e in mobile_token1:
+                                    mobile_token.append(e[0])
+                                if mobile_token:
+                                    push_service = FCMNotification(
+                                        api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                    # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
+                                    registration_id = mobile_token
+                                    message_title = title
+                                    message_body = message
+                                    result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
+                                                                               message_body=message_body)
+                                    result1 = {
+                                        "route": 'Ok'
+                                    }
+                                    return Response(result1)
+
+                            else:
+                                for e in mobile_token1:
+                                    mobile_token.append(e[0])
+                                    # for e in mobile_token:
+                                    #     mobile_token = e[0]
+                                    # print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token)
+                                    push_service = FCMNotification(
+                                        api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                    # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
+                                    if mobile_token:
+                                        registration_id = mobile_token[0]
+                                        message_title = title
+                                        message_body = message
+                                        result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
+                                                                                   message_body=message_body)
+                                        result1 = {
+                                            "route": 'Ok'
+                                        }
+
+                                        return Response(result1)
+                            result1 = {
+                                "route": 'Ok'
+                            }
+                            return Response(result1)
