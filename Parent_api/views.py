@@ -568,6 +568,7 @@ def kids_list(request):
                                     "select id from round_schedule WHERE  day_id = %s",
                                     [day_name[0][0]])
                                 rounds_details = cursor.fetchall()
+
                                 for rou in range(len(rounds_details)):
                                     cursor.execute(
                                         "select round_schedule_id,transport_state from transport_participant WHERE round_schedule_id = %s and student_id = %s",
@@ -584,10 +585,14 @@ def kids_list(request):
                                             "select is_active from transport_round WHERE  id = %s",
                                             [rounds[0][0]])
                                         is_active = cursor.fetchall()
+
                                         if is_active[0][0]:
+
                                             student_round_id = rounds[0][0]
                                             is_active_round = is_active[0][0]
+                                            break
                                         else:
+
                                             student_round_id = rounds[0][0]
                                             is_active_round = is_active[0][0]
 
@@ -684,8 +689,7 @@ def kids_list(request):
                                          }
                                 }
                                 url_m = {}
-                                model_list = (
-                                    "Badges", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
+                                model_list = ( "Badges", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
                                     "Weekly Plans", 'Online Exams')
                                 cursor.execute("select name from ir_ui_menu where name in %s", [model_list])
                                 list = cursor.fetchall()
@@ -1477,8 +1481,6 @@ def get_bus_notifition_student_new(school_name, student_name, notifications_text
     return notifications
 
 
-
-
 @api_view(['POST'])
 def kids_hstory_new(request):
     if request.method == 'POST':
@@ -1908,13 +1910,6 @@ def kids_hstory_new(request):
 
 
 
-
-
-
-
-
-
-
 def get_info_message(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id):
     notificationsType = ''
     icon_tracking=''
@@ -2073,7 +2068,9 @@ def get_bus_notifition_student(school_name, student_name, notifications_text, no
             [vehicle_id[0][0]])
         bus_num = cursor.fetchall()
 
+
         if "just been" in notifications_text:
+
 
             if str(student_name) in notifications_text:
 
@@ -3689,7 +3686,9 @@ def kids_hstory(request):
                                                         "select  is_active,type,write_date from transport_round WHERE id = %s  ",
                                                         [rec_s])
                                                     is_active = cursor.fetchall()
+
                                                     if is_active[0][0]:
+
                                                         if sh_message_wizard[message_wizard][1] < round_history[0][1]:
                                                             deadline = sh_message_wizard[message_wizard][1]
                                                             notifications_text = str(
@@ -3737,7 +3736,9 @@ def kids_hstory(request):
                                                                 student_history[0][0] == 'no-show') and (
                                                                     sh_message_wizard[message_wizard][1] >
                                                                     student_history[0][3]):
+
                                                                 continue
+
                                                             deadline = sh_message_wizard[message_wizard][1]
                                                             notifications_text = str(
                                                                 sh_message_wizard[message_wizard][0]) if \
@@ -3752,7 +3753,9 @@ def kids_hstory(request):
                                                                                                         attendance_round,
                                                                                                         std[0])
                                                     else:
+
                                                         if sh_message_wizard[message_wizard][1] < is_active[0][2]:
+
                                                             deadline = sh_message_wizard[message_wizard][1]
                                                             notifications_text = str(
                                                                 sh_message_wizard[message_wizard][0]) if \

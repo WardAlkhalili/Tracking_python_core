@@ -1197,7 +1197,7 @@ def set_round_status(request):
                                                                        '%Y-%m-%d %H:%M:%S')
 
                                         # if round_info1[0][1] == 'pick_up' :
-                                        if round_info1[0][1]:
+                                        if round_info1[0][1]== 'pick_up' :
                                                 cursor.execute(
                                                     "select  name,vehicle_id,driver_id from transport_round WHERE id = %s  ",
                                                     [round_id])
@@ -1266,7 +1266,6 @@ def set_round_status(request):
                                                 "UPDATE public.round_history SET na= %s WHERE id=%s",
                                                 ['cancel', round_history[0][1]])
                                         else:
-                                            #
                                             curr_date = date.today()
                                             day_name = calendar.day_name[curr_date.weekday()]
                                             cursor.execute(
@@ -1440,7 +1439,9 @@ def students_bus_checks(request):
                             with connections[school_name].cursor() as cursor:
 
                                 students = request.data.get('students')
+
                                 for rec in students:
+
 
                                     round_id = rec['round_id']
                                     status = rec['status']
@@ -1591,14 +1592,26 @@ def students_bus_checks(request):
                                                 if not('None' in str(settings)) :
 
                                                     data = json.loads(settings[0][0])
+                                                    # if data['notifications']['check_in']:
+                                                    #     print("Ddddddddddddddddd")
+                                                    #     print(str(data['notifications']['check_in']))
+                                                    # print("1601", str(data['notifications']['check_in']))
                                                     title=''
                                                     message=''
 
                                                     if type(data['notifications']) is dict:
+
                                                         for e in mobile_token1:
-                                                            if data['notifications']['check_in'] and status == 'in':
-                                                                mobile_token.append(e[0])
+
+                                                            if status == 'in':
+                                                                if data['notifications']['check_in']:
+                                                                    mobile_token.append(e[0])
                                                                 title = 'Bus notification'
+
+                                                                if round_info[0][3] == 'pick_up':
+                                                                    title = 'Bus notification'
+                                                                else:
+                                                                    title = "School Departure"
                                                                 message = student_name[0][
                                                                               0] + ' has just been checked into the bus'
                                                                 date_string = datetime.datetime.now().strftime(
@@ -1606,21 +1619,22 @@ def students_bus_checks(request):
                                                                 r = datetime.datetime.strptime(date_string,
                                                                                                '%Y-%m-%d %H:%M:%S')
 
-                                                                if round_info[0][3]=='pick_up':
+                                                                # if round_info[0][3]=='pick_up':
 
-                                                                    cursor.execute(
-                                                                        "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                                        [round_id, r, 'App\Model\sta'+str(rec), 'Bus notification',
-                                                                         message, message,
-                                                                         driver_name[0][0]])
+                                                                cursor.execute(
+                                                                    "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                                    [round_id, r, 'App\Model\sta'+str(rec), title,
+                                                                     message, message,
+                                                                     driver_name[0][0]])
 
 
-                                                            elif data['notifications']['check_out'] and status == 'out':
+                                                            elif  status == 'out':
                                                                 date_string = datetime.datetime.now().strftime(
                                                                     "%Y-%m-%d %H:%M:%S")
                                                                 r = datetime.datetime.strptime(date_string,
                                                                                                '%Y-%m-%d %H:%M:%S')
-                                                                mobile_token.append(e[0])
+                                                                if data['notifications']['check_out']:
+                                                                    mobile_token.append(e[0])
                                                                 title = 'Checkout Notification'
                                                                 message = 'The bus ' +str( bus_num[
                                                                     0]) + 'has arrived at your home and ' + \
@@ -1693,25 +1707,32 @@ def students_bus_checks(request):
                                                                                       '%Y-%m-%d %H:%M:%S')
 
                                                        for e in mobile_token1:
-                                                           if notifications[3]=="true," and status == 'in':
-                                                               mobile_token.append(e[0])
+                                                           if  status == 'in':
+                                                               if notifications[3]=="true," :
+                                                                 mobile_token.append(e[0])
                                                                title = 'Bus notification'
+
+                                                               if round_info[0][3] == 'pick_up':
+                                                                   title = 'Bus notification'
+                                                               else:
+                                                                   title = "School Departure"
                                                                message = student_name[0][
                                                                              0] + ' has just been checked into the bus'
                                                                date_string = datetime.datetime.now().strftime(
                                                                    "%Y-%m-%d %H:%M:%S")
                                                                r = datetime.datetime.strptime(date_string,
                                                                                               '%Y-%m-%d %H:%M:%S')
-                                                               if round_info[0][3]=="pick_up":
-                                                                   cursor.execute(
-                                                                       "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                                       [round_id, r, 'App\Model\sta'+str(rec), 'Bus notification',
-                                                                        message, message,
-                                                                        driver_name[0][0]])
+                                                               # if round_info[0][3]=="pick_up":
+                                                               cursor.execute(
+                                                                   "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                                   [round_id, r, 'App\Model\sta'+str(rec), title,
+                                                                    message, message,
+                                                                    driver_name[0][0]])
 
 
-                                                           elif notifications[5]=="true," and status == 'out':
-                                                               mobile_token.append(e[0])
+                                                           elif  status == 'out':
+                                                               if notifications[5]=="true," :
+                                                                 mobile_token.append(e[0])
                                                                title = 'Checkout Notification'
                                                                message = 'The bus ' + str(bus_num[
                                                                    0][0]) + 'has arrived at your home and ' + \
@@ -1799,9 +1820,15 @@ def students_bus_checks(request):
 
 
                                                 else:
+
                                                     if status == 'in':
                                                         mobile_token.append(e[0])
                                                         title = 'Bus notification'
+                                                        if round_info[0][3] == 'pick_up':
+                                                            title = 'Bus notification'
+                                                        else:
+                                                            title = "School Departure"
+
                                                         message = student_name[0][0] + ' has just been checked into the bus'
                                                         date_string = datetime.datetime.now().strftime(
                                                             "%Y-%m-%d %H:%M:%S")
@@ -1810,7 +1837,7 @@ def students_bus_checks(request):
 
                                                         cursor.execute(
                                                             "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                            [round_id, r, 'App\Model\sta'+str(rec), 'Bus notification', message, message,
+                                                            [round_id, r, 'App\Model\sta'+str(rec), title, message, message,
                                                              driver_name[0][0]])
 
 
