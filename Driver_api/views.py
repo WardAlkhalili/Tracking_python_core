@@ -663,6 +663,7 @@ def student_list(request, round_id):
                                                             ['absent',datetime.datetime.now(), student_student12[0]['id'],
                                                              rounds_details[0][0]])
                                                     elif student_history[0][0] == 'absent_all':
+
                                                         in_round = False
                                                         out_round = False
                                                         abs = True
@@ -688,7 +689,7 @@ def student_list(request, round_id):
                                                             in_round = False
                                                             out_round = False
                                                             abs = True
-                                                            no_show = False
+                                                            no_show = True
                                                     if round_info1[0][1] == 'pick_up':
 
                                                         cursor.execute(
@@ -1593,9 +1594,7 @@ def students_bus_checks(request):
 
                                                     data = json.loads(settings[0][0])
                                                     # if data['notifications']['check_in']:
-                                                    #     print("Ddddddddddddddddd")
-                                                    #     print(str(data['notifications']['check_in']))
-                                                    # print("1601", str(data['notifications']['check_in']))
+
                                                     title=''
                                                     message=''
 
@@ -1707,7 +1706,10 @@ def students_bus_checks(request):
                                                                                       '%Y-%m-%d %H:%M:%S')
 
                                                        for e in mobile_token1:
+
                                                            if  status == 'in':
+
+
                                                                if notifications[3]=="true," :
                                                                  mobile_token.append(e[0])
                                                                title = 'Bus notification'
@@ -1731,7 +1733,9 @@ def students_bus_checks(request):
 
 
                                                            elif  status == 'out':
+
                                                                if notifications[5]=="true," :
+
                                                                  mobile_token.append(e[0])
                                                                title = 'Checkout Notification'
                                                                message = 'The bus ' + str(bus_num[
