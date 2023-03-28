@@ -331,17 +331,17 @@ def round_list(request):
 
                                             if school_day_student_round_transfer_rel:
                                                 if not student_state[3]:
-                                                    cursor.execute("select name from student_student WHERE id = %s ",
+                                                    cursor.execute("select display_name_search from student_student WHERE id = %s ",
                                                                    [student_state[0]])
                                                     student_student21 = cursor.fetchall()
-                                                    moved_students.append( "The student <br><b><font color='#CE3337'>"+student_student21[0][0]+"</font></b><br> has been moved from this bus for this round only")
+                                                    moved_students.append( "The student <br><b><font color='#CE3337'>"+str(student_student21[0][0])+"</font></b><br> has been moved from this bus for this round only")
                                                 else:
-                                                    cursor.execute("select name from student_student WHERE id = %s ",
+                                                    cursor.execute("select display_name_search from student_student WHERE id = %s ",
                                                                    [student_state[0]])
                                                     student_student21 = cursor.fetchall()
                                                     moved_students.append(
-                                                        "The student <br><b><font color='#CE3337'>" + student_student21[0][
-                                                            0] + "</font></b><br> has been added to this round. Before you start the round please check the availability of the student on the bus and the pickup location of the studen")
+                                                        "The student <br><b><font color='#CE3337'>" + str(student_student21[0][
+                                                            0]) + "</font></b><br> has been added to this round. Before you start the round please check the availability of the student on the bus and the pickup location of the studen")
 
                                 moved_students1.append(moved_students)
                             if r_id:
