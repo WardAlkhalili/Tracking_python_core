@@ -1,4 +1,4 @@
-from builtins import str
+from builtins import str, type
 from selectors import SelectSelector
 
 from django.shortcuts import render
@@ -47,6 +47,7 @@ def parent_login(request):
         url = 'https://tst.tracking.trackware.com/web/session/authenticate'
         # url = 'http://127.0.0.1:9098/web/session/authenticate'
         try:
+
             body = json.dumps(
                 {"jsonrpc": "2.0", "params": {"db": school_name, "login": user_name, "password": password}})
             headers = {
@@ -4899,6 +4900,7 @@ def get_student_assignment(request, student_id):
                                 assignments = cursor.fetchall()
 
                             for assingment in assignments:
+                                
                                 cursor.execute(
                                     " select id,state,deadline,title,access_token,subject_id from survey_survey where id=%s and is_assignment=%s",
                                     [assingment[1], True])
@@ -4918,19 +4920,27 @@ def get_student_assignment(request, student_id):
                                         " select id  from survey_user_input_line where survey_id=%s",
                                         [assingment[1]])
                                     survey_user_input_line = cursor.fetchall()
+
                                     if survey[0][1] == 'open':
+                                        dead=''
                                         if survey[0][2]:
                                             deadline = survey[0][2]
+
                                             # cursor.execute(
                                             #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
                                             # transport_setting = cursor.fetchall()
                                             # date_tz = transport_setting[0][0]
                                             date_tz = 'Asia/Kuwait'
-                                            deadline.replace(date_tz)
-                                            deadline = deadline.replace(date_tz)
-                                            deadline = datetime.strptime(deadline, "%d/%m/%Y %H:%M:%S")
-                                            x = datetime.datetime.now().replace(date_tz)
-                                            if deadline <= datetime.strptime(x, "%d/%m/%Y %H:%M:%S"):
+                                            # deadline.replace(date_tz)
+                                            # deadline = deadline.replace(date_tz)
+                                            deadline = deadline.astimezone(pytz.timezone(date_tz))
+
+                                            dead=str(deadline.day)+"/"+str(deadline.month)+"/"+str(deadline.year)+" "+str(deadline.hour)+":"+str(deadline.minute)+":"+str(deadline.second)
+                                            deadline = datetime.datetime.strptime(str(dead), "%d/%m/%Y %H:%M:%S")
+
+                                            x = datetime.datetime.now().astimezone(pytz.timezone(date_tz))
+                                            cur_data=str(x.day)+"/"+str(x.month)+"/"+str(x.year)+" "+str(x.hour)+":"+str(x.minute)+":"+str(x.second)
+                                            if deadline <= datetime.datetime.strptime(str(cur_data), "%d/%m/%Y %H:%M:%S"):
                                                 start = True
                                                 state = 'done'
                                             else:
@@ -4947,20 +4957,21 @@ def get_student_assignment(request, student_id):
                                         data.append({
                                             "id": assingment[0],
                                             "assignment_id": assingment[1],
-                                            "name": survey[0][3],
-                                            "subject": subject_name[0][0],
-                                            "token": survey[0][4],
-                                            'answer_token': assingment[2],
+                                            "name": survey[0][3] if survey[0][3] else '',
+                                            "subject": subject_name[0][0] if subject_name[0][0]  else '',
+                                            "token": survey[0][4] if survey[0][4] else '',
+                                            'answer_token': assingment[2]if assingment[2] else '' ,
                                             'questions_count': len(survey_question),
                                             "state": state,
-                                            'last_displayed_page': assingment[3],
+                                            # 'last_displayed_page': assingment[3] if assingment[3] else ' gg' ,
                                             'answered_questions': len(survey_user_input_line),
-                                            "ass_state": survey[0][1],
-                                            "deadline": deadline,
+                                            "ass_state": survey[0][1] if survey[0][1] else '',
+                                            "deadline": dead ,
                                             "start": start
                                         })
 
                         result = {'result': data}
+
                     return Response(result)
 
 
