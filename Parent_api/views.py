@@ -1183,10 +1183,10 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         notificationsType = 'educational'
     elif notifications_title == 'Pick Up By Parent' or notifications_title == 'Absence':
         notificationsType = 'Absence'
-    elif notifications_title == 'School Departure' or notifications_title == 'Checkout Notification' or notifications_title == 'No Show Notification' or "has arrived at your home" in notifications_text or "has just reached the school." in notifications_text or "has just been checked into the bus." in notifications_text or notifications_title == "Absence notification" or 'Message from bus no' in notifications_title:
+    elif notifications_title == 'Pick-up round' or notifications_title == 'School Departure' or notifications_title == 'Checkout Notification' or notifications_title == 'No Show Notification' or "has arrived at your home" in notifications_text or "has just reached the school." in notifications_text or "has just been checked into the bus." in notifications_text or notifications_title == "Absence notification" or 'Message from bus no' in notifications_title:
 
         notificationsType = 'tracking'
-        if (notifications_title == 'School Departure'):
+        if (notifications_title == 'Pick-up round' or notifications_title == 'School Departure'):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-get-on-bus.svg'
         elif (notifications_title == 'Checkout Notification'):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
@@ -4618,7 +4618,7 @@ def post_Event(request):
                                 'X-Openerp-Session-Id': Session,
                                 'Content-Type': 'application/json',
                             }
-                            # url ="http://192.168.1.150:9098/upload_events_flutter"
+                            # url ="http://192.168.1.46:9098/upload_events_flutter"
                             url = str(base_url) + "upload_events_flutter"
                             response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
@@ -4825,15 +4825,15 @@ def get_exam(request, student_id):
                                         data.append({
                                             "id": assingment[0],
                                             "assignment_id": assingment[1],
-                                            "name": survey[0][3],
-                                            "subject": subject_name[0][0],
-                                            "token": survey[0][4],
-                                            'answer_token': assingment[2],
+                                            "name": survey[0][3] if survey[0][3] else '',
+                                            "subject": subject_name[0][0] if subject_name[0][0]  else '',
+                                            "token": survey[0][4]if survey[0][4]  else '',
+                                            'answer_token': assingment[2] if assingment[2]  else '',
                                             'questions_count': len(survey_question),
-                                            "state": state,
+                                            "state": state ,
                                             'last_displayed_page': "None",
                                             'answered_questions': len(survey_user_input_line),
-                                            "ass_state": survey[0][1],
+                                            "ass_state": survey[0][1] if survey[0][1]  else '',
                                             "start": start,
                                             'start_time': start_time if start_time else 'None',
                                             'allowed_time_to_start_exams': allowed_time_to_start_exams if allowed_time_to_start_exams else 'None',
