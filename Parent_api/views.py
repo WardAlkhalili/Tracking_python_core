@@ -1167,7 +1167,7 @@ def hide_message(request):
         else:
             result = {'result': 'error4'}
             return Response(result)
-def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0'):
+def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0',notifications_title_ar='',notifications_text_ar=''):
     show=show_notif
     stutes=stutes_notif
     if stutes=='Read':
@@ -1208,6 +1208,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         if (notifications_title == 'survey'):
             icon_tracking=show_notif
 
+
     if student_name:
         return {
             "avatar": avatar,
@@ -1223,6 +1224,8 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             "stutes": stutes,
             "show": show,
             "action_id": str(action_id),
+            "notifications_text_ar": notifications_text_ar if notifications_text_ar else  notifications_text,
+            "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
 
         }
     else:
@@ -1239,6 +1242,9 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             "stutes":stutes,
             "show":show,
             "action_id": str(action_id),
+            "notifications_text_ar": notifications_text_ar if notifications_text_ar else notifications_text,
+            "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
+
         }
 
 
@@ -1381,7 +1387,7 @@ def get_student_history_new(student_id, school_name, student_name):
                 list_hist_student.append(mas[0])
 
             cursor.execute(
-                "select  message_en,create_date,type,id from sh_message_wizard WHERE id=%s ORDER BY ID DESC LIMIT 50",
+                "select  message_en,create_date,type,id,type_ar,message_ar from sh_message_wizard WHERE id=%s ORDER BY ID DESC LIMIT 50",
                 [mas[0]])
             sh_message_wizard1 = cursor.fetchall()
 
@@ -1389,17 +1395,19 @@ def get_student_history_new(student_id, school_name, student_name):
                 deadline = sh_message_wizard1[sh_message_bus][1]
 
                 notifications_text = sh_message_wizard1[sh_message_bus][0]
+                notifications_text_ar = sh_message_wizard1[sh_message_bus][5]
                 avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                 create_date = deadline.replace(second=0) if deadline else ''
-                notifications_title = "Message from bus no. " + str(bus_num) + "   " + str(student_name)
+                notifications_title = "Message from bus no. " + str(bus_num[0][0]) + "   " + str(student_name)
+                notifications_title_ar =  str(student_name)+ " "+str(bus_num[0][0]) + "   "+"رسالة من الحافلة رقم . "
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title,
-                                     student_name, student_id))
+                                     student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
     return notifications
 
 
 def get_bus_notifition_student_new(school_name, student_name, notifications_text, notifications_title, deadline, round_id,
-                               attendance_round, student_id):
+                               attendance_round, student_id,notifications_title_ar,notifications_text_ar):
     notifications = []
 
     avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
@@ -1425,20 +1433,20 @@ def get_bus_notifition_student_new(school_name, student_name, notifications_text
                     notifications_title = 'Bus notification'
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title,
-                                     student_name, student_id))
+                                     student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
         elif "did not check into the bus today" in notifications_text:
 
             if str(student_name) in notifications_text:
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "No Show Notification",
-                                     student_name, student_id))
+                                     student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
 
         elif "has not checked into the bus" in notifications_text:
 
             if str(student_name) in notifications_text:
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "Absence notification",
-                                     student_name, student_id))
+                                     student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
 
 
         elif "has arrived at your home and" in notifications_text:
@@ -1446,13 +1454,13 @@ def get_bus_notifition_student_new(school_name, student_name, notifications_text
             if str(student_name) in notifications_text:
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "Checkout Notification",
-                                     student_name, student_id))
+                                     student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
 
         elif "just reached" in notifications_text:
             if str(student_name) in notifications_text:
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "Bus notification",
-                                     student_name, student_id))
+                                     student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
 
         else:
 
@@ -1467,18 +1475,19 @@ def get_bus_notifition_student_new(school_name, student_name, notifications_text
                     time = attendance_round[0][2]
                 else:
                     time = attendance_round[0][3]
+            notifications_title_ar = str(student_name) + " " + str(bus_num) + "   " + "رسالة من الحافلة رقم . "
             if time:
                 if time > deadline:
                     notifications.append(
                         get_info_message_new(deadline, notifications_text, avatar, create_date,
                                          "Message from bus no. " + str(
-                                             bus_num[0][0]) + "  " + str(student_name), student_name, student_id))
+                                             bus_num[0][0]) + "  " + str(student_name), student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
 
 
             else:
                 notifications.append(
-                    get_info_message_new(deadline, notifications_text, avatar, create_date, "Message from bus no. " + str(
-                        bus_num[0][0]) + "  " + str(student_name), student_name, student_id))
+                    get_info_message_new(deadline, notifications_text, avatar, create_date, "Message from bus no. 111 " + str(
+                        bus_num[0][0]) + "  " + str(student_name), student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
     return notifications
 
 
@@ -1592,7 +1601,7 @@ def kids_hstory_new(request):
                                         else:
                                             student_round_id.append(rec_s)
                                             cursor.execute(
-                                                "select  message_ar,create_date,type,round_id,id from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
+                                                "select  message_ar,create_date,type,round_id,id,type_ar,message_en from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
                                                 [rec_s, 'emergency', 'App\Model\Driver',
                                                  'App\Model\sta' + str(parent_id)])
                                             sh_message_wizard = cursor.fetchall()
@@ -1714,15 +1723,18 @@ def kids_hstory_new(request):
                                                                             continue
 
                                                                     deadline = sh_message_wizard[message_wizard][1]
-                                                                    notifications_text = str(
+                                                                    notifications_text_ar = str(
                                                                         sh_message_wizard[message_wizard][0]) if \
                                                                         sh_message_wizard[message_wizard][0] else ''
+                                                                    notifications_text = str(
+                                                                        sh_message_wizard[message_wizard][6]) if \
+                                                                        sh_message_wizard[message_wizard][6] else ''
                                                                     notifications += get_bus_notifition_student_new(
                                                                         school_name, fname,
                                                                         notifications_text,
                                                                         sh_message_wizard[message_wizard][2],
                                                                         deadline, rec_s,
-                                                                        attendance_round_yousef, std[0])
+                                                                        attendance_round_yousef, std[0],sh_message_wizard[message_wizard][5],notifications_text_ar)
 
                                                         continue
                                                     cursor.execute(
@@ -1742,9 +1754,11 @@ def kids_hstory_new(request):
                                                         if sh_message_wizard[message_wizard][1] < round_history[0][1]:
                                                             deadline = sh_message_wizard[message_wizard][1]
                                                             notifications_text = str(
+                                                                sh_message_wizard[message_wizard][6]) if \
+                                                                sh_message_wizard[message_wizard][6] else ''
+                                                            notifications_text_ar = str(
                                                                 sh_message_wizard[message_wizard][0]) if \
                                                                 sh_message_wizard[message_wizard][0] else ''
-
                                                             notifications += get_bus_notifition_student_new(school_name,
                                                                                                         fname,
                                                                                                         notifications_text,
@@ -1753,7 +1767,9 @@ def kids_hstory_new(request):
                                                                                                             2],
                                                                                                         deadline, rec_s,
                                                                                                         attendance_round,
-                                                                                                        std[0])
+                                                                                                        std[0], sh_message_wizard[
+                                                                                                            message_wizard][
+                                                                                                            5],notifications_text_ar)
                                                         if is_active[0][1] == 'pick_up':
                                                             if (student_history[0][0] == 'absent-all' or
                                                                 student_history[0][0] == 'in' or
@@ -1765,9 +1781,11 @@ def kids_hstory_new(request):
                                                                 continue
                                                             deadline = sh_message_wizard[message_wizard][1]
                                                             notifications_text = str(
+                                                                sh_message_wizard[message_wizard][6]) if \
+                                                                sh_message_wizard[message_wizard][6] else ''
+                                                            notifications_text_ar = str(
                                                                 sh_message_wizard[message_wizard][0]) if \
                                                                 sh_message_wizard[message_wizard][0] else ''
-
                                                             notifications += get_bus_notifition_student_new(school_name,
                                                                                                         fname,
                                                                                                         notifications_text,
@@ -1776,7 +1794,8 @@ def kids_hstory_new(request):
                                                                                                             2],
                                                                                                         deadline, rec_s,
                                                                                                         attendance_round,
-                                                                                                        std[0])
+                                                                                                        std[0],sh_message_wizard[
+                                                                                                            message_wizard][5],notifications_text_ar)
                                                         else:
 
                                                             if (student_history[0][0] == 'absent-all' or
@@ -1789,6 +1808,9 @@ def kids_hstory_new(request):
                                                                 continue
                                                             deadline = sh_message_wizard[message_wizard][1]
                                                             notifications_text = str(
+                                                                sh_message_wizard[message_wizard][6]) if \
+                                                                sh_message_wizard[message_wizard][6] else ''
+                                                            notifications_text_ar = str(
                                                                 sh_message_wizard[message_wizard][0]) if \
                                                                 sh_message_wizard[message_wizard][0] else ''
                                                             notifications += get_bus_notifition_student_new(school_name,
@@ -1799,14 +1821,18 @@ def kids_hstory_new(request):
                                                                                                             2],
                                                                                                         deadline, rec_s,
                                                                                                         attendance_round,
-                                                                                                        std[0])
+                                                                                                        std[0],  sh_message_wizard[
+                                                                                                            message_wizard][
+                                                                                                            5],notifications_text_ar)
                                                     else:
                                                         if sh_message_wizard[message_wizard][1] < is_active[0][2]:
                                                             deadline = sh_message_wizard[message_wizard][1]
                                                             notifications_text = str(
+                                                                sh_message_wizard[message_wizard][6]) if \
+                                                            sh_message_wizard[message_wizard][6] else ''
+                                                            notifications_text_ar = str(
                                                                 sh_message_wizard[message_wizard][0]) if \
-                                                            sh_message_wizard[message_wizard][0] else ''
-
+                                                                sh_message_wizard[message_wizard][0] else ''
                                                             if (sh_message_wizard[message_wizard][1] <
                                                                     student_history[0][3]):
                                                                 notifications += get_bus_notifition_student_new(school_name,
@@ -1818,7 +1844,9 @@ def kids_hstory_new(request):
                                                                                                             deadline,
                                                                                                             rec_s,
                                                                                                             attendance_round,
-                                                                                                            std[0])
+                                                                                                            std[0],sh_message_wizard[
+                                                                                                                message_wizard][
+                                                                                                                5],notifications_text_ar)
 
                                         if student_round_h:
 
@@ -1883,7 +1911,7 @@ def kids_hstory_new(request):
                                                                                                  deadline.replace(
                                                                                                      second=0) if deadline else '',
                                                                                                  "Bus notification",
-                                                                                                 fname, time_out[0][1]))
+                                                                                                 fname, time_out[0][1],0,None,None,'0',"اشعار من الحافلة"," وصل إلى المدرسة."+ fname))
 
                             notifications.sort(key=get_year, reverse=True)
 
@@ -2045,10 +2073,11 @@ def get_student_history(student_id, school_name, student_name):
                 notifications_text = sh_message_wizard1[sh_message_bus][0]
                 avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                 create_date = deadline.replace(second=0) if deadline else ''
-                notifications_title = "Message from bus no. " + str(bus_num) + "   " + str(student_name)
+                notifications_title = "Message from bus no. " + str(bus_num[0][0]) + "   " + str(student_name)
+                notifications_title_ar = str(student_name) + " " + str(bus_num[0][0]) + "   " + "رسالة من الحافلة رقم . "
                 notifications.append(
                     get_info_message(deadline, notifications_text, avatar, create_date, notifications_title,
-                                     student_name, student_id))
+                                     student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text))
     return notifications
 
 
@@ -2123,18 +2152,19 @@ def get_bus_notifition_student(school_name, student_name, notifications_text, no
                     time = attendance_round[0][2]
                 else:
                     time = attendance_round[0][3]
+            notifications_title_ar = str(student_name) + " " + str(bus_num[0][0]) + "   " + "رسالة من الحافلة رقم . "
             if time:
                 if time > deadline:
                     notifications.append(
                         get_info_message(deadline, notifications_text, avatar, create_date,
                                          "Message from bus no. " + str(
-                                             bus_num[0][0]) + "  " + str(student_name), student_name, student_id))
+                                             bus_num[0][0]) + "  " + str(student_name), student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text))
 
 
             else:
                 notifications.append(
                     get_info_message(deadline, notifications_text, avatar, create_date, "Message from bus no. " + str(
-                        bus_num[0][0]) + "  " + str(student_name), student_name, student_id))
+                        bus_num[0][0]) + "  " + str(student_name), student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text))
     return notifications
 
 
