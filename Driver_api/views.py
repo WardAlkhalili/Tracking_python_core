@@ -36,7 +36,7 @@ def driver_login(request):
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  driver_id,bus_no,id  from fleet_vehicle WHERE bus_pin = %s", [pincode])
             data_id_bus = cursor.fetchall()
-            print(data_id_bus)
+   
             cursor.execute("select name from res_partner WHERE id = %s", [data_id_bus[0][0]])
             driver_name = cursor.fetchall()
 
@@ -1110,6 +1110,13 @@ def recent_notifications(request):
             result = {'status': 'error'}
             return Response(result)
 
+def save_message_wizard(school_name,round_id,date,from_type,message_title,message_title_ar,message_body,message_body_ar,driver_name):
+    with connections[school_name].cursor() as cursor:
+        cursor.execute(
+            "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+            [round_id, date, from_type, message_title,
+             message_body, message_body_ar,
+             driver_name[0][0], message_title_ar])
 
 @api_view(['POST'])
 def set_round_status(request):
@@ -1350,11 +1357,14 @@ def set_round_status(request):
 
 
 
-                                                cursor.execute(
-                                                    "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                    [round_id, r, 'App\Model\sta' + str(rec), message_title,
-                                                     message_body, message_body_ar,
-                                                     driver_name[0][0],message_title_ar])
+                                                # cursor.execute(
+                                                #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+                                                #     [round_id, r, 'App\Model\sta' + str(rec), message_title,
+                                                #      message_body, message_body_ar,
+                                                #      driver_name[0][0],message_title_ar])
+                                                save_message_wizard(school_name, round_id, r, 'App\Model\sta' + str(rec),
+                                                                    message_title, message_title_ar, message_body,
+                                                                    message_body_ar, driver_name[0][0])
                                                 push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
 
                                                 if mobile_token and not("token" in mobile_token):
@@ -1596,6 +1606,7 @@ def students_bus_checks(request):
                     driver_id = Manager.objects.filter(token=au).values_list('driver_id')
                     if db_name:
                         for e in db_name:
+
                             school_name = e[0]
                             school_name = Manager.pincode(school_name)
                             with connections[school_name].cursor() as cursor:
@@ -1784,12 +1795,17 @@ def students_bus_checks(request):
                                                                                                '%Y-%m-%d %H:%M:%S')
 
                                                                 # if round_info[0][3]=='pick_up':
-
-                                                                cursor.execute(
-                                                                    "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                    [round_id, r, 'App\Model\sta'+str(rec), title,
-                                                                     message, message_ar,
-                                                                     driver_name[0][0],title_ar])
+                                                                #
+                                                                # cursor.execute(
+                                                                #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+                                                                #     [round_id, r, 'App\Model\sta'+str(rec), title,
+                                                                #      message, message_ar,
+                                                                #      driver_name[0][0],title_ar])
+                                                                save_message_wizard(school_name, round_id, r,
+                                                                                    'App\Model\sta'+str(rec),
+                                                                                    title, title_ar,
+                                                                                    message,
+                                                                                    message_ar, driver_name[0][0])
 
 
                                                             elif  status == 'out':
@@ -1807,12 +1823,18 @@ def students_bus_checks(request):
                                                                     0]) + 'has arrived at your home and ' + \
                                                                           student_name[0][
                                                                               0] + ' has been checked out of the bus. '
-                                                                cursor.execute(
-                                                                    "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                    [round_id, r, 'App\Model\sta'+str(rec),
-                                                                     title,
-                                                                     message, message_ar,
-                                                                     driver_name[0][0],title_ar])
+                                                                # cursor.execute(
+                                                                #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+                                                                #     [round_id, r, 'App\Model\sta'+str(rec),
+                                                                #      title,
+                                                                #      message, message_ar,
+                                                                #      driver_name[0][0],title_ar])
+                                                                save_message_wizard(school_name, round_id, r,
+                                                                                    'App\Model\sta' + str(rec),
+                                                                                    title, title_ar,
+                                                                                    message,
+                                                                                    message_ar, driver_name[0][0])
+
                                                             else:
                                                                 date_string = datetime.datetime.now().strftime(
                                                                     "%Y-%m-%d %H:%M:%S")
@@ -1825,12 +1847,17 @@ def students_bus_checks(request):
                                                                     message_ar="لم يظهر اليوم."+student_name[0][ 0]
                                                                     message = student_name[0][
                                                                                   0] + ' did not check into the bus today'
-                                                                    cursor.execute(
-                                                                        "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                        [round_id, r, 'App\Model\sta'+str(rec),
-                                                                         title,
-                                                                         message, message_ar,
-                                                                         driver_name[0][0],title_ar])
+                                                                    # cursor.execute(
+                                                                    #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+                                                                    #     [round_id, r, 'App\Model\sta'+str(rec),
+                                                                    #      title,
+                                                                    #      message, message_ar,
+                                                                    #      driver_name[0][0],title_ar])
+                                                                    save_message_wizard(school_name, round_id, r,
+                                                                                        'App\Model\sta' + str(rec),
+                                                                                        title, title_ar,
+                                                                                        message,
+                                                                                        message_ar, driver_name[0][0])
 
                                                                 elif status == 'absent':
 
@@ -1844,12 +1871,17 @@ def students_bus_checks(request):
                                                                         "%Y-%m-%d %H:%M:%S")
                                                                     r = datetime.datetime.strptime(date_string,
                                                                                                    '%Y-%m-%d %H:%M:%S')
-                                                                    cursor.execute(
-                                                                        "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                        [round_id, r, 'App\Model\sta'+str(rec),
-                                                                         title,
-                                                                         message, message_ar,
-                                                                         driver_name[0][0],title_ar])
+                                                                    # cursor.execute(
+                                                                    #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+                                                                    #     [round_id, r, 'App\Model\sta'+str(rec),
+                                                                    #      title,
+                                                                    #      message, message_ar,
+                                                                    #      driver_name[0][0],title_ar])
+                                                                    save_message_wizard(school_name, round_id, r,
+                                                                                        'App\Model\sta' + str(rec),
+                                                                                        title, title_ar,
+                                                                                        message,
+                                                                                        message_ar, driver_name[0][0])
                                                                 elif status == 'near':
                                                                     date_string = datetime.datetime.now().strftime(
                                                                         "%Y-%m-%d %H:%M:%S")
@@ -1903,11 +1935,16 @@ def students_bus_checks(request):
                                                                r = datetime.datetime.strptime(date_string,
                                                                                               '%Y-%m-%d %H:%M:%S')
                                                                # if round_info[0][3]=="pick_up":
-                                                               cursor.execute(
-                                                                   "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                   [round_id, r, 'App\Model\sta'+str(rec), title,
-                                                                    message, message_ar,
-                                                                    driver_name[0][0],title_ar])
+                                                               # cursor.execute(
+                                                               #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+                                                               #     [round_id, r, 'App\Model\sta'+str(rec), title,
+                                                               #      message, message_ar,
+                                                               #      driver_name[0][0],title_ar])
+                                                               save_message_wizard(school_name, round_id, r,
+                                                                                   'App\Model\sta' + str(rec),
+                                                                                   title, title_ar,
+                                                                                   message,
+                                                                                   message_ar, driver_name[0][0])
 
 
                                                            elif  status == 'out':
@@ -1923,12 +1960,17 @@ def students_bus_checks(request):
                                                                          student_name[0][
                                                                              0] + ' has been checked out of the bus. '
 
-                                                               cursor.execute(
-                                                                   "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                   [round_id, r, 'App\Model\sta'+str(rec),
-                                                                    title,
-                                                                    message, message_ar,
-                                                                    driver_name[0][0],title_ar])
+                                                               # cursor.execute(
+                                                               #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+                                                               #     [round_id, r, 'App\Model\sta'+str(rec),
+                                                               #      title,
+                                                               #      message, message_ar,
+                                                               #      driver_name[0][0],title_ar])
+                                                               save_message_wizard(school_name, round_id, r,
+                                                                                   'App\Model\sta' + str(rec),
+                                                                                   title, title_ar,
+                                                                                   message,
+                                                                                   message_ar, driver_name[0][0])
                                                            else:
 
 
@@ -1939,12 +1981,17 @@ def students_bus_checks(request):
                                                                    message_ar = "لم يظهر اليوم." + student_name[0][0]
                                                                    message = student_name[0][
                                                                                  0] + ' did not check into the bus today'
-                                                                   cursor.execute(
-                                                                       "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                       [round_id, r, 'App\Model\sta'+str(rec),
-                                                                        title,
-                                                                        message, message_ar,
-                                                                        driver_name[0][0],title_ar])
+                                                                   # cursor.execute(
+                                                                   #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+                                                                   #     [round_id, r, 'App\Model\sta'+str(rec),
+                                                                   #      title,
+                                                                   #      message, message_ar,
+                                                                   #      driver_name[0][0],title_ar])
+                                                                   save_message_wizard(school_name, round_id, r,
+                                                                                       'App\Model\sta' + str(rec),
+                                                                                       title, title_ar,
+                                                                                       message,
+                                                                                       message_ar, driver_name[0][0])
                                                                # yousef aa
                                                                elif status == 'absent':
 
@@ -1958,12 +2005,17 @@ def students_bus_checks(request):
                                                                        "%Y-%m-%d %H:%M:%S")
                                                                    r = datetime.datetime.strptime(date_string,
                                                                                                   '%Y-%m-%d %H:%M:%S')
-                                                                   cursor.execute(
-                                                                       "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                       [round_id, r, 'App\Model\sta'+str(rec),
-                                                                        'Absence notification',
-                                                                        message, message_ar,
-                                                                        driver_name[0][0],title_ar])
+                                                                   # cursor.execute(
+                                                                   #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+                                                                   #     [round_id, r, 'App\Model\sta'+str(rec),
+                                                                   #      'Absence notification',
+                                                                   #      message, message_ar,
+                                                                   #      driver_name[0][0],title_ar])
+                                                                   save_message_wizard(school_name, round_id, r,
+                                                                                       'App\Model\sta' + str(rec),
+                                                                                       'Absence notification', title_ar,
+                                                                                       message,
+                                                                                       message_ar, driver_name[0][0])
                                                                elif status == 'out':
                                                                    title = 'Checkout Notification'
                                                                    title_ar = 'اشعار من الحافلة'
@@ -1973,12 +2025,17 @@ def students_bus_checks(request):
                                                                              student_name[0][
                                                                                  0] + ' has been checked out of the bus. '
 
-                                                                   cursor.execute(
-                                                                       "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                       [round_id, r, 'App\Model\sta' + str(rec),
-                                                                        title,
-                                                                        message, message_ar,
-                                                                        driver_name[0][0],title_ar])
+                                                                   # cursor.execute(
+                                                                   #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+                                                                   #     [round_id, r, 'App\Model\sta' + str(rec),
+                                                                   #      title,
+                                                                   #      message, message_ar,
+                                                                   #      driver_name[0][0],title_ar])
+                                                                   save_message_wizard(school_name, round_id, r,
+                                                                                       'App\Model\sta' + str(rec),
+                                                                                       title, title_ar,
+                                                                                       message,
+                                                                                       message_ar, driver_name[0][0])
                                                                elif status == 'near':
                                                                    if round_info[0][3] == 'pick_up':
                                                                        title_ar = "الباص قريب منك"
@@ -2031,10 +2088,15 @@ def students_bus_checks(request):
                                                         r = datetime.datetime.strptime(date_string,
                                                                                        '%Y-%m-%d %H:%M:%S')
 
-                                                        cursor.execute(
-                                                            "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                            [round_id, r, 'App\Model\sta'+str(rec), title, message, message_ar,
-                                                             driver_name[0][0],title_ar])
+                                                        # cursor.execute(
+                                                        #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+                                                        #     [round_id, r, 'App\Model\sta'+str(rec), title, message, message_ar,
+                                                        #      driver_name[0][0],title_ar])
+                                                        save_message_wizard(school_name, round_id, r,
+                                                                            'App\Model\sta' + str(rec),
+                                                                            title, title_ar,
+                                                                            message,
+                                                                            message_ar, driver_name[0][0])
 
 
                                                     elif status == 'out':
@@ -2051,9 +2113,14 @@ def students_bus_checks(request):
                                                                                        '%Y-%m-%d %H:%M:%S')
                                                         if round_info[0][3] == 'pick_up':
 
-                                                            cursor.execute(
-                                                                "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                [round_id, r, 'App\Model\sta'+str(rec), title,message, message_ar,driver_name[0][0],title_ar])
+                                                            # cursor.execute(
+                                                            #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+                                                            #     [round_id, r, 'App\Model\sta'+str(rec), title,message, message_ar,driver_name[0][0],title_ar])
+                                                            save_message_wizard(school_name, round_id, r,
+                                                                                'App\Model\sta' + str(rec),
+                                                                                title, title_ar,
+                                                                                message,
+                                                                                message_ar, driver_name[0][0])
                                                     else:
                                                         if status == 'no-show':
                                                             mobile_token.append(e[0])
@@ -2065,11 +2132,16 @@ def students_bus_checks(request):
                                                                 "%Y-%m-%d %H:%M:%S")
                                                             r = datetime.datetime.strptime(date_string,
                                                                                            '%Y-%m-%d %H:%M:%S')
-                                                            cursor.execute(
-                                                                "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                [round_id, r, 'App\Model\sta'+str(rec), title,
-                                                                 message, message_ar,
-                                                                 driver_name[0][0],title_ar])
+                                                            # cursor.execute(
+                                                            #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+                                                            #     [round_id, r, 'App\Model\sta'+str(rec), title,
+                                                            #      message, message_ar,
+                                                            #      driver_name[0][0],title_ar])
+                                                            save_message_wizard(school_name, round_id, r,
+                                                                                'App\Model\sta' + str(rec),
+                                                                                title, title_ar,
+                                                                                message,
+                                                                                message_ar, driver_name[0][0])
                                                         # yousef    qqqq
                                                         elif status == 'absent':
 
@@ -2083,11 +2155,16 @@ def students_bus_checks(request):
                                                                 "%Y-%m-%d %H:%M:%S")
                                                             r = datetime.datetime.strptime(date_string,
                                                                                            '%Y-%m-%d %H:%M:%S')
-                                                            cursor.execute(
-                                                                "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                [round_id, r, 'App\Model\sta'+str(rec), 'Absence notification',
-                                                                 message, message_ar,
-                                                                 driver_name[0][0],title_ar])
+                                                            # cursor.execute(
+                                                            #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+                                                            #     [round_id, r, 'App\Model\sta'+str(rec), 'Absence notification',
+                                                            #      message, message_ar,
+                                                            #      driver_name[0][0],title_ar])
+                                                            save_message_wizard(school_name, round_id, r,
+                                                                                'App\Model\sta' + str(rec),
+                                                                                'Absence notification', title_ar,
+                                                                                message,
+                                                                                message_ar, driver_name[0][0])
 
                                                     if not(round_info[0][3] == 'pick_up') and status == 'in':
                                                         continue

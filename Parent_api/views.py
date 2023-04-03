@@ -1486,7 +1486,7 @@ def get_bus_notifition_student_new(school_name, student_name, notifications_text
 
             else:
                 notifications.append(
-                    get_info_message_new(deadline, notifications_text, avatar, create_date, "Message from bus no. 111 " + str(
+                    get_info_message_new(deadline, notifications_text, avatar, create_date, "Message from bus no. " + str(
                         bus_num[0][0]) + "  " + str(student_name), student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
     return notifications
 
