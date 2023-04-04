@@ -4086,6 +4086,7 @@ def notify(request):
 
                                     if target_rounds == 'both':
                                         for res in rounds_details:
+
                                             cursor.execute(
                                                 "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                                 [lat, long, student_id, res[1], when, "absent-all",
@@ -4533,10 +4534,11 @@ def post_attendance(request):
                         type = request.data.get('type')
                         notes = request.data.get('notes')
                         departure_time = request.data.get('departure_time')
-                        reason = request.data.get('reason')
+                        reason = request.data.get('Reason')
                         arrival_time = request.data.get('arrival_time')
                         base_url = request.data.get('base_url')
                         with connections[school_name].cursor() as cursor:
+                         
 
                             attached_files = request.data.get("file")
                             body = json.dumps({"jsonrpc": "2.0",
