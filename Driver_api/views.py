@@ -36,7 +36,7 @@ def driver_login(request):
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  driver_id,bus_no,id  from fleet_vehicle WHERE bus_pin = %s", [pincode])
             data_id_bus = cursor.fetchall()
-   
+
             cursor.execute("select name from res_partner WHERE id = %s", [data_id_bus[0][0]])
             driver_name = cursor.fetchall()
 
@@ -748,10 +748,11 @@ def student_list(request, round_id):
 
                                         pickup_request = cursor.fetchall()
                                         if pickup_request or school_message:
-                                            in_round = False
-                                            out_round = False
-                                            abs = False
-                                            no_show = True
+                                            if round_info1[0][1] != 'pick_up':
+                                                in_round = False
+                                                out_round = False
+                                                abs = False
+                                                no_show = True
                                         cursor.execute("select * from school_parent WHERE id = %s",
                                                        [student_student12[0]['father_id']])
                                         columns_f = (x.name for x in cursor.description)
@@ -1017,6 +1018,7 @@ def student_list(request, round_id):
 
                                 result = {"students_list": student
                                           }
+                               
                                 return Response(result)
                     if request.method == 'POST':
                         result = {"status": "error"
