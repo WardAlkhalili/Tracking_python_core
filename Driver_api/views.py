@@ -53,7 +53,7 @@ def driver_login(request):
             manager.save()
             cursor.execute(
                 "UPDATE public.res_partner SET signup_token=%s WHERE id=%s;",
-                [unique_id, data_id_bus[0][0]])
+                [mobile_token, data_id_bus[0][0]])
             # *------------------------------------------------------------------------------------------------*
             # Details for login setting
 
@@ -1018,7 +1018,7 @@ def student_list(request, round_id):
 
                                 result = {"students_list": student
                                           }
-                               
+
                                 return Response(result)
                     if request.method == 'POST':
                         result = {"status": "error"

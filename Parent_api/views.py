@@ -2,7 +2,7 @@ from builtins import str, type
 from selectors import SelectSelector
 
 from django.shortcuts import render
-
+from django.db.models import Q
 # Create your views here.
 from django.conf import settings
 from rest_framework.views import APIView
@@ -20,7 +20,7 @@ from itertools import chain
 # from ..Driver_api.models import Manager
 # from yousef.api.Tracking_python_core.Driver_api.models import Manager
 from multiprocessing import Process
-
+from pyfcm import FCMNotification
 import pandas as pd
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
@@ -503,476 +503,501 @@ def kids_list(request):
                     db_name = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('db_name')
                     parent_id = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('parent_id')
                     school_id = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('school_id')
-
+                    mobile_token =ManagerParent.objects.filter(token=au.split(",")[0]).values_list('mobile_token')
+                    db_name_test=[]
+                    for e in mobile_token:
+                        mobile_token = e[0]
+                    database_yousef_test = ManagerParent.objects.filter(mobile_token=mobile_token).values_list('db_name')
+                    # print("-------------------------------------------------------")
+                    # print(mobile_token)
+                    # print(database_yousef_test)
+                    for d in database_yousef_test:
+                        db_name_test.append(d[0])
+                    # print("--------------------------------------------------------",db_name_test)
                     for e in parent_id:
                         parent_id = e[0]
                     for e in school_id:
                         school_id = e[0]
-                    if db_name:
-                        for e in db_name:
-                            school_name = e[0]
+                    if db_name_test:
+                        studen_list = []
 
-                        school_name = ManagerParent.pincode(school_name)
-                        with connections[school_name].cursor() as cursor:
-                            cursor.execute(
-                                "select activate_app_map from school_parent WHERE id = %s",
-                                [parent_id])
-                            columns = (x.name for x in cursor.description)
-                            parent_show_map = cursor.fetchall()
-                            cursor.execute(
-                                "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type,name,name_ar from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
-                                [parent_id, parent_id, parent_id])
-                            columns = (x.name for x in cursor.description)
-                            student = cursor.fetchall()
-                            student1 = []
-                            columnNames = [column[0] for column in cursor.description]
-                            for record in student:
-                                student1.append(dict(zip(columnNames, record)))
-                            studen_list = []
-                            cursor.execute(
-                                "select  lat,lng,pickup_request_distance,change_location,show_map,enable_parents_to_confirm_student_pickup,pickup_request_distance from transport_setting  ORDER BY ID DESC LIMIT 1")
-                            columns = (x.name for x in cursor.description)
-                            setting = cursor.fetchall()
+                        seen = []
+                        all_db_name_test = []
+                        for d in db_name_test:
+                            t = d
+                            if d not in seen:
+                                seen.append(t)
+                                all_db_name_test.append(d)
+                        for e in all_db_name_test:
 
-                            show_map = True
-                            cursor.execute(
-                                "select first_lang  from res_company  ORDER BY ID DESC LIMIT 1")
+                            school_name = e
 
-                            first_lang = cursor.fetchall()
-                            cursor.execute(
-                                "select name from res_lang WHERE id = %s ",
-                                [first_lang[0][0]])
+                            school_name = ManagerParent.pincode(school_name)
+                            parent_id = ManagerParent.objects.filter(Q(mobile_token=mobile_token),
+                                                                     Q(db_name=school_name)).values_list('parent_id')
+                            for e in parent_id:
+                                parent_id = e[0]
+                            with connections[school_name].cursor() as cursor:
+                                cursor.execute(
+                                    "select activate_app_map from school_parent WHERE id = %s",
+                                    [parent_id])
+                                columns = (x.name for x in cursor.description)
+                                parent_show_map = cursor.fetchall()
+                                cursor.execute(
+                                    "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type,name,name_ar from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
+                                    [parent_id, parent_id, parent_id])
+                                columns = (x.name for x in cursor.description)
+                                student = cursor.fetchall()
+                                student1 = []
+                                columnNames = [column[0] for column in cursor.description]
+                                for record in student:
+                                    student1.append(dict(zip(columnNames, record)))
 
-                            lang = cursor.fetchall()
+                                cursor.execute(
+                                    "select  lat,lng,pickup_request_distance,change_location,show_map,enable_parents_to_confirm_student_pickup,pickup_request_distance from transport_setting  ORDER BY ID DESC LIMIT 1")
+                                columns = (x.name for x in cursor.description)
+                                setting = cursor.fetchall()
 
-                            if (parent_show_map[0][0] == True):
-                                # if (setting[0][4]==True and parent_show_map[0][0]==None) or (setting[0][4]==False and parent_show_map[0][0]==True) or (setting[0][4]and parent_show_map[0][0]) :
                                 show_map = True
-                            else:
-                                show_map = False
-                            cursor.execute(
-                                "select  name,phone from res_company WHERE id = %s ",
-                                [school_id])
-                            columns = (x.name for x in cursor.description)
-                            school = cursor.fetchall()
-                            for rec in range(len(student)):
-                                # round = self.env["round.schedule"].search([('student_id', '=', self.id)])
-                                is_active_round = False
-                                student_round_id = 0
-                                curr_date = date.today()
-
                                 cursor.execute(
-                                    "select  id  from school_day where name = %s",
-                                    [calendar.day_name[curr_date.weekday()]])
-                                day_name = cursor.fetchall()
+                                    "select first_lang  from res_company  ORDER BY ID DESC LIMIT 1")
+
+                                first_lang = cursor.fetchall()
                                 cursor.execute(
-                                    "select id from round_schedule WHERE  day_id = %s",
-                                    [day_name[0][0]])
-                                rounds_details = cursor.fetchall()
+                                    "select name from res_lang WHERE id = %s ",
+                                    [first_lang[0][0]])
 
-                                for rou in range(len(rounds_details)):
-                                    cursor.execute(
-                                        "select round_schedule_id,transport_state from transport_participant WHERE round_schedule_id = %s and student_id = %s",
-                                        [rounds_details[rou][0], student1[rec]['id']])
+                                lang = cursor.fetchall()
 
-                                    rounds_count_student = cursor.fetchall()
-
-                                    if rounds_count_student:
-                                        cursor.execute(
-                                            "select round_id from round_schedule WHERE  id = %s",
-                                            [rounds_count_student[0][0]])
-                                        rounds = cursor.fetchall()
-                                        cursor.execute(
-                                            "select is_active from transport_round WHERE  id = %s",
-                                            [rounds[0][0]])
-                                        is_active = cursor.fetchall()
-
-                                        if is_active[0][0]:
-
-                                            student_round_id = rounds[0][0]
-                                            is_active_round = is_active[0][0]
-                                            break
-                                        else:
-
-                                            student_round_id = rounds[0][0]
-                                            is_active_round = is_active[0][0]
-
-                                x = {
-                                    "Exams": {
-                                        # "url": "https://" + school_name + ".staging.trackware.com/my/Badges/",tst.tracking.trackware.com
-                                        # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Badges/",
-                                        "url": "https://tst.tracking.trackware.com/my/Exams/",
-                                        "arabic_url": "tst.tracking.trackware.com/ar_SY/my/Exams/",
-                                        "name": "Exams",
-                                        "name_ar": "امتحانات",
-                                        "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png",
-                                        "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg"
-                                    },
-                                    "Badges": {
-                                        # "url": "https://" + school_name + ".staging.trackware.com/my/Badges/",tst.tracking.trackware.com
-                                        # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Badges/",
-                                        "url": "https://tst.tracking.trackware.com/my/Badges/",
-                                        "arabic_url": "tst.tracking.trackware.com/ar_SY/my/Badges/",
-                                        "name": "Badges",
-                                        "name_ar": "الشارات",
-                                        "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Badge.png",
-                                        "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Badge.svg"
-                                    },
-                                    "Weeklyplans":
-                                        {
-                                            # "url": "https://" + school_name + ".staging.trackware.com/my/Weekly-plans/",
-                                            # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Weekly-plans/",
-                                            "url": "https://tst.tracking.trackware.com/my/Weekly-plans/",
-                                            "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Weekly-plans/",
-                                            "name": "Weeklyplans",
-                                            "name_ar": "الخطط الأسبوعية",
-                                            "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Weekly+Plans.png",
-                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg"
-                                        },
-                                    "Assignments": {
-                                        "url": "https://tst.tracking.trackware.com/my/Assignments/",
-                                        "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Assignments/",
-                                        # "url": "https://" + school_name + ".staging.trackware.com/my/Assignments/",
-                                        # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Assignments/",
-                                        "name": "Assignments",
-                                        "name_ar": "الواجبات الالكترونية",
-                                        "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png",
-                                        "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg"
-                                    },
-                                    # "Exam": {
-                                    #     "url": "my/exam/",
-                                    #     "arabic_url": "ar_SY/my/exam",
-                                    #     "arabic_name": "امتحانات",
-                                    #     "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png"
-                                    # },
-                                    "Events":
-                                        {"name": "Events",
-                                         "name_ar": "الفعاليات و الانشطة",
-                                         # "url": "https://" + school_name + ".staging.trackware.com/my/Events/",
-                                         # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Events/",
-                                         "url": "https://tst.tracking.trackware.com/my/Events/",
-                                         "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Events/",
-                                         "arabic_name": "الفعاليات و الانشطة",
-                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Events.png",
-                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg"
-                                         },
-                                    "Homeworks":
-                                        {"name": "Homeworks",
-                                         # "url": "https://" + school_name + ".staging.trackware.com/my/Homeworks/",
-                                         # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Homeworks/",
-                                         "url": "https://tst.tracking.trackware.com/my/Homeworks/",
-                                         "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Homeworks/",
-                                         "name_ar": "الواجبات المنزلية",
-                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/worksheets.png",
-                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg"
-                                         },
-                                    "Calendar":
-                                        {"name": "Calendar",
-                                         "url": "https://tst.tracking.trackware.com/my/Calendar/",
-                                         "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Calendar/",
-                                         # "url": "https://" + school_name + ".staging.trackware.com/my/Calendar/",
-                                         # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Calendar/",
-                                         "name_ar": "التقويم",
-                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/School+Calendar.png",
-                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg"
-                                         },
-
-                                    "Clinic":
-                                        {"name": "Clinic",
-                                         "name_ar": "العيادة",
-                                         # "url": "https://" + school_name + ".staging.trackware.com/my/Clinic/",
-                                         # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Clinic/",
-                                         "url": "https://tst.tracking.trackware.com/my/Clinic/",
-                                         "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Clinic/",
-                                         "arabic_name": "العيادة",
-                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
-                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg"
-                                         }
-                                }
-                                url_m = {}
-                                model_list = ( "Badges", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
-                                    "Weekly Plans", 'Online Exams')
-                                cursor.execute("select name from ir_ui_menu where name in %s", [model_list])
-                                list = cursor.fetchall()
-                                res = []
-                                [res.append(x[0]) for x in list if x[0] not in res]
-                                model = []
-                                show_absence = False
-                                for rec1 in res:
-
-                                    if 'Weekly Plans' == rec1:
-                                        x['Weeklyplans']['arabic_url'] = x['Weeklyplans']['arabic_url'] + str(
-                                            student1[rec]['user_id'])
-                                        x['Weeklyplans']['url'] = x['Weeklyplans']['url'] + str(
-                                            student1[rec]['user_id'])
-                                        model.append(x['Weeklyplans'])
-
-                                    if 'Events' == rec1:
-                                        x['Events']['arabic_url'] = x['Events']['arabic_url'] + str(
-                                            student1[rec]['user_id'])
-                                        x['Events']['url'] = x['Events']['url'] + str(student1[rec]['user_id'])
-                                        model.append(x['Events'])
-                                    if 'Online Exams' == rec1:
-                                        x['Exams']['arabic_url'] = x['Exams']['arabic_url'] + str(
-                                            student1[rec]['user_id'])
-                                        x['Exams']['url'] = x['Exams']['url'] + str(student1[rec]['user_id'])
-                                        model.append(x['Exams'])
-
-                                    if 'Online Assignments' == rec1:
-                                        x['Assignments']['arabic_url'] = x['Assignments']['arabic_url'] + str(
-                                            student1[rec]['user_id'])
-                                        x['Assignments']['url'] = x['Assignments']['url'] + str(
-                                            student1[rec]['user_id'])
-                                        model.append(x['Assignments'])
-
-                                    if 'Homework' == rec1:
-                                        x['Homeworks']['arabic_url'] = x['Homeworks']['arabic_url'] + str(
-                                            student1[rec]['user_id'])
-                                        x['Homeworks']['url'] = x['Homeworks']['url'] + str(student1[rec]['user_id'])
-                                        model.append(x['Homeworks'])
-
-                                    if 'Badges' == rec1:
-                                        x['Badges']['arabic_url'] = x['Badges']['arabic_url'] + str(
-                                            student1[rec]['user_id'])
-                                        x['Badges']['url'] = x['Badges']['url'] + str(student1[rec]['user_id'])
-                                        model.append(x['Badges'])
-
-                                    if 'Calendar' == rec1:
-                                        x['Calendar']['url'] = x['Calendar']['url'] + str(student1[rec]['user_id'])
-                                        x['Calendar']['arabic_url'] = x['Calendar']['arabic_url'] + str(
-                                            student1[rec]['user_id'])
-                                        model.append(x['Calendar'])
-
-                                    if 'Clinic' == rec1:
-                                        x['Clinic']['arabic_url'] = x['Clinic']['arabic_url'] + str(
-                                            student1[rec]['user_id'])
-                                        x['Clinic']['url'] = x['Clinic']['url'] + str(student1[rec]['user_id'])
-                                        model.append(x['Clinic'])
-
-                                cursor.execute(
-                                    "select name from ir_ui_menu where name ='Tracking'")
-                                tracking = cursor.fetchall()
-
-                                if len(tracking) > 0:
-                                    model.append({
-                                        # "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(
-                                        #     student1[rec]['user_id']),
-                                        # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Absence/" + str(
-                                        #     student1[rec]['user_id']),
-                                        "url": "https://tst.tracking.trackware.com/my/Absence/" + str(
-                                            student1[rec]['user_id']),
-                                        "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Absence/" + str(
-                                            student1[rec]['user_id']),
-                                        "name": "Absence",
-                                        "name_ar": "الغياب",
-                                        "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png",
-                                        "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg"
-                                    }
-                                    )
-                                    show_absence = True
-                                try:
-                                    cursor.execute(
-                                        "select is_portal_exist from school_parent")
-                                    is_portal_exist = cursor.fetchall()
-                                    # sql = """select is_portal_exist from school_parent '"""
-                                except:
-                                    model = {
-                                        "Absence":
-                                            {
-                                                # "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(
-                                                #     student1[rec]['user_id']),
-                                                # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Absence/" + str(
-                                                #     student1[rec]['user_id']),
-                                                "url": "https://tst.tracking.trackware.com/my/Absence/" + str(
-                                                    student1[rec]['user_id']),
-                                                "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Absence/" + str(
-                                                    student1[rec]['user_id']),
-                                                "name": "Absence",
-                                                "name_ar": "الغياب",
-                                                "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png",
-                                                "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg"
-                                            }
-
-                                    }
-                                    show_absence = True
-
-                                if 'by_parents' in student[rec][3]:
-                                    pick = True
+                                if (parent_show_map[0][0] == True):
+                                    # if (setting[0][4]==True and parent_show_map[0][0]==None) or (setting[0][4]==False and parent_show_map[0][0]==True) or (setting[0][4]and parent_show_map[0][0]) :
+                                    show_map = True
                                 else:
-                                    pick = False
-                                if 'by_parents' in student[rec][4]:
-                                    drop = True
-                                else:
-                                    drop = False
-
-                                student_st = ''
-                                assistant_id = 0
-                                assistant_name = ''
-                                assistant_mobile_number = ''
-                                driver_mobile_token = ''
-                                driver_mobile_number = ''
-                                driver_name = ''
-                                bus_id = 0
-                                round_type = ''
-                                round_name = ''
-                                if bool(is_active_round):
-                                    student_st = rounds_count_student[0][1] if rounds_count_student else ""
-
-                                    cursor.execute(
-                                        "select name,type,attendant_id,vehicle_id,driver_id from transport_round WHERE id = %s",
-                                        [int(student_round_id)])
-                                    round_info = cursor.fetchall()
-                                    round_type = round_info[0][1]
-                                    round_name = round_info[0][0]
-                                    assistant_id = int(round_info[0][2])
-                                    cursor.execute(
-                                        "select name,mobile_phone from hr_employee WHERE id = %s",
-                                        [assistant_id])
-                                    assistant = cursor.fetchall()
-                                    assistant_mobile_number = assistant[0][1]
-                                    assistant_name = assistant[0][0]
-
-                                    cursor.execute(
-                                        "select name,mobile from res_partner WHERE id = %s",
-                                        [round_info[0][4]])
-                                    driver_info = cursor.fetchall()
-                                    driver_name = driver_info[0][0]
-                                    driver_mobile_number = driver_info[0][1]
-                                    cursor.execute(
-                                        "select bus_no from fleet_vehicle WHERE id = %s",
-                                        [round_info[0][3]])
-                                    fleet_info = cursor.fetchall()
-                                    bus_id = int(fleet_info[0][0])
-                                    # fleet.vehicle
-
-                                student_grade = None
-                                # ----------------------
-
+                                    show_map = False
                                 cursor.execute(
-                                    "SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s",
-                                    [student1[rec]['id']])
-                                student_distribution_line_id = cursor.fetchall()
-                                if student_distribution_line_id:
+                                    "select  name,phone from res_company WHERE id = %s ",
+                                    [school_id])
+                                columns = (x.name for x in cursor.description)
+                                school = cursor.fetchall()
+                                for rec in range(len(student)):
+                                    # round = self.env["round.schedule"].search([('student_id', '=', self.id)])
+                                    is_active_round = False
+                                    student_round_id = 0
+                                    curr_date = date.today()
+
                                     cursor.execute(
-                                        "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = %s",
-                                        [student_distribution_line_id[0][0]])
-                                    student_distribution_line = cursor.fetchall()
-                                    if student_distribution_line:
-                                        cursor.execute(
-                                            "SELECT name FROM public.academic_grade WHERE id = %s",
-                                            [student_distribution_line[0][0]])
-                                        academic_grade = cursor.fetchall()
-                                        student_grade = academic_grade[0][0]
-                                if student_grade == None:
+                                        "select  id  from school_day where name = %s",
+                                        [calendar.day_name[curr_date.weekday()]])
+                                    day_name = cursor.fetchall()
                                     cursor.execute(
-                                        "select user_id from student_student where id=%s",
-                                        [student1[rec]['id']])
-                                    user_id_q = cursor.fetchall()
-                                    if user_id_q:
+                                        "select id from round_schedule WHERE  day_id = %s",
+                                        [day_name[0][0]])
+                                    rounds_details = cursor.fetchall()
+
+                                    for rou in range(len(rounds_details)):
                                         cursor.execute(
-                                            " select partner_id from res_users where id=%s",
-                                            [user_id_q[0][0]])
-                                        partner_id_q = cursor.fetchall()
-                                        if partner_id_q:
+                                            "select round_schedule_id,transport_state from transport_participant WHERE round_schedule_id = %s and student_id = %s",
+                                            [rounds_details[rou][0], student1[rec]['id']])
+
+                                        rounds_count_student = cursor.fetchall()
+
+                                        if rounds_count_student:
                                             cursor.execute(
-                                                "select class_id from res_partner where id=%s",
-                                                [partner_id_q[0][0]])
-                                            class_id_q = cursor.fetchall()
-                                            if class_id_q:
+                                                "select round_id from round_schedule WHERE  id = %s",
+                                                [rounds_count_student[0][0]])
+                                            rounds = cursor.fetchall()
+                                            cursor.execute(
+                                                "select is_active from transport_round WHERE  id = %s",
+                                                [rounds[0][0]])
+                                            is_active = cursor.fetchall()
+
+                                            if is_active[0][0]:
+
+                                                student_round_id = rounds[0][0]
+                                                is_active_round = is_active[0][0]
+                                                break
+                                            else:
+
+                                                student_round_id = rounds[0][0]
+                                                is_active_round = is_active[0][0]
+
+                                    x = {
+                                        "Exams": {
+                                            # "url": "https://" + school_name + ".staging.trackware.com/my/Badges/",tst.tracking.trackware.com
+                                            # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Badges/",
+                                            "url": "https://tst.tracking.trackware.com/my/Exams/",
+                                            "arabic_url": "tst.tracking.trackware.com/ar_SY/my/Exams/",
+                                            "name": "Exams",
+                                            "name_ar": "امتحانات",
+                                            "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png",
+                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg"
+                                        },
+                                        "Badges": {
+                                            # "url": "https://" + school_name + ".staging.trackware.com/my/Badges/",tst.tracking.trackware.com
+                                            # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Badges/",
+                                            "url": "https://tst.tracking.trackware.com/my/Badges/",
+                                            "arabic_url": "tst.tracking.trackware.com/ar_SY/my/Badges/",
+                                            "name": "Badges",
+                                            "name_ar": "الشارات",
+                                            "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Badge.png",
+                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Badge.svg"
+                                        },
+                                        "Weeklyplans":
+                                            {
+                                                # "url": "https://" + school_name + ".staging.trackware.com/my/Weekly-plans/",
+                                                # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Weekly-plans/",
+                                                "url": "https://tst.tracking.trackware.com/my/Weekly-plans/",
+                                                "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Weekly-plans/",
+                                                "name": "Weeklyplans",
+                                                "name_ar": "الخطط الأسبوعية",
+                                                "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Weekly+Plans.png",
+                                                "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg"
+                                            },
+                                        "Assignments": {
+                                            "url": "https://tst.tracking.trackware.com/my/Assignments/",
+                                            "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Assignments/",
+                                            # "url": "https://" + school_name + ".staging.trackware.com/my/Assignments/",
+                                            # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Assignments/",
+                                            "name": "Assignments",
+                                            "name_ar": "الواجبات الالكترونية",
+                                            "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png",
+                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg"
+                                        },
+                                        # "Exam": {
+                                        #     "url": "my/exam/",
+                                        #     "arabic_url": "ar_SY/my/exam",
+                                        #     "arabic_name": "امتحانات",
+                                        #     "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png"
+                                        # },
+                                        "Events":
+                                            {"name": "Events",
+                                             "name_ar": "الفعاليات و الانشطة",
+                                             # "url": "https://" + school_name + ".staging.trackware.com/my/Events/",
+                                             # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Events/",
+                                             "url": "https://tst.tracking.trackware.com/my/Events/",
+                                             "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Events/",
+                                             "arabic_name": "الفعاليات و الانشطة",
+                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Events.png",
+                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg"
+                                             },
+                                        "Homeworks":
+                                            {"name": "Homeworks",
+                                             # "url": "https://" + school_name + ".staging.trackware.com/my/Homeworks/",
+                                             # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Homeworks/",
+                                             "url": "https://tst.tracking.trackware.com/my/Homeworks/",
+                                             "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Homeworks/",
+                                             "name_ar": "الواجبات المنزلية",
+                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/worksheets.png",
+                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg"
+                                             },
+                                        "Calendar":
+                                            {"name": "Calendar",
+                                             "url": "https://tst.tracking.trackware.com/my/Calendar/",
+                                             "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Calendar/",
+                                             # "url": "https://" + school_name + ".staging.trackware.com/my/Calendar/",
+                                             # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Calendar/",
+                                             "name_ar": "التقويم",
+                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/School+Calendar.png",
+                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg"
+                                             },
+
+                                        "Clinic":
+                                            {"name": "Clinic",
+                                             "name_ar": "العيادة",
+                                             # "url": "https://" + school_name + ".staging.trackware.com/my/Clinic/",
+                                             # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Clinic/",
+                                             "url": "https://tst.tracking.trackware.com/my/Clinic/",
+                                             "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Clinic/",
+                                             "arabic_name": "العيادة",
+                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
+                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg"
+                                             }
+                                    }
+                                    url_m = {}
+                                    model_list = ( "Badges", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
+                                        "Weekly Plans", 'Online Exams')
+                                    cursor.execute("select name from ir_ui_menu where name in %s", [model_list])
+                                    list = cursor.fetchall()
+                                    res = []
+                                    [res.append(x[0]) for x in list if x[0] not in res]
+                                    model = []
+                                    show_absence = False
+                                    for rec1 in res:
+
+                                        if 'Weekly Plans' == rec1:
+                                            x['Weeklyplans']['arabic_url'] = x['Weeklyplans']['arabic_url'] + str(
+                                                student1[rec]['user_id'])
+                                            x['Weeklyplans']['url'] = x['Weeklyplans']['url'] + str(
+                                                student1[rec]['user_id'])
+                                            model.append(x['Weeklyplans'])
+
+                                        if 'Events' == rec1:
+                                            x['Events']['arabic_url'] = x['Events']['arabic_url'] + str(
+                                                student1[rec]['user_id'])
+                                            x['Events']['url'] = x['Events']['url'] + str(student1[rec]['user_id'])
+                                            model.append(x['Events'])
+                                        if 'Online Exams' == rec1:
+                                            x['Exams']['arabic_url'] = x['Exams']['arabic_url'] + str(
+                                                student1[rec]['user_id'])
+                                            x['Exams']['url'] = x['Exams']['url'] + str(student1[rec]['user_id'])
+                                            model.append(x['Exams'])
+
+                                        if 'Online Assignments' == rec1:
+                                            x['Assignments']['arabic_url'] = x['Assignments']['arabic_url'] + str(
+                                                student1[rec]['user_id'])
+                                            x['Assignments']['url'] = x['Assignments']['url'] + str(
+                                                student1[rec]['user_id'])
+                                            model.append(x['Assignments'])
+
+                                        if 'Homework' == rec1:
+                                            x['Homeworks']['arabic_url'] = x['Homeworks']['arabic_url'] + str(
+                                                student1[rec]['user_id'])
+                                            x['Homeworks']['url'] = x['Homeworks']['url'] + str(student1[rec]['user_id'])
+                                            model.append(x['Homeworks'])
+
+                                        if 'Badges' == rec1:
+                                            x['Badges']['arabic_url'] = x['Badges']['arabic_url'] + str(
+                                                student1[rec]['user_id'])
+                                            x['Badges']['url'] = x['Badges']['url'] + str(student1[rec]['user_id'])
+                                            model.append(x['Badges'])
+
+                                        if 'Calendar' == rec1:
+                                            x['Calendar']['url'] = x['Calendar']['url'] + str(student1[rec]['user_id'])
+                                            x['Calendar']['arabic_url'] = x['Calendar']['arabic_url'] + str(
+                                                student1[rec]['user_id'])
+                                            model.append(x['Calendar'])
+
+                                        if 'Clinic' == rec1:
+                                            x['Clinic']['arabic_url'] = x['Clinic']['arabic_url'] + str(
+                                                student1[rec]['user_id'])
+                                            x['Clinic']['url'] = x['Clinic']['url'] + str(student1[rec]['user_id'])
+                                            model.append(x['Clinic'])
+
+                                    cursor.execute(
+                                        "select name from ir_ui_menu where name ='Tracking'")
+                                    tracking = cursor.fetchall()
+
+                                    if len(tracking) > 0:
+                                        model.append({
+                                            # "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(
+                                            #     student1[rec]['user_id']),
+                                            # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Absence/" + str(
+                                            #     student1[rec]['user_id']),
+                                            "url": "https://tst.tracking.trackware.com/my/Absence/" + str(
+                                                student1[rec]['user_id']),
+                                            "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Absence/" + str(
+                                                student1[rec]['user_id']),
+                                            "name": "Absence",
+                                            "name_ar": "الغياب",
+                                            "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png",
+                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg"
+                                        }
+                                        )
+                                        show_absence = True
+                                    try:
+                                        cursor.execute(
+                                            "select is_portal_exist from school_parent")
+                                        is_portal_exist = cursor.fetchall()
+                                        # sql = """select is_portal_exist from school_parent '"""
+                                    except:
+                                        model = {
+                                            "Absence":
+                                                {
+                                                    # "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(
+                                                    #     student1[rec]['user_id']),
+                                                    # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Absence/" + str(
+                                                    #     student1[rec]['user_id']),
+                                                    "url": "https://tst.tracking.trackware.com/my/Absence/" + str(
+                                                        student1[rec]['user_id']),
+                                                    "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Absence/" + str(
+                                                        student1[rec]['user_id']),
+                                                    "name": "Absence",
+                                                    "name_ar": "الغياب",
+                                                    "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png",
+                                                    "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg"
+                                                }
+
+                                        }
+                                        show_absence = True
+
+                                    if 'by_parents' in student[rec][3]:
+                                        pick = True
+                                    else:
+                                        pick = False
+                                    if 'by_parents' in student[rec][4]:
+                                        drop = True
+                                    else:
+                                        drop = False
+
+                                    student_st = ''
+                                    assistant_id = 0
+                                    assistant_name = ''
+                                    assistant_mobile_number = ''
+                                    driver_mobile_token = ''
+                                    driver_mobile_number = ''
+                                    driver_name = ''
+                                    bus_id = 0
+                                    round_type = ''
+                                    round_name = ''
+                                    if bool(is_active_round):
+                                        student_st = rounds_count_student[0][1] if rounds_count_student else ""
+
+                                        cursor.execute(
+                                            "select name,type,attendant_id,vehicle_id,driver_id from transport_round WHERE id = %s",
+                                            [int(student_round_id)])
+                                        round_info = cursor.fetchall()
+                                        round_type = round_info[0][1]
+                                        round_name = round_info[0][0]
+                                        assistant_id = int(round_info[0][2])
+                                        cursor.execute(
+                                            "select name,mobile_phone from hr_employee WHERE id = %s",
+                                            [assistant_id])
+                                        assistant = cursor.fetchall()
+                                        assistant_mobile_number = assistant[0][1]
+                                        assistant_name = assistant[0][0]
+
+                                        cursor.execute(
+                                            "select name,mobile from res_partner WHERE id = %s",
+                                            [round_info[0][4]])
+                                        driver_info = cursor.fetchall()
+                                        driver_name = driver_info[0][0]
+                                        driver_mobile_number = driver_info[0][1]
+                                        cursor.execute(
+                                            "select bus_no from fleet_vehicle WHERE id = %s",
+                                            [round_info[0][3]])
+                                        fleet_info = cursor.fetchall()
+                                        bus_id = int(fleet_info[0][0])
+                                        # fleet.vehicle
+
+                                    student_grade = None
+                                    # ----------------------
+
+                                    cursor.execute(
+                                        "SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s",
+                                        [student1[rec]['id']])
+                                    student_distribution_line_id = cursor.fetchall()
+                                    if student_distribution_line_id:
+                                        cursor.execute(
+                                            "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = %s",
+                                            [student_distribution_line_id[0][0]])
+                                        student_distribution_line = cursor.fetchall()
+                                        if student_distribution_line:
+                                            cursor.execute(
+                                                "SELECT name FROM public.academic_grade WHERE id = %s",
+                                                [student_distribution_line[0][0]])
+                                            academic_grade = cursor.fetchall()
+                                            student_grade = academic_grade[0][0]
+                                    if student_grade == None:
+                                        cursor.execute(
+                                            "select user_id from student_student where id=%s",
+                                            [student1[rec]['id']])
+                                        user_id_q = cursor.fetchall()
+                                        if user_id_q:
+                                            cursor.execute(
+                                                " select partner_id from res_users where id=%s",
+                                                [user_id_q[0][0]])
+                                            partner_id_q = cursor.fetchall()
+                                            if partner_id_q:
                                                 cursor.execute(
-                                                    "select academic_grade_id from school_class where id=%s",
-                                                    [class_id_q[0][0]])
-                                                academic_grade_id_q = cursor.fetchall()
-                                                if academic_grade_id_q:
+                                                    "select class_id from res_partner where id=%s",
+                                                    [partner_id_q[0][0]])
+                                                class_id_q = cursor.fetchall()
+                                                if class_id_q:
                                                     cursor.execute(
-                                                        "select name from academic_grade where id=%s",
-                                                        [academic_grade_id_q[0][0]])
-                                                    academic_grade_q = cursor.fetchall()
-                                                    student_grade = academic_grade_q[0][0]
-                                    # ---------------------
-                                fname = student1[rec]['display_name_search']
-                                if "Arabic" not in lang:
-                                    fname = student1[rec]['name']
+                                                        "select academic_grade_id from school_class where id=%s",
+                                                        [class_id_q[0][0]])
+                                                    academic_grade_id_q = cursor.fetchall()
+                                                    if academic_grade_id_q:
+                                                        cursor.execute(
+                                                            "select name from academic_grade where id=%s",
+                                                            [academic_grade_id_q[0][0]])
+                                                        academic_grade_q = cursor.fetchall()
+                                                        student_grade = academic_grade_q[0][0]
+                                        # ---------------------
+                                    fname = student1[rec]['display_name_search']
+                                    if "Arabic" not in lang:
+                                        fname = student1[rec]['name']
 
-                                else:
-                                    fname = student1[rec]['name_ar']
+                                    else:
+                                        fname = student1[rec]['name_ar']
 
-                                studen_list.append({
+                                    studen_list.append({
 
-                                    "name": student1[rec]['display_name_search'],
-                                    "fname": fname,
-                                    "id": student1[rec]['id'],
-                                    "user_id": student1[rec]['user_id'],
-                                    "avatar": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
-                                        student1[rec]['image_url']) if student1[rec][
-                                        'image_url'] else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
-                                    "school_id": int(school_id),
-                                    "student_grade": student_grade,
-                                    "drop_off_by_parent": drop,
-                                    "pickup_by_parent": pick,
-                                    "father_id": student1[rec]['father_id'],
-                                    "mother_id": student1[rec]['mother_id'],
-                                    "other_1": 0,
-                                    "other_2": 0,
-                                    "school_name": school[0][0],
-                                    "school_mobile_number": school[0][1],
-                                    "school_lat": str(setting[0][0]),
-                                    "school_lng": str(setting[0][1]),
-                                    "driver_mobile_number": driver_mobile_number,
-                                    "driver_mobile_token": "",
-                                    "driver_name": driver_name,
-                                    "assistant_name": assistant_name,
-                                    "assistant_mobile_number": assistant_mobile_number,
-                                    "bus_id": bus_id,
-                                    "round_type": round_type,
-                                    "is_active": bool(is_active_round),
-                                    "round_name": round_name,
-                                    "round_id": int(student_round_id),
-                                    "assistant_id": assistant_id,
-                                    "route_order": 0,
-                                    "chat_teachers": False,
-                                    "target_lng": "0.0",
-                                    "target_lat": "0.0",
-                                    "license_state": "not_active",
-                                    "trial_days_left": 0,
-                                    "license_days_left": 0,
-                                    "semester_start_date": "",
-                                    "semester_end_date": "",
-                                    "show_add_bus_card": False,
-                                    "allow_upload_students_images": False,
-                                    "show_map": show_map,
-                                    "change_location": bool(setting[0][3]),
-                                    "pickup_request_distance": int(setting[0][2]),
-
-                                    "show_absence": show_absence,
-                                    "student_status": {
-                                        "activity_type": str(student_st),
+                                        "name": student1[rec]['display_name_search'],
+                                        "fname": fname,
+                                        "id": student1[rec]['id'],
+                                        "user_id": student1[rec]['user_id'],
+                                        "avatar": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
+                                            student1[rec]['image_url']) if student1[rec][
+                                            'image_url'] else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
+                                        "school_id": int(school_id),
+                                        "student_grade": student_grade,
+                                        "drop_off_by_parent": drop,
+                                        "pickup_by_parent": pick,
+                                        "father_id": student1[rec]['father_id'],
+                                        "mother_id": student1[rec]['mother_id'],
+                                        "other_1": 0,
+                                        "other_2": 0,
+                                        "school_name": school[0][0],
+                                        "school_mobile_number": school[0][1],
+                                        "school_lat": str(setting[0][0]),
+                                        "school_lng": str(setting[0][1]),
+                                        "driver_mobile_number": driver_mobile_number,
+                                        "driver_mobile_token": "",
+                                        "driver_name": driver_name,
+                                        "assistant_name": assistant_name,
+                                        "assistant_mobile_number": assistant_mobile_number,
+                                        "bus_id": bus_id,
+                                        "round_type": round_type,
+                                        "is_active": bool(is_active_round),
+                                        "round_name": round_name,
                                         "round_id": int(student_round_id),
-                                        "datetime": ""
-                                    },
-                                    # "mobile_numbers": [
-                                    #     {
-                                    #         "mobile": school[0][1],
-                                    #         "name": school[0][0],
-                                    #         "type": "school"
-                                    #     },
-                                    #     {
-                                    #         "mobile": "",
-                                    #         "name": "My Company (San Francisco)",
-                                    #         "type": "school"
-                                    #     },
-                                    #     {
-                                    #         "mobile": "",
-                                    #         "name": "My Company (San Francisco)",
-                                    #         "type": "school"
-                                    #     }
-                                    # ],
-                                    "features": model,
-                                })
+                                        "assistant_id": assistant_id,
+                                        "route_order": 0,
+                                        "chat_teachers": False,
+                                        "target_lng": "0.0",
+                                        "target_lat": "0.0",
+                                        "license_state": "not_active",
+                                        "trial_days_left": 0,
+                                        "license_days_left": 0,
+                                        "semester_start_date": "",
+                                        "semester_end_date": "",
+                                        "show_add_bus_card": False,
+                                        "allow_upload_students_images": False,
+                                        "show_map": show_map,
+                                        "change_location": bool(setting[0][3]),
+                                        "pickup_request_distance": int(setting[0][2]),
 
-                            result = {'message': '', 'students': studen_list, "parent_id": int(parent_id)}
+                                        "show_absence": show_absence,
+                                        "student_status": {
+                                            "activity_type": str(student_st),
+                                            "round_id": int(student_round_id),
+                                            "datetime": ""
+                                        },
+                                        # "mobile_numbers": [
+                                        #     {
+                                        #         "mobile": school[0][1],
+                                        #         "name": school[0][0],
+                                        #         "type": "school"
+                                        #     },
+                                        #     {
+                                        #         "mobile": "",
+                                        #         "name": "My Company (San Francisco)",
+                                        #         "type": "school"
+                                        #     },
+                                        #     {
+                                        #         "mobile": "",
+                                        #         "name": "My Company (San Francisco)",
+                                        #         "type": "school"
+                                        #     }
+                                        # ],
+                                        "features": model,
+                                    })
 
-                            return Response(result)
+                        result = {'message': '', 'students': studen_list, "parent_id": int(parent_id)}
+                        # print("ssssssssssssssssssssss")
+                        return Response(result)
+
                     result = {'status': 'error'}
                     return Response(result)
         result = {'status': 'error'}
@@ -4038,6 +4063,7 @@ def notify(request):
                             # round_id=request.data.get('status')
                             with connections[school_name].cursor() as cursor:
                                 type = "absent-all" if target_rounds == 'both' else "absent"
+
                                 cursor.execute("select  display_name_search from student_student WHERE id = %s",
                                                [student_id])
 
@@ -4086,7 +4112,14 @@ def notify(request):
 
                                     if target_rounds == 'both':
                                         for res in rounds_details:
-
+                                            cursor.execute(
+                                                "select driver_id from transport_round WHERE id = %s",
+                                                [res[1]])
+                                            round_info = cursor.fetchall()
+                                            cursor.execute("select signup_token from res_partner WHERE id = %s",
+                                                           [round_info[0][0]])
+                                            driver_name = cursor.fetchall()
+                                            send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[1])
                                             cursor.execute(
                                                 "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                                 [lat, long, student_id, res[1], when, "absent-all",
@@ -4109,6 +4142,14 @@ def notify(request):
                                         rounds_details = cursor.fetchall()
 
                                         for res in rounds_details:
+                                            cursor.execute(
+                                                "select driver_id from transport_round WHERE id = %s",
+                                                [res[0]])
+                                            round_info = cursor.fetchall()
+                                            cursor.execute("select signup_token from res_partner WHERE id = %s",
+                                                           [round_info[0][0]])
+                                            driver_name = cursor.fetchall()
+                                            send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[0])
                                             cursor.execute(
                                                 "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                                 [lat, long, student_id, res[0], when,
@@ -4230,6 +4271,21 @@ def notify(request):
                         #
                         #
 
+def send_driver_notif(mobile_token,student_id,student_name,round_id):
+    push_service = FCMNotification(
+        api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+    registration_id = mobile_token
+
+    message_title = "absent"
+    message_body = "message_body"
+
+    result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
+                                               message_body=message_body, message_icon="",
+                                               data_message={"json_data": json.dumps(
+                                                   {"student_id": student_id, "status": "absent",
+                                                    "student_name": student_name, "round_id": round_id,
+                                                    "date_time": ""})}
+                                               )
 
 @api_view(['GET'])
 def get_badge(request, student_id):
@@ -4251,23 +4307,38 @@ def get_badge(request, student_id):
                         academic_year = cursor.fetchall()
                         academic_year_ids = []
                         data = []
+                        new_add=False
                         for rec in academic_year:
                             academic_year_ids.append(rec[0])
                         cursor.execute(
-                            "select  school_badge_id,teacher_id,subject_id,date,new_badge,id  from badge_badge WHERE student_id = %s AND year_id in %s  ORDER BY ID DESC",
+                            "select  school_badge_id,teacher_id,subject_id,date,new_badge,id,new_added  from badge_badge WHERE student_id = %s AND year_id in %s  ORDER BY ID DESC",
                             [student_id, tuple(academic_year_ids)])
                         badges = cursor.fetchall()
 
                         for b in badges:
+                            cursor.execute(
+                                "select  *  from student_seen WHERE student_id = %s AND model_name = 'badge.badge' And rec_id = %s   ORDER BY ID DESC",
+                                [student_id, b[5]])
+                            student_seen = cursor.fetchall()
+
+                            # if len(student_seen) > 0:
+                            #     new_add=True
+
+                            new_add = len(student_seen) == 0 or new_add
                             cursor.execute(
                                 "select  name,description,image_url  from school_badge WHERE id = %s ",
                                 [b[0]])
                             school_badge = cursor.fetchall()
 
                             cursor.execute(
-                                "select  name  from hr_employee WHERE id = %s ",
+                                "select  name,image_url,job_id  from hr_employee WHERE id = %s ",
                                 [b[1]])
                             teacher_name = cursor.fetchall()
+                            cursor.execute(
+                                "select  name from hr_job WHERE id = %s ",
+                                [teacher_name[0][2]])
+                            job_name = cursor.fetchall()
+
                             subject_name = ''
                             delta = ''
                             if b[2]:
@@ -4294,10 +4365,14 @@ def get_badge(request, student_id):
                                          'subject': subject_name[0][0] if subject_name else '',
                                          'description': school_badge[0][1],
                                          'new_badge': b[4],
-                                         'disable': delta.days < badge_duration[0][0] if delta else True
+                                         'disable': delta.days < badge_duration[0][0] if delta else True,
+                                         'job_name':job_name[0][0] if  job_name else '',
+                                         'image_teacher':teacher_name[0][1] if teacher_name[0][1] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png",
+
                                          })
 
-                    result = {'result': data}
+                    result = {'result': data, 'new_add': new_add}
+
 
                     return Response(result)
 
@@ -4538,7 +4613,7 @@ def post_attendance(request):
                         arrival_time = request.data.get('arrival_time')
                         base_url = request.data.get('base_url')
                         with connections[school_name].cursor() as cursor:
-                         
+
 
                             attached_files = request.data.get("file")
                             body = json.dumps({"jsonrpc": "2.0",

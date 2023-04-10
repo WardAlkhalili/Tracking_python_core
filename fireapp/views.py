@@ -247,6 +247,7 @@ def twoArgs(message_id,school_name):
 
 
 
+
         result1 = {
             "route": 'Ok'
 
@@ -290,7 +291,44 @@ def send_confirmation_message_to_parent(request):
 
         return Response(result1)
 
+@api_view(['POST'])
+def send_dri(request):
+    if request.method == 'POST':
 
+        mobile_token = request.data.get('mobile_token')
+        student_name = request.data.get('student_name')
+        student_id = request.data.get('student_id')
+        round_id = request.data.get('round_id')
+        if mobile_token:
+            push_service = FCMNotification(
+                api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+            # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
+            registration_id = mobile_token
+
+            message_title = "absent"
+            message_body = "message_body"
+
+            result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
+                                                       message_body=message_body, message_icon="",
+                                                       data_message={"json_data": json.dumps(
+                                                           {"student_id": student_id, "status": "absent",
+                                                            "student_name": student_name, "round_id": round_id,
+                                                            "date_time": ""})}
+                                                       )
+            # mobile_token2=[]
+            #
+            # for e in mobile_token:
+            #     mobile_token2.append(e[0])
+            # if mobile_token2 and not ("token" in mobile_token2):
+
+
+
+
+        result1 = {
+            "route": 'Ok'
+        }
+
+        return Response(result1)
 @api_view(['POST'])
 def send_survey_message_to_parent(request):
     if request.method == 'POST':
