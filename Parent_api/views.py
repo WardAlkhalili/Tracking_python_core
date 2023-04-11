@@ -1486,7 +1486,12 @@ def get_bus_notifition_student_new(school_name, student_name, notifications_text
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "Bus notification",
                                      student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
-
+        elif "The pickup round is started" in notifications_text:
+            if str(student_name) in notifications_text:
+                notifications.append(
+                    get_info_message_new(deadline, notifications_text, avatar, create_date, "Pick-up round",
+                                         student_name, student_id, 0, None, None, '0', notifications_title_ar,
+                                         notifications_text_ar))
         else:
 
             cursor.execute(
@@ -1530,6 +1535,7 @@ def kids_hstory_new(request):
                     notifications = []
                     notifications_not_d = []
                     seen = set()
+
                     for e in parent_id:
                         parent_id = e[0]
                     if db_name:
@@ -4372,6 +4378,7 @@ def get_badge(request, student_id):
                                          })
 
                     result = {'result': data, 'new_add': new_add}
+                    print(result)
 
 
                     return Response(result)
