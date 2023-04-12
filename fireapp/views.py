@@ -305,8 +305,8 @@ def send_dri(request):
             # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
             registration_id = mobile_token
 
-            message_title = "absent"
-            message_body = student_name+"has been picked up by parents"
+            message_title = "Picked up with Parents"
+            message_body = "The student "+student_name+" has been picked up by their parents, so please don't wait for them."
 
             result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
                                                        message_body=message_body, message_icon="",

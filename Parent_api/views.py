@@ -4125,7 +4125,7 @@ def notify(request):
                                             cursor.execute("select signup_token from res_partner WHERE id = %s",
                                                            [round_info[0][0]])
                                             driver_name = cursor.fetchall()
-                                            send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[1])
+                                            send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[1],'both',when)
                                             cursor.execute(
                                                 "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                                 [lat, long, student_id, res[1], when, "absent-all",
@@ -4155,7 +4155,7 @@ def notify(request):
                                             cursor.execute("select signup_token from res_partner WHERE id = %s",
                                                            [round_info[0][0]])
                                             driver_name = cursor.fetchall()
-                                            send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[0])
+                                            send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[0],"morning",when)
                                             cursor.execute(
                                                 "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                                 [lat, long, student_id, res[0], when,
@@ -4277,13 +4277,16 @@ def notify(request):
                         #
                         #
 
-def send_driver_notif(mobile_token,student_id,student_name,round_id):
+def send_driver_notif(mobile_token,student_id,student_name,round_id,type,when):
     push_service = FCMNotification(
         api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
     registration_id = mobile_token
-
-    message_title = "absent"
-    message_body = "message_body"
+    message_title = ""
+    message_body = "The student "+student_name+"will be absent on" +str(when)+". So please do not pass by my home for pickup."
+    if(type=="morning"):
+        message_title = "Absent Only Morning"
+    else:
+        message_title = "Absent All Day "
 
     result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
                                                message_body=message_body, message_icon="",
