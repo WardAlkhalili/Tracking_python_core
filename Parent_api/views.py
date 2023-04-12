@@ -1284,7 +1284,7 @@ def get_school_message_new(student_id, school_name, school_message, student_name
         message_ids = list(dict.fromkeys(message_ids))
         if message_ids:
             cursor.execute(
-                "select  school_message_id,id,read_message,show_message,action_id from school_message_student_student WHERE school_message_id in %s AND student_student_id = %s AND show_message=true",
+                "select DISTINCT ON (school_message_id) school_message_id,id,read_message,show_message,action_id from school_message_student_student WHERE school_message_id in %s AND student_student_id = %s AND show_message=true",
                 [tuple(message_ids), student_id])
             message_student = cursor.fetchall()
             message_id = []
@@ -3822,6 +3822,7 @@ def kids_hstory(request):
                                                             notifications_text = str(
                                                                 sh_message_wizard[message_wizard][0]) if \
                                                             sh_message_wizard[message_wizard][0] else ''
+
 
                                                             if (sh_message_wizard[message_wizard][1] <
                                                                     student_history[0][3]):
