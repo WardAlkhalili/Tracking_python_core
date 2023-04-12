@@ -1671,9 +1671,13 @@ def kids_hstory_new(request):
                                                         car_time = datetime.datetime(datetime.datetime.now().year,
                                                                                      datetime.datetime.now().month,
                                                                                      datetime.datetime.now().day)
+                                                        # if (is_active[0][0] and car_time == date_time_message) or (
+                                                        #         not is_active[0][0] and car_time == date_time_message):
 
                                                         if (is_active[0][0] and car_time == date_time_message) or (
-                                                                not is_active[0][0] and car_time == date_time_message):
+                                                                not is_active[0][0] and car_time >= date_time_message and sh_message_wizard[
+                                                                                                                message_wizard][
+                                                                                                                2] not in "Message from bus"):
 
                                                             cursor.execute(
                                                                 "select  round_schedule_id from transport_participant WHERE student_id = %s",
@@ -1690,6 +1694,7 @@ def kids_hstory_new(request):
                                                                 round_id_student = []
                                                                 for r_id in round_id_tst:
                                                                     round_id_student.append(r_id[0])
+
                                                                 if rec_s in round_id_student:
                                                                     cursor.execute(
                                                                         "select  id,round_id,bus_check_in,time_out,history_id from round_student_history WHERE student_id = %s And driver_waiting is not  null  AND round_id=%s AND bus_check_in is not null AND  datetime >= %s AND  datetime < %s ",
@@ -1711,6 +1716,7 @@ def kids_hstory_new(request):
                                                                         sh_message_wizard[message_wizard][1].year,
                                                                         sh_message_wizard[message_wizard][1].month,
                                                                         sh_message_wizard[message_wizard][1].day + 1)
+
                                                                     if attendance_round_yousef:
                                                                         cursor.execute(
                                                                             "select  id,round_start,round_end,na from round_history WHERE id=%s",
@@ -1766,6 +1772,7 @@ def kids_hstory_new(request):
                                                                         sh_message_wizard[message_wizard][2],
                                                                         deadline, rec_s,
                                                                         attendance_round_yousef, std[0],sh_message_wizard[message_wizard][5],notifications_text_ar)
+
 
                                                         continue
                                                     cursor.execute(
