@@ -489,6 +489,8 @@ def student_pick_up(request):
 
 @api_view(['POST', 'GET'])
 def kids_list(request):
+
+
     if request.method == 'POST':
 
         if request.headers:
@@ -967,7 +969,7 @@ def kids_list(request):
                                         "show_map": show_map,
                                         "change_location": bool(setting[0][3]),
                                         "pickup_request_distance": int(setting[0][2]),
-
+                                        "db": school_name,
                                         "show_absence": show_absence,
                                         "student_status": {
                                             "activity_type": str(student_st),
