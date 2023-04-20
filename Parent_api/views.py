@@ -776,10 +776,10 @@ def kids_list(request):
                                             model.append(x['Clinic'])
 
                                     cursor.execute(
-                                        "select name from ir_ui_menu where name ='Tracking'")
+                                        "select name from ir_ui_menu where name ='Live Tracking'  LIMIT 1")
                                     tracking = cursor.fetchall()
-
                                     if len(tracking) > 0:
+
                                         model.append({
                                             # "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(
                                             #     student1[rec]['user_id']),
@@ -798,8 +798,9 @@ def kids_list(request):
                                         show_absence = True
                                     try:
                                         cursor.execute(
-                                            "select is_portal_exist from school_parent")
+                                            "select is_portal_exist from school_parent  LIMIT 1")
                                         is_portal_exist = cursor.fetchall()
+
                                         # sql = """select is_portal_exist from school_parent '"""
                                     except:
                                         model = {
@@ -1199,7 +1200,9 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
     stutes=stutes_notif
     if stutes=='Read':
         stutes="Mark As UnRead"
-    elif  stutes=='UnRead':
+    elif  stutes=='UnRead' :
+        stutes = "Mark As Read"
+    else:
         stutes = "Mark As Read"
 
     if show==None:
