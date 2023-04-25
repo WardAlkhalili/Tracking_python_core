@@ -683,7 +683,7 @@ def kids_list(request):
                                              "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg"
                                              },
                                         "Homeworks":
-                                            {"name": "Homeworks",
+                                            {"name": "Homework",
                                              # "url": "https://" + school_name + ".staging.trackware.com/my/Homeworks/",
                                              # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Homeworks/",
                                              "url": "https://tst.tracking.trackware.com/my/Homeworks/",
