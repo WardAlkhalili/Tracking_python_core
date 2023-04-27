@@ -103,7 +103,7 @@ def parent_login(request):
             #     'school_id': company_id
             #
             # }
-
+            
             result = {
                 "status": "ok",
                 "kids": [],
@@ -1214,7 +1214,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         notificationsType = 'educational'
     elif notifications_title == 'Pick Up By Parent' or notifications_title == 'Absence':
         notificationsType = 'Absence'
-    elif notifications_title == 'Pick-up round' or notifications_title == 'School Departure' or notifications_title == 'Checkout Notification' or notifications_title == 'No Show Notification' or "has arrived at your home" in notifications_text or "has just reached the school." in notifications_text or "has just been checked into the bus." in notifications_text or notifications_title == "Absence notification" or 'Message from bus no' in notifications_title:
+    elif notifications_title == 'Pick-up round' or notifications_title == 'School Departure' or notifications_title == 'Checkout Notification' or notifications_title == 'No Show Notification' or "has arrived at your home" in notifications_text or "has just reached the school" in notifications_text or "has just been checked into the bus" in notifications_text or notifications_title == "Absence notification" or 'Message from bus no' in notifications_title:
 
         notificationsType = 'tracking'
         if (notifications_title == 'Pick-up round' or notifications_title == 'School Departure'):
@@ -4394,7 +4394,7 @@ def get_badge(request, student_id):
                                          })
 
                     result = {'result': data, 'new_add': new_add}
-                    print(result)
+
 
 
                     return Response(result)
@@ -5597,10 +5597,12 @@ def get_event_form_view_data(request, event, std):
                                 events = cursor.fetchall()
 
                                 data = []
+
                                 cursor.execute(
                                     " select name,state,start_date,maximum_participants,maximum_participants,cost,attached_event,attach_files_event,link,contact_id,supervisor_id,start_date,end_date,start_reg_date,last_reg_date,company_id from school_event where id=%s",
                                     [events[0][1]])
                                 school_event = cursor.fetchall()
+
                                 cursor.execute(
                                     " select currency_id from res_company where id=%s",
                                     [school_event[0][15]])
