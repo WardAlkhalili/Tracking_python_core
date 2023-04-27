@@ -1210,7 +1210,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
 
     notificationsType = ''
     icon_tracking=''
-    if notifications_title == 'Weekly plan' or notifications_title == 'Assignment' or notifications_title == 'Homework' or notifications_title == 'Exam' or notifications_title == 'educational':
+    if notifications_title == 'Weekly Plan' or notifications_title == 'Assignment' or notifications_title == 'Homework' or notifications_title == 'Exam' or notifications_title == 'educational':
         notificationsType = 'educational'
     elif notifications_title == 'Pick Up By Parent' or notifications_title == 'Absence':
         notificationsType = 'Absence'
