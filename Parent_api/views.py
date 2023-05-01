@@ -1057,10 +1057,18 @@ def read_survey(request):
 
                         with connections[school_name].cursor() as cursor:
 
-
                             cursor.execute(
-                                "UPDATE public.survey_user_input SET read_message=not(read_message) WHERE id=%s;",
-                                [ message_id])
+                                " select read_message from survey_user_input where id=%s ",
+                                [message_id])
+                            read_message = cursor.fetchall()
+                            if read_message[0][0]:
+                                cursor.execute(
+                                    "UPDATE public.survey_user_input SET read_message=not(read_message) WHERE id=%s;",
+                                    [ message_id])
+                            else:
+                                cursor.execute(
+                                    "UPDATE public.survey_user_input SET read_message=true WHERE id=%s;",
+                                    [message_id])
 
 
                             result = {
@@ -1136,14 +1144,18 @@ def read_message(request):
 
                         with connections[school_name].cursor() as cursor:
 
-
                             cursor.execute(
-                                "UPDATE public.school_message_student_student SET read_message=not(read_message) WHERE id=%s;",
-                                [ message_id])
+                                " select read_message from school_message_student_student where id=%s ",
+                                [message_id])
+                            read_message = cursor.fetchall()
+                            if read_message[0][0]:
+                                cursor.execute("UPDATE public.school_message_student_student SET read_message=not(read_message) WHERE id=%s;", [message_id])
+                            else:
+                                cursor.execute(
+                                    "UPDATE public.school_message_student_student SET read_message=true WHERE id=%s;",
+                                    [message_id])
 
-
-                            result = {
-                                'status': 'ok', }
+                            result = {'status': 'ok',}
 
                             return Response(result)
                     else:
