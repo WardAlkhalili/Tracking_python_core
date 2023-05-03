@@ -4408,7 +4408,7 @@ def get_badge(request, student_id):
                                          'new_badge': b[4],
                                          'disable': delta.days < badge_duration[0][0] if delta else True,
                                          'job_name':job_name[0][0] if  job_name else '',
-                                         'image_teacher':teacher_name[0][1] if teacher_name[0][1] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png",
+                                         'image_teacher':'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(teacher_name[0][1]) if teacher_name[0][1] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png",
 
                                          })
 
