@@ -1482,17 +1482,13 @@ def get_bus_notifition_student_new(school_name, student_name, notifications_text
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "No Show Notification",
                                      student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
-
         elif "has not checked into the bus" in notifications_text:
 
             if str(student_name) in notifications_text:
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "Absence notification",
                                      student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
-
-
         elif "has arrived at your home and" in notifications_text:
-
             if str(student_name) in notifications_text:
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "Checkout Notification",
@@ -3952,10 +3948,6 @@ def kids_hstory(request):
             return Response(result)
 
 
-
-
-
-
 def get_year(element):
     return element['date_time']
 
@@ -4413,9 +4405,6 @@ def get_badge(request, student_id):
                                          })
 
                     result = {'result': data, 'new_add': new_add}
-
-
-
                     return Response(result)
 
 
