@@ -1928,7 +1928,8 @@ def students_bus_checks(request):
                                                            if  status == 'in' or status == 'near':
 
 
-                                                               if notifications[3]=="true," :
+                                                               if 'true'in notifications[3] or notifications[3]=="true," :
+                                                                 print("ooop00000000000")
                                                                  mobile_token.append(e[0])
                                                                title = 'Bus notification'
                                                                title_ar = "اشعار من الحافلة"
@@ -2179,6 +2180,9 @@ def students_bus_checks(request):
                                                     if not(round_info[0][3] == 'pick_up') and status == 'in':
                                                         continue
                                                     if mobile_token:
+                                                        notifications = list(data['notifications'].split(" "))
+                                                        li = list(data['notifications'].split(","))
+                                                        lang = "ar" if "ar" in li[3] else 'en'
                                                         mobile_token = []
 
                                                         for e in mobile_token1:
@@ -2187,8 +2191,8 @@ def students_bus_checks(request):
                                                         push_service = FCMNotification(
                                                             api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
                                                         registration_id = mobile_token
-                                                        message_title = title if 'en' =="en" else title_ar
-                                                        message_body = message if 'en' =="en" else message_ar
+                                                        message_title = title if lang =="en" else title_ar
+                                                        message_body = message if lang =="en" else message_ar
 
                                                         if mobile_token and not ("token" in mobile_token):
 
