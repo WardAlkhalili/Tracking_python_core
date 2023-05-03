@@ -5571,7 +5571,7 @@ def get_worksheet_form_view_data(request, wsheet, std):
                                          'teacher_name': hr_employee[0][1],
                                          'link': worksheet[0][6] if worksheet[0][6] else '',
                                          'teacher_id': hr_employee[0][0],
-                                         'teacher_image': hr_employee[0][2] if hr_employee[0][
+                                         'teacher_image': 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(hr_employee[0][2]) if hr_employee[0][
                                              2] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png",
                                          'teacher_position': job_name[0][0] if job_name else 'Teacher',
                                          'subject': subject_name[0][0],
