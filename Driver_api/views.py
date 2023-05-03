@@ -1600,6 +1600,9 @@ def set_round_status(request):
 def students_bus_checks(request):
 
     if request.method == 'POST':
+        print("start")
+        # result = {'status': 'OK'}
+        # return Response(result)
         if request.headers:
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
@@ -1607,6 +1610,9 @@ def students_bus_checks(request):
                     db_name = Manager.objects.filter(token=au).values_list('db_name')
                     driver_id = Manager.objects.filter(token=au).values_list('driver_id')
                     if db_name:
+                        print("-------------------------------")
+                        print(request.data)
+                        print("-------------------------------")
                         for e in db_name:
 
                             school_name = e[0]
@@ -1779,13 +1785,14 @@ def students_bus_checks(request):
 
                                                         for e in mobile_token1:
 
-                                                            if status == 'in':
+                                                            if status == 'in' or status == 'near':
                                                                 if data['notifications']['check_in']:
                                                                     mobile_token.append(e[0])
                                                                 title = 'Bus notification'
                                                                 title_ar = "اشعار من الحافلة"
                                                                 if round_info[0][3] != 'pick_up':
                                                                     title = "School Departure"
+                                                                print("1792 qqqqqqqqqqqqqqqqqqqqqqqq")
                                                                 message_ar = "صعد إلى الحافلة" + student_name[0][
                                                                     0] + str(bus_num[
                                                                                  0][0])
@@ -1918,7 +1925,7 @@ def students_bus_checks(request):
 
                                                        for e in mobile_token1:
 
-                                                           if  status == 'in':
+                                                           if  status == 'in' or status == 'near':
 
 
                                                                if notifications[3]=="true," :
@@ -1927,6 +1934,7 @@ def students_bus_checks(request):
                                                                title_ar = "اشعار من الحافلة"
                                                                if round_info[0][3] != 'pick_up':
                                                                    title = "School Departure"
+                                                               print("1993 qqqqqqqqqqqqqqqqqqqqqqqq")
                                                                message_ar = "صعد إلى الحافلة" + student_name[0][
                                                                    0] + str(bus_num[
                                                                                 0][0])
@@ -2074,14 +2082,14 @@ def students_bus_checks(request):
 
                                                 else:
 
-                                                    if status == 'in':
+                                                    if status == 'in' or status == 'near':
                                                         mobile_token.append(e[0])
                                                         title = 'Bus notification'
                                                         title_ar ="اشعار من الحافلة"
                                                         if round_info[0][3] != 'pick_up':
                                                             title = "School Departure"
                                                             title_ar = "اشعار من الحافلة"
-
+                                                        print("2088 qqqqqqqqqqqqqqqqqqqqqqqq")
                                                         message_ar = "صعد إلى الحافلة"+ student_name[0][0] + str(bus_num[
                                                                    0][0])
                                                         message = student_name[0][0] + ' has just been checked into the bus'
@@ -2266,6 +2274,7 @@ def reordered_students(request):
 @api_view(['POST'])
 def notify(request):
     if request.method == 'POST':
+        print(request.data)
         if request.headers:
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
@@ -2443,7 +2452,7 @@ def notify(request):
                                     result = {'status': "ok"}
                                     return Response(result)
                         elif name == 'emergency':
-
+                                print(request.data)
                                 emergency_text = request.data.get('emergency_text')
                                 students_ids = request.data.get('students_ids')
                                 with connections[school_name].cursor() as cursor:
