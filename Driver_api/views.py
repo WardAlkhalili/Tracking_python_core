@@ -1927,7 +1927,7 @@ def students_bus_checks(request):
 
                                                            if  status == 'in' or status == 'near':
 
-
+                                                               print(notifications[3])
                                                                if 'true'in notifications[3] or notifications[3]=="true," :
                                                                  print("ooop00000000000")
                                                                  mobile_token.append(e[0])
