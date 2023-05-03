@@ -32,7 +32,8 @@ import pytz
 import datetime
 from rest_framework import status
 
-
+import urllib.request
+import math
 @api_view(['POST'])
 def parent_login(request):
     if request.method == 'POST':
@@ -492,7 +493,6 @@ def kids_list(request):
 
 
     if request.method == 'POST':
-
         if request.headers:
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
@@ -1609,6 +1609,8 @@ def kids_hstory_new(request):
 
                                 else:
                                     fname = student[4]
+                                # from concurrent.futures import ThreadPoolExecutor
+                               
                                 notifications += get_school_message_new(student[0], school_name, school_message, fname)
                                 notifications += get_student_history_new(student[0], school_name, fname)
                                 cursor.execute(
@@ -4359,6 +4361,11 @@ def get_badge(request, student_id):
                             #     new_add=True
 
                             new_add = len(student_seen) == 0 or new_add
+                            if new_add:
+
+                                cursor.execute(
+                                    "INSERT INTO student_seen(model_name,student_id,rec_id)VALUES (%s,%s,%s);",
+                                    ['badge.badge',student_id,b[5]])
                             cursor.execute(
                                 "select  name,description,image_url  from school_badge WHERE id = %s ",
                                 [b[0]])
@@ -5520,14 +5527,17 @@ def get_worksheet_form_view_data(request, wsheet, std):
                             job_name = cursor.fetchall()
                             # hr.job
                             if worksheet[0][6]:
-                                import urllib.request
-                                import math
+
                                 # importing the module
                                 file = urllib.request.urlopen(worksheet[0][6])
                                 size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
-                                i = int(math.floor(math.log(file.length, 1024)))
-                                p = math.pow(1024, i)
-                                s = round(file.length / p, 2)
+
+                                i=0
+                                s=0
+                                if file.length:
+                                    i = int(math.floor(math.log(file.length, 1024)))
+                                    p = math.pow(1024, i)
+                                    s = round(file.length / p, 2)
                             cursor.execute(
                                 "select id from student_student where id=%s",
                                 [std])
