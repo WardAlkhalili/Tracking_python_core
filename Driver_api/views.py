@@ -1923,7 +1923,6 @@ def students_bus_checks(request):
 
 
                                                                if 'true'in notifications[3] or notifications[3]=="true," :
-
                                                                  mobile_token.append(e[0])
                                                                title = 'Bus notification'
                                                                title_ar = "اشعار من الحافلة"
@@ -2058,7 +2057,9 @@ def students_bus_checks(request):
                                                                        message = ' You are next on the route. ' + student_name[0][ 0] + ' is about to arrive.'
                                                     if not(round_info[0][3] == 'pick_up') and status == 'in':
                                                         continue
-
+                                                    print("2060-----------------------")
+                                                    print(mobile_token1)
+                                                    print(mobile_token)
                                                     if mobile_token1:
                                                         mobile_token = []
                                                         for e in mobile_token1:
@@ -2464,9 +2465,22 @@ def notify(request):
                                         "select  name  from res_partner WHERE id = %s  ",
                                         [driver_id])
                                     driver_id = cursor.fetchall()
-                                    cursor.execute(
-                                        "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,sender_name,message_ar)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                        [round_id,r, 'App\Model\Driver', 'emergency', emergency_text, driver_id[0][0],emergency_text])
+                                    for students in students_ids:
+                                        cursor.execute(
+                                            "select father_id,mother_id,responsible_id_value from student_student WHERE id = %s ",
+                                            [students])
+                                        columns4 = (x.name for x in cursor.description)
+                                        student_student2 = cursor.fetchall()
+                                        for parent_id in student_student2:
+                                            print("kkkkkk",parent_id)
+                                            cursor.execute(
+                                                "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,sender_name,message_ar)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                [round_id, r, 'App\Model\sta' + str(parent_id[0]), 'emergency_student', emergency_text,
+                                                 driver_id[0][0], emergency_text])
+                                    #     'App\Model\sta' + str(parent_id)
+                                    # cursor.execute(
+                                    #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,sender_name,message_ar)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                    #     [round_id,r, 'App\Model\Driver', 'emergency', emergency_text, driver_id[0][0],emergency_text])
                                     result = {'status': "ok"}
                                     return Response(result)
                         elif name == 'changed_location':
