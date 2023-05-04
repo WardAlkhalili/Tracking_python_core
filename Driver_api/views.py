@@ -1303,7 +1303,7 @@ def set_round_status(request):
                                         message_title = "Pick-up round"
                                         message_title_ar = "الجولة الصباحية"
                                         # message_body = student_name[0][0] + "  has just been checked into the bus."
-                                        message_body = "The pickup round is started, please have your children" + \
+                                        message_body = "The pickup round is started, please have your children " + \
                                                        student_name[0][
                                                            0] + " ready."
 
@@ -1600,9 +1600,6 @@ def set_round_status(request):
 def students_bus_checks(request):
 
     if request.method == 'POST':
-        print("start")
-        # result = {'status': 'OK'}
-        # return Response(result)
         if request.headers:
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
@@ -1610,9 +1607,6 @@ def students_bus_checks(request):
                     db_name = Manager.objects.filter(token=au).values_list('db_name')
                     driver_id = Manager.objects.filter(token=au).values_list('driver_id')
                     if db_name:
-                        print("-------------------------------")
-                        print(request.data)
-                        print("-------------------------------")
                         for e in db_name:
 
                             school_name = e[0]
@@ -1792,7 +1786,7 @@ def students_bus_checks(request):
                                                                 title_ar = "اشعار من الحافلة"
                                                                 if round_info[0][3] != 'pick_up':
                                                                     title = "School Departure"
-                                                                print("1792 qqqqqqqqqqqqqqqqqqqqqqqq")
+
                                                                 message_ar = "صعد إلى الحافلة" + student_name[0][
                                                                     0] + str(bus_num[
                                                                                  0][0])
@@ -1829,7 +1823,7 @@ def students_bus_checks(request):
                                                                 message_ar='وصل إلى المنزل.' + student_name[0][
                                                                               0]
                                                                 message = 'The bus ' +str( bus_num[
-                                                                    0]) + 'has arrived at your home and ' + \
+                                                                    0]) + ' has arrived at your home and ' + \
                                                                           student_name[0][
                                                                               0] + ' has been checked out of the bus. '
                                                                 # cursor.execute(
@@ -1927,15 +1921,15 @@ def students_bus_checks(request):
 
                                                            if  status == 'in' or status == 'near':
 
-                                                               print(notifications[3])
+
                                                                if 'true'in notifications[3] or notifications[3]=="true," :
-                                                                 print("ooop00000000000")
+
                                                                  mobile_token.append(e[0])
                                                                title = 'Bus notification'
                                                                title_ar = "اشعار من الحافلة"
                                                                if round_info[0][3] != 'pick_up':
                                                                    title = "School Departure"
-                                                               print("1993 qqqqqqqqqqqqqqqqqqqqqqqq")
+
                                                                message_ar = "صعد إلى الحافلة" + student_name[0][
                                                                    0] + str(bus_num[
                                                                                 0][0])
@@ -2090,7 +2084,7 @@ def students_bus_checks(request):
                                                         if round_info[0][3] != 'pick_up':
                                                             title = "School Departure"
                                                             title_ar = "اشعار من الحافلة"
-                                                        print("2088 qqqqqqqqqqqqqqqqqqqqqqqq")
+
                                                         message_ar = "صعد إلى الحافلة"+ student_name[0][0] + str(bus_num[
                                                                    0][0])
                                                         message = student_name[0][0] + ' has just been checked into the bus'

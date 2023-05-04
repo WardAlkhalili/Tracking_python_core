@@ -1646,9 +1646,14 @@ def kids_hstory_new(request):
                                             pass
                                         else:
                                             student_round_id.append(rec_s)
+                                            # cursor.execute(
+                                            #     "select  message_ar,create_date,type,round_id,id,type_ar,message_en from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
+                                            #     [rec_s, 'emergency', 'App\Model\Driver',
+                                            #      'App\Model\sta' + str(parent_id)])
+                                            # sh_message_wizard = cursor.fetchall()
                                             cursor.execute(
-                                                "select  message_ar,create_date,type,round_id,id,type_ar,message_en from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
-                                                [rec_s, 'emergency', 'App\Model\Driver',
+                                                "select  message_ar,create_date,type,round_id,id,type_ar,message_en from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
+                                                [rec_s, 'emergency',
                                                  'App\Model\sta' + str(parent_id)])
                                             sh_message_wizard = cursor.fetchall()
                                             # save bus message
@@ -3623,9 +3628,14 @@ def kids_hstory(request):
                                             pass
                                         else:
                                             student_round_id.append(rec_s)
+                                            # cursor.execute(
+                                            #     "select  message_ar,create_date,type,round_id,id from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
+                                            #     [rec_s, 'emergency', 'App\Model\Driver',
+                                            #      'App\Model\sta' + str(parent_id)])
+                                            # sh_message_wizard = cursor.fetchall()
                                             cursor.execute(
-                                                "select  message_ar,create_date,type,round_id,id from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
-                                                [rec_s, 'emergency', 'App\Model\Driver',
+                                                "select  message_ar,create_date,type,round_id,id from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
+                                                [rec_s, 'emergency',
                                                  'App\Model\sta' + str(parent_id)])
                                             sh_message_wizard = cursor.fetchall()
                                             # save bus message
