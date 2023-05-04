@@ -1608,11 +1608,9 @@ def students_bus_checks(request):
                     driver_id = Manager.objects.filter(token=au).values_list('driver_id')
                     if db_name:
                         for e in db_name:
-
                             school_name = e[0]
                             school_name = Manager.pincode(school_name)
                             with connections[school_name].cursor() as cursor:
-
                                 students = request.data.get('students')
                                 print(len(students))
                                 print(students)
@@ -1763,6 +1761,8 @@ def students_bus_checks(request):
                                             mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec),
                                                                                          Q(db_name=school_name),
                                                                                          Q(is_active=True)).values_list( 'mobile_token').order_by('-pk')
+                                            print(settings)
+
 
                                             if settings:
 
@@ -2063,6 +2063,7 @@ def students_bus_checks(request):
                                                     print(mobile_token1)
                                                     print(mobile_token)
                                                     if mobile_token1:
+
                                                         mobile_token = []
                                                         for e in mobile_token1:
                                                             mobile_token.append(e[0])
@@ -2072,10 +2073,11 @@ def students_bus_checks(request):
                                                         message_title = title if lang =="en" else title_ar
                                                         message_body = message if lang =="en" else message_ar
                                                         if mobile_token and not ("token" in mobile_token):
-                                                            notify_single_device = push_service.notify_single_device(
-                                                                registration_id=registration_id[0],
-                                                                message_title=message_title,
-                                                                message_body=message_body)
+                                                                print('2076',mobile_token)
+                                                                notify_single_device = push_service.notify_single_device(
+                                                                    registration_id=registration_id[0],
+                                                                    message_title=message_title,
+                                                                    message_body=message_body)
 
 
                                                 else:
@@ -2195,7 +2197,7 @@ def students_bus_checks(request):
                                                         print(mobile_token)
 
                                                         if mobile_token and not ("token" in mobile_token):
-
+                                                            print('2200', mobile_token)
                                                             notify_single_device = push_service.notify_single_device(
                                                                 registration_id=registration_id[0],
                                                                 message_title=message_title,
