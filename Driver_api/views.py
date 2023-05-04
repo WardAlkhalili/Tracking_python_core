@@ -1614,6 +1614,8 @@ def students_bus_checks(request):
                             with connections[school_name].cursor() as cursor:
 
                                 students = request.data.get('students')
+                                print(len(students))
+                                print(students)
 
                                 for rec in students:
 
