@@ -1921,9 +1921,9 @@ def students_bus_checks(request):
 
                                                            if  status == 'in' or status == 'near':
 
-
-                                                               if 'true'in notifications[3] or notifications[3]=="true," :
-                                                                 mobile_token.append(e[0])
+                                                               print(notifications[3])
+                                                               # if 'true'in notifications[3] or notifications[3]=="true," :
+                                                               mobile_token.append(e[0])
                                                                title = 'Bus notification'
                                                                title_ar = "اشعار من الحافلة"
                                                                if round_info[0][3] != 'pick_up':
