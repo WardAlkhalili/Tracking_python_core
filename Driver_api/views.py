@@ -2079,6 +2079,7 @@ def students_bus_checks(request):
                                                 else:
 
                                                     if status == 'in' or status == 'near':
+                                                        print("ssssssssssssssssssss2082",e[0])
                                                         mobile_token.append(e[0])
                                                         title = 'Bus notification'
                                                         title_ar ="اشعار من الحافلة"
@@ -2188,6 +2189,8 @@ def students_bus_checks(request):
                                                         registration_id = mobile_token
                                                         message_title = title if "en" =="en" else title_ar
                                                         message_body = message if "en" =="en" else message_ar
+                                                        print("--------------------------2192")
+                                                        print(mobile_token)
 
                                                         if mobile_token and not ("token" in mobile_token):
 
