@@ -4134,58 +4134,63 @@ def notify(request):
                                         "select id,round_id from round_schedule WHERE id in %s and day_id =%s",
                                         [tuple(r_id), day_id[0][0]])
                                     rounds_details = cursor.fetchall()
+                                    cursor.execute("select activity_type from student_history WHERE student_id = %s and datetime = %s ",
+                                                   [student_id,when])
+                                    student_history = cursor.fetchall()
+                                    result = {'result': "attendance"}
+                                    if not student_history:
+                                        if target_rounds == 'both':
+                                            for res in rounds_details:
+                                                cursor.execute(
+                                                    "select driver_id from transport_round WHERE id = %s",
+                                                    [res[1]])
+                                                round_info = cursor.fetchall()
+                                                cursor.execute("select signup_token from res_partner WHERE id = %s",
+                                                               [round_info[0][0]])
+                                                driver_name = cursor.fetchall()
+                                                send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[1],'both',when)
+                                                cursor.execute(
+                                                    "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                    [lat, long, student_id, res[1], when, "absent-all",
+                                                     notification_id[0][0]])
+                                                cursor.execute(
+                                                    "INSERT INTO round_student_history(student_id,round_id,datetime)VALUES (%s,%s,%s);",
+                                                    [student_id, res[1], when])
 
-                                    if target_rounds == 'both':
-                                        for res in rounds_details:
-                                            cursor.execute(
-                                                "select driver_id from transport_round WHERE id = %s",
-                                                [res[1]])
-                                            round_info = cursor.fetchall()
-                                            cursor.execute("select signup_token from res_partner WHERE id = %s",
-                                                           [round_info[0][0]])
-                                            driver_name = cursor.fetchall()
-                                            send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[1],'both',when)
-                                            cursor.execute(
-                                                "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                [lat, long, student_id, res[1], when, "absent-all",
-                                                 notification_id[0][0]])
-                                            cursor.execute(
-                                                "INSERT INTO round_student_history(student_id,round_id,datetime)VALUES (%s,%s,%s);",
-                                                [student_id, res[1], when])
+                                                cursor.execute(
+                                                    "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
+                                                    ['absent-all', student_id, res[0]])
+                                        else:
+                                            round_id = []
+                                            for rec in rounds_details:
+                                                round_id.append(rec[1])
 
                                             cursor.execute(
-                                                "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
-                                                ['absent-all', student_id, res[0]])
-                                    else:
-                                        round_id = []
-                                        for rec in rounds_details:
-                                            round_id.append(rec[1])
+                                                "select id from transport_round WHERE id in %s and  type=%s",
+                                                [tuple(round_id), 'pick_up'])
+                                            rounds_details = cursor.fetchall()
 
-                                        cursor.execute(
-                                            "select id from transport_round WHERE id in %s and  type=%s",
-                                            [tuple(round_id), 'pick_up'])
-                                        rounds_details = cursor.fetchall()
+                                            for res in rounds_details:
+                                                cursor.execute(
+                                                    "select driver_id from transport_round WHERE id = %s",
+                                                    [res[0]])
+                                                round_info = cursor.fetchall()
+                                                cursor.execute("select signup_token from res_partner WHERE id = %s",
+                                                               [round_info[0][0]])
+                                                driver_name = cursor.fetchall()
+                                                send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[0],"morning",when)
+                                                cursor.execute(
+                                                    "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                                    [lat, long, student_id, res[0], when,
+                                                     'absent', notification_id[0][0]])
+                                                cursor.execute(
+                                                    "INSERT INTO round_student_history( student_id, round_id,datetime)VALUES (%s,%s,%s);",
+                                                    [student_id, res[0], when])
+                                                cursor.execute(
+                                                    "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
+                                                    ['absent', student_id, res[0]])
+                                        result = {'result': "ok"}
 
-                                        for res in rounds_details:
-                                            cursor.execute(
-                                                "select driver_id from transport_round WHERE id = %s",
-                                                [res[0]])
-                                            round_info = cursor.fetchall()
-                                            cursor.execute("select signup_token from res_partner WHERE id = %s",
-                                                           [round_info[0][0]])
-                                            driver_name = cursor.fetchall()
-                                            send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[0],"morning",when)
-                                            cursor.execute(
-                                                "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                [lat, long, student_id, res[0], when,
-                                                 'absent', notification_id[0][0]])
-                                            cursor.execute(
-                                                "INSERT INTO round_student_history( student_id, round_id,datetime)VALUES (%s,%s,%s);",
-                                                [student_id, res[0], when])
-                                            cursor.execute(
-                                                "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
-                                                ['absent', student_id, res[0]])
-                                result = {'result': "ok"}
 
                                 return Response(result)
                         elif name == 'changed_location':
