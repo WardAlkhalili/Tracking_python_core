@@ -1519,12 +1519,13 @@ def get_bus_notifition_student_new(school_name, student_name, notifications_text
                 else:
                     time = attendance_round[0][3]
             notifications_title_ar = str(student_name) + " " + str(bus_num) + "   " + "رسالة من الحافلة رقم . "
-            if time:
-                if time > deadline:
-                    notifications.append(
-                        get_info_message_new(deadline, notifications_text, avatar, create_date,
-                                         "Message from bus no. " + str(
-                                             bus_num[0][0]) + "  " + str(student_name), student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
+            if 'emergency_student'+str(student_id) != notifications_title:
+                if time:
+                    if time > deadline:
+                        notifications.append(
+                            get_info_message_new(deadline, notifications_text, avatar, create_date,
+                                             "Message from bus no. " + str(
+                                                 bus_num[0][0]) + "  " + str(student_name), student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
 
 
             else:
@@ -1656,6 +1657,7 @@ def kids_hstory_new(request):
                                                 [rec_s, 'emergency',
                                                  'App\Model\sta' + str(parent_id)])
                                             sh_message_wizard = cursor.fetchall()
+
                                             # save bus message
                                             for message_wizard in range(len(sh_message_wizard)):
                                                 avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
@@ -1666,245 +1668,265 @@ def kids_hstory_new(request):
                                                     else:
                                                         fname = std[4]
 
-                                                    cursor.execute(
-                                                        "select  id,round_id,bus_check_in,time_out,history_id from round_student_history WHERE student_id = %s And driver_waiting is not  null  AND round_id=%s AND bus_check_in is  null AND  datetime >= %s AND  datetime < %s ",
-                                                        [std[0], rec, datetime.datetime(
-                                                            sh_message_wizard[message_wizard][1].year,
-                                                            sh_message_wizard[message_wizard][1].month,
-                                                            sh_message_wizard[message_wizard][1].day),
-                                                         datetime.datetime(
-                                                             sh_message_wizard[message_wizard][1].year,
-                                                             sh_message_wizard[message_wizard][1].month,
-                                                             sh_message_wizard[message_wizard][1].day + 1)])
-                                                    attendance_round = cursor.fetchall()
-
-                                                    if not attendance_round:
-                                                        cursor.execute(
-                                                            "select  is_active,type,write_date from transport_round WHERE id = %s  ",
-                                                            [rec_s])
-                                                        is_active = cursor.fetchall()
-                                                        date_time_message = datetime.datetime(
-                                                            sh_message_wizard[message_wizard][1].year,
-                                                            sh_message_wizard[message_wizard][1].month,
-                                                            sh_message_wizard[message_wizard][1].day)
-
-                                                        car_time = datetime.datetime(datetime.datetime.now().year,
-                                                                                     datetime.datetime.now().month,
-                                                                                     datetime.datetime.now().day)
-                                                        # if (is_active[0][0] and car_time == date_time_message) or (
-                                                        #         not is_active[0][0] and car_time == date_time_message):
-
-                                                        if (is_active[0][0] and car_time == date_time_message) or (
-                                                                not is_active[0][0] and car_time >= date_time_message and sh_message_wizard[
-                                                                                                                message_wizard][
-                                                                                                                2] not in "Message from bus"):
-
-                                                            cursor.execute(
-                                                                "select  round_schedule_id from transport_participant WHERE student_id = %s",
-                                                                [std[0]])
-                                                            round_schedule_id_tst = cursor.fetchall()
-                                                            schedule_id = []
-                                                            for cha_round_s in round_schedule_id_tst:
-                                                                schedule_id.append(cha_round_s[0])
-                                                            if schedule_id:
-                                                                cursor.execute(
-                                                                    "select  round_id from round_schedule WHERE id in %s",
-                                                                    [tuple(schedule_id)])
-                                                                round_id_tst = cursor.fetchall()
-                                                                round_id_student = []
-                                                                for r_id in round_id_tst:
-                                                                    round_id_student.append(r_id[0])
-
-                                                                if rec_s in round_id_student:
-                                                                    cursor.execute(
-                                                                        "select  id,round_id,bus_check_in,time_out,history_id from round_student_history WHERE student_id = %s And driver_waiting is not  null  AND round_id=%s AND bus_check_in is not null AND  datetime >= %s AND  datetime < %s ",
-                                                                        [std[0], rec, datetime.datetime(
-                                                                            sh_message_wizard[message_wizard][1].year,
-                                                                            sh_message_wizard[message_wizard][1].month,
-                                                                            sh_message_wizard[message_wizard][1].day),
-                                                                         datetime.datetime(
-                                                                             sh_message_wizard[message_wizard][1].year,
-                                                                             sh_message_wizard[message_wizard][1].month,
-                                                                             sh_message_wizard[message_wizard][
-                                                                                 1].day + 1)])
-                                                                    attendance_round_yousef = cursor.fetchall()
-                                                                    start = datetime.datetime(
-                                                                        sh_message_wizard[message_wizard][1].year,
-                                                                        sh_message_wizard[message_wizard][1].month,
-                                                                        sh_message_wizard[message_wizard][1].day)
-                                                                    end = datetime.datetime(
-                                                                        sh_message_wizard[message_wizard][1].year,
-                                                                        sh_message_wizard[message_wizard][1].month,
-                                                                        sh_message_wizard[message_wizard][1].day + 1)
-
-                                                                    if attendance_round_yousef:
-                                                                        cursor.execute(
-                                                                            "select  id,round_start,round_end,na from round_history WHERE id=%s",
-                                                                            [attendance_round_yousef[0][4]])
-                                                                        round_history = cursor.fetchall()
-                                                                        cursor.execute(
-                                                                            "select  activity_type,lat,long,datetime from student_history WHERE round_id = %s and student_id=%s and history_id = %s ORDER BY ID DESC  ",
-                                                                            [rec_s, std[0], round_history[0][0]])
-                                                                        student_history = cursor.fetchall()
-
-                                                                        cursor.execute(
-                                                                            "select  is_active,type,write_date from transport_round WHERE id = %s  ",
-                                                                            [rec_s])
-                                                                        is_active = cursor.fetchall()
-                                                                        cursor.execute(
-                                                                            "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and datetime >= %s and datetime <= %s   ORDER BY ID DESC LIMIT 1 ",
-                                                                            [rec_s, std[0],
-                                                                             start, end])
-                                                                        student_history1 = cursor.fetchall()
-
-                                                                    # if is_active[0][1] == 'pick_up':
-                                                                    #     print("ssssssssssss222",student_history,std[1])
-                                                                    #     if (student_history[0][0] == 'absent-all' or
-                                                                    #         student_history[0][0] == 'in' or
-                                                                    #         student_history[0][0] == 'Onboard' or
-                                                                    #         student_history[0][0] == 'absent' or
-                                                                    #         student_history[0][0] == 'no-show') and (
-                                                                    #             sh_message_wizard[message_wizard][1] <
-                                                                    #             student_history[0][3]):
-                                                                    #         continue
-
-                                                                    cursor.execute(
-                                                                        "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and datetime >= %s and datetime <= %s   ORDER BY ID DESC LIMIT 1 ",
-                                                                        [rec_s, std[0],
-                                                                         start, end])
-                                                                    student_history1 = cursor.fetchall()
-
-                                                                    if student_history1:
-                                                                        if student_history1[0][0] == 'absent' or \
-                                                                                student_history1[0][0] == 'absent-all':
-                                                                            continue
-
-                                                                    deadline = sh_message_wizard[message_wizard][1]
-                                                                    notifications_text_ar = str(
-                                                                        sh_message_wizard[message_wizard][0]) if \
-                                                                        sh_message_wizard[message_wizard][0] else ''
-                                                                    notifications_text = str(
-                                                                        sh_message_wizard[message_wizard][6]) if \
-                                                                        sh_message_wizard[message_wizard][6] else ''
-                                                                    notifications += get_bus_notifition_student_new(
-                                                                        school_name, fname,
-                                                                        notifications_text,
-                                                                        sh_message_wizard[message_wizard][2],
-                                                                        deadline, rec_s,
-                                                                        attendance_round_yousef, std[0],sh_message_wizard[message_wizard][5],notifications_text_ar)
-
-
-                                                        continue
-                                                    cursor.execute(
-                                                        "select  id,round_start,round_end,na from round_history WHERE id=%s",
-                                                        [attendance_round[0][4]])
-                                                    round_history = cursor.fetchall()
-                                                    cursor.execute(
-                                                        "select  activity_type,lat,long,datetime from student_history WHERE round_id = %s and student_id=%s and history_id = %s ORDER BY ID DESC LIMIT 1 ",
-                                                        [rec_s, std[0], round_history[0][0]])
-                                                    student_history = cursor.fetchall()
-
-                                                    cursor.execute(
-                                                        "select  is_active,type,write_date from transport_round WHERE id = %s  ",
-                                                        [rec_s])
-                                                    is_active = cursor.fetchall()
-                                                    if is_active[0][0]:
-                                                        if sh_message_wizard[message_wizard][1] < round_history[0][1]:
-                                                            deadline = sh_message_wizard[message_wizard][1]
-                                                            notifications_text = str(
-                                                                sh_message_wizard[message_wizard][6]) if \
-                                                                sh_message_wizard[message_wizard][6] else ''
-                                                            notifications_text_ar = str(
-                                                                sh_message_wizard[message_wizard][0]) if \
-                                                                sh_message_wizard[message_wizard][0] else ''
-                                                            notifications += get_bus_notifition_student_new(school_name,
-                                                                                                        fname,
-                                                                                                        notifications_text,
-                                                                                                        sh_message_wizard[
-                                                                                                            message_wizard][
-                                                                                                            2],
-                                                                                                        deadline, rec_s,
-                                                                                                        attendance_round,
-                                                                                                        std[0], sh_message_wizard[
-                                                                                                            message_wizard][
-                                                                                                            5],notifications_text_ar)
-                                                        if is_active[0][1] == 'pick_up':
-                                                            if (student_history[0][0] == 'absent-all' or
-                                                                student_history[0][0] == 'in' or
-                                                                student_history[0][0] == 'Onboard' or
-                                                                student_history[0][0] == 'absent' or
-                                                                student_history[0][0] == 'no-show') and (
-                                                                    sh_message_wizard[message_wizard][1] >
-                                                                    student_history[0][3]):
-                                                                continue
-                                                            deadline = sh_message_wizard[message_wizard][1]
-                                                            notifications_text = str(
-                                                                sh_message_wizard[message_wizard][6]) if \
-                                                                sh_message_wizard[message_wizard][6] else ''
-                                                            notifications_text_ar = str(
-                                                                sh_message_wizard[message_wizard][0]) if \
-                                                                sh_message_wizard[message_wizard][0] else ''
-                                                            notifications += get_bus_notifition_student_new(school_name,
-                                                                                                        fname,
-                                                                                                        notifications_text,
-                                                                                                        sh_message_wizard[
-                                                                                                            message_wizard][
-                                                                                                            2],
-                                                                                                        deadline, rec_s,
-                                                                                                        attendance_round,
-                                                                                                        std[0],sh_message_wizard[
-                                                                                                            message_wizard][5],notifications_text_ar)
-                                                        else:
-
-                                                            if (student_history[0][0] == 'absent-all' or
-                                                                student_history[0][0] == 'out' or
-                                                                student_history[0][0] == 'Offboard' or
-                                                                student_history[0][0] == 'absent' or
-                                                                student_history[0][0] == 'no-show') and (
-                                                                    sh_message_wizard[message_wizard][1] >
-                                                                    student_history[0][3]):
-                                                                continue
-                                                            deadline = sh_message_wizard[message_wizard][1]
-                                                            notifications_text = str(
-                                                                sh_message_wizard[message_wizard][6]) if \
-                                                                sh_message_wizard[message_wizard][6] else ''
-                                                            notifications_text_ar = str(
-                                                                sh_message_wizard[message_wizard][0]) if \
-                                                                sh_message_wizard[message_wizard][0] else ''
-                                                            notifications += get_bus_notifition_student_new(school_name,
-                                                                                                        fname,
-                                                                                                        notifications_text,
-                                                                                                        sh_message_wizard[
-                                                                                                            message_wizard][
-                                                                                                            2],
-                                                                                                        deadline, rec_s,
-                                                                                                        attendance_round,
-                                                                                                        std[0],  sh_message_wizard[
-                                                                                                            message_wizard][
-                                                                                                            5],notifications_text_ar)
-                                                    else:
-                                                        if sh_message_wizard[message_wizard][1] < is_active[0][2]:
-                                                            deadline = sh_message_wizard[message_wizard][1]
-                                                            notifications_text = str(
-                                                                sh_message_wizard[message_wizard][6]) if \
-                                                            sh_message_wizard[message_wizard][6] else ''
-                                                            notifications_text_ar = str(
-                                                                sh_message_wizard[message_wizard][0]) if \
-                                                                sh_message_wizard[message_wizard][0] else ''
-                                                            if (sh_message_wizard[message_wizard][1] <
-                                                                    student_history[0][3]):
-                                                                notifications += get_bus_notifition_student_new(school_name,
-                                                                                                            fname,
-                                                                                                            notifications_text,
-                                                                                                            sh_message_wizard[
-                                                                                                                message_wizard][
-                                                                                                                2],
-                                                                                                            deadline,
-                                                                                                            rec_s,
-                                                                                                            attendance_round,
-                                                                                                            std[0],sh_message_wizard[
-                                                                                                                message_wizard][
-                                                                                                                5],notifications_text_ar)
+                                                    deadline = sh_message_wizard[message_wizard][1]
+                                                    notifications_text = str(
+                                                        sh_message_wizard[message_wizard][6]) if \
+                                                        sh_message_wizard[message_wizard][6] else ''
+                                                    notifications_text_ar = str(
+                                                        sh_message_wizard[message_wizard][0]) if \
+                                                        sh_message_wizard[message_wizard][0] else ''
+                                                    notifications += get_bus_notifition_student_new(school_name,
+                                                                                                    fname,
+                                                                                                    notifications_text,
+                                                                                                    sh_message_wizard[
+                                                                                                        message_wizard][
+                                                                                                        2],
+                                                                                                    deadline, rec_s,
+                                                                                                    None,
+                                                                                                    std[0],
+                                                                                                    sh_message_wizard[
+                                                                                                        message_wizard][
+                                                                                                        5],
+                                                                                                    notifications_text_ar)
+                                                    # cursor.execute(
+                                                    #     "select  id,round_id,bus_check_in,time_out,history_id from round_student_history WHERE student_id = %s And driver_waiting is not  null  AND round_id=%s AND bus_check_in is  null AND  datetime >= %s AND  datetime < %s ",
+                                                    #     [std[0], rec, datetime.datetime(
+                                                    #         sh_message_wizard[message_wizard][1].year,
+                                                    #         sh_message_wizard[message_wizard][1].month,
+                                                    #         sh_message_wizard[message_wizard][1].day),
+                                                    #      datetime.datetime(
+                                                    #          sh_message_wizard[message_wizard][1].year,
+                                                    #          sh_message_wizard[message_wizard][1].month,
+                                                    #          sh_message_wizard[message_wizard][1].day + 1)])
+                                                    # attendance_round = cursor.fetchall()
+                                                    #
+                                                    # if not attendance_round:
+                                                    #     cursor.execute(
+                                                    #         "select  is_active,type,write_date from transport_round WHERE id = %s  ",
+                                                    #         [rec_s])
+                                                    #     is_active = cursor.fetchall()
+                                                    #     date_time_message = datetime.datetime(
+                                                    #         sh_message_wizard[message_wizard][1].year,
+                                                    #         sh_message_wizard[message_wizard][1].month,
+                                                    #         sh_message_wizard[message_wizard][1].day)
+                                                    #
+                                                    #     car_time = datetime.datetime(datetime.datetime.now().year,
+                                                    #                                  datetime.datetime.now().month,
+                                                    #                                  datetime.datetime.now().day)
+                                                    #     # if (is_active[0][0] and car_time == date_time_message) or (
+                                                    #     #         not is_active[0][0] and car_time == date_time_message):
+                                                    #
+                                                    #     if (is_active[0][0] and car_time == date_time_message) or (
+                                                    #             not is_active[0][0] and car_time >= date_time_message and sh_message_wizard[
+                                                    #                                                             message_wizard][
+                                                    #                                                             2] not in "Message from bus"):
+                                                    #
+                                                    #         cursor.execute(
+                                                    #             "select  round_schedule_id from transport_participant WHERE student_id = %s",
+                                                    #             [std[0]])
+                                                    #         round_schedule_id_tst = cursor.fetchall()
+                                                    #         schedule_id = []
+                                                    #         for cha_round_s in round_schedule_id_tst:
+                                                    #             schedule_id.append(cha_round_s[0])
+                                                    #         if schedule_id:
+                                                    #             cursor.execute(
+                                                    #                 "select  round_id from round_schedule WHERE id in %s",
+                                                    #                 [tuple(schedule_id)])
+                                                    #             round_id_tst = cursor.fetchall()
+                                                    #             round_id_student = []
+                                                    #             for r_id in round_id_tst:
+                                                    #                 round_id_student.append(r_id[0])
+                                                    #
+                                                    #             if rec_s in round_id_student:
+                                                    #                 cursor.execute(
+                                                    #                     "select  id,round_id,bus_check_in,time_out,history_id from round_student_history WHERE student_id = %s And driver_waiting is not  null  AND round_id=%s AND bus_check_in is not null AND  datetime >= %s AND  datetime < %s ",
+                                                    #                     [std[0], rec, datetime.datetime(
+                                                    #                         sh_message_wizard[message_wizard][1].year,
+                                                    #                         sh_message_wizard[message_wizard][1].month,
+                                                    #                         sh_message_wizard[message_wizard][1].day),
+                                                    #                      datetime.datetime(
+                                                    #                          sh_message_wizard[message_wizard][1].year,
+                                                    #                          sh_message_wizard[message_wizard][1].month,
+                                                    #                          sh_message_wizard[message_wizard][
+                                                    #                              1].day + 1)])
+                                                    #                 attendance_round_yousef = cursor.fetchall()
+                                                    #                 start = datetime.datetime(
+                                                    #                     sh_message_wizard[message_wizard][1].year,
+                                                    #                     sh_message_wizard[message_wizard][1].month,
+                                                    #                     sh_message_wizard[message_wizard][1].day)
+                                                    #                 end = datetime.datetime(
+                                                    #                     sh_message_wizard[message_wizard][1].year,
+                                                    #                     sh_message_wizard[message_wizard][1].month,
+                                                    #                     sh_message_wizard[message_wizard][1].day + 1)
+                                                    #
+                                                    #                 if attendance_round_yousef:
+                                                    #                     cursor.execute(
+                                                    #                         "select  id,round_start,round_end,na from round_history WHERE id=%s",
+                                                    #                         [attendance_round_yousef[0][4]])
+                                                    #                     round_history = cursor.fetchall()
+                                                    #                     cursor.execute(
+                                                    #                         "select  activity_type,lat,long,datetime from student_history WHERE round_id = %s and student_id=%s and history_id = %s ORDER BY ID DESC  ",
+                                                    #                         [rec_s, std[0], round_history[0][0]])
+                                                    #                     student_history = cursor.fetchall()
+                                                    #
+                                                    #                     cursor.execute(
+                                                    #                         "select  is_active,type,write_date from transport_round WHERE id = %s  ",
+                                                    #                         [rec_s])
+                                                    #                     is_active = cursor.fetchall()
+                                                    #                     cursor.execute(
+                                                    #                         "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and datetime >= %s and datetime <= %s   ORDER BY ID DESC LIMIT 1 ",
+                                                    #                         [rec_s, std[0],
+                                                    #                          start, end])
+                                                    #                     student_history1 = cursor.fetchall()
+                                                    #
+                                                    #                 # if is_active[0][1] == 'pick_up':
+                                                    #                 #     print("ssssssssssss222",student_history,std[1])
+                                                    #                 #     if (student_history[0][0] == 'absent-all' or
+                                                    #                 #         student_history[0][0] == 'in' or
+                                                    #                 #         student_history[0][0] == 'Onboard' or
+                                                    #                 #         student_history[0][0] == 'absent' or
+                                                    #                 #         student_history[0][0] == 'no-show') and (
+                                                    #                 #             sh_message_wizard[message_wizard][1] <
+                                                    #                 #             student_history[0][3]):
+                                                    #                 #         continue
+                                                    #
+                                                    #                 cursor.execute(
+                                                    #                     "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and datetime >= %s and datetime <= %s   ORDER BY ID DESC LIMIT 1 ",
+                                                    #                     [rec_s, std[0],
+                                                    #                      start, end])
+                                                    #                 student_history1 = cursor.fetchall()
+                                                    #
+                                                    #                 if student_history1:
+                                                    #                     if student_history1[0][0] == 'absent' or \
+                                                    #                             student_history1[0][0] == 'absent-all':
+                                                    #                         continue
+                                                    #
+                                                    #                 deadline = sh_message_wizard[message_wizard][1]
+                                                    #                 notifications_text_ar = str(
+                                                    #                     sh_message_wizard[message_wizard][0]) if \
+                                                    #                     sh_message_wizard[message_wizard][0] else ''
+                                                    #                 notifications_text = str(
+                                                    #                     sh_message_wizard[message_wizard][6]) if \
+                                                    #                     sh_message_wizard[message_wizard][6] else ''
+                                                    #                 notifications += get_bus_notifition_student_new(
+                                                    #                     school_name, fname,
+                                                    #                     notifications_text,
+                                                    #                     sh_message_wizard[message_wizard][2],
+                                                    #                     deadline, rec_s,
+                                                    #                     attendance_round_yousef, std[0],sh_message_wizard[message_wizard][5],notifications_text_ar)
+                                                    #
+                                                    #
+                                                    #     continue
+                                                    # cursor.execute(
+                                                    #     "select  id,round_start,round_end,na from round_history WHERE id=%s",
+                                                    #     [attendance_round[0][4]])
+                                                    # round_history = cursor.fetchall()
+                                                    # cursor.execute(
+                                                    #     "select  activity_type,lat,long,datetime from student_history WHERE round_id = %s and student_id=%s and history_id = %s ORDER BY ID DESC LIMIT 1 ",
+                                                    #     [rec_s, std[0], round_history[0][0]])
+                                                    # student_history = cursor.fetchall()
+                                                    #
+                                                    # cursor.execute(
+                                                    #     "select  is_active,type,write_date from transport_round WHERE id = %s  ",
+                                                    #     [rec_s])
+                                                    # is_active = cursor.fetchall()
+                                                    # if is_active[0][0]:
+                                                    #     if sh_message_wizard[message_wizard][1] < round_history[0][1]:
+                                                    #         deadline = sh_message_wizard[message_wizard][1]
+                                                    #         notifications_text = str(
+                                                    #             sh_message_wizard[message_wizard][6]) if \
+                                                    #             sh_message_wizard[message_wizard][6] else ''
+                                                    #         notifications_text_ar = str(
+                                                    #             sh_message_wizard[message_wizard][0]) if \
+                                                    #             sh_message_wizard[message_wizard][0] else ''
+                                                    #         notifications += get_bus_notifition_student_new(school_name,
+                                                    #                                                     fname,
+                                                    #                                                     notifications_text,
+                                                    #                                                     sh_message_wizard[
+                                                    #                                                         message_wizard][
+                                                    #                                                         2],
+                                                    #                                                     deadline, rec_s,
+                                                    #                                                     attendance_round,
+                                                    #                                                     std[0], sh_message_wizard[
+                                                    #                                                         message_wizard][
+                                                    #                                                         5],notifications_text_ar)
+                                                    #     if is_active[0][1] == 'pick_up':
+                                                    #         if (student_history[0][0] == 'absent-all' or
+                                                    #             student_history[0][0] == 'in' or
+                                                    #             student_history[0][0] == 'Onboard' or
+                                                    #             student_history[0][0] == 'absent' or
+                                                    #             student_history[0][0] == 'no-show') and (
+                                                    #                 sh_message_wizard[message_wizard][1] >
+                                                    #                 student_history[0][3]):
+                                                    #             continue
+                                                    #         deadline = sh_message_wizard[message_wizard][1]
+                                                    #         notifications_text = str(
+                                                    #             sh_message_wizard[message_wizard][6]) if \
+                                                    #             sh_message_wizard[message_wizard][6] else ''
+                                                    #         notifications_text_ar = str(
+                                                    #             sh_message_wizard[message_wizard][0]) if \
+                                                    #             sh_message_wizard[message_wizard][0] else ''
+                                                    #         notifications += get_bus_notifition_student_new(school_name,
+                                                    #                                                     fname,
+                                                    #                                                     notifications_text,
+                                                    #                                                     sh_message_wizard[
+                                                    #                                                         message_wizard][
+                                                    #                                                         2],
+                                                    #                                                     deadline, rec_s,
+                                                    #                                                     attendance_round,
+                                                    #                                                     std[0],sh_message_wizard[
+                                                    #                                                         message_wizard][5],notifications_text_ar)
+                                                    #     else:
+                                                    #
+                                                    #         if (student_history[0][0] == 'absent-all' or
+                                                    #             student_history[0][0] == 'out' or
+                                                    #             student_history[0][0] == 'Offboard' or
+                                                    #             student_history[0][0] == 'absent' or
+                                                    #             student_history[0][0] == 'no-show') and (
+                                                    #                 sh_message_wizard[message_wizard][1] >
+                                                    #                 student_history[0][3]):
+                                                    #             continue
+                                                    #         deadline = sh_message_wizard[message_wizard][1]
+                                                    #         notifications_text = str(
+                                                    #             sh_message_wizard[message_wizard][6]) if \
+                                                    #             sh_message_wizard[message_wizard][6] else ''
+                                                    #         notifications_text_ar = str(
+                                                    #             sh_message_wizard[message_wizard][0]) if \
+                                                    #             sh_message_wizard[message_wizard][0] else ''
+                                                    #         notifications += get_bus_notifition_student_new(school_name,
+                                                    #                                                     fname,
+                                                    #                                                     notifications_text,
+                                                    #                                                     sh_message_wizard[
+                                                    #                                                         message_wizard][
+                                                    #                                                         2],
+                                                    #                                                     deadline, rec_s,
+                                                    #                                                     attendance_round,
+                                                    #                                                     std[0],  sh_message_wizard[
+                                                    #                                                         message_wizard][
+                                                    #                                                         5],notifications_text_ar)
+                                                    # else:
+                                                    #     if sh_message_wizard[message_wizard][1] < is_active[0][2]:
+                                                    #         deadline = sh_message_wizard[message_wizard][1]
+                                                    #         notifications_text = str(
+                                                    #             sh_message_wizard[message_wizard][6]) if \
+                                                    #         sh_message_wizard[message_wizard][6] else ''
+                                                    #         notifications_text_ar = str(
+                                                    #             sh_message_wizard[message_wizard][0]) if \
+                                                    #             sh_message_wizard[message_wizard][0] else ''
+                                                    #         if (sh_message_wizard[message_wizard][1] <
+                                                    #                 student_history[0][3]):
+                                                    #             notifications += get_bus_notifition_student_new(school_name,
+                                                    #                                                         fname,
+                                                    #                                                         notifications_text,
+                                                    #                                                         sh_message_wizard[
+                                                    #                                                             message_wizard][
+                                                    #                                                             2],
+                                                    #                                                         deadline,
+                                                    #                                                         rec_s,
+                                                    #                                                         attendance_round,
+                                                    #                                                         std[0],sh_message_wizard[
+                                                    #                                                             message_wizard][
+                                                    #                                                             5],notifications_text_ar)
 
                                         if student_round_h:
 

@@ -1612,12 +1612,7 @@ def students_bus_checks(request):
                             school_name = Manager.pincode(school_name)
                             with connections[school_name].cursor() as cursor:
                                 students = request.data.get('students')
-                                print(len(students))
-                                print(students)
-
                                 for rec in students:
-
-
                                     round_id = rec['round_id']
                                     status = rec['status']
                                     # day_count = rec['day_count']
@@ -1761,9 +1756,6 @@ def students_bus_checks(request):
                                             mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec),
                                                                                          Q(db_name=school_name),
                                                                                          Q(is_active=True)).values_list( 'mobile_token').order_by('-pk')
-                                            print(settings)
-
-
                                             if settings:
 
                                                 if not('None' in str(settings)) :
@@ -1922,13 +1914,12 @@ def students_bus_checks(request):
                                                        for e in mobile_token1:
 
                                                            if  status == 'in' or status == 'near':
-
-                                                               print(notifications[3])
-                                                               # if 'true'in notifications[3] or notifications[3]=="true," :
-                                                               mobile_token.append(e[0])
+                                                               if 'true'in notifications[3] or notifications[3]=="true," :
+                                                                    mobile_token.append(e[0])
                                                                title = 'Bus notification'
                                                                title_ar = "اشعار من الحافلة"
                                                                if round_info[0][3] != 'pick_up':
+
                                                                    title = "School Departure"
 
                                                                message_ar = "صعد إلى الحافلة" + student_name[0][
@@ -1951,8 +1942,6 @@ def students_bus_checks(request):
                                                                                    title, title_ar,
                                                                                    message,
                                                                                    message_ar, driver_name[0][0])
-
-
                                                            elif  status == 'out':
 
                                                                if notifications[5]=="true," :
@@ -2057,13 +2046,20 @@ def students_bus_checks(request):
                                                                        title = 'The bus is near you.'
                                                                        message_ar = " علو وصول إلى المنزل " + student_name[0][0]
                                                                        message = ' You are next on the route. ' + student_name[0][ 0] + ' is about to arrive.'
+
+                                                           push_service = FCMNotification(
+                                                               api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                                           registration_id = mobile_token
+                                                           message_title = title if lang == "en" else title_ar
+                                                           message_body = message if lang == "en" else message_ar
+                                                           if mobile_token and not ("token" in mobile_token) and not(status == 'absent' or status == 'no-show'):
+                                                               notify_single_device = push_service.notify_single_device(
+                                                                   registration_id=registration_id[0],
+                                                                   message_title=message_title,
+                                                                   message_body=message_body)
                                                     if not(round_info[0][3] == 'pick_up') and status == 'in':
                                                         continue
-                                                    print("2060-----------------------")
-                                                    print(mobile_token1)
-                                                    print(mobile_token)
                                                     if mobile_token1:
-
                                                         mobile_token = []
                                                         for e in mobile_token1:
                                                             mobile_token.append(e[0])
@@ -2073,7 +2069,6 @@ def students_bus_checks(request):
                                                         message_title = title if lang =="en" else title_ar
                                                         message_body = message if lang =="en" else message_ar
                                                         if mobile_token and not ("token" in mobile_token):
-                                                                print('2076',mobile_token)
                                                                 notify_single_device = push_service.notify_single_device(
                                                                     registration_id=registration_id[0],
                                                                     message_title=message_title,
@@ -2083,7 +2078,6 @@ def students_bus_checks(request):
                                                 else:
 
                                                     if status == 'in' or status == 'near':
-                                                        print("ssssssssssssssssssss2082",e[0])
                                                         mobile_token.append(e[0])
                                                         title = 'Bus notification'
                                                         title_ar ="اشعار من الحافلة"
@@ -2178,7 +2172,16 @@ def students_bus_checks(request):
                                                                                 message_ar, driver_name[0][0])
 
                                                     if not(round_info[0][3] == 'pick_up') and status == 'in':
+
+                                                        mobile_token.append(e[0])
+                                                        title = "School Departure"
+                                                        title_ar = "اشعار من الحافلة"
+
+                                                        message_ar = "صعد إلى الحافلة" + student_name[0][0] + str(bus_num[
+                                                                                                                      0][0])
+                                                        message = student_name[0][0] + ' has just been checked into the bus'
                                                         continue
+
                                                     if mobile_token:
                                                         # notifications = list(data['notifications'].split(" "))
                                                         # li = list(data['notifications'].split(","))
@@ -2193,11 +2196,9 @@ def students_bus_checks(request):
                                                         registration_id = mobile_token
                                                         message_title = title if "en" =="en" else title_ar
                                                         message_body = message if "en" =="en" else message_ar
-                                                        print("--------------------------2192")
-                                                        print(mobile_token)
 
                                                         if mobile_token and not ("token" in mobile_token):
-                                                            print('2200', mobile_token)
+
                                                             notify_single_device = push_service.notify_single_device(
                                                                 registration_id=registration_id[0],
                                                                 message_title=message_title,
@@ -2280,7 +2281,6 @@ def reordered_students(request):
 @api_view(['POST'])
 def notify(request):
     if request.method == 'POST':
-        print(request.data)
         if request.headers:
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
@@ -2458,7 +2458,6 @@ def notify(request):
                                     result = {'status': "ok"}
                                     return Response(result)
                         elif name == 'emergency':
-                                print(request.data)
                                 emergency_text = request.data.get('emergency_text')
                                 students_ids = request.data.get('students_ids')
                                 with connections[school_name].cursor() as cursor:
@@ -2479,10 +2478,9 @@ def notify(request):
                                         columns4 = (x.name for x in cursor.description)
                                         student_student2 = cursor.fetchall()
                                         for parent_id in student_student2:
-                                            print("kkkkkk",parent_id)
                                             cursor.execute(
                                                 "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,sender_name,message_ar)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                                [round_id, r, 'App\Model\sta' + str(parent_id[0]), 'emergency_student', emergency_text,
+                                                [round_id, r, 'App\Model\sta' + str(parent_id[0]), 'emergency_student'+str(students), emergency_text,
                                                  driver_id[0][0], emergency_text])
                                     #     'App\Model\sta' + str(parent_id)
                                     # cursor.execute(
