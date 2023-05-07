@@ -603,6 +603,7 @@ def kids_list(request):
 
                                         rounds_count_student = cursor.fetchall()
 
+
                                         if rounds_count_student:
                                             cursor.execute(
                                                 "select round_id from round_schedule WHERE  id = %s",
@@ -998,7 +999,7 @@ def kids_list(request):
                                     })
 
                         result = {'message': '', 'students': studen_list, "parent_id": int(parent_id)}
-                        # print("ssssssssssssssssssssss")
+
                         return Response(result)
 
                     result = {'status': 'error'}
@@ -1449,7 +1450,7 @@ def get_student_history_new(student_id, school_name, student_name):
 
 
 def get_bus_notifition_student_new(school_name, student_name, notifications_text, notifications_title, deadline, round_id,
-                               attendance_round, student_id,notifications_title_ar,notifications_text_ar):
+                               attendance_round, student_id,notifications_title_ar,notifications_text_ar,fname_ar):
     notifications = []
 
     avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
@@ -1477,13 +1478,11 @@ def get_bus_notifition_student_new(school_name, student_name, notifications_text
                     get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title,
                                      student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
         elif "did not check into the bus today" in notifications_text:
-
-            if str(student_name) in notifications_text:
+            if str(student_name) in notifications_text or str(fname_ar) in notifications_text:
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "No Show Notification",
                                      student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
         elif "has not checked into the bus" in notifications_text:
-
             if str(student_name) in notifications_text:
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "Absence notification",
@@ -1597,7 +1596,7 @@ def kids_hstory_new(request):
 
                             lang = cursor.fetchall()
                             fname = ''
-
+                            fname_ar = ''
                             for student in student_info:
 
                                 student_round = []
@@ -1658,15 +1657,18 @@ def kids_hstory_new(request):
                                                  'App\Model\sta' + str(parent_id)])
                                             sh_message_wizard = cursor.fetchall()
 
+
                                             # save bus message
                                             for message_wizard in range(len(sh_message_wizard)):
                                                 avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                 for std in student_info:
                                                     if "Arabic" not in lang:
                                                         fname = std[3]
+                                                        fname_ar=std[4]
 
                                                     else:
                                                         fname = std[4]
+                                                        fname_ar = std[3]
 
                                                     deadline = sh_message_wizard[message_wizard][1]
                                                     notifications_text = str(
@@ -1675,6 +1677,7 @@ def kids_hstory_new(request):
                                                     notifications_text_ar = str(
                                                         sh_message_wizard[message_wizard][0]) if \
                                                         sh_message_wizard[message_wizard][0] else ''
+
                                                     notifications += get_bus_notifition_student_new(school_name,
                                                                                                     fname,
                                                                                                     notifications_text,
@@ -1687,7 +1690,7 @@ def kids_hstory_new(request):
                                                                                                     sh_message_wizard[
                                                                                                         message_wizard][
                                                                                                         5],
-                                                                                                    notifications_text_ar)
+                                                                                                    notifications_text_ar,fname_ar)
                                                     # cursor.execute(
                                                     #     "select  id,round_id,bus_check_in,time_out,history_id from round_student_history WHERE student_id = %s And driver_waiting is not  null  AND round_id=%s AND bus_check_in is  null AND  datetime >= %s AND  datetime < %s ",
                                                     #     [std[0], rec, datetime.datetime(
