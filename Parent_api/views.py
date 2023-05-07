@@ -844,7 +844,7 @@ def kids_list(request):
                                     round_type = ''
                                     round_name = ''
                                     if bool(is_active_round):
-                                        student_st = rounds_count_student[0][1] if rounds_count_student else ""
+                                        student_st =  'in' if rounds_count_student[0][1] == "Onboard" else rounds_count_student[0][1]  if rounds_count_student else ""
 
                                         cursor.execute(
                                             "select name,type,attendant_id,vehicle_id,driver_id from transport_round WHERE id = %s",
