@@ -2185,7 +2185,7 @@ def students_bus_checks(request):
                                                     if mobile_token:
                                                         # notifications = list(data['notifications'].split(" "))
                                                         # li = list(data['notifications'].split(","))
-                                                        lang = "ar" if "ar" in li[3] else 'en'
+                                                        # lang = "ar" if "ar" in li[3] else 'en'
                                                         mobile_token = []
 
                                                         for e in mobile_token1:
