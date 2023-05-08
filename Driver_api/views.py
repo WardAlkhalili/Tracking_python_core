@@ -614,7 +614,8 @@ def student_list(request, round_id):
 
                                                     lat = student_history[0][1]
                                                     long = student_history[0][2]
-                                                    if student_history[0][0] == 'in' or student_history[0][0] == 'near':
+                                                    if student_history[0][0] == 'in' :
+
 
                                                         in_round = True
                                                         out_round = False
@@ -958,21 +959,13 @@ def student_list(request, round_id):
                                             "round_id": student_student12[0]['round_id'],
                                             "responsible_id_value": student_student12[0]['responsible_id_value'],
                                             "grade": student_grade,
-                                            # "first_mandatory": student_student[std][134],
 
-                                            # "second_mandatory": student_student[std][135],
-                                            # "third_mandatory": student_student[std][136],
-                                            # "last_mandatory": student_student[std][137],
                                             "section_id_value": student_student12[0]['section_id_value'],
-                                            # "grade":student_student[std][147],
-                                            # "laravel_through_key": s[std]['laravel_through_key'],
                                             "parents_info": [
                                                 {
                                                     "father": {
                                                         "mobile_token": father_inf[0][
                                                             'mobile_token'] if father_inf else "",
-                                                        # "mobile_pn_registration_id": father_inf[0]['mobile_pn_registration_id']if father_inf else "",
-                                                        # "invite_count": father_inf[0]['invite_count']if father_inf else "",
                                                         "settings": father_inf[0]['settings'] if father_inf else "",
                                                         "number": father_inf[0]['mobile'] if father_inf else "",
                                                         "id": father_inf[0]['id'] if father_inf else -1
@@ -981,17 +974,7 @@ def student_list(request, round_id):
                                                     "mother": {
                                                         "mobile_token": mother_inf[0][
                                                             'mobile_token'] if mother_inf else "",
-                                                        # "mobile_pn_registration_id": mother_inf[0]['mobile_pn_registration_id']if mother_inf else"",
-                                                        # "invite_count": mother_inf[0]['invite_count']if mother_inf else"",
                                                         "settings": mother_inf[0]['settings'] if mother_inf else "",
-                                                        # {
-                                                        #     "notifications": {
-                                                        #         "locale": "ar",
-                                                        #         "nearby": False,
-                                                        #         "check_in": False,
-                                                        #         "check_out": False
-                                                        #     }
-                                                        # },
                                                         "number": mother_inf[0]['mobile'] if mother_inf else "",
                                                         "id": mother_inf[0]['id'] if mother_inf else -1
                                                     }
@@ -1212,88 +1195,7 @@ def set_round_status(request):
                                                     else:
                                                         li = list(data['notifications'].split(","))
                                                         lang = "ar" if "ar" in li[3] else 'en'
-                                                # print("assssssssssss",mobile_token1[0][0])
-                                                # for e in mobile_token1:
-                                                #     print(e[0])
-                                                    # mobile_token.append(e[0])
-                                                # if mobile_token1:
-                                                #
-                                                #     registration_id = mobile_token1[0][0]
-                                                #     # message_title = "School Departure"
-                                                #     message_title = "Pick-up round"
-                                                #     message_title_ar = "الجولة الصباحية"
-                                                #     # message_body = student_name[0][0] + "  has just been checked into the bus."
-                                                #     message_body = "The pickup round is started, please have your children" + \
-                                                #                    student_name[0][
-                                                #                        0] + " ready."
-                                                #
-                                                #     message_body_ar = "بدأت الجولة الصباحية, الرجاء ان يكون " + \
-                                                #                       student_name[0][0] + " مستعداً"
-                                                #     date_string = datetime.datetime.now().strftime(
-                                                #         "%Y-%m-%d %H:%M:%S")
-                                                #     r = datetime.datetime.strptime(date_string,
-                                                #                                    '%Y-%m-%d %H:%M:%S')
-                                                #
-                                                #     # if round_info1[0][1] == 'pick_up' :
-                                                #     if round_info1[0][1] == 'pick_up':
-                                                #         cursor.execute(
-                                                #             "select  name,vehicle_id,driver_id from transport_round WHERE id = %s  ",
-                                                #             [round_id])
-                                                #         round_info22 = cursor.fetchall()
-                                                #         cursor.execute(
-                                                #             "select  id,round_start,round_end,na from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
-                                                #             [round_id, round_info22[0][2], round_info22[0][1],
-                                                #              round_id])
-                                                #         round_history = cursor.fetchall()
-                                                #
-                                                #         start = datetime.datetime(datetime.datetime.now().year,
-                                                #                                   datetime.datetime.now().month,
-                                                #                                   datetime.datetime.now().day)
-                                                #         if round_history:
-                                                #
-                                                #             now = datetime.date.today()
-                                                #             if round_history[0][1].strftime('%Y-%m-%d') == str(now):
-                                                #                 cursor.execute(
-                                                #                     "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
-                                                #                     [round_id, student_name[0][1], round_history[0][0]])
-                                                #                 student_history = cursor.fetchall()
-                                                #                 cursor.execute(
-                                                #                     "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and datetime >= %s and datetime <= %s   ORDER BY ID DESC LIMIT 1 ",
-                                                #                     [round_id, student_name[0][1], start,
-                                                #                      datetime.datetime.now()])
-                                                #                 student_history1 = cursor.fetchall()
-                                                #                 if student_history1:
-                                                #                     if student_history1[0][0] == 'absent' or \
-                                                #                             student_history1[0][0] == 'absent-all' or \
-                                                #                             student_history1[0][0] == 'no-show':
-                                                #                         continue
-                                                #             else:
-                                                #                 cursor.execute(
-                                                #                     "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and datetime >= %s and datetime <= %s   ORDER BY ID DESC LIMIT 1 ",
-                                                #                     [round_id, student_name[0][1], start,
-                                                #                      datetime.datetime.now()])
-                                                #                 student_history1 = cursor.fetchall()
-                                                #
-                                                #                 if student_history1:
-                                                #                     if student_history1[0][0] == 'absent' or \
-                                                #                             student_history1[0][0] == 'absent-all' or \
-                                                #                             student_history1[0][0] == 'no-show':
-                                                #                         continue
-                                                #
-                                                #         cursor.execute(
-                                                #             "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                #             [round_id, r, 'App\Model\sta' + str(rec), message_title,
-                                                #              message_body, message_body_ar,
-                                                #              driver_name[0][0],message_title_ar])
-                                                #         push_service = FCMNotification(
-                                                #             api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                                #
-                                                #         if mobile_token1[0][0] and not ("token" in mobile_token1[0][0]):
-                                                #             print("dddddddddddddddddd")
-                                                #             notify_single_device = push_service.notify_single_device(
-                                                #                 registration_id=registration_id[0],
-                                                #                 message_title=message_title if lang=="en" else message_title_ar ,
-                                                #                 message_body=message_body if lang=="en" else message_body_ar)
+
                                         mobile_token=[]
                                         for e in mobile_token1:
                                             mobile_token.append(e[0])
@@ -1358,12 +1260,6 @@ def set_round_status(request):
                                                                 continue
 
 
-
-                                                # cursor.execute(
-                                                #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                #     [round_id, r, 'App\Model\sta' + str(rec), message_title,
-                                                #      message_body, message_body_ar,
-                                                #      driver_name[0][0],message_title_ar])
                                                 save_message_wizard(school_name, round_id, r, 'App\Model\sta' + str(rec),
                                                                     message_title, message_title_ar, message_body,
                                                                     message_body_ar, driver_name[0][0])
@@ -1465,59 +1361,9 @@ def set_round_status(request):
                                                                                          Q(db_name=school_name),
                                                                                          Q(is_active=True)).values_list(
                                                 'mobile_token').order_by('-pk')
-                                            # cursor.execute(
-                                            #     "select  id,round_start from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
-                                            #     [round_id, round_info[0][2], round_info[0][1], round_id])
-                                            # round_history = cursor.fetchall()
-                                            # if round_history:
-                                            #     now = datetime.date.today()
-                                            #     if round_history[0][1].strftime('%Y-%m-%d') == str(now):
-                                            #         cursor.execute(
-                                            #             "select  datetime,id,time_out,bus_check_in from round_student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
-                                            #             [round_id, k[0], round_history[0][0]])
-                                            #         student_history = cursor.fetchall()
-                                            #         if student_history:
-                                            #             if round_info[0][3] == 'pick_up':
-                                            #                 if student_history[0][3]:
-                                            #                     cursor.execute(
-                                            #                         "UPDATE public.round_student_history SET time_out = %s WHERE id =%s ",
-                                            #                         [datetime.datetime.now(), student_history[0][1]])
-                                            #                     push_service = FCMNotification(
-                                            #                         api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                            #                     registration_id = mobile_token1[0][0]
-                                            #                     message_title = " Bus Notification"
-                                            #                     message_title_ar = 'اشعار من الحافلة'
-                                            #                     message_body_ar = " وصل إلى المدرسة." + student_name[0][
-                                            #                         0]
-                                            #
-                                            #                     message_body = student_name[0][
-                                            #                                        0] + "  has just reached the school."
-                                            #                     if mobile_token1[0][0]and not ("token" in mobile_token1[0][0]):
-                                            #                         notify_single_device = push_service.notify_single_device(
-                                            #                             registration_id=registration_id[0],
-                                            #                             message_title=message_title if lang=="en" else message_title_ar,
-                                            #                             message_body=message_body if lang=="en" else message_body_ar )
-                                            #             else:
-                                            #                 if student_history[0][2]:
-                                            #                     cursor.execute(
-                                            #                         "UPDATE public.round_student_history SET bus_check_in = %s WHERE id =%s ",
-                                            #                         [datetime.datetime.now(), student_history[0][1]])
                                         mobile_token = []
                                         for e in mobile_token1:
                                             mobile_token.append(e[0])
-                                        # if round_info[0][3] == 'pick_up':
-                                            # push_service = FCMNotification(
-                                            #     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                            # registration_id = mobile_token
-                                            # message_title = " Bus Notification"
-                                            #
-                                            # message_body = student_name[0][0] + "  has just reached the school."
-                                            # if mobile_token and not ("token" in mobile_token):
-                                            #     notify_single_device = push_service.notify_single_device(
-                                            #         registration_id=registration_id[0],
-                                            #         message_title=message_title,
-                                            #         message_body=message_body)
-                                    # for k in rounds_count_student:
                                         cursor.execute(
                                             "select  id,round_start from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
                                             [round_id, round_info[0][2], round_info[0][1], round_id])
@@ -1611,8 +1457,11 @@ def students_bus_checks(request):
                             school_name = e[0]
                             school_name = Manager.pincode(school_name)
                             with connections[school_name].cursor() as cursor:
+
                                 students = request.data.get('students')
+                                print(students)
                                 for rec in students:
+                                    print(rec)
                                     round_id = rec['round_id']
                                     status = rec['status']
                                     # day_count = rec['day_count']
@@ -1639,7 +1488,9 @@ def students_bus_checks(request):
                                                 "select  datetime,id from round_student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
                                                 [round_id, student_id, round_history[0][0]])
                                             student_history = cursor.fetchall()
+                                            print(student_history)
                                             if student_history:
+                                                print(student_history)
                                                 cursor.execute(
                                                     "INSERT INTO  student_history (round_id,student_id,bus_check_in,datetime,history_id,lat,long,activity_type) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
                                                     [round_id, student_id, datetime.datetime.now(),
@@ -2482,10 +2333,6 @@ def notify(request):
                                                 "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,sender_name,message_ar)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                                 [round_id, r, 'App\Model\sta' + str(parent_id[0]), 'emergency_student'+str(students), emergency_text,
                                                  driver_id[0][0], emergency_text])
-                                    #     'App\Model\sta' + str(parent_id)
-                                    # cursor.execute(
-                                    #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,sender_name,message_ar)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                    #     [round_id,r, 'App\Model\Driver', 'emergency', emergency_text, driver_id[0][0],emergency_text])
                                     result = {'status': "ok"}
                                     return Response(result)
                         elif name == 'changed_location':
