@@ -1870,6 +1870,7 @@ def students_bus_checks(request):
             result = {'status': 'error'}
             return Response(result)
 
+
 def send_notification(mobile_token1 ,message_title,message_body):
     mobile_token=[]
     for e in mobile_token1:
