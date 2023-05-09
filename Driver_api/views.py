@@ -605,7 +605,13 @@ def student_list(request, round_id):
                                                 if student_history:
                                                     lat = student_history[0][1]
                                                     long = student_history[0][2]
-                                                    if student_history[0][0] == 'in' or student_history[0][0] == 'near':
+                                                    if student_history[0][0] == 'near':
+                                                        if round_info1[0][1] != 'pick_up':
+                                                            in_round = True
+                                                            out_round = False
+                                                            abs = False
+                                                            no_show = False
+                                                    if student_history[0][0] == 'in' :
 
 
                                                         in_round = True
