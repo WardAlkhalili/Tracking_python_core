@@ -109,7 +109,8 @@ def driver_login(request):
             result = {
                 "status": "ok",
                 "school_phone": company_login_info[0][1],
-                "location_refresh_rate": login_details1[0]['location_refresh_rate'],
+                "location_refresh_rate": 10,
+                # "location_refresh_rate": login_details1[0]['location_refresh_rate'],
                 "school_name": company_login_info[0][0],
                 "school_db": school_name,
                 "school_lng": login_details1[0]['lng'],
@@ -197,6 +198,7 @@ def driver_login(request):
                 ],
                 "geofenses": [],
                 "Authorization": "Bearer " + unique_id, }
+
         return Response(result)
 
 
@@ -412,6 +414,7 @@ def round_list(request):
                                         start = False
                                         cancel = False
                                     result1[rec] = {
+
                                         "round_time": str(list_round1[rec]['start_time']),
                                         "name": str(list_round1[rec]['name']),
                                         "date": None,
@@ -426,6 +429,7 @@ def round_list(request):
                                         "drop_off_lng": list_round1[rec]['drop_off_lng'] if list_round1[rec][
                                             'drop_off_lng'] else 0,
                                         "route_id": list_round1[rec]['route_id'],
+                                        "deleted_at": None,
                                         "round_canceled": cancel,
                                         "round_ended": end,
                                         "round_started": start,
@@ -449,8 +453,9 @@ def round_list(request):
                                 """ select 	allow_driver_change_students_location,allow_driver_to_use_beacon from transport_setting ORDER BY ID DESC LIMIT 1""")
                             login_details = cursor.fetchall()
 
-
+                            # print(result1)
                             for rec in range(len(result1)):
+
                                 round.append(result1[rec])
                                 result = {
                                     "school_settings": {
@@ -1276,11 +1281,15 @@ def set_round_status(request):
                                         [round_id, round_info[0][2], round_info[0][1], round_id])
                                     round_history = cursor.fetchall()
                                     if round_history:
+                                        cursor.execute(
+                                            "UPDATE public.round_history SET na= %s WHERE id=%s",
+                                            ['', round_history[0][1]])
                                         now = datetime.date.today()
                                         if round_history[0][0].strftime('%Y-%m-%d') == str(now):
-                                            cursor.execute(
-                                                "UPDATE public.round_history SET na= %s WHERE id=%s",
-                                                ['cancel', round_history[0][1]])
+                                            pass
+                                            # cursor.execute(
+                                            #     "UPDATE public.round_history SET na= %s WHERE id=%s",
+                                            #     ['cancel', round_history[0][1]])
                                         else:
                                             curr_date = date.today()
                                             day_name = calendar.day_name[curr_date.weekday()]
@@ -1412,7 +1421,6 @@ def set_round_status(request):
                                                 "UPDATE public.round_history SET round_end= %s,na= %s WHERE id=%s",
                                                 [datetime.datetime.now(),'end', round_history[0][1]])
                                 elif status == 'cancel':
-
                                     cursor.execute(
                                         "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
                                         [round_id, round_info[0][2], round_info[0][1], round_id])
@@ -1422,6 +1430,7 @@ def set_round_status(request):
                                         if round_history[0][0].strftime('%Y-%m-%d') == str(now):
                                             cursor.execute(
                                                 "UPDATE public.round_history SET na= %s WHERE id=%s",
+
                                                 ['cancel', round_history[0][1]])
                                 cursor.execute(
                                     "UPDATE public.transport_round SET is_active= not(is_active), pick_up_lat=%s ,pick_up_lng=%s ,drop_off_lat=%s ,drop_off_lng=%s,write_date=%s WHERE id=%s",
@@ -1457,9 +1466,7 @@ def students_bus_checks(request):
                             school_name = e[0]
                             school_name = Manager.pincode(school_name)
                             with connections[school_name].cursor() as cursor:
-
                                 students = request.data.get('students')
-                                print(students)
                                 for rec in students:
                                     print(rec)
                                     round_id = rec['round_id']
@@ -1488,9 +1495,7 @@ def students_bus_checks(request):
                                                 "select  datetime,id from round_student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
                                                 [round_id, student_id, round_history[0][0]])
                                             student_history = cursor.fetchall()
-                                            print(student_history)
                                             if student_history:
-                                                print(student_history)
                                                 cursor.execute(
                                                     "INSERT INTO  student_history (round_id,student_id,bus_check_in,datetime,history_id,lat,long,activity_type) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
                                                     [round_id, student_id, datetime.datetime.now(),
@@ -1619,12 +1624,13 @@ def students_bus_checks(request):
                                                     title_ar = ''
                                                     message_ar = ''
                                                     if type(data['notifications']) is dict:
+                                                        print("pppppppppppppppppppppppp")
                                                         if "ar" in data['notifications']['locale']:
                                                             lang = "ar"
 
                                                         for e in mobile_token1:
 
-                                                            if status == 'in' or status == 'near':
+                                                            if status == 'in' :
                                                                 if data['notifications']['check_in']:
                                                                     mobile_token.append(e[0])
                                                                 title = 'Bus notification'
@@ -1682,6 +1688,31 @@ def students_bus_checks(request):
                                                                                     title, title_ar,
                                                                                     message,
                                                                                     message_ar, driver_name[0][0])
+                                                            elif  status == 'near':
+                                                                print("near ",e[0])
+                                                                print("line 1696")
+                                                                mobile_token.append(e[0])
+                                                                date_string = datetime.datetime.now().strftime(
+                                                                    "%Y-%m-%d %H:%M:%S")
+                                                                r = datetime.datetime.strptime(date_string,
+                                                                                               '%Y-%m-%d %H:%M:%S')
+                                                                if round_info[0][3] == 'pick_up':
+                                                                    title_ar = "الباص قريب منك"
+                                                                    title = 'The bus is near you.'
+                                                                    message = ' You are next on the route. Please have ' + \
+                                                                              student_name[0][
+                                                                                  0] + ' ready to leave'
+                                                                    message_ar = "انت التالي, الحافلة اقتربت منك, الرجاء ان يكون" + \
+                                                                                 student_name[0][
+                                                                                     0] + "مستعداً"
+                                                                else:
+                                                                    title_ar = "الباص قريب منك"
+                                                                    title = 'The bus is near you.'
+                                                                    message = ' You are next on the route. ' + \
+                                                                              student_name[0][
+                                                                                  0] + ' is about to arrive.'
+                                                                    message_ar = " علو وصول إلى المنزل " + \
+                                                                                 student_name[0][0]
 
                                                             else:
                                                                 date_string = datetime.datetime.now().strftime(
@@ -1764,7 +1795,7 @@ def students_bus_checks(request):
 
                                                        for e in mobile_token1:
 
-                                                           if  status == 'in' or status == 'near':
+                                                           if  status == 'in':
                                                                if 'true'in notifications[3] or notifications[3]=="true," :
                                                                     mobile_token.append(e[0])
                                                                title = 'Bus notification'
@@ -1817,6 +1848,31 @@ def students_bus_checks(request):
                                                                                    title, title_ar,
                                                                                    message,
                                                                                    message_ar, driver_name[0][0])
+                                                           elif status == 'near':
+                                                               print("near ", e[0])
+                                                               print("line 1857")
+                                                               mobile_token.append(e[0])
+                                                               date_string = datetime.datetime.now().strftime(
+                                                                   "%Y-%m-%d %H:%M:%S")
+                                                               r = datetime.datetime.strptime(date_string,
+                                                                                              '%Y-%m-%d %H:%M:%S')
+                                                               if round_info[0][3] == 'pick_up':
+                                                                   title_ar = "الباص قريب منك"
+                                                                   title = 'The bus is near you.'
+                                                                   message = ' You are next on the route. Please have ' + \
+                                                                             student_name[0][
+                                                                                 0] + ' ready to leave'
+                                                                   message_ar = "انت التالي, الحافلة اقتربت منك, الرجاء ان يكون" + \
+                                                                                student_name[0][
+                                                                                    0] + "مستعداً"
+                                                               else:
+                                                                   title_ar = "الباص قريب منك"
+                                                                   title = 'The bus is near you.'
+                                                                   message = ' You are next on the route. ' + \
+                                                                             student_name[0][
+                                                                                 0] + ' is about to arrive.'
+                                                                   message_ar = " علو وصول إلى المنزل " + \
+                                                                                student_name[0][0]
                                                            else:
 
 
