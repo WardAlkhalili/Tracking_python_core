@@ -564,17 +564,9 @@ def student_list(request, round_id):
                                 for std_id in st_id:
                                     cursor.execute("select * from student_student WHERE id = %s ",
                                                    [std_id])
-                                    columns4 = (x.name for x in cursor.description)
-
                                     student_student2 = cursor.fetchall()
-
-
-                                    # s = [dict(zip(columns4, row)) for row in student_student]
                                     student_student12 = []
                                     columnNames = [column[0] for column in cursor.description]
-
-
-
                                     if student_student2:
                                         for record in student_student2:
                                             student_student12.append(dict(zip(columnNames, record)))
@@ -600,26 +592,20 @@ def student_list(request, round_id):
                                             [round_id, round_info[0][2], round_info[0][1],
                                              round_id])
                                         round_history = cursor.fetchall()
-
                                         start = datetime.datetime(datetime.datetime.now().year,
                                                                   datetime.datetime.now().month,
                                                                   datetime.datetime.now().day)
                                         if round_history:
-
-
                                             now = datetime.date.today()
                                             if round_history[0][1].strftime('%Y-%m-%d') == str(now):
-
                                                 cursor.execute(
                                                     "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
                                                     [round_id, student_student12[0]['id'], round_history[0][0]])
                                                 student_history = cursor.fetchall()
-
                                                 if student_history:
-
                                                     lat = student_history[0][1]
                                                     long = student_history[0][2]
-                                                    if student_history[0][0] == 'in' :
+                                                    if student_history[0][0] == 'in' or student_history[0][0] == 'near':
 
 
                                                         in_round = True
@@ -691,7 +677,6 @@ def student_list(request, round_id):
                                                     student_history1 = cursor.fetchall()
 
                                                     if student_history1:
-
                                                         if student_history1[0][0] == 'absent' or student_history1[0][
                                                             0] == 'absent-all':
 
@@ -700,37 +685,30 @@ def student_list(request, round_id):
                                                             abs = True
                                                             no_show = True
                                                     if round_info1[0][1] == 'pick_up':
-
                                                         cursor.execute(
                                                             "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id =%s AND round_schedule_id= %s",
                                                             ['out',datetime.datetime.now(), student_student12[0]['id'],
                                                              rounds_details[0][0]])
-                                                        # ch_out = len(rounds_count_student)
                                                     else:
 
                                                         cursor.execute(
                                                             "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id =%s AND round_schedule_id= %s",
                                                             ['in',datetime.datetime.now(), student_student12[0]['id'],
                                                              rounds_details[0][0]])
-                                                        # ch_in = len(rounds_count_student)
                                             else:
 
                                                 cursor.execute(
                                                     "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and datetime >= %s and datetime <= %s   ORDER BY ID DESC LIMIT 1 ",
                                                     [round_id, student_student12[0]['id'],start,datetime.datetime.now()])
                                                 student_history1 = cursor.fetchall()
-
                                                 if student_history1:
-
                                                     if round_info1[0][1] == 'pick_up':
                                                         if student_history1[0][0]=='absent' or student_history1[0][0]=='absent-all':
-
                                                             in_round = False
                                                             out_round = False
                                                             abs = True
                                                             no_show = False
                                                     else:
-
                                                         if student_history1[0][0] == 'absent' or student_history1[0][
                                                             0] == 'absent-all':
                                                             in_round = False
@@ -994,10 +972,7 @@ def student_list(request, round_id):
                                             "lng": long,
                                             "no_show": no_show,
                                         }
-
-
                                 student = []
-
                                 for std_inf in st_id:
                                     student.append(student_info[std_inf])
                                 cursor.execute(
@@ -1287,9 +1262,12 @@ def set_round_status(request):
                                         now = datetime.date.today()
                                         if round_history[0][0].strftime('%Y-%m-%d') == str(now):
                                             pass
-                                            # cursor.execute(
-                                            #     "UPDATE public.round_history SET na= %s WHERE id=%s",
-                                            #     ['cancel', round_history[0][1]])
+                                            # if round_info[0][3] == 'pick_up':
+                                            #     pass
+                                            # else:
+                                            #     cursor.execute(
+                                            #         "UPDATE public.round_history SET na= %s WHERE id=%s",
+                                            #         ['cancel', round_history[0][1]])
                                         else:
                                             curr_date = date.today()
                                             day_name = calendar.day_name[curr_date.weekday()]
@@ -1300,14 +1278,12 @@ def set_round_status(request):
                                             cursor.execute(
                                                 "select id,day_id from round_schedule WHERE round_id = %s and day_id = %s",
                                                 [round_id, day_name[0][0]])
-                                            columns3 = (x.name for x in cursor.description)
                                             rounds_details = cursor.fetchall()
                                             day_list = {}
                                             # for z in rounds_details:
                                             cursor.execute(
                                                 "select student_id from transport_participant WHERE round_schedule_id = %s",
                                                 [rounds_details[0][0]])
-                                            columns4 = (x.name for x in cursor.description)
                                             rounds_count_student = cursor.fetchall()
                                             ch_in = 0
                                             ch_out = 0
@@ -1348,7 +1324,6 @@ def set_round_status(request):
                                         cursor.execute(
                                             "select father_id,mother_id,responsible_id_value from student_student WHERE id = %s ",
                                             [k[0]])
-                                        columns4 = (x.name for x in cursor.description)
                                         student_student2 = cursor.fetchall()
                                         for rec in student_student2[0]:
                                             lang ="en"
@@ -1468,7 +1443,7 @@ def students_bus_checks(request):
                             with connections[school_name].cursor() as cursor:
                                 students = request.data.get('students')
                                 for rec in students:
-                                    print(rec)
+                                    # print(rec)
                                     round_id = rec['round_id']
                                     status = rec['status']
                                     # day_count = rec['day_count']
@@ -1546,7 +1521,7 @@ def students_bus_checks(request):
 
                                                 if status =='out' or status =='in':
 
-
+                                                    print(status,"ooooooooooododododo")
                                                     cursor.execute(
                                                         "INSERT INTO  round_student_history (round_id,student_id,driver_waiting,bus_check_in,datetime,history_id) VALUES (%s,%s,%s,%s,%s,%s); ",
                                                         [round_id, student_id, waiting_minutes, datetime.datetime.now(),
@@ -1560,14 +1535,13 @@ def students_bus_checks(request):
                                                     "INSERT INTO  student_history (round_id,student_id,bus_check_in,datetime,history_id,lat,long,activity_type) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
                                                     [round_id, student_id, datetime.datetime.now(),
                                                      datetime.datetime.now(), round_history[0][0], lat, long, status])
-
+                                    # cursor.execute(
+                                    #     "select  id  from school_day where name = %s",
+                                    #     [calendar.day_name[curr_date.weekday()]])
+                                    # day_id = cursor.fetchall()
                                     cursor.execute(
-                                        "select  id  from school_day where name = %s",
-                                        [calendar.day_name[curr_date.weekday()]])
-                                    day_id = cursor.fetchall()
-                                    cursor.execute(
-                                        "select  id from round_schedule WHERE round_id = %s AND day_id =%s ",
-                                        [round_id, day_id[0][0]])
+                                        "select  id from round_schedule WHERE round_id = %s AND day_id =(select  id  from school_day where name = %s)",
+                                        [round_id, calendar.day_name[curr_date.weekday()]])
                                     round_schedule = cursor.fetchall()
                                     if status!='near':
                                         cursor.execute(
@@ -1613,378 +1587,155 @@ def students_bus_checks(request):
                                                                                          Q(db_name=school_name),
                                                                                          Q(is_active=True)).values_list( 'mobile_token').order_by('-pk')
                                             if settings:
-
+                                                print(settings)
                                                 if not('None' in str(settings)) :
 
                                                     data = json.loads(settings[0][0])
+
                                                     # if data['notifications']['check_in']:
-                                                    lang ="en"
+                                                    lang = "en"
+                                                    check_in = True
+                                                    check_out = True
+                                                    nearby = True
                                                     title=''
                                                     message=''
                                                     title_ar = ''
                                                     message_ar = ''
                                                     if type(data['notifications']) is dict:
-                                                        print("pppppppppppppppppppppppp")
+                                                        check_in = data['notifications']['check_in']
+                                                        check_out = data['notifications']['check_out']
+                                                        nearby = data['notifications']['nearby']
                                                         if "ar" in data['notifications']['locale']:
                                                             lang = "ar"
 
-                                                        for e in mobile_token1:
-
-                                                            if status == 'in' :
-                                                                if data['notifications']['check_in']:
-                                                                    mobile_token.append(e[0])
-                                                                title = 'Bus notification'
-                                                                title_ar = "اشعار من الحافلة"
-                                                                if round_info[0][3] != 'pick_up':
-                                                                    title = "School Departure"
-
-                                                                message_ar = "صعد إلى الحافلة" + student_name[0][
-                                                                    0] + str(bus_num[
-                                                                                 0][0])
-                                                                message = student_name[0][
-                                                                              0] + ' has just been checked into the bus'
-                                                                date_string = datetime.datetime.now().strftime(
-                                                                    "%Y-%m-%d %H:%M:%S")
-                                                                r = datetime.datetime.strptime(date_string,
-                                                                                               '%Y-%m-%d %H:%M:%S')
-
-                                                                # if round_info[0][3]=='pick_up':
-                                                                #
-                                                                # cursor.execute(
-                                                                #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                #     [round_id, r, 'App\Model\sta'+str(rec), title,
-                                                                #      message, message_ar,
-                                                                #      driver_name[0][0],title_ar])
-                                                                save_message_wizard(school_name, round_id, r,
-                                                                                    'App\Model\sta'+str(rec),
-                                                                                    title, title_ar,
-                                                                                    message,
-                                                                                    message_ar, driver_name[0][0])
-
-
-                                                            elif  status == 'out':
-                                                                date_string = datetime.datetime.now().strftime(
-                                                                    "%Y-%m-%d %H:%M:%S")
-                                                                r = datetime.datetime.strptime(date_string,
-                                                                                               '%Y-%m-%d %H:%M:%S')
-                                                                if data['notifications']['check_out']:
-                                                                    mobile_token.append(e[0])
-                                                                title = 'Checkout Notification'
-                                                                title_ar='اشعار من الحافلة'
-                                                                message_ar='وصل إلى المنزل.' + student_name[0][
-                                                                              0]
-                                                                message = 'The bus ' +str( bus_num[
-                                                                    0]) + ' has arrived at your home and ' + \
-                                                                          student_name[0][
-                                                                              0] + ' has been checked out of the bus. '
-                                                                # cursor.execute(
-                                                                #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                #     [round_id, r, 'App\Model\sta'+str(rec),
-                                                                #      title,
-                                                                #      message, message_ar,
-                                                                #      driver_name[0][0],title_ar])
-                                                                save_message_wizard(school_name, round_id, r,
-                                                                                    'App\Model\sta' + str(rec),
-                                                                                    title, title_ar,
-                                                                                    message,
-                                                                                    message_ar, driver_name[0][0])
-                                                            elif  status == 'near':
-                                                                print("near ",e[0])
-                                                                print("line 1696")
-                                                                mobile_token.append(e[0])
-                                                                date_string = datetime.datetime.now().strftime(
-                                                                    "%Y-%m-%d %H:%M:%S")
-                                                                r = datetime.datetime.strptime(date_string,
-                                                                                               '%Y-%m-%d %H:%M:%S')
-                                                                if round_info[0][3] == 'pick_up':
-                                                                    title_ar = "الباص قريب منك"
-                                                                    title = 'The bus is near you.'
-                                                                    message = ' You are next on the route. Please have ' + \
-                                                                              student_name[0][
-                                                                                  0] + ' ready to leave'
-                                                                    message_ar = "انت التالي, الحافلة اقتربت منك, الرجاء ان يكون" + \
-                                                                                 student_name[0][
-                                                                                     0] + "مستعداً"
-                                                                else:
-                                                                    title_ar = "الباص قريب منك"
-                                                                    title = 'The bus is near you.'
-                                                                    message = ' You are next on the route. ' + \
-                                                                              student_name[0][
-                                                                                  0] + ' is about to arrive.'
-                                                                    message_ar = " علو وصول إلى المنزل " + \
-                                                                                 student_name[0][0]
-
-                                                            else:
-                                                                date_string = datetime.datetime.now().strftime(
-                                                                    "%Y-%m-%d %H:%M:%S")
-                                                                r = datetime.datetime.strptime(date_string,
-                                                                                               '%Y-%m-%d %H:%M:%S')
-                                                                if status == 'no-show':
-                                                                    mobile_token.append(e[0])
-                                                                    title_ar = ' إشعار الغياب'
-                                                                    title = ' No Show Notification'
-                                                                    message_ar="لم يظهر اليوم."+student_name[0][ 0]
-                                                                    message = student_name[0][
-                                                                                  0] + ' did not check into the bus today'
-                                                                    # cursor.execute(
-                                                                    #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                    #     [round_id, r, 'App\Model\sta'+str(rec),
-                                                                    #      title,
-                                                                    #      message, message_ar,
-                                                                    #      driver_name[0][0],title_ar])
-                                                                    save_message_wizard(school_name, round_id, r,
-                                                                                        'App\Model\sta' + str(rec),
-                                                                                        title, title_ar,
-                                                                                        message,
-                                                                                        message_ar, driver_name[0][0])
-
-                                                                elif status == 'absent':
-
-                                                                    mobile_token.append(e[0])
-                                                                    title = 'Absence notification'
-                                                                    title_ar = 'اشعار من الحافلة'
-                                                                    message_ar="غائب اليوم." +student_name[0][0]
-                                                                    message = ' Your child ' + student_name[0][
-                                                                        0] + ' has not checked into the bus and is absent today.'
-                                                                    date_string = datetime.datetime.now().strftime(
-                                                                        "%Y-%m-%d %H:%M:%S")
-                                                                    r = datetime.datetime.strptime(date_string,
-                                                                                                   '%Y-%m-%d %H:%M:%S')
-                                                                    # cursor.execute(
-                                                                    #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                    #     [round_id, r, 'App\Model\sta'+str(rec),
-                                                                    #      title,
-                                                                    #      message, message_ar,
-                                                                    #      driver_name[0][0],title_ar])
-                                                                    save_message_wizard(school_name, round_id, r,
-                                                                                        'App\Model\sta' + str(rec),
-                                                                                        title, title_ar,
-                                                                                        message,
-                                                                                        message_ar, driver_name[0][0])
-                                                                elif status == 'near':
-                                                                    date_string = datetime.datetime.now().strftime(
-                                                                        "%Y-%m-%d %H:%M:%S")
-                                                                    r = datetime.datetime.strptime(date_string,
-                                                                                                   '%Y-%m-%d %H:%M:%S')
-                                                                    if round_info[0][3] == 'pick_up':
-                                                                        title_ar="الباص قريب منك"
-                                                                        title = 'The bus is near you.'
-                                                                        message =' You are next on the route. Please have '+student_name[0][
-                                                                            0]+' ready to leave'
-                                                                        message_ar="انت التالي, الحافلة اقتربت منك, الرجاء ان يكون"+student_name[0][
-                                                                            0]+"مستعداً"
-                                                                    else:
-                                                                            title_ar = "الباص قريب منك"
-                                                                            title = 'The bus is near you.'
-                                                                            message = ' You are next on the route. ' + student_name[0][ 0] + ' is about to arrive.'
-                                                                            message_ar = " علو وصول إلى المنزل " +student_name[0][0]
-
-
-
                                                     else:
 
-
-
-                                                       notifications = list(data['notifications'].split(" "))
                                                        li = list(data['notifications'].split(","))
+                                                       nearby = True if "true" in li[0] else False,
+                                                       check_in = True if "true" in li[1] else False,
+                                                       check_out = True if "true" in li[2] else False
                                                        lang = "ar" if "ar" in li[3] else 'en'
                                                        date_string = datetime.datetime.now().strftime(
                                                            "%Y-%m-%d %H:%M:%S")
                                                        r = datetime.datetime.strptime(date_string,
                                                                                       '%Y-%m-%d %H:%M:%S')
+                                                    mobile_token2=[]
+                                                    for e in mobile_token1:
+                                                        print("dddddd",student_name[0][0])
+                                                        if e[0] in mobile_token2:
+                                                            continue
+                                                        if status == 'in':
+                                                            if check_in:
+                                                                mobile_token.append(e[0])
+                                                            title = 'Bus notification'
+                                                            title_ar = "اشعار من الحافلة"
+                                                            if round_info[0][3] != 'pick_up':
+                                                                title = "School Departure"
 
-                                                       for e in mobile_token1:
+                                                            message_ar = "صعد إلى الحافلة" + student_name[0][
+                                                                0] + str(bus_num[
+                                                                             0][0])
+                                                            message = student_name[0][
+                                                                          0] + ' has just been checked into the bus'
+                                                            date_string = datetime.datetime.now().strftime(
+                                                                "%Y-%m-%d %H:%M:%S")
+                                                            r = datetime.datetime.strptime(date_string,
+                                                                                           '%Y-%m-%d %H:%M:%S')
+                                                            save_message_wizard(school_name, round_id, r,
+                                                                                'App\Model\sta' + str(rec),
+                                                                                title, title_ar,
+                                                                                message,
+                                                                                message_ar, driver_name[0][0])
+                                                        elif status == 'out':
+                                                            if check_out:
+                                                                mobile_token.append(e[0])
+                                                            title = 'Checkout Notification'
+                                                            title_ar = 'اشعار من الحافلة'
+                                                            message_ar = 'وصل إلى المنزل.' + student_name[0][0]
+                                                            message = 'The bus ' + str(bus_num[
+                                                                                           0][
+                                                                                           0]) + 'has arrived at your home and ' + \
+                                                                      student_name[0][
+                                                                          0] + ' has been checked out of the bus. '
 
-                                                           if  status == 'in':
-                                                               if 'true'in notifications[3] or notifications[3]=="true," :
-                                                                    mobile_token.append(e[0])
-                                                               title = 'Bus notification'
-                                                               title_ar = "اشعار من الحافلة"
-                                                               if round_info[0][3] != 'pick_up':
-
-                                                                   title = "School Departure"
-
-                                                               message_ar = "صعد إلى الحافلة" + student_name[0][
-                                                                   0] + str(bus_num[
-                                                                                0][0])
-                                                               message = student_name[0][
-                                                                             0] + ' has just been checked into the bus'
-                                                               date_string = datetime.datetime.now().strftime(
-                                                                   "%Y-%m-%d %H:%M:%S")
-                                                               r = datetime.datetime.strptime(date_string,
-                                                                                              '%Y-%m-%d %H:%M:%S')
-                                                               # if round_info[0][3]=="pick_up":
-                                                               # cursor.execute(
-                                                               #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                               #     [round_id, r, 'App\Model\sta'+str(rec), title,
-                                                               #      message, message_ar,
-                                                               #      driver_name[0][0],title_ar])
-                                                               save_message_wizard(school_name, round_id, r,
-                                                                                   'App\Model\sta' + str(rec),
-                                                                                   title, title_ar,
-                                                                                   message,
-                                                                                   message_ar, driver_name[0][0])
-                                                           elif  status == 'out':
-
-                                                               if notifications[5]=="true," :
-
-                                                                 mobile_token.append(e[0])
-                                                               title = 'Checkout Notification'
-                                                               title_ar = 'اشعار من الحافلة'
-                                                               message_ar = 'وصل إلى المنزل.' + student_name[0][0]
-                                                               message = 'The bus ' + str(bus_num[
-                                                                   0][0]) + 'has arrived at your home and ' + \
-                                                                         student_name[0][
-                                                                             0] + ' has been checked out of the bus. '
-
-                                                               # cursor.execute(
-                                                               #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                               #     [round_id, r, 'App\Model\sta'+str(rec),
-                                                               #      title,
-                                                               #      message, message_ar,
-                                                               #      driver_name[0][0],title_ar])
-                                                               save_message_wizard(school_name, round_id, r,
-                                                                                   'App\Model\sta' + str(rec),
-                                                                                   title, title_ar,
-                                                                                   message,
-                                                                                   message_ar, driver_name[0][0])
-                                                           elif status == 'near':
-                                                               print("near ", e[0])
-                                                               print("line 1857")
-                                                               mobile_token.append(e[0])
-                                                               date_string = datetime.datetime.now().strftime(
-                                                                   "%Y-%m-%d %H:%M:%S")
-                                                               r = datetime.datetime.strptime(date_string,
-                                                                                              '%Y-%m-%d %H:%M:%S')
-                                                               if round_info[0][3] == 'pick_up':
-                                                                   title_ar = "الباص قريب منك"
-                                                                   title = 'The bus is near you.'
-                                                                   message = ' You are next on the route. Please have ' + \
+                                                            save_message_wizard(school_name, round_id, r,
+                                                                                'App\Model\sta' + str(rec),
+                                                                                title, title_ar,
+                                                                                message,
+                                                                                message_ar, driver_name[0][0])
+                                                        elif status == 'near':
+                                                            if nearby:
+                                                                mobile_token.append(e[0])
+                                                            date_string = datetime.datetime.now().strftime(
+                                                                "%Y-%m-%d %H:%M:%S")
+                                                            r = datetime.datetime.strptime(date_string,
+                                                                                           '%Y-%m-%d %H:%M:%S')
+                                                            if round_info[0][3] == 'pick_up':
+                                                                title_ar = "الباص قريب منك"
+                                                                title = 'The bus is near you.'
+                                                                message = ' You are next on the route. Please have ' + \
+                                                                          student_name[0][
+                                                                              0] + ' ready to leave'
+                                                                message_ar = "انت التالي, الحافلة اقتربت منك, الرجاء ان يكون" + \
                                                                              student_name[0][
-                                                                                 0] + ' ready to leave'
-                                                                   message_ar = "انت التالي, الحافلة اقتربت منك, الرجاء ان يكون" + \
-                                                                                student_name[0][
-                                                                                    0] + "مستعداً"
-                                                               else:
-                                                                   title_ar = "الباص قريب منك"
-                                                                   title = 'The bus is near you.'
-                                                                   message = ' You are next on the route. ' + \
-                                                                             student_name[0][
-                                                                                 0] + ' is about to arrive.'
-                                                                   message_ar = " علو وصول إلى المنزل " + \
-                                                                                student_name[0][0]
-                                                           else:
-
-
-                                                               if status == 'no-show':
-                                                                   mobile_token.append(e[0])
-                                                                   title = ' No Show Notification'
-                                                                   title_ar = ' إشعار الغياب'
-                                                                   message_ar = "لم يظهر اليوم." + student_name[0][0]
-                                                                   message = student_name[0][
-                                                                                 0] + ' did not check into the bus today'
-                                                                   # cursor.execute(
-                                                                   #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                   #     [round_id, r, 'App\Model\sta'+str(rec),
-                                                                   #      title,
-                                                                   #      message, message_ar,
-                                                                   #      driver_name[0][0],title_ar])
-                                                                   save_message_wizard(school_name, round_id, r,
-                                                                                       'App\Model\sta' + str(rec),
-                                                                                       title, title_ar,
-                                                                                       message,
-                                                                                       message_ar, driver_name[0][0])
-                                                               # yousef aa
-                                                               elif status == 'absent':
-
-                                                                   mobile_token.append(e[0])
-                                                                   title = 'Absence notification'
-                                                                   title_ar = 'اشعار من الحافلة'
-                                                                   message_ar = "غائب اليوم." + student_name[0][0]
-                                                                   message = ' Your child ' + student_name[0][
-                                                                       0] + ' has not checked into the bus and is absent today.'
-                                                                   date_string = datetime.datetime.now().strftime(
-                                                                       "%Y-%m-%d %H:%M:%S")
-                                                                   r = datetime.datetime.strptime(date_string,
-                                                                                                  '%Y-%m-%d %H:%M:%S')
-                                                                   # cursor.execute(
-                                                                   #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                   #     [round_id, r, 'App\Model\sta'+str(rec),
-                                                                   #      'Absence notification',
-                                                                   #      message, message_ar,
-                                                                   #      driver_name[0][0],title_ar])
-                                                                   save_message_wizard(school_name, round_id, r,
-                                                                                       'App\Model\sta' + str(rec),
-                                                                                       'Absence notification', title_ar,
-                                                                                       message,
-                                                                                       message_ar, driver_name[0][0])
-                                                               elif status == 'out':
-                                                                   title = 'Checkout Notification'
-                                                                   title_ar = 'اشعار من الحافلة'
-                                                                   message_ar = 'وصل إلى المنزل.' + student_name[0][0]
-                                                                   message = 'The bus ' + str(bus_num[
-                                                                       0][0]) + 'has arrived at your home and ' + \
-                                                                             student_name[0][
-                                                                                 0] + ' has been checked out of the bus. '
-
-                                                                   # cursor.execute(
-                                                                   #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                                   #     [round_id, r, 'App\Model\sta' + str(rec),
-                                                                   #      title,
-                                                                   #      message, message_ar,
-                                                                   #      driver_name[0][0],title_ar])
-                                                                   save_message_wizard(school_name, round_id, r,
-                                                                                       'App\Model\sta' + str(rec),
-                                                                                       title, title_ar,
-                                                                                       message,
-                                                                                       message_ar, driver_name[0][0])
-                                                               elif status == 'near':
-                                                                   if round_info[0][3] == 'pick_up':
-                                                                       title_ar = "الباص قريب منك"
-                                                                       title = 'The bus is near you.'
-                                                                       message = ' You are next on the route. Please have ' + \
-                                                                                 student_name[0][
-                                                                                     0] + ' ready to leave'
-                                                                       message_ar = "انت التالي, الحافلة اقتربت منك, الرجاء ان يكون" + \
-                                                                                    student_name[0][
-                                                                                        0] + "مستعداً"
-                                                                   else:
-                                                                       title_ar = "الباص قريب منك"
-                                                                       title = 'The bus is near you.'
-                                                                       message_ar = " علو وصول إلى المنزل " + student_name[0][0]
-                                                                       message = ' You are next on the route. ' + student_name[0][ 0] + ' is about to arrive.'
-
-                                                           push_service = FCMNotification(
-                                                               api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                                           registration_id = mobile_token
-                                                           message_title = title if lang == "en" else title_ar
-                                                           message_body = message if lang == "en" else message_ar
-                                                           if mobile_token and not ("token" in mobile_token) and not(status == 'absent' or status == 'no-show'):
-                                                               notify_single_device = push_service.notify_single_device(
-                                                                   registration_id=registration_id[0],
-                                                                   message_title=message_title,
-                                                                   message_body=message_body)
-                                                    if not(round_info[0][3] == 'pick_up') and status == 'in':
-                                                        continue
-                                                    if mobile_token1:
-                                                        mobile_token = []
-                                                        for e in mobile_token1:
+                                                                                 0] + "مستعداً"
+                                                            else:
+                                                                title_ar = "الباص قريب منك"
+                                                                title = 'The bus is near you.'
+                                                                message = ' You are next on the route. ' + \
+                                                                          student_name[0][
+                                                                              0] + ' is about to arrive.'
+                                                                message_ar = " علو وصول إلى المنزل " + \
+                                                                             student_name[0][0]
+                                                    else:
+                                                        if status == 'no-show':
                                                             mobile_token.append(e[0])
-                                                        push_service = FCMNotification(
-                                                            api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                                        registration_id = mobile_token
-                                                        message_title = title if lang =="en" else title_ar
-                                                        message_body = message if lang =="en" else message_ar
-                                                        if mobile_token and not ("token" in mobile_token):
-                                                                notify_single_device = push_service.notify_single_device(
-                                                                    registration_id=registration_id[0],
-                                                                    message_title=message_title,
-                                                                    message_body=message_body)
+                                                            title = ' No Show Notification'
+                                                            title_ar = ' إشعار الغياب'
+                                                            message_ar = "لم يظهر اليوم." + student_name[0][0]
+                                                            message = student_name[0][
+                                                                          0] + ' did not check into the bus today'
+
+                                                            save_message_wizard(school_name, round_id, r,
+                                                                                'App\Model\sta' + str(rec),
+                                                                                title, title_ar,
+                                                                                message,
+                                                                                message_ar, driver_name[0][0])
+                                                        # yousef aa
+                                                        elif status == 'absent':
+
+                                                            mobile_token.append(e[0])
+                                                            title = 'Absence notification'
+                                                            title_ar = 'اشعار من الحافلة'
+                                                            message_ar = "غائب اليوم." + student_name[0][0]
+                                                            message = ' Your child ' + student_name[0][
+                                                                0] + ' has not checked into the bus and is absent today.'
+                                                            date_string = datetime.datetime.now().strftime(
+                                                                "%Y-%m-%d %H:%M:%S")
+                                                            r = datetime.datetime.strptime(date_string,
+                                                                                           '%Y-%m-%d %H:%M:%S')
+                                                            save_message_wizard(school_name, round_id, r,
+                                                                                'App\Model\sta' + str(rec),
+                                                                                'Absence notification', title_ar,
+                                                                                message,
+                                                                                message_ar, driver_name[0][0])
+
+                                                    push_service = FCMNotification(
+                                                        api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                                    registration_id = mobile_token
+                                                    message_title = title if lang == "en" else title_ar
+                                                    message_body = message if lang == "en" else message_ar
+                                                    if mobile_token and not ("token" in mobile_token):
+                                                        notify_single_device = push_service.notify_single_device(
+                                                            registration_id=registration_id[0],
+                                                            message_title=message_title,
+                                                            message_body=message_body)
+
 
 
                                                 else:
 
-                                                    if status == 'in' or status == 'near':
+                                                    if status == 'in' :
                                                         mobile_token.append(e[0])
                                                         title = 'Bus notification'
                                                         title_ar ="اشعار من الحافلة"
@@ -2033,6 +1784,24 @@ def students_bus_checks(request):
                                                                                 title, title_ar,
                                                                                 message,
                                                                                 message_ar, driver_name[0][0])
+
+                                                    elif status == 'near':
+                                                        mobile_token.append(e[0])
+                                                        if round_info[0][3] == 'pick_up':
+                                                            title_ar = "الباص قريب منك"
+                                                            title = 'The bus is near you.'
+                                                            message = ' You are next on the route. Please have ' + \
+                                                                      student_name[0][
+                                                                          0] + ' ready to leave'
+                                                            message_ar = "انت التالي, الحافلة اقتربت منك, الرجاء ان يكون" + \
+                                                                         student_name[0][
+                                                                             0] + "مستعداً"
+                                                        else:
+                                                            title_ar = "الباص قريب منك"
+                                                            title = 'The bus is near you.'
+                                                            message_ar = " علو وصول إلى المنزل " + student_name[0][0]
+                                                            message = ' You are next on the route. ' + student_name[0][
+                                                                0] + ' is about to arrive.'
                                                     else:
                                                         if status == 'no-show':
                                                             mobile_token.append(e[0])
@@ -2044,11 +1813,6 @@ def students_bus_checks(request):
                                                                 "%Y-%m-%d %H:%M:%S")
                                                             r = datetime.datetime.strptime(date_string,
                                                                                            '%Y-%m-%d %H:%M:%S')
-                                                            # cursor.execute(
-                                                            #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                            #     [round_id, r, 'App\Model\sta'+str(rec), title,
-                                                            #      message, message_ar,
-                                                            #      driver_name[0][0],title_ar])
                                                             save_message_wizard(school_name, round_id, r,
                                                                                 'App\Model\sta' + str(rec),
                                                                                 title, title_ar,
@@ -2067,11 +1831,6 @@ def students_bus_checks(request):
                                                                 "%Y-%m-%d %H:%M:%S")
                                                             r = datetime.datetime.strptime(date_string,
                                                                                            '%Y-%m-%d %H:%M:%S')
-                                                            # cursor.execute(
-                                                            #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
-                                                            #     [round_id, r, 'App\Model\sta'+str(rec), 'Absence notification',
-                                                            #      message, message_ar,
-                                                            #      driver_name[0][0],title_ar])
                                                             save_message_wizard(school_name, round_id, r,
                                                                                 'App\Model\sta' + str(rec),
                                                                                 'Absence notification', title_ar,
@@ -2090,26 +1849,9 @@ def students_bus_checks(request):
                                                         continue
 
                                                     if mobile_token:
-                                                        # notifications = list(data['notifications'].split(" "))
-                                                        # li = list(data['notifications'].split(","))
-                                                        # lang = "ar" if "ar" in li[3] else 'en'
-                                                        mobile_token = []
-
-                                                        for e in mobile_token1:
-                                                            mobile_token.append(e[0])
-
-                                                        push_service = FCMNotification(
-                                                            api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                                        registration_id = mobile_token
                                                         message_title = title if "en" =="en" else title_ar
                                                         message_body = message if "en" =="en" else message_ar
-
-                                                        if mobile_token and not ("token" in mobile_token):
-
-                                                            notify_single_device = push_service.notify_single_device(
-                                                                registration_id=registration_id[0],
-                                                                message_title=message_title,
-                                                                message_body=message_body)
+                                                        send_notification(mobile_token1, message_title, message_body)
 
 
 
@@ -2128,7 +1870,18 @@ def students_bus_checks(request):
             result = {'status': 'error'}
             return Response(result)
 
-
+def send_notification(mobile_token1 ,message_title,message_body):
+    mobile_token=[]
+    for e in mobile_token1:
+        mobile_token.append(e[0])
+    push_service = FCMNotification(
+        api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+    registration_id = mobile_token
+    if mobile_token and not ("token" in mobile_token):
+        notify_single_device = push_service.notify_single_device(
+            registration_id=registration_id[0],
+            message_title=message_title,
+            message_body=message_body)
 @api_view(['POST'])
 def reordered_students(request):
     if request.method == 'POST':
@@ -2499,7 +2252,6 @@ def notify(request):
 
                                     push_service = FCMNotification(
                                         api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                    registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
 
                                 if mobile_token:
                                     registration_id = mobile_token[0]
@@ -2507,6 +2259,7 @@ def notify(request):
                                     message_body_ar =" لقد وصلت الحافلة " + str(bus_num[0][0]) +" إلى المنزل " if round_type=="dropoff" else "لقد وصلت الحافلة " + str(bus_num[0][0]) + ".الرجاء إرسال " +student_name[0][0]+"للصعود للحافلة"
                                     message_title = "Arrival - Parent" if round_type=="dropoff" else "Bus Arrival"
                                     message_body = "The bus " + str(bus_num[0][0]) + "has arrived at your home"
+
                                     result = push_service.notify_single_device(registration_id=registration_id,
                                                                                message_title=message_title if lang =="en" else message_title_ar,
                                                                                message_body=message_body if lang =="en" else message_body_ar)
