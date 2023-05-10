@@ -54,6 +54,7 @@ database = firebase.database()
 def Get_last_bus_location(request, bus_id, school_name):
     if request.method == 'GET':
         fullRound = school_name + "-stg-round-" + str(bus_id)
+        # print(fullRound)
         curr_date = date.today()
         #     # here we are doing firebase authentication
         # print("name sssssssssss11", request.build_absolute_uri())
@@ -157,7 +158,6 @@ def send_school_message(request):
 
         school_name = request.data.get('school_name')
         message_id = request.data.get('message_id')
-
         r =Timer(3.0, twoArgs, (message_id, school_name))
         r.start()
         result1 = {
@@ -234,14 +234,12 @@ def twoArgs(message_id,school_name):
                 api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
             registration_id = token
 
-
-
             message_title = school_message[0][1]
             # print(message_title)
             message_body = school_message[0][0]
             result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
                                                           registration_ids=registration_id,
-                                                          data_message={})
+                                                          data_message={},)
 
 
 
@@ -301,7 +299,9 @@ def send_dri(request):
         round_id = request.data.get('round_id')
         if mobile_token:
             push_service = FCMNotification(
-                api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                api_key="AAAAXj2DTK0:APA91bFSxi4txQ8WffLYLBrxFVd3JMCSP5n9WfZafPnLpxC2i9cXHi2SofNoNSBgFWt2tgqjEstSeVkre-1FklyKn4NIy0AuYSwafkQt-RhXcVCth3RJdt8GUbTw9aZI70XFmYBshjuy")
+            # push_service = FCMNotification(
+            #     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
             # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
             registration_id = mobile_token
 
@@ -384,7 +384,7 @@ def push_notification(request):
                             user_id = request.data.get('user_id')
                             user_ids = request.data.get('user_ids')
                             parent_id = request.data.get('parent_id')
-
+                            print(request.data)
 
                             mobile_token = []
                             school_name = ManagerParent.objects.filter(school_id=school_id).values_list('db_name').order_by('-pk')
