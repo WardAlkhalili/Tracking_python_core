@@ -603,8 +603,8 @@ def student_list(request, round_id):
                                                     [round_id, student_student12[0]['id'], round_history[0][0]])
                                                 student_history = cursor.fetchall()
                                                 if student_history:
-                                                    lat = student_history[0][1]
-                                                    long = student_history[0][2]
+                                                    # lat = student_history[0][1]
+                                                    # long = student_history[0][2]
                                                     if student_history[0][0] == 'near':
                                                         if round_info1[0][1] != 'pick_up':
                                                             in_round = True
@@ -974,12 +974,14 @@ def student_list(request, round_id):
                                             "check_in": in_round,
                                             "check_out": out_round,
                                             "absent": abs,
-                                            "lat": lat,
-                                            "lng": long,
+                                            "lat": lat if lat else 0,
+                                            "lng": long if long else 0,
                                             "no_show": no_show,
                                         }
                                 student = []
                                 for std_inf in st_id:
+                                    print("ffffffffffffffffff",
+                                          student_info[std_inf] )
                                     student.append(student_info[std_inf])
                                 cursor.execute(
                                     "UPDATE public.transport_round SET total_checkedout_students= %s , total_checkedin_students= %s WHERE id=%s",
