@@ -51,6 +51,8 @@ def driver_login(request):
             manager = Manager(token=unique_id, db_name=school_name, driver_id=data_id_bus[0][0],
                               mobile_token=mobile_token)
             manager.save()
+            # print(mobile_token)
+            # print(data_id_bus[0][0])
             cursor.execute(
                 "UPDATE public.res_partner SET signup_token=%s WHERE id=%s;",
                 [mobile_token, data_id_bus[0][0]])
@@ -980,8 +982,8 @@ def student_list(request, round_id):
                                         }
                                 student = []
                                 for std_inf in st_id:
-                                    print("ffffffffffffffffff",
-                                          student_info[std_inf] )
+                                    # print("ffffffffffffffffff",
+                                    #       student_info[std_inf] )
                                     student.append(student_info[std_inf])
                                 cursor.execute(
                                     "UPDATE public.transport_round SET total_checkedout_students= %s , total_checkedin_students= %s WHERE id=%s",
@@ -1257,7 +1259,7 @@ def set_round_status(request):
                                                     notify_single_device = push_service.notify_single_device(
                                                         registration_id=registration_id[0],
                                                         message_title=message_title if lang =="en" else message_title_ar,
-                                                        message_body=message_body if lang =="en" else message_body_ar)
+                                                        message_body=message_body if lang =="en" else message_body_ar,sound='new_beeb.mp3')
 
                                     cursor.execute(
                                         "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
@@ -1386,7 +1388,7 @@ def set_round_status(request):
                                                                 notify_single_device = push_service.notify_single_device(
                                                                     registration_id=registration_id[0],
                                                                     message_title=message_title if lang=='en' else message_title_ar,
-                                                                    message_body=message_body if lang=='en' else message_body_ar)
+                                                                    message_body=message_body if lang=='en' else message_body_ar,sound='new_beeb.mp3')
                                                     else:
                                                         if student_history[0][2]:
                                                             cursor.execute(
@@ -1529,7 +1531,7 @@ def students_bus_checks(request):
 
                                                 if status =='out' or status =='in':
 
-                                                    print(status,"ooooooooooododododo")
+                                                    # print(status,"ooooooooooododododo")
                                                     cursor.execute(
                                                         "INSERT INTO  round_student_history (round_id,student_id,driver_waiting,bus_check_in,datetime,history_id) VALUES (%s,%s,%s,%s,%s,%s); ",
                                                         [round_id, student_id, waiting_minutes, datetime.datetime.now(),
@@ -1595,7 +1597,7 @@ def students_bus_checks(request):
                                                                                          Q(db_name=school_name),
                                                                                          Q(is_active=True)).values_list( 'mobile_token').order_by('-pk')
                                             if settings:
-                                                print(settings)
+                                                # print(settings)
                                                 if not('None' in str(settings)) :
 
                                                     data = json.loads(settings[0][0])
@@ -1629,7 +1631,7 @@ def students_bus_checks(request):
                                                                                       '%Y-%m-%d %H:%M:%S')
                                                     mobile_token2=[]
                                                     for e in mobile_token1:
-                                                        print("dddddd",student_name[0][0])
+                                                        # print("dddddd",student_name[0][0])
                                                         if e[0] in mobile_token2:
                                                             continue
                                                         if status == 'in':
@@ -1737,7 +1739,7 @@ def students_bus_checks(request):
                                                         notify_single_device = push_service.notify_single_device(
                                                             registration_id=registration_id[0],
                                                             message_title=message_title,
-                                                            message_body=message_body)
+                                                            message_body=message_body,sound='new_beeb.mp3')
 
 
 
@@ -1890,7 +1892,7 @@ def send_notification(mobile_token1 ,message_title,message_body):
         notify_single_device = push_service.notify_single_device(
             registration_id=registration_id[0],
             message_title=message_title,
-            message_body=message_body)
+            message_body=message_body,sound='new_beeb.mp3')
 @api_view(['POST'])
 def reordered_students(request):
     if request.method == 'POST':
@@ -2271,7 +2273,7 @@ def notify(request):
 
                                     result = push_service.notify_single_device(registration_id=registration_id,
                                                                                message_title=message_title if lang =="en" else message_title_ar,
-                                                                               message_body=message_body if lang =="en" else message_body_ar)
+                                                                               message_body=message_body if lang =="en" else message_body_ar,sound='new_beeb.mp3')
 
                                 # user_no_move_time_exceeded
 

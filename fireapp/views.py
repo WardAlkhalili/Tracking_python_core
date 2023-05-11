@@ -228,7 +228,7 @@ def twoArgs(message_id,school_name):
             for tok in mobile_token:
 
                 token.append(tok[0])
-            # print("ffffffffff",len(token))
+
 
             push_service = FCMNotification(
                 api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
@@ -239,9 +239,9 @@ def twoArgs(message_id,school_name):
             message_body = school_message[0][0]
             result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
                                                           registration_ids=registration_id,
-                                                          data_message={},)
+                                                          data_message={},sound='new_beeb.mp3')
 
-
+            print(result)
 
 
 
@@ -305,11 +305,11 @@ def send_dri(request):
             # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
             registration_id = mobile_token
 
-            message_title = "Picked up with Parents"
-            message_body = "The student "+student_name+" has been picked up by their parents, so please don't wait for them."
+            message_title = "Picked up by Parents"
+            message_body = "The student "+student_name+" has been picked up by his parents, so please don't be waiting."
 
             result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
-                                                       message_body=message_body, message_icon="",
+                                                       message_body=message_body, message_icon="",sound='new_beeb.mp3',
                                                        data_message={"json_data": json.dumps(
                                                            {"student_id": student_id, "status": "absent",
                                                             "student_name": student_name, "round_id": round_id,
@@ -349,7 +349,7 @@ def send_survey_message_to_parent(request):
         message_title = "Survey"
         message_body = message_body
 
-        result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
+        result = push_service.notify_single_device(registration_id=registration_id,sound='new_beeb.mp3', message_title=message_title,
                                                    message_body=message_body,
                                                    )
         # #
@@ -432,7 +432,7 @@ def push_notification(request):
 
                                                     result = push_service.notify_single_device(registration_id=registration_id,
                                                                                                message_title=message_title,
-                                                                                               message_body=message_body)
+                                                                                               message_body=message_body,sound='new_beeb.mp3')
 
                                                     result1 = {
                                                         "route": 'Ok'
@@ -499,7 +499,7 @@ def push_notification(request):
                                         message_title = title
                                         message_body = message
                                         result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
-                                                                                   message_body=message_body)
+                                                                                   message_body=message_body,sound='new_beeb.mp3')
                                         result1 = {
                                             "route": 'Ok'
                                         }
