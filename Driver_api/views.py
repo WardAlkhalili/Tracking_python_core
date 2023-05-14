@@ -1,20 +1,9 @@
-from builtins import map
-
-from django.conf import settings
 from django.db.models import Q
 from django.utils.datetime_safe import datetime
-
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import *
 from django.db import connections
-from django.http.response import Http404, JsonResponse
-from django.http import HttpResponse
-from django.core.serializers import serialize
-from collections import ChainMap
-from rest_framework import status
-from itertools import chain
 from rest_framework.authtoken.models import Token
 from django.contrib.auth.models import User
 import datetime
@@ -23,9 +12,6 @@ import calendar
 from pyfcm import FCMNotification
 from Parent_api.models import ManagerParent
 import json
-
-# Create your views here.
-
 
 @api_view(['POST'])
 def driver_login(request):
@@ -36,13 +22,6 @@ def driver_login(request):
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  driver_id,bus_no,id  from fleet_vehicle WHERE bus_pin = %s", [pincode])
             data_id_bus = cursor.fetchall()
-
-            cursor.execute("select name from res_partner WHERE id = %s", [data_id_bus[0][0]])
-            driver_name = cursor.fetchall()
-
-            cursor.execute("select id,name from transport_round WHERE driver_id = %s", [data_id_bus[0][0]])
-            rounds_name = cursor.fetchall()
-
             # Authentication
             user = User.objects.all().first()
             token_auth, created = Token.objects.get_or_create(user=user)
@@ -51,63 +30,21 @@ def driver_login(request):
             manager = Manager(token=unique_id, db_name=school_name, driver_id=data_id_bus[0][0],
                               mobile_token=mobile_token)
             manager.save()
-            # print(mobile_token)
-            # print(data_id_bus[0][0])
             cursor.execute(
                 "UPDATE public.res_partner SET signup_token=%s WHERE id=%s;",
                 [mobile_token, data_id_bus[0][0]])
             # *------------------------------------------------------------------------------------------------*
             # Details for login setting
-
             cursor.execute("""
-            
             select nearby_distance,lat,lng,battery_low,location_refresh_rate,timezone,utc_offset,speed_limit_watch,standstill_watch,notify_if_driver_check_in_out_geo_fence,notify_on_battery_low_of_drivers_app,notify_it_driver_turns_off_gps,user_speed_exceeded,user_no_move_time_exceeded,use_round_order from transport_setting ORDER BY ID DESC LIMIT 1
-            
             """)
             login_details = cursor.fetchall()
-
             login_details1 = []
             columnNames = [column[0] for column in cursor.description]
             for record in login_details:
                 login_details1.append(dict(zip(columnNames, record)))
             cursor.execute('select name,phone,id  from  res_company')
             company_login_info = cursor.fetchall()
-
-            # *------------------------------------------------------------------------------------------------*
-            cursor.execute("select id,round_id,day_id from round_schedule WHERE round_id = %s", [rounds_name[0][0]])
-            rounds_details = cursor.fetchall()
-
-            cursor.execute("select count(student_id) from transport_participant WHERE round_schedule_id = %s",
-                           [rounds_name[0][0]])
-            rounds_count_student = cursor.fetchall()
-
-            day_list = []
-            for x, y, z in rounds_details:
-                cursor.execute("select  name  from school_day where id = %s", [z])
-                day_name = cursor.fetchall()
-                day_list.append(list(day_name))
-
-            # *------------------------------------------------------------------------------------------------*
-            # 1-List of active round
-
-            cursor.execute("select  id,name  from transport_round WHERE is_active = %s", [True])
-            active_round_list = cursor.fetchall()
-            active_round_list = str(active_round_list)[1:-1]
-
-            # 2-A student transferred to another round
-            cursor.execute(
-                "select  student_id,source_round_id  from transport_participant WHERE source_round_id IS NOT %s",
-                [None])
-            student_transferred = cursor.fetchall()
-            student_transferred_list = str(student_transferred)[1:-1]
-
-            student_name_transferred = []
-            for x, y in student_transferred:
-                cursor.execute("select id,display_name_search from student_student WHERE id = %s", [x])
-                student_transferred = cursor.fetchall()
-                student_name_transferred.append(list(student_transferred))
-
-            student_name_transferred_list = str(student_name_transferred)[1:-1]
             result = {
                 "status": "ok",
                 "school_phone": company_login_info[0][1],
@@ -120,7 +57,7 @@ def driver_login(request):
                 "school_id": company_login_info[0][2],
                 "utc_offset": login_details1[0]['utc_offset'],
                 "timezone": login_details1[0]['timezone'],
-                "tracklink": True,
+                "tracklink": False,
                 "bus_id": data_id_bus[0][2],
                 "bus_number": data_id_bus[0][1],
                 "driver_id": data_id_bus[0][0],
@@ -203,38 +140,6 @@ def driver_login(request):
 
         return Response(result)
 
-
-# cursor.execute("select id,name from transport_round WHERE id = %s",[y])
-
-
-# def login_settings(self,pincode):
-
-#     if request.method == 'GET':
-
-#         school_name = Manager.pincode(pincode)
-#         with connections[school_name].cursor() as cursor:
-#             cursor.execute("select nearby_distance,lat,lng,battery_low,location_refresh_rate,timezone,utc_offset from transport_setting ORDER BY ID DESC LIMIT 1")    
-#             columns2 = (x.name for x in cursor.description)        
-#             login_details = cursor.fetchall()
-#             login_details=str(login_details)[1:-1]
-
-#             result = {
-#                     'nearby_distance ' : str(nearby_distance)[1:-1],
-#                     'lat' : str(lat)[1:-1],
-#                     'lng': str(lng)[1:-1],
-#                     'battery_low':str(battery_low)[1:-1],
-#                     'location_refresh_rate':str(location_refresh_rate)[1:-1],
-#                     'timezone':str(timezone)[1:-1],
-#                     'utc_offset':str(utc_offset)[1:-1]
-#                 }
-
-#         return Response(login_details)
-
-{
-    "pincode": "iksW6O4MR"
-}
-
-
 @api_view(['POST'])
 def round_list(request):
     if request.method == 'POST':
@@ -244,42 +149,32 @@ def round_list(request):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
                     db_name = Manager.objects.filter(token=au).values_list('db_name')
                     driver_id = Manager.objects.filter(token=au).values_list('driver_id')
-
                     for e in driver_id:
                         driver_id = e[0]
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-
                         with connections[school_name].cursor() as cursor:
                             curr_date = date.today()
                             cursor.execute(
                                 "select  id  from school_day where name = %s",
                                 [calendar.day_name[curr_date.weekday()]])
                             day_id = cursor.fetchall()
-
                             result = {}
                             cursor.execute(
                                 "select name,start_time,pick_up_address,drop_off_address,pick_up_lat,pick_up_lng,drop_off_lat,drop_off_lng,route_id,id,is_active from transport_round WHERE vehicle_id = %s and  type = %s and  active_status='active'",
                                 [request.data.get('bus_id'),
                                  'drop_off' if 'drop' in request.data.get('round_type') else 'pick_up'])
-                            columns = (x.name for x in cursor.description)
                             list_round = cursor.fetchall()
-
                             list_round1 = []
-
                             columnNames = [column[0] for column in cursor.description]
                             for record in list_round:
                                 list_round1.append(dict(zip(columnNames, record)))
-
                             result1 = {}
                             round = []
                             r_id = []
                             l_round = []
-
                             moved_students1=[]
-
-
                             for id in list_round1:
                                 moved_students = []
                                 r_id.append(id['id'])
@@ -291,12 +186,7 @@ def round_list(request):
                                     "select student_id,sequence,transfer_state,source_round_id from transport_participant WHERE round_schedule_id = %s ORDER BY sequence ASC",
                                     [rounds_details[0][0]])
                                 round_state_student = cursor.fetchall()
-
-
-
                                 if round_state_student:
-                                    import datetime
-
                                     start = datetime.datetime(datetime.datetime.now().year,datetime.datetime.now().month, datetime.datetime.now().day)
                                     end = datetime.datetime(datetime.datetime.now().year,
                                                               datetime.datetime.now().month,
@@ -355,12 +245,6 @@ def round_list(request):
                                 rounds_details = cursor.fetchall()
                                 for id in rounds_details:
                                     l_round.append(id[2])
-
-                                # cursor.execute(
-                                #     "select name,start_time,pick_up_address,drop_off_address,pick_up_lat,pick_up_lng,drop_off_lat,drop_off_lng,route_id,id,is_active from transport_round WHERE id in %s",
-                                #     [tuple(l_round)])
-                                # list_round = cursor.fetchall()
-
                                 for rec in range(len(rounds_details)):
                                     day_list = {}
                                     day_name = calendar.day_name[curr_date.weekday()]
@@ -449,13 +333,9 @@ def round_list(request):
                                         "students_list": [day_list]
 
                                     }
-
-
                             cursor.execute(
                                 """ select 	allow_driver_change_students_location,allow_driver_to_use_beacon from transport_setting ORDER BY ID DESC LIMIT 1""")
                             login_details = cursor.fetchall()
-
-                            # print(result1)
                             for rec in range(len(result1)):
 
                                 round.append(result1[rec])
@@ -466,7 +346,6 @@ def round_list(request):
                                     },
                                     "rounds": round
                                 }
-
                             return Response(result)
                     else:
                         result = {"status": "Token notFound"
@@ -484,7 +363,6 @@ def round_list(request):
                       }
 
             return Response(result)
-
 
 @api_view(['GET'])
 def student_list(request, round_id):
@@ -1014,7 +892,6 @@ def student_list(request, round_id):
 
             return Response(result)
 
-
 @api_view(['POST'])
 def recent_notifications(request):
     if request.method == 'POST':
@@ -1435,10 +1312,8 @@ def set_round_status(request):
             result = {'status': 'error'}
             return Response(result)
 
-
 @api_view(['POST'])
 def students_bus_checks(request):
-
     if request.method == 'POST':
         if request.headers:
             if request.headers.get('Authorization'):
@@ -1880,7 +1755,6 @@ def students_bus_checks(request):
             result = {'status': 'error'}
             return Response(result)
 
-
 def send_notification(mobile_token1 ,message_title,message_body):
     mobile_token=[]
     for e in mobile_token1:
@@ -1963,13 +1837,6 @@ def notify(request):
                             school_name = e[0]
 
                         school_name = Manager.pincode(school_name)
-
-                        # type = request.data.get('location_type')
-
-                        # round_type = request.data.get('round_type')
-                        # student_id = request.data[0].get('student_id')
-                        # name = request.data[0].get('notification_type')
-
                         if not ("arrive_alarm" in  str(request.data)):
                             name = request.data.get('name')
                             round_id = request.data.get('round_id')
@@ -1995,8 +1862,6 @@ def notify(request):
                                     "select  name  from res_partner WHERE id = %s  ",
                                     [driver_id])
                                 driver_id = cursor.fetchall()
-
-
                                 message_en="The battery of the tracking device in the bus "+ str(bus_num[0][0])+" is running out of charge"
                                 cursor.execute(
                                         "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
@@ -2243,21 +2108,6 @@ def notify(request):
                                     mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec),
                                                                                  Q(db_name=school_name),
                                                                                  Q(is_active=True)).values_list( 'mobile_token').order_by('-pk')
-                                    # push_service = FCMNotification(
-                                    #     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                    # # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
-                                    #
-                                    # if mobile_token1:
-                                    #     registration_id = mobile_token1[0][0]
-                                    #     message_title_ar = "اشعار من الحافلة"
-                                    #     message_body_ar = " لقد وصلت الحافلة " + str(bus_num[0][
-                                    #                                                      0]) + " إلى المنزل " if round_type == "dropoff" else "لقد وصلت الحافلة " + str(
-                                    #         bus_num[0][0]) + ".الرجاء إرسال " + student_name[0][0] + "للصعود للحافلة"
-                                    #     message_title = "Arrival - Parent" if round_type == "dropoff" else "Bus Arrival"
-                                    #     message_body = "The bus " + str(bus_num[0][0]) + "has arrived at your home"
-                                    #     result = push_service.notify_single_device(registration_id=registration_id,
-                                    #                                                message_title=message_title if lang == "en" else message_title_ar,
-                                    #                                                message_body=message_body if lang == "en" else message_body_ar)
                                     for e in mobile_token1:
                                             mobile_token.append(e[0])
 

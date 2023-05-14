@@ -813,7 +813,7 @@ def kids_list(request):
                                                 "SELECT name FROM public.academic_grade WHERE id = %s",
                                                 [student_distribution_line[0][0]])
                                             academic_grade = cursor.fetchall()
-                                            student_grade = academic_grade[0][0]
+                                            student_grade = academic_grade[0][0] if academic_grade else ''
                                     if student_grade == None:
                                         cursor.execute(
                                             "select name from academic_grade where id=(select academic_grade_id from school_class where id="
@@ -821,7 +821,8 @@ def kids_list(request):
                                             "(select user_id from student_student where id=%s))))",
                                             [student1[rec]['id']])
                                         academic_grade_q = cursor.fetchall()
-                                        student_grade = academic_grade_q[0][0]
+
+                                        student_grade = academic_grade_q[0][0] if academic_grade_q else ''
                                         # ---------------------
                                     fname = student1[rec]['display_name_search']
                                     if "Arabic" not in lang:
@@ -2472,7 +2473,7 @@ def notify(request):
                                         "select id,round_id from round_schedule WHERE id in %s and day_id =%s",
                                         [tuple(r_id), day_id[0][0]])
                                     rounds_details = cursor.fetchall()
-                                    cursor.execute("select activity_type from student_history WHERE student_id = %s and datetime = %s ",
+                                    cursor.execute("select activity_type from student_history WHERE student_id = %s and datetime >= %s ",
                                                    [student_id,when])
                                     student_history = cursor.fetchall()
                                     result = {'result': "attendance"}
@@ -2580,7 +2581,7 @@ def notify(request):
 
 
 def send_driver_notif(mobile_token,student_id,student_name,round_id,type,when):
-    print("ffffffffffffffffffffffffffffffffffffffffffff",mobile_token)
+
     # AAAAXj2DTK0:APA91bFSxi4txQ8WffLYLBrxFVd3JMCSP5n9WfZafPnLpxC2i9cXHi2SofNoNSBgFWt2tgqjEstSeVkre-1FklyKn4NIy0AuYSwafkQt-RhXcVCth3RJdt8GUbTw9aZI70XFmYBshjuy
     push_service = FCMNotification(
             api_key="AAAAXj2DTK0:APA91bFSxi4txQ8WffLYLBrxFVd3JMCSP5n9WfZafPnLpxC2i9cXHi2SofNoNSBgFWt2tgqjEstSeVkre-1FklyKn4NIy0AuYSwafkQt-RhXcVCth3RJdt8GUbTw9aZI70XFmYBshjuy")
