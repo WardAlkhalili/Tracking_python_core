@@ -1321,7 +1321,6 @@ def get_student_history_new(student_id, school_name, student_name):
 def get_bus_notifition_student_new(school_name, student_name, notifications_text, notifications_title, deadline, round_id,
                                attendance_round, student_id,notifications_title_ar,notifications_text_ar,fname_ar):
     notifications = []
-
     avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
     with connections[school_name].cursor() as cursor:
         create_date = deadline.replace(second=0) if deadline else ''
@@ -1337,7 +1336,7 @@ def get_bus_notifition_student_new(school_name, student_name, notifications_text
 
         if "just been" in notifications_text:
 
-            if str(student_name) in notifications_text:
+            if str(student_name) in notifications_text or str(fname_ar) in notifications_text:
 
                 if notifications_title == 'School Departure':
                     notifications_title = 'School Departure'
@@ -1352,23 +1351,24 @@ def get_bus_notifition_student_new(school_name, student_name, notifications_text
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "No Show Notification",
                                      student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
         elif "has not checked into the bus" in notifications_text:
-            if str(student_name) in notifications_text:
+            if str(student_name) in notifications_text or str(fname_ar) in notifications_text:
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "Absence notification",
                                      student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
         elif "has arrived at your home and" in notifications_text:
-            if str(student_name) in notifications_text:
+
+            if str(student_name) in notifications_text or str(fname_ar) in notifications_text:
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "Checkout Notification",
                                      student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
 
         elif "just reached" in notifications_text:
-            if str(student_name) in notifications_text:
+            if str(student_name) in notifications_text or str(fname_ar) in notifications_text:
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "Bus notification",
                                      student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
         elif "The pickup round is started" in notifications_text:
-            if str(student_name) in notifications_text:
+            if str(student_name) in notifications_text or str(fname_ar) in notifications_text:
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "Pick-up round",
                                          student_name, student_id, 0, None, None, '0', notifications_title_ar,
@@ -1515,6 +1515,7 @@ def kids_hstory_new(request):
                                                 [rec_s, 'emergency',
                                                  'App\Model\sta' + str(parent_id)])
                                             sh_message_wizard = cursor.fetchall()
+
 
 
                                             # save bus message
@@ -2473,11 +2474,18 @@ def notify(request):
                                         "select id,round_id from round_schedule WHERE id in %s and day_id =%s",
                                         [tuple(r_id), day_id[0][0]])
                                     rounds_details = cursor.fetchall()
-                                    cursor.execute("select activity_type from student_history WHERE student_id = %s and datetime >= %s ",
+                                    cursor.execute("select activity_type from student_history WHERE student_id = %s and datetime >= %s  ",
                                                    [student_id,when])
                                     student_history = cursor.fetchall()
                                     result = {'result': "attendance"}
-                                    if not student_history:
+                                    student_history1=[]
+                                    for res in student_history:
+                                        student_history1.append(res[0])
+                                    if "in" in student_history1 or "out" in student_history1 or "absent" in student_history1:
+                                        pass
+                                    else:
+                                        student_history=[]
+                                    if not student_history :
                                         if target_rounds == 'both':
                                             for res in rounds_details:
                                                 cursor.execute(
@@ -2604,7 +2612,7 @@ def send_driver_notif(mobile_token,student_id,student_name,round_id,type,when):
                                                     "student_name": student_name, "round_id": round_id,
                                                     "date_time": ""})}
                                                )
-    print(result)
+
 
 @api_view(['GET'])
 def get_badge(request, student_id):
