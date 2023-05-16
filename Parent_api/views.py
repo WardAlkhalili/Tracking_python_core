@@ -805,7 +805,7 @@ def kids_list(request):
                                     student_grade = None
                                     # ----------------------
                                     cursor.execute(
-                                        "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = (SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s)",
+                                        "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = (SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s ORDER BY student_distribution_line_id DESC LIMIT 1)",
                                         [student1[rec]['id']])
                                     student_distribution_line = cursor.fetchall()
                                     if student_distribution_line:
@@ -821,7 +821,6 @@ def kids_list(request):
                                             "(select user_id from student_student where id=%s))))",
                                             [student1[rec]['id']])
                                         academic_grade_q = cursor.fetchall()
-
                                         student_grade = academic_grade_q[0][0] if academic_grade_q else ''
                                         # ---------------------
                                     fname = student1[rec]['display_name_search']
