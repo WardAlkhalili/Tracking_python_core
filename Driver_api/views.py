@@ -18,10 +18,12 @@ def driver_login(request):
     if request.method == 'POST':
         pincode = request.data.get('bus_pin')
         mobile_token = request.data.get('mobile_token')
+        print(mobile_token)
         school_name = Manager.pincode(pincode)
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  driver_id,bus_no,id  from fleet_vehicle WHERE bus_pin = %s", [pincode])
             data_id_bus = cursor.fetchall()
+            print(data_id_bus)
             # Authentication
             user = User.objects.all().first()
             token_auth, created = Token.objects.get_or_create(user=user)
@@ -1542,7 +1544,10 @@ def students_bus_checks(request):
                                                                                            0]) + 'has arrived at your home and ' + \
                                                                       student_name[0][
                                                                           0] + ' has been checked out of the bus. '
-
+                                                            date_string = datetime.datetime.now().strftime(
+                                                                "%Y-%m-%d %H:%M:%S")
+                                                            r = datetime.datetime.strptime(date_string,
+                                                                                           '%Y-%m-%d %H:%M:%S')
                                                             save_message_wizard(school_name, round_id, r,
                                                                                 'App\Model\sta' + str(rec),
                                                                                 title, title_ar,

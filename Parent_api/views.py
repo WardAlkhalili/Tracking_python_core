@@ -28,6 +28,7 @@ def parent_login(request):
         user_name = request.data.get('user_name')
         school_name = request.data.get('school_name')
         mobile_token = request.data.get('mobile_token')
+        print(mobile_token)
         url = 'https://tst.tracking.trackware.com/web/session/authenticate'
         try:
 
@@ -2899,7 +2900,7 @@ def get_attendance(request, student_id):
                                 absence_request.append({'leave_id': st[0],
                                                         'name': st[1],
                                                         'start_date': st[2].strftime("%d %b %Y"),
-                                                        'end_date': st[3],
+                                                        'end_date': st[3].strftime("%d %b %Y"),
                                                         'reason': 'Death of A Relative' if st[4] == 'death' else (
                                                             st[4].capitalize() if st[4] else ""),
                                                         'type': st[5].capitalize() if st[5] else "",
@@ -2908,6 +2909,7 @@ def get_attendance(request, student_id):
 
                     result = {'absence_request': absence_request,
                               'daily_attendance': daily_attendance}
+
 
                     return Response(result)
 
@@ -3600,7 +3602,7 @@ def get_weekly_plan_lines(request, plan_id, student_id, week_name):
 @api_view(['GET'])
 def get_data_worksheets(request, student_id):
     if request.method == 'GET':
-
+        print("sss")
         if request.headers:
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
@@ -3656,6 +3658,7 @@ def get_data_worksheets(request, student_id):
 
                                             data.append({'worksheet_id': w[0],
                                                          'name': w[1],
+                                                         # str(p[2].strftime("%d %b %Y"))
                                                          'date': str(date.strftime("%d %b %Y")),
                                                          'priority': w[2],
                                                          'deadline': str(deadline.strftime("%d %b %Y") + ' ' + str(
@@ -3665,6 +3668,7 @@ def get_data_worksheets(request, student_id):
                                                          'finish': str(deadline < datetime.datetime.now().astimezone(
                                                              new_timezone)) if deadline else ''
                                                          })
+                                print(data)
                                 result = {'result': data}
 
                                 return Response(result)
@@ -3833,7 +3837,7 @@ def get_worksheet_form_view_data(request, wsheet, std):
 
                             data.append({'worksheet_id': worksheet[0][0],
                                          'name': worksheet[0][1],
-                                         'date': str(worksheet[0][3]),
+                                         'date': str(worksheet[0][3].strftime("%d %b %Y"))if worksheet[0][3] else '',
                                          'teacher_name': hr_employee[0][1],
                                          'link': worksheet[0][6] if worksheet[0][6] else '',
                                          'teacher_id': hr_employee[0][0],
@@ -3844,7 +3848,7 @@ def get_worksheet_form_view_data(request, wsheet, std):
                                          'homework': "%s %s" % (s, size_name[i]) if worksheet[0][7] else '',
                                          'homework_name': worksheet[0][8],
                                          'description': worksheet[0][9],
-                                         'deadline': str(date_time_obj) if worksheet[0][5] else "",
+                                         'deadline': str(date_time_obj.strftime("%d %b %Y")) if worksheet[0][5] else "",
                                          'end': str(datetime.datetime.now() >= worksheet[0][5]) if worksheet[0][
                                              5] else "",
                                          'student_solution': student_solution
@@ -3880,7 +3884,7 @@ def get_event_form_view_data(request, event, std):
                             with connections[school_name].cursor() as cursor:
 
                                 cursor.execute(
-                                    " select id,event_id,state from school_event_registration where  id =%s   ORDER BY create_date DESC",
+                                    " select id,event_id,state,new_added from school_event_registration where  id =%s   ORDER BY create_date DESC",
                                     [event])
                                 events = cursor.fetchall()
 
@@ -3978,7 +3982,10 @@ def get_event_form_view_data(request, event, std):
                                              'state': events[0][2],
                                              'flag': str(True) if events[0][2] == 'draft' else str(False),
                                              'period': str(school_event[0][12] - school_event[0][11]),
-                                             'student_solution': student_solution})
+                                             'student_solution': student_solution,
+
+                                             'new_added':str(events[0][3]) if events[0][3] else ''})
+                                print(student_solution)
 
                                 result = {'result': data}
 
