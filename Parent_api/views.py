@@ -28,12 +28,14 @@ def parent_login(request):
         user_name = request.data.get('user_name')
         school_name = request.data.get('school_name')
         mobile_token = request.data.get('mobile_token')
-        print(mobile_token)
+        # http://192.168.1.82/
         url = 'https://tst.tracking.trackware.com/web/session/authenticate'
+        # url = 'http://192.168.1.82:9098/web/session/authenticate'
         try:
 
             body = json.dumps(
                 {"jsonrpc": "2.0", "params": {"db": school_name, "login": user_name, "password": password}})
+
             headers = {
                 'Content-Type': 'application/json',
             }
@@ -515,6 +517,11 @@ def kids_list(request):
                                     [])
 
                                 lang = cursor.fetchall()
+                                cursor.execute(
+                                    "select link  from res_company  ORDER BY ID DESC LIMIT 1",
+                                    [])
+
+                                school_logo = cursor.fetchall()
 
                                 if (parent_show_map[0][0] == True):
                                     show_map = True
@@ -832,7 +839,7 @@ def kids_list(request):
                                         fname = student1[rec]['name_ar']
 
                                     studen_list.append({
-
+                                        "schoolImage": school_logo[0][0] if school_logo[0][0] else'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
                                         "name": student1[rec]['display_name_search'],
                                         "fname": fname,
                                         "id": student1[rec]['id'],
@@ -863,6 +870,7 @@ def kids_list(request):
                                         "round_name": round_name,
                                         "round_id": int(student_round_id),
                                         "assistant_id": assistant_id,
+
                                         "route_order": 0,
                                         "chat_teachers": False,
                                         "target_lng": "0.0",
@@ -2846,6 +2854,7 @@ def get_attendance(request, student_id):
                     with connections[school_name].cursor() as cursor:
                         absence_request = []
                         daily_attendance = []
+
                         cursor.execute(
                             "select display_name_search,year_id,user_id from student_student where id=%s",
                             [student_id])
@@ -2906,10 +2915,8 @@ def get_attendance(request, student_id):
                                                         'type': st[5].capitalize() if st[5] else "",
                                                         'status': st[6].capitalize() if st[6] else "",
                                                         'arrival_time': arrival_time})
-
                     result = {'absence_request': absence_request,
                               'daily_attendance': daily_attendance}
-
 
                     return Response(result)
 
@@ -2939,6 +2946,7 @@ def post_attendance(request):
                         arrival_time = request.data.get('arrival_time')
                         base_url = request.data.get('base_url')
                         with connections[school_name].cursor() as cursor:
+
 
 
                             attached_files = request.data.get("file")
@@ -3595,6 +3603,7 @@ def get_weekly_plan_lines(request, plan_id, student_id, week_name):
                                 data['lines'] = subject_lines
                                 notes = ''
                                 data['notes'] = notes
+
                         result = {'result': data}
                         return Response(result)
 
@@ -3602,7 +3611,6 @@ def get_weekly_plan_lines(request, plan_id, student_id, week_name):
 @api_view(['GET'])
 def get_data_worksheets(request, student_id):
     if request.method == 'GET':
-        print("sss")
         if request.headers:
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
@@ -3668,7 +3676,6 @@ def get_data_worksheets(request, student_id):
                                                          'finish': str(deadline < datetime.datetime.now().astimezone(
                                                              new_timezone)) if deadline else ''
                                                          })
-                                print(data)
                                 result = {'result': data}
 
                                 return Response(result)
@@ -3985,7 +3992,6 @@ def get_event_form_view_data(request, event, std):
                                              'student_solution': student_solution,
 
                                              'new_added':str(events[0][3]) if events[0][3] else ''})
-                                print(student_solution)
 
                                 result = {'result': data}
 

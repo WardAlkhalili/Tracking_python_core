@@ -18,12 +18,10 @@ def driver_login(request):
     if request.method == 'POST':
         pincode = request.data.get('bus_pin')
         mobile_token = request.data.get('mobile_token')
-        print(mobile_token)
         school_name = Manager.pincode(pincode)
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  driver_id,bus_no,id  from fleet_vehicle WHERE bus_pin = %s", [pincode])
             data_id_bus = cursor.fetchall()
-            print(data_id_bus)
             # Authentication
             user = User.objects.all().first()
             token_auth, created = Token.objects.get_or_create(user=user)
@@ -933,7 +931,7 @@ def recent_notifications(request):
                                         round_schedules.append(rec[0])
                                     if round_schedules:
                                         cursor.execute(
-                                            "select  message_ar,create_date,type from sh_message_wizard WHERE round_id in %s AND sender_name = %s AND from_type='App\Model\Driver' ",
+                                            "select  message_en,create_date,type from sh_message_wizard WHERE round_id in %s AND sender_name = %s AND from_type='App\Model\Driver' ORDER BY ID DESC",
                                             [tuple(round_schedules), driver_name[0][0]])
                                         sh_message_wizard = cursor.fetchall()
                                         for rec in range(len(sh_message_wizard)):
@@ -2012,6 +2010,11 @@ def notify(request):
                                         "select  name  from res_partner WHERE id = %s  ",
                                         [driver_id])
                                     driver_id = cursor.fetchall()
+                                    cursor.execute(
+                                         "INSERT INTO sh_message_wizard(round_id,create_date,from_type, type, message_en,sender_name,message_ar)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                        [round_id, r, 'App\Model\Driver',
+                                         'emergency' , emergency_text,
+                                         driver_id[0][0], emergency_text])
                                     for students in students_ids:
                                         cursor.execute(
                                             "select father_id,mother_id,responsible_id_value from student_student WHERE id = %s ",
