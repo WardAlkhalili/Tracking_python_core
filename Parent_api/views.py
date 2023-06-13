@@ -1105,8 +1105,10 @@ def hide_message(request):
         else:
             result = {'result': 'error4'}
             return Response(result)
-def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0',notifications_title_ar='',notifications_text_ar=''):
+def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0',notifications_title_ar='',notifications_text_ar='',student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png'):
     show=show_notif
+    # if student_image:
+    #     print(student_image)
     stutes=stutes_notif
     if stutes=='Read':
         stutes="Mark As UnRead"
@@ -1181,6 +1183,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             "id": str(id),
             "stutes": stutes,
             "show": show,
+            "student_image": student_image,
             "action_id": str(action_id),
             "notifications_text_ar": notifications_text_ar if notifications_text_ar else  notifications_text,
             "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
@@ -1199,6 +1202,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             "id":id,
             "stutes":stutes,
             "show":show,
+            "student_image": student_image,
             "action_id": str(action_id),
             "notifications_text_ar": notifications_text_ar if notifications_text_ar else notifications_text,
             "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
@@ -1220,6 +1224,10 @@ def get_school_message_new(student_id, school_name, school_message, student_name
                 "select DISTINCT ON (school_message_id) school_message_id,id,read_message,show_message,action_id from school_message_student_student WHERE school_message_id in %s AND student_student_id = %s AND show_message=true",
                 [tuple(message_ids), student_id])
             message_student = cursor.fetchall()
+            cursor.execute(
+                "select  image_url from student_student WHERE id=%s",
+                [student_id])
+            student_image = cursor.fetchall()
             message_id = []
             for res in message_student:
                 action_id = res[4]
@@ -1248,7 +1256,8 @@ def get_school_message_new(student_id, school_name, school_message, student_name
                                 action_id=events[0][0]
                     notifications.append(
                         get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title,
-                                             student_name, student_id,res[1],"Read" if res[2] else 'UnRead',"show" if res[3] else 'not show' ,action_id))
+                                             student_name, student_id,res[1],"Read" if res[2] else 'UnRead',"show" if res[3] else 'not show' ,action_id,'','','https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
+                                            student_image[0][0]) if student_image[0][0]else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',))
     return notifications
 def get_survey(student_id, school_name):
     notifications = []
