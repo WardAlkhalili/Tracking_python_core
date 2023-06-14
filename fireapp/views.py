@@ -295,6 +295,7 @@ def send_dri(request):
         student_name = request.data.get('student_name')
         student_id = request.data.get('student_id')
         round_id = request.data.get('round_id')
+        print(mobile_token)
         # dFcb6UaVQAeAbMrAgnCF59:APA91bExNfxIYZF9QOZMHrp1bDABtihTkDc-8boLfqBvHIg76mlHv8zgEayFM3gT08YoMaeLTnwfGZKGCVNVd_x1zAbGFx4WjOE2_NTZGjRRT3s4clNxHk3XmJZdfvWl3beQDahHsFSc
         if mobile_token:
             # push_service = FCMNotification(
