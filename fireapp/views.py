@@ -290,6 +290,7 @@ def send_confirmation_message_to_parent(request):
 @api_view(['POST'])
 def send_dri(request):
     if request.method == 'POST':
+        print(request.data)
 
         mobile_token = request.data.get('mobile_token')
         student_name = request.data.get('student_name')
