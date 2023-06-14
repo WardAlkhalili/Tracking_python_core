@@ -241,8 +241,6 @@ def twoArgs(message_id,school_name):
                                                           registration_ids=registration_id,
                                                           data_message={},sound='new_beeb.mp3')
 
-            print(result)
-
 
 
 
@@ -297,11 +295,12 @@ def send_dri(request):
         student_name = request.data.get('student_name')
         student_id = request.data.get('student_id')
         round_id = request.data.get('round_id')
+        # dFcb6UaVQAeAbMrAgnCF59:APA91bExNfxIYZF9QOZMHrp1bDABtihTkDc-8boLfqBvHIg76mlHv8zgEayFM3gT08YoMaeLTnwfGZKGCVNVd_x1zAbGFx4WjOE2_NTZGjRRT3s4clNxHk3XmJZdfvWl3beQDahHsFSc
         if mobile_token:
-            push_service = FCMNotification(
-                api_key="AAAAXj2DTK0:APA91bFSxi4txQ8WffLYLBrxFVd3JMCSP5n9WfZafPnLpxC2i9cXHi2SofNoNSBgFWt2tgqjEstSeVkre-1FklyKn4NIy0AuYSwafkQt-RhXcVCth3RJdt8GUbTw9aZI70XFmYBshjuy")
             # push_service = FCMNotification(
-            #     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+            #     api_key="AAAAXj2DTK0:APA91bFSxi4txQ8WffLYLBrxFVd3JMCSP5n9WfZafPnLpxC2i9cXHi2SofNoNSBgFWt2tgqjEstSeVkre-1FklyKn4NIy0AuYSwafkQt-RhXcVCth3RJdt8GUbTw9aZI70XFmYBshjuy")
+            push_service = FCMNotification(
+                api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
             # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
             registration_id = mobile_token
 
@@ -384,8 +383,6 @@ def push_notification(request):
                             user_id = request.data.get('user_id')
                             user_ids = request.data.get('user_ids')
                             parent_id = request.data.get('parent_id')
-                            print(request.data)
-
                             mobile_token = []
                             school_name = ManagerParent.objects.filter(school_id=school_id).values_list('db_name').order_by('-pk')
                             # print(school_name[0][0])
@@ -509,3 +506,4 @@ def push_notification(request):
                                 "route": 'Ok'
                             }
                             return Response(result1)
+
