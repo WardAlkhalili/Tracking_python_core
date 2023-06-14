@@ -314,6 +314,7 @@ def send_dri(request):
                                                             "student_name": student_name, "round_id": round_id,
                                                             "date_time": ""})}
                                                        )
+            print('yousef ahmad',result)
             # mobile_token2=[]
             #
             # for e in mobile_token:
