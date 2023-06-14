@@ -296,6 +296,16 @@ def send_dri(request):
         student_name = request.data.get('student_name')
         student_id = request.data.get('student_id')
         round_id = request.data.get('round_id')
+        signup_token=''
+        with connections['tst'].cursor() as cursor:
+            cursor.execute("select  driver_id from transport_round WHERE id = %s", [round_id])
+            data_id_bus = cursor.fetchall()
+            cursor.execute(
+                "select signup_token from public.res_partner  WHERE id=%s;",
+                [data_id_bus[0][0]])
+            signup_token = cursor.fetchall()
+            print(signup_token)
+        mobile_token = signup_token[0][0]
         print(mobile_token)
         print(round_id)
         # dFcb6UaVQAeAbMrAgnCF59:APA91bExNfxIYZF9QOZMHrp1bDABtihTkDc-8boLfqBvHIg76mlHv8zgEayFM3gT08YoMaeLTnwfGZKGCVNVd_x1zAbGFx4WjOE2_NTZGjRRT3s4clNxHk3XmJZdfvWl3beQDahHsFSc
