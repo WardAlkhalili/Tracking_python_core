@@ -290,8 +290,6 @@ def send_confirmation_message_to_parent(request):
 @api_view(['POST'])
 def send_dri(request):
     if request.method == 'POST':
-        print(request.data)
-
         mobile_token = request.data.get('mobile_token')
         student_name = request.data.get('student_name')
         student_id = request.data.get('student_id')
@@ -301,13 +299,11 @@ def send_dri(request):
             cursor.execute("select  driver_id from transport_round WHERE id = %s", [round_id])
             data_id_bus = cursor.fetchall()
             cursor.execute(
-                "select signup_token from public.res_partner  WHERE id=%s;",
+                "select token from public.res_partner  WHERE id=%s;",
                 [data_id_bus[0][0]])
             signup_token = cursor.fetchall()
-            print(signup_token)
         mobile_token = signup_token[0][0]
-        print(mobile_token)
-        print(round_id)
+
         # dFcb6UaVQAeAbMrAgnCF59:APA91bExNfxIYZF9QOZMHrp1bDABtihTkDc-8boLfqBvHIg76mlHv8zgEayFM3gT08YoMaeLTnwfGZKGCVNVd_x1zAbGFx4WjOE2_NTZGjRRT3s4clNxHk3XmJZdfvWl3beQDahHsFSc
         if mobile_token:
             # push_service = FCMNotification(
@@ -327,7 +323,6 @@ def send_dri(request):
                                                             "student_name": student_name, "round_id": round_id,
                                                             "date_time": ""})}
                                                        )
-            print('yousef ahmad',result)
             # mobile_token2=[]
             #
             # for e in mobile_token:

@@ -2527,7 +2527,7 @@ def notify(request):
                                                     "select driver_id from transport_round WHERE id = %s",
                                                     [res[1]])
                                                 round_info = cursor.fetchall()
-                                                cursor.execute("select signup_token from res_partner WHERE id = %s",
+                                                cursor.execute("select token from res_partner WHERE id = %s",
                                                                [round_info[0][0]])
                                                 driver_name = cursor.fetchall()
                                                 send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[1],'both',when)

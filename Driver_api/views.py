@@ -31,8 +31,9 @@ def driver_login(request):
                               mobile_token=mobile_token)
             manager.save()
             cursor.execute(
-                "UPDATE public.res_partner SET signup_token=%s WHERE id=%s;",
-                [mobile_token, data_id_bus[0][0]])
+                "UPDATE public.res_partner SET signup_token=%s , token=%s  WHERE id=%s;",
+                [mobile_token,mobile_token, data_id_bus[0][0]])
+
             # *------------------------------------------------------------------------------------------------*
             # Details for login setting
             cursor.execute("""
