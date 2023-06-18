@@ -655,11 +655,24 @@ def kids_list(request):
                                              "arabic_name": "العيادة",
                                              "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
                                              "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg"
+                                             },
+
+                                        "Library":
+                                            {"name": "Library",
+                                             "name_ar": "المكتبه",
+                                             # "url": "https://" + school_name + ".staging.trackware.com/my/Clinic/",
+                                             # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Clinic/",
+                                             "url": "https://tst.tracking.trackware.com/my/Library/",
+                                             "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Library/",
+                                             "arabic_name": "العيادة",
+                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
+                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg"
                                              }
+
                                     }
                                     url_m = {}
                                     model_list = ( "Badges", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
-                                        "Weekly Plans", 'Online Exams')
+                                        "Weekly Plans", 'Online Exams','Library')
                                     cursor.execute("select name from ir_ui_menu where name in %s", [model_list])
                                     list = cursor.fetchall()
                                     res = []
@@ -716,6 +729,11 @@ def kids_list(request):
                                                 student1[rec]['user_id'])
                                             x['Clinic']['url'] = x['Clinic']['url'] + str(student1[rec]['user_id'])
                                             model.append(x['Clinic'])
+                                        if 'Library'==rec1:
+                                            x['Library']['arabic_url'] = x['Clinic']['arabic_url'] + str(
+                                                student1[rec]['user_id'])
+                                            x['Library']['url'] = x['Library']['url'] + str(student1[rec]['user_id'])
+                                            model.append(x['Library'])
                                     cursor.execute(
                                         "select name from ir_ui_menu where name ='Live Tracking'  LIMIT 1")
                                     tracking = cursor.fetchall()
@@ -4022,3 +4040,147 @@ def get_event_form_view_data(request, event, std):
                                 result = {'result': data}
 
                                 return Response(result)
+
+
+
+@api_view(['GET'])
+def get_library(request, student_id):
+
+    if request.method == 'GET':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                    with connections[school_name].cursor() as cursor:
+                        book_borrowed = []
+                        book_all_r = []
+                        book_req=[]
+                        cursor.execute(
+                            " SELECT ID,NAME FROM product_template WHERE is_library_book=TRUE",
+                            [])
+                        all_book = cursor.fetchall()
+
+                        for book1 in all_book:
+                            cursor.execute(
+                                "SELECT  product_qty  from  report_stock_quantity WHERE product_id=%s  ORDER BY DATE DESC LIMIT 1",
+                                [book1[0]])
+                            report_stock_quantity = cursor.fetchall()
+                            if report_stock_quantity:
+                                if report_stock_quantity[0][0]>0:
+                                    book_all_r.append({'id': book1[0],
+                                                          'name': book1[1]
+
+                                                          })
+                        cursor.execute(
+                            "select display_name_search,year_id,user_id from student_student where id=%s",
+                            [student_id])
+                        user_id_q = cursor.fetchall()
+                        cursor.execute(
+                            " select branch_id from res_users where id=%s",
+                            [user_id_q[0][2]])
+                        branch_id = cursor.fetchall()
+                        if user_id_q:
+                            cursor.execute(
+                                "SELECT  id,book_id,state,create_date,date_delivered,date_returned from book_request  where student_id=%s and branch_id=%s ORDER BY id DESC",
+                                [student_id, branch_id[0][0]])
+                            book_request = cursor.fetchall()
+                            for book in book_request:
+                                book_author=''
+                                cursor.execute(
+                                    "SELECT name,id FROM product_template WHERE id = %s",
+                                    [book[1]])
+                                book_name = cursor.fetchall()
+
+                                cursor.execute(
+                                    "SELECT book_author_id FROM book_author_prodtempl_rel WHERE product_template_id=%s",
+                                    [book_name[0][1]])
+                                book_author_prodtempl_rel = cursor.fetchall()
+                                for author in book_author_prodtempl_rel:
+                                    cursor.execute(
+                                        "SELECT name FROM product_author WHERE id=%s",
+                                        [author[0]])
+                                    product_author = cursor.fetchall()
+                                    book_author+=product_author[0][0] +' & '
+                                if book_author:
+                                    book_author=book_author[:len(book_author)-2] + book_author[len(book_author):]
+                                if  book[2]== 'done':
+                                    book_borrowed.append({'id': book[1],
+                                                     'name': book_name[0][0],
+                                                     'date_delivered': book[4].strftime("%d %b %Y"),
+                                                     'date_returned': book[5].strftime("%d %b %Y"),
+                                                     'status': book[2],
+                                                     'book_author': book_author
+                                                     })
+
+                                else:
+                                    book_req.append({'id': book[1],
+                                                             'name': book_name[0][0],
+                                                             'requested_date': book[3].strftime("%d %b %Y"),
+                                                             'status': book[2]
+                                                             })
+
+                    result = {'book_request': book_req,
+                              'book_borrowed': book_borrowed,
+                              'book':book_all_r}
+
+                    return Response(result)
+
+@api_view(['POST'])
+def post_library(request):
+        if request.method == 'POST':
+            if request.headers:
+                if request.headers.get('Authorization'):
+                    if 'Bearer' in request.headers.get('Authorization'):
+                        au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                        db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+                        if db_name:
+                            for e in db_name:
+                                school_name = e[0]
+                            school_name = ManagerParent.pincode(school_name)
+                            student_id = request.data.get('student_id')
+                            book_id= request.data.get('book_id')
+                            countDay=request.data.get('countDay')
+                            request_soft_copy = request.data.get('copy')
+                            with connections[school_name].cursor() as cursor:
+
+                                cursor.execute(
+                                    "select id from stock_warehouse WHERE is_library =true ORDER BY ID DESC LIMIT 1",
+                                    [])
+                                stock_warehouse = cursor.fetchall()
+                                cursor.execute(
+                                    "select id from book_request  ORDER BY ID DESC LIMIT 1",
+                                    [])
+                                book_request = cursor.fetchall()
+                                cursor.execute(
+                                    "select id from res_partner  WHERE student_id =%s",
+                                    [student_id])
+                                borrower_id = cursor.fetchall()
+                                cursor.execute(
+                                    "select year_id,user_id from student_student where id=%s",
+                                    [student_id])
+                                user_id_q = cursor.fetchall()
+                                cursor.execute(
+                                    " select branch_id from res_users where id=%s",
+                                    [user_id_q[0][1]])
+                                branch_id = cursor.fetchall()
+                                # cursor.execute(
+                                #     "select year_id,branch_id from student_student  WHERE id =%s",
+                                #     [student_id])
+                                # branch_id = cursor.fetchall()
+                                # res.partner
+                                name='R00'+str(book_request[0][0]+1)
+                                # select id from stock_warehouse WHERE is_library =true ORDER BY ID DESC LIMIT 1
+                                cursor.execute(
+                                    "INSERT INTO book_request(borrower_id,book_id,requested_borrow_days,name,request_soft_copy,library_id,state,create_date,student_id,branch_id)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                                    [borrower_id[0][0],book_id,countDay,name,request_soft_copy,stock_warehouse[0][0] if stock_warehouse else 1,'under_approval',datetime.datetime.now(),student_id,branch_id[0][0] ])
+                                result = {'result': 'ok'}
+                                return Response(result)
+                    result = {'result': 'Error Authorization'}
+                    return Response(result)
+                result = {'result': 'Not Authorization'}
+                return Response(result)

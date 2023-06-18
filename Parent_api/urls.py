@@ -35,7 +35,8 @@ urlpatterns = [
     path('api/get_event_form_view_data/<int:event>/<int:std>', views.get_event_form_view_data),
     path('api/get_all_weekly_plans/<int:student_id>', views.get_all_weekly_plans),
     path('api/get_weekly_plan_lines/<int:student_id>/<int:plan_id>/<str:week_name>', views.get_weekly_plan_lines),
-
+    path('api/get_library/<int:student_id>', views.get_library),
+    path('parents/post_library', views.post_library),
 
 
 ]
