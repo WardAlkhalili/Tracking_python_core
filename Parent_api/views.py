@@ -850,7 +850,7 @@ def kids_list(request):
                                         student_grade = academic_grade_q[0][0] if academic_grade_q else ''
                                         # ---------------------
                                     fname = student1[rec]['display_name_search']
-                                    
+
                                     if any('English' in x[0]  for x in lang):
 
                                         fname = student1[rec]['name']
@@ -1521,10 +1521,12 @@ def kids_hstory_new(request):
                             for student in student_info:
 
                                 student_round = []
-                                if "Arabic" not in lang:
+                                if  any('English'  in x[0]  for x in lang):
+
                                     fname = student[3]
 
                                 else:
+
                                     fname = student[4]
                                 notifications += get_school_message_new(student[0], school_name, school_message, fname)
                                 notifications += get_student_history_new(student[0], school_name, fname)
@@ -1578,7 +1580,7 @@ def kids_hstory_new(request):
                                             for message_wizard in range(len(sh_message_wizard)):
                                                 avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                                 for std in student_info:
-                                                    if "Arabic" not in lang:
+                                                    if any('English'  not in x[0]  for x in lang):
                                                         fname = std[3]
                                                         fname_ar=std[4]
 
@@ -1649,7 +1651,7 @@ def kids_hstory_new(request):
                                                                         name = cursor.fetchall()
 
                                                                         if time_out[0][0] and time_out[0][2]:
-                                                                            if "Arabic" not in lang:
+                                                                            if any('English'  in x[0]  for x in lang):
                                                                                 if name[0][1]:
                                                                                     fname = name[0][1]
                                                                                 else:
