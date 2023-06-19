@@ -850,10 +850,13 @@ def kids_list(request):
                                         student_grade = academic_grade_q[0][0] if academic_grade_q else ''
                                         # ---------------------
                                     fname = student1[rec]['display_name_search']
-                                    if "Arabic" not in lang:
+                                    
+                                    if any('English' in x[0]  for x in lang):
+
                                         fname = student1[rec]['name']
 
                                     else:
+
                                         fname = student1[rec]['name_ar']
 
                                     studen_list.append({
@@ -4066,16 +4069,16 @@ def get_library(request, student_id):
                         all_book = cursor.fetchall()
 
                         for book1 in all_book:
-                            cursor.execute(
-                                "SELECT  product_qty  from  report_stock_quantity WHERE product_id=%s  ORDER BY DATE DESC LIMIT 1",
-                                [book1[0]])
-                            report_stock_quantity = cursor.fetchall()
-                            if report_stock_quantity:
-                                if report_stock_quantity[0][0]>0:
-                                    book_all_r.append({'id': book1[0],
-                                                          'name': book1[1]
+                            # cursor.execute(
+                            #     "SELECT  product_qty  from  report_stock_quantity WHERE product_id=%s  ORDER BY DATE DESC LIMIT 1",
+                            #     [book1[0]])
+                            # report_stock_quantity = cursor.fetchall()
+                            # if report_stock_quantity:
+                                # if report_stock_quantity[0][0]>0:
+                            book_all_r.append({'id': book1[0],
+                                                  'name': book1[1]
 
-                                                          })
+                                                  })
                         cursor.execute(
                             "select display_name_search,year_id,user_id from student_student where id=%s",
                             [student_id])
@@ -4086,7 +4089,7 @@ def get_library(request, student_id):
                         branch_id = cursor.fetchall()
                         if user_id_q:
                             cursor.execute(
-                                "SELECT  id,book_id,state,create_date,date_delivered,date_returned from book_request  where student_id=%s and branch_id=%s ORDER BY id DESC",
+                                "SELECT  id,book_id,state,create_date,date_delivered,date_returned,expected_return_date from book_request  where student_id=%s and branch_id=%s ORDER BY id DESC",
                                 [student_id, branch_id[0][0]])
                             book_request = cursor.fetchall()
                             for book in book_request:
@@ -4108,11 +4111,13 @@ def get_library(request, student_id):
                                     book_author+=product_author[0][0] +' & '
                                 if book_author:
                                     book_author=book_author[:len(book_author)-2] + book_author[len(book_author):]
-                                if  book[2]== 'done':
+                                if  book[2]== 'delivered' or  book[2]== 'done':
+
                                     book_borrowed.append({'id': book[1],
                                                      'name': book_name[0][0],
                                                      'date_delivered': book[4].strftime("%d %b %Y"),
-                                                     'date_returned': book[5].strftime("%d %b %Y"),
+                                                     'date_returned': book[6].strftime("%d %b %Y"),
+                                                        'date_returned_on': book[5].strftime("%d %b %Y")if book[5] else '' ,
                                                      'status': book[2],
                                                      'book_author': book_author
                                                      })
@@ -4144,7 +4149,7 @@ def post_library(request):
                             school_name = ManagerParent.pincode(school_name)
                             student_id = request.data.get('student_id')
                             book_id= request.data.get('book_id')
-                            countDay=request.data.get('countDay')
+                            # countDay=request.data.get('countDay')
                             request_soft_copy = request.data.get('copy')
                             with connections[school_name].cursor() as cursor:
 
@@ -4172,12 +4177,12 @@ def post_library(request):
                                 #     "select year_id,branch_id from student_student  WHERE id =%s",
                                 #     [student_id])
                                 # branch_id = cursor.fetchall()
-                                # res.partner
+                                # res.partner expected_return_date
                                 name='R00'+str(book_request[0][0]+1)
                                 # select id from stock_warehouse WHERE is_library =true ORDER BY ID DESC LIMIT 1
                                 cursor.execute(
-                                    "INSERT INTO book_request(borrower_id,book_id,requested_borrow_days,name,request_soft_copy,library_id,state,create_date,student_id,branch_id)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                                    [borrower_id[0][0],book_id,countDay,name,request_soft_copy,stock_warehouse[0][0] if stock_warehouse else 1,'under_approval',datetime.datetime.now(),student_id,branch_id[0][0] ])
+                                    "INSERT INTO book_request(borrower_id,book_id,name,request_soft_copy,library_id,state,create_date,student_id,branch_id,academic_year)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                                    [borrower_id[0][0],book_id,name,request_soft_copy,stock_warehouse[0][0] if stock_warehouse else 1,'under_approval',datetime.datetime.now(),student_id,branch_id[0][0],user_id_q[0][0] ])
                                 result = {'result': 'ok'}
                                 return Response(result)
                     result = {'result': 'Error Authorization'}
