@@ -501,7 +501,7 @@ def kids_list(request):
                                     [parent_id])
                                 parent_show_map = cursor.fetchall()
                                 cursor.execute(
-                                    "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type,name,name_ar from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
+                                    "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type,name,name_ar,gender from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                     [parent_id, parent_id, parent_id])
                                 student = cursor.fetchall()
                                 student1 = []
@@ -666,7 +666,7 @@ def kids_list(request):
                                              "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Library/",
                                              "arabic_name": "العيادة",
                                              "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
-                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg"
+                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg"
                                              }
 
                                     }
@@ -850,6 +850,12 @@ def kids_list(request):
                                         student_grade = academic_grade_q[0][0] if academic_grade_q else ''
                                         # ---------------------
                                     fname = student1[rec]['display_name_search']
+                                    defaultImage=''
+                                    if student1[rec]['gender']=='male':
+                                        defaultImage='https://trackware-schools.s3.eu-central-1.amazonaws.com/male.png'
+                                    else:
+                                        defaultImage = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/fma.png'
+
 
                                     if any('English' in x[0]  for x in lang):
 
@@ -867,7 +873,7 @@ def kids_list(request):
                                         "user_id": student1[rec]['user_id'],
                                         "avatar": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
                                             student1[rec]['image_url']) if student1[rec][
-                                            'image_url'] else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
+                                            'image_url'] else defaultImage,
                                         "school_id": int(school_id),
                                         "student_grade": student_grade,
                                         "drop_off_by_parent": drop,
@@ -4066,7 +4072,7 @@ def get_library(request, student_id):
                         book_all_r = []
                         book_req=[]
                         cursor.execute(
-                            " SELECT ID,NAME FROM product_template WHERE is_library_book=TRUE",
+                            " SELECT ID,NAME,borrow_period_days FROM product_template WHERE is_library_book=TRUE",
                             [])
                         all_book = cursor.fetchall()
 
@@ -4077,8 +4083,10 @@ def get_library(request, student_id):
                             # report_stock_quantity = cursor.fetchall()
                             # if report_stock_quantity:
                                 # if report_stock_quantity[0][0]>0:
+
                             book_all_r.append({'id': book1[0],
-                                                  'name': book1[1]
+                                                  'name': book1[1],
+                                               'borrow_period_days': str(book1[2])
 
                                                   })
                         cursor.execute(
