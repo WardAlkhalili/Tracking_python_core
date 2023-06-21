@@ -4159,7 +4159,7 @@ def post_library(request):
                             school_name = ManagerParent.pincode(school_name)
                             student_id = request.data.get('student_id')
                             book_id= request.data.get('book_id')
-                            # countDay=request.data.get('countDay')
+                            countDay=request.data.get('countDay')
                             request_soft_copy = request.data.get('copy')
                             with connections[school_name].cursor() as cursor:
 
@@ -4191,8 +4191,8 @@ def post_library(request):
                                 name='R00'+str(book_request[0][0]+1)
                                 # select id from stock_warehouse WHERE is_library =true ORDER BY ID DESC LIMIT 1
                                 cursor.execute(
-                                    "INSERT INTO book_request(borrower_id,book_id,name,request_soft_copy,library_id,state,create_date,student_id,branch_id,academic_year)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                                    [borrower_id[0][0],book_id,name,request_soft_copy,stock_warehouse[0][0] if stock_warehouse else 1,'under_approval',datetime.datetime.now(),student_id,branch_id[0][0],user_id_q[0][0] ])
+                                    "INSERT INTO book_request(borrower_id,book_id,name,request_soft_copy,library_id,state,create_date,student_id,branch_id,academic_year,requested_borrow_days)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                                    [borrower_id[0][0],book_id,name,request_soft_copy,stock_warehouse[0][0] if stock_warehouse else 1,'under_approval',datetime.datetime.now(),student_id,branch_id[0][0],user_id_q[0][0],countDay ])
                                 result = {'result': 'ok'}
                                 return Response(result)
                     result = {'result': 'Error Authorization'}
