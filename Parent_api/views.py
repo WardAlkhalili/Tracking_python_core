@@ -1160,9 +1160,15 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         elif (notifications_title == 'Homework'):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg'
 
-    elif notifications_title == 'Pick Up By Parent' or notifications_title == 'Absence':
+    elif notifications_title == 'Pick Up By Parent' or notifications_title == 'Absence' or notifications_title == 'clinic' or notifications_title == 'library' :
+
         notificationsType = 'Absence'
-        icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
+        if (notifications_title == 'clinic'):
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg'
+        elif (notifications_title == 'library'):
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg'
+        else:
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
     elif notifications_title == 'Pick-up round' or notifications_title == 'School Departure' or notifications_title == 'Checkout Notification' or notifications_title == 'No Show Notification' or "has arrived at your home" in notifications_text or "has just reached the school" in notifications_text or "has just been checked into the bus" in notifications_text or notifications_title == "Absence notification" or 'Message from bus no' in notifications_title:
 
         notificationsType = 'tracking'
@@ -1188,8 +1194,6 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             icon_tracking=show_notif
         elif(notifications_title=='Event')  :
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg'
-        elif (notifications_title == 'clinic'):
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg'
         elif (notifications_title == 'Meeting'):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg'
         else:
