@@ -501,7 +501,7 @@ def kids_list(request):
                                     [parent_id])
                                 parent_show_map = cursor.fetchall()
                                 cursor.execute(
-                                    "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type,name,name_ar,gender from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
+                                    "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type,name,name_ar,gender,password,national_id from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                     [parent_id, parent_id, parent_id])
                                 student = cursor.fetchall()
                                 student1 = []
@@ -864,6 +864,40 @@ def kids_list(request):
                                     else:
 
                                         fname = student1[rec]['name_ar']
+                                    # password,national_id
+                                    user_name=student1[rec]['national_id']
+                                    password = student1[rec]['national_id']
+                                    if student1[rec]['password']:
+                                         password=student1[rec]['password']
+                                    url = 'https://tst.tracking.trackware.com/web/session/authenticate'
+                                    # url = 'http://192.168.1.82:9098/web/session/authenticate'
+                                    try:
+
+                                        body = json.dumps(
+                                            {"jsonrpc": "2.0",
+                                             "params": {"db": school_name, "login": user_name, "password": password}})
+
+                                        headers = {
+                                            'Content-Type': 'application/json',
+                                        }
+
+                                        response1 = requests.request("POST", url, headers=headers, data=body)
+
+                                        response = response1.json()
+                                        if "error" in response:
+                                            result = {
+                                                "status": "erorrq"}
+                                            # return Response(result)
+                                        session = response1.cookies
+                                        uid = response['result']['uid']
+                                        company_id = response['result']['company_id']
+
+                                    except:
+                                        result = {
+                                            "status": "erorr2"
+                                                      ""}
+                                        # return Response(result)
+                                    # session = response1.cookies
 
                                     studen_list.append({
                                         "schoolImage": school_logo[0][0] if school_logo[0][0] else'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
@@ -913,6 +947,7 @@ def kids_list(request):
                                         "change_location": bool(setting[0][3]),
                                         "pickup_request_distance": int(setting[0][2]),
                                         "db": school_name,
+                                        "session_id": session.get_dict()['session_id'],
                                         "show_absence": show_absence,
                                         "student_status": {
                                             "activity_type": str(student_st),
@@ -4203,3 +4238,62 @@ def post_library(request):
                     return Response(result)
                 result = {'result': 'Not Authorization'}
                 return Response(result)
+            # Marks
+
+
+
+@api_view(['GET'])
+def get_marks(request, student_id):
+
+    if request.method == 'GET':
+        # if request.headers:
+        #     if request.headers.get('Authorization'):
+        #         if 'Bearer' in request.headers.get('Authorization'):
+        #             au = request.headers.get('Authorization').replace('Bearer', '').strip()
+        #             db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+        #
+        #             if db_name:
+        #                 for e in db_name:
+        #                     school_name = e[0]
+                    with connections['tst'].cursor() as cursor:
+                        book_borrowed = []
+                        book_all_r = []
+                        book_req=[]
+                        cursor.execute(
+                            "SELECT id,name FROM academic_semester WHERE year_id=(SELECT year_id FROM student_student WHERE id=%s)",
+                            [student_id])
+                        academic_semester = cursor.fetchall()
+                    
+                        class_id = None
+                        # ----------------------
+                        cursor.execute(
+                            "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = (SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s ORDER BY student_distribution_line_id DESC LIMIT 1)",
+                            [student_id])
+                        student_distribution_line = cursor.fetchall()
+                        if student_distribution_line:
+
+                            cursor.execute(
+                                "SELECT id FROM public.academic_grade WHERE id = %s",
+                                [student_distribution_line[0][0]])
+                            academic_grade = cursor.fetchall()
+                            cursor.execute(
+                                "select id from school_class WHERE academic_grade_id = %s",
+                                [academic_grade[0][0]])
+                            cl = cursor.fetchall()
+                            class_id = cl[0][0] if cl else ''
+                        if class_id == None:
+                            cursor.execute(
+                                "select class_id from res_partner where id=(select partner_id from res_users where id=(select user_id from student_student where id=%s))",
+                                [student_id])
+                            academic_grade_q = cursor.fetchall()
+                            class_id = academic_grade_q[0][0] if academic_grade_q else ''
+                        cursor.execute(
+                            " SELECT name,subject_id FROM mark_mark WHERE state='approved' and  class_id=%s",
+                            [class_id])
+                        mark = cursor.fetchall()
+
+                    result = {'book_request': book_req,
+                              'book_borrowed': book_borrowed,
+                              'book':book_all_r}
+
+                    return Response(result)

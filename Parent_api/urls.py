@@ -37,6 +37,8 @@ urlpatterns = [
     path('api/get_weekly_plan_lines/<int:student_id>/<int:plan_id>/<str:week_name>', views.get_weekly_plan_lines),
     path('api/get_library/<int:student_id>', views.get_library),
     path('parents/post_library', views.post_library),
+    path('api/get_marks/<int:student_id>', views.get_marks),
+#     get_marks
 
 
 ]
