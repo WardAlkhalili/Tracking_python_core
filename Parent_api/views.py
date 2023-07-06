@@ -958,7 +958,7 @@ def kids_list(request):
                                     })
 
                         result = {'message': '', 'students': studen_list, "parent_id": int(parent_id)}
-
+                        # print(result)
                         return Response(result)
 
                     result = {'status': 'error'}
@@ -3237,6 +3237,7 @@ def get_exam(request, student_id):
                                     " select partner_id,branch_id from res_users where id=%s",
                                     [user_id_q[0][0]])
                                 partner_id_q = cursor.fetchall()
+                                print(partner_id_q,user_id_q)
 
                                 data = []
                                 state = 'new'
@@ -3246,14 +3247,17 @@ def get_exam(request, student_id):
                                     [partner_id_q[0][0], user_id_q[0][1], partner_id_q[0][1]])
                                 assignments = cursor.fetchall()
 
+
                             for assingment in assignments:
+                                print(assingment)
                                 cursor.execute(
                                     " select id,state,deadline,title,access_token,subject_id,allowed_time_to_start,time_limit,mark,exam_names from survey_survey where id=%s and certificate=%s",
                                     [assingment[1], True])
                                 survey = cursor.fetchall()
 
-                                if survey:
 
+                                if survey:
+                                    print("lllllllll", survey)
 
                                     cursor.execute(
                                         "select  name  from school_subject WHERE id = %s ",
@@ -3267,9 +3271,10 @@ def get_exam(request, student_id):
                                     allowed_to_enter_exam_after_time_limit = True if allowed_enter_exam_student_survey_rel else False
 
                                     cursor.execute(
-                                        " select id  from survey_question where survey_id=%s",
+                                        " select id  from survey_question where survey_id=%s and question_type != ''",
                                         [assingment[1]])
                                     survey_question = cursor.fetchall()
+
                                     cursor.execute(
                                         " select exam_name_english ,exam_name_arabic  from exam_name where id=%s",
                                         [survey[0][9]])
@@ -3371,15 +3376,15 @@ def get_exam(request, student_id):
                                             'answered_questions': len(survey_user_input_line),
                                             "ass_state": survey[0][1] if survey[0][1]  else '',
                                             "start": start,
-                                            'start_time': start_time if start_time else 'None',
-                                            'allowed_time_to_start_exams': allowed_time_to_start_exams if allowed_time_to_start_exams else 'None',
-                                            'allowed_enter_exam_student_ids': allowed_to_enter_exam_after_time_limit[0][
-                                                0] if allowed_to_enter_exam_after_time_limit else "None",
+                                            'start_time': str(start_time) if start_time else 'None',
+                                            'allowed_time_to_start_exams': str(allowed_time_to_start_exams) if allowed_time_to_start_exams else 'None',
+                                            'allowed_enter_exam_student_ids': str(allowed_to_enter_exam_after_time_limit[0][
+                                                0]) if allowed_to_enter_exam_after_time_limit else "None",
                                             "exam_name_english": exam_name[0][0] if exam_name else 'None',
                                             "exam_name_arabic": exam_name[0][1] if exam_name else 'None',
                                             'mark': int(survey[0][8]),
                                             'time_limit': survey[0][7] if survey[0][7] else 0,
-                                            'allowed_time_to_start': survey[0][6] if survey[0][6] else 0,
+                                            'allowed_time_to_start': survey[0][6] if survey[0][6] else 0.0,
                                             'late_to_exams': late_to_exams if late_to_exams else "None",
                                             'late_time': late_time if late_time else "None",
                                             'exam_start_in': exam_start_in if exam_start_in else "None",
@@ -3387,7 +3392,7 @@ def get_exam(request, student_id):
                                         })
 
                         result = {'result': data}
-
+                
                     return Response(result)
 
 
@@ -3448,7 +3453,7 @@ def get_student_assignment(request, student_id):
                                         [survey[0][5]])
                                     subject_name = cursor.fetchall()
                                     cursor.execute(
-                                        " select id  from survey_question where survey_id=%s",
+                                        " select id  from survey_question where survey_id=%s and question_type != ''",
                                         [assingment[1]])
                                     survey_question = cursor.fetchall()
                                     cursor.execute(
@@ -3771,6 +3776,7 @@ def get_data_worksheets(request, student_id):
                                                              new_timezone)) if deadline else ''
                                                          })
                                 result = {'result': data}
+                                # print(result)
 
                                 return Response(result)
                             result = {'result': data}
@@ -3955,6 +3961,7 @@ def get_worksheet_form_view_data(request, wsheet, std):
                                          'student_solution': student_solution
                                          })
                         result = {'result': data}
+                        # print(result)
                         return Response(result)
                     result = {'result': data}
                     return Response(result)
@@ -4263,7 +4270,7 @@ def get_marks(request, student_id):
                             "SELECT id,name FROM academic_semester WHERE year_id=(SELECT year_id FROM student_student WHERE id=%s)",
                             [student_id])
                         academic_semester = cursor.fetchall()
-                    
+
                         class_id = None
                         # ----------------------
                         cursor.execute(

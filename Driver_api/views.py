@@ -1112,7 +1112,7 @@ def set_round_status(request):
                                                              datetime.datetime.now()])
                                                         student_history1 = cursor.fetchall()
                                                         if student_history1:
-                                                            if student_history1[0][0] == 'absent' or student_history1[0][0] == 'absent-all' or student_history1[0][0] ==  'no-show':
+                                                            if student_history1[0][0] == 'absent' or student_history1[0][0] == 'absent-all' or student_history1[0][0] ==  'no-show' or student_history1[0][0]=='in':
                                                                 continue
                                                     else:
                                                         cursor.execute(
@@ -1124,7 +1124,7 @@ def set_round_status(request):
                                                         if student_history1:
                                                             if student_history1[0][0] == 'absent' or \
                                                                     student_history1[0][0] == 'absent-all' or \
-                                                                    student_history1[0][0] == 'no-show':
+                                                                    student_history1[0][0] == 'no-show' :
                                                                 continue
 
 
