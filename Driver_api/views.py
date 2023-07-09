@@ -1468,6 +1468,8 @@ def students_bus_checks(request):
                                             cursor.execute("select  settings from school_parent WHERE id = %s", [rec])
                                             settings = cursor.fetchall()
 
+                                            # print(settings)
+
 
                                             mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec),
                                                                                          Q(db_name=school_name),
@@ -1475,19 +1477,18 @@ def students_bus_checks(request):
                                             if settings:
                                                 # print(settings)
                                                 if not('None' in str(settings)) :
-
                                                     data = json.loads(settings[0][0])
-
                                                     # if data['notifications']['check_in']:
                                                     lang = "en"
-                                                    check_in = True
-                                                    check_out = True
-                                                    nearby = True
                                                     title=''
                                                     message=''
                                                     title_ar = ''
                                                     message_ar = ''
+                                                    # check_in = True
+                                                    # check_out = True
+                                                    # nearby = True
                                                     if type(data['notifications']) is dict:
+
                                                         check_in = data['notifications']['check_in']
                                                         check_out = data['notifications']['check_out']
                                                         nearby = data['notifications']['nearby']
@@ -1495,12 +1496,13 @@ def students_bus_checks(request):
                                                             lang = "ar"
 
                                                     else:
-
+                                                       # print("dddddddddddddddddddddddddddddddddddddd")
                                                        li = list(data['notifications'].split(","))
                                                        nearby = True if "true" in li[0] else False,
                                                        check_in = True if "true" in li[1] else False,
                                                        check_out = True if "true" in li[2] else False
                                                        lang = "ar" if "ar" in li[3] else 'en'
+                                                       # print("dddddddddddddddddddddddddddddddddddddd",check_in)
                                                        date_string = datetime.datetime.now().strftime(
                                                            "%Y-%m-%d %H:%M:%S")
                                                        r = datetime.datetime.strptime(date_string,
