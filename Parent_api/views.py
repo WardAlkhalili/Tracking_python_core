@@ -193,6 +193,7 @@ def settings(request):
                                 "UPDATE public.school_parent SET settings=%s WHERE id=%s;",
                                 [settings, parent_id])
 
+
                             result = {
                                 'status': 'ok', }
 
@@ -500,10 +501,17 @@ def kids_list(request):
                                     "select activate_app_map from school_parent WHERE id = %s",
                                     [parent_id])
                                 parent_show_map = cursor.fetchall()
+
                                 cursor.execute(
                                     "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type,name,name_ar,gender,password,national_id from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                     [parent_id, parent_id, parent_id])
                                 student = cursor.fetchall()
+
+                                # cursor.execute(
+                                #     "select  id,display_name_search from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
+                                #     [parent_id, parent_id, parent_id])
+                                # student121 = cursor.fetchall()
+                                # print(student121)
                                 student1 = []
                                 columnNames = [column[0] for column in cursor.description]
                                 for record in student:
@@ -840,6 +848,7 @@ def kids_list(request):
                                                 [student_distribution_line[0][0]])
                                             academic_grade = cursor.fetchall()
                                             student_grade = academic_grade[0][0] if academic_grade else ''
+
                                     if student_grade == None:
                                         cursor.execute(
                                             "select name from academic_grade where id=(select academic_grade_id from school_class where id="
@@ -848,6 +857,7 @@ def kids_list(request):
                                             [student1[rec]['id']])
                                         academic_grade_q = cursor.fetchall()
                                         student_grade = academic_grade_q[0][0] if academic_grade_q else ''
+
                                         # ---------------------
                                     fname = student1[rec]['display_name_search']
                                     defaultImage=''
@@ -3237,7 +3247,7 @@ def get_exam(request, student_id):
                                     " select partner_id,branch_id from res_users where id=%s",
                                     [user_id_q[0][0]])
                                 partner_id_q = cursor.fetchall()
-                                print(partner_id_q,user_id_q)
+                                # print(partner_id_q,user_id_q)
 
                                 data = []
                                 state = 'new'
@@ -3249,7 +3259,7 @@ def get_exam(request, student_id):
 
 
                             for assingment in assignments:
-                                print(assingment)
+                                # print(assingment)
                                 cursor.execute(
                                     " select id,state,deadline,title,access_token,subject_id,allowed_time_to_start,time_limit,mark,exam_names from survey_survey where id=%s and certificate=%s",
                                     [assingment[1], True])
@@ -3257,7 +3267,7 @@ def get_exam(request, student_id):
 
 
                                 if survey:
-                                    print("lllllllll", survey)
+                                    # print("lllllllll", survey)
 
                                     cursor.execute(
                                         "select  name  from school_subject WHERE id = %s ",
@@ -3392,7 +3402,8 @@ def get_exam(request, student_id):
                                         })
 
                         result = {'result': data}
-                
+                        # print(result)
+
                     return Response(result)
 
 
@@ -4071,9 +4082,9 @@ def get_event_form_view_data(request, event, std):
                                              'name': school_event[0][0],
                                              'start_date': str(school_event[0][11].strftime("%d %b %Y")),
                                              'end_date': str(school_event[0][12].strftime("%d %b %Y")),
-                                             'registration_start_date': str(school_event[0][13]) if school_event[0][
+                                             'registration_start_date': str(school_event[0][13].strftime("%d %b %Y")) if school_event[0][
                                                  13] else '',
-                                             'registration_last_date': str(school_event[0][14]) if school_event[0][
+                                             'registration_last_date': str(school_event[0][14].strftime("%d %b %Y")) if school_event[0][
                                                  14] else '',
                                              'maximum_participants': school_event[0][3],
                                              'available_seats': available_seats,
