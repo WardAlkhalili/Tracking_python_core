@@ -807,8 +807,21 @@ def kids_list(request):
                                     bus_id = 0
                                     round_type = ''
                                     round_name = ''
+                                    # print(is_active_round)
                                     if bool(is_active_round):
-                                        student_st =  'in' if rounds_count_student[0][1] == "Onboard" else rounds_count_student[0][1]  if rounds_count_student else ""
+                                        # print(rounds_count_student[0][1])
+                                        start = datetime.datetime(datetime.datetime.now().year,
+                                                                  datetime.datetime.now().month,
+                                                                  datetime.datetime.now().day)
+                                        cursor.execute(
+                                            "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and datetime = %s  ORDER BY ID DESC LIMIT 1 ",
+                                            [rounds[0][0], student1[rec]['id'], start])
+                                        student_history = cursor.fetchall()
+                                        # print(student_history,"doasdklasodsadlssks")
+                                        if student_history:
+                                            student_st =  student_history[0][0] if student_history else ""
+                                        else:
+                                            student_st =  'in' if rounds_count_student[0][1] == "Onboard" else rounds_count_student[0][1]  if rounds_count_student else ""
 
                                         cursor.execute(
                                             "select name,type,attendant_id,vehicle_id,driver_id from transport_round WHERE id = %s",
@@ -3021,6 +3034,7 @@ def get_attendance(request, student_id):
                                                         'arrival_time': arrival_time})
                     result = {'absence_request': absence_request,
                               'daily_attendance': daily_attendance}
+
 
                     return Response(result)
 
