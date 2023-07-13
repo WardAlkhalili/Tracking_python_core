@@ -172,16 +172,18 @@ def send_school_message(request):
 
 def twoArgs(message_id,school_name):
     with connections[school_name].cursor() as cursor:
-
+        # print("llllllllllllllllllllllll")
         cursor.execute(
             "select  message,title  from school_message where id = %s",
             [message_id])
         school_message = cursor.fetchall()
+        print(school_message)
 
         cursor.execute(
             "select  student_student_id  from school_message_student_student where school_message_id = %s",
             [message_id])
         school_message_student_student = cursor.fetchall()
+        print(school_message_student_student)
 
 
 
@@ -219,9 +221,9 @@ def twoArgs(message_id,school_name):
             # for rec in parent:
             #     parent_id.append(rec[0])
             #
+
             mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id), Q(db_name=school_name),
-                                                        Q(is_active=True)).values_list(
-                'mobile_token').order_by('-pk')
+                                                        Q(is_active=True)).values_list('mobile_token').order_by('-pk')
 
             token = []
 
@@ -235,11 +237,12 @@ def twoArgs(message_id,school_name):
             registration_id = token
 
             message_title = school_message[0][1]
-            # print(message_title)
+            print(registration_id)
             message_body = school_message[0][0]
             result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
                                                           registration_ids=registration_id,
                                                           data_message={},sound='new_beeb.mp3')
+            print(result)
 
 
 
@@ -294,22 +297,23 @@ def send_dri(request):
         student_name = request.data.get('student_name')
         student_id = request.data.get('student_id')
         round_id = request.data.get('round_id')
-        signup_token=''
-        with connections['tst'].cursor() as cursor:
-            cursor.execute("select  driver_id from transport_round WHERE id = %s", [round_id])
-            data_id_bus = cursor.fetchall()
-            cursor.execute(
-                "select token from public.res_partner  WHERE id=%s;",
-                [data_id_bus[0][0]])
-            signup_token = cursor.fetchall()
-        mobile_token = signup_token[0][0]
 
+        signup_token=''
+        # with connections['tst'].cursor() as cursor:
+        #     cursor.execute("select  driver_id from transport_round WHERE id = %s", [round_id])
+        #     data_id_bus = cursor.fetchall()
+        #     cursor.execute(
+        #         "select token from public.res_partner  WHERE id=%s;",
+        #         [data_id_bus[0][0]])
+        #     signup_token = cursor.fetchall()
+        # mobile_token = signup_token[0][0]
+        print(mobile_token)
         # dFcb6UaVQAeAbMrAgnCF59:APA91bExNfxIYZF9QOZMHrp1bDABtihTkDc-8boLfqBvHIg76mlHv8zgEayFM3gT08YoMaeLTnwfGZKGCVNVd_x1zAbGFx4WjOE2_NTZGjRRT3s4clNxHk3XmJZdfvWl3beQDahHsFSc
         if mobile_token:
-            # push_service = FCMNotification(
-            #     api_key="AAAAXj2DTK0:APA91bFSxi4txQ8WffLYLBrxFVd3JMCSP5n9WfZafPnLpxC2i9cXHi2SofNoNSBgFWt2tgqjEstSeVkre-1FklyKn4NIy0AuYSwafkQt-RhXcVCth3RJdt8GUbTw9aZI70XFmYBshjuy")
             push_service = FCMNotification(
-                api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                api_key="AAAAXj2DTK0:APA91bFSxi4txQ8WffLYLBrxFVd3JMCSP5n9WfZafPnLpxC2i9cXHi2SofNoNSBgFWt2tgqjEstSeVkre-1FklyKn4NIy0AuYSwafkQt-RhXcVCth3RJdt8GUbTw9aZI70XFmYBshjuy")
+            # push_service = FCMNotification(
+            #     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
             # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
             registration_id = mobile_token
 
@@ -323,6 +327,7 @@ def send_dri(request):
                                                             "student_name": student_name, "round_id": round_id,
                                                             "date_time": ""})}
                                                        )
+            # print(result)
             # mobile_token2=[]
             #
             # for e in mobile_token:
