@@ -1133,10 +1133,10 @@ def read_message(request):
                                 [message_id])
                             read_message = cursor.fetchall()
                             if read_message[0][0]:
-                                cursor.execute("UPDATE public.school_message_student_student SET read_message=not(read_message) WHERE id=%s;", [message_id])
+                                cursor.execute("UPDATE public.message_student SET read_message=not(read_message) WHERE id=%s;", [message_id])
                             else:
                                 cursor.execute(
-                                    "UPDATE public.school_message_student_student SET read_message=true WHERE id=%s;",
+                                    "UPDATE public.message_student SET read_message=true WHERE id=%s;",
                                     [message_id])
 
                             result = {'status': 'ok',}
@@ -1175,7 +1175,7 @@ def hide_message(request):
 
                         with connections[school_name].cursor() as cursor:
                             cursor.execute(
-                                "UPDATE public.school_message_student_student SET show_message=not(show_message) WHERE id=%s;",
+                                "UPDATE public.message_student SET show_message=not(show_message) WHERE id=%s;",
                                 [ message_id])
                             result = {'status': 'ok', }
                             return Response(result)
@@ -1581,7 +1581,7 @@ def kids_hstory_new(request):
                                 cursor.execute("select  id  from school_message ")
                                 school_message = cursor.fetchall()
 
-                            # notifications +=get_survey(parent_id,school_name)
+                            notifications +=get_survey(parent_id,school_name)
                             cursor.execute(
                                 "select  id,display_name_search,image_url,name,name_ar,year_id,user_id from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
@@ -1597,6 +1597,7 @@ def kids_hstory_new(request):
                             fname_ar = ''
                             for student in student_info:
                                 # print("safkdsfkdkkfsdfkd")
+
                                 cursor.execute(
                                     " select branch_id from res_users where id=%s",
                                     [student[6]])
