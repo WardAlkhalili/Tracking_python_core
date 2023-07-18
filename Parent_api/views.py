@@ -2494,7 +2494,7 @@ def kids_hstory(request):
 
 
 def get_year(element):
-    print(element['date_time'])
+    
     return element['date_time']
 
 
