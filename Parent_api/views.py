@@ -1174,9 +1174,19 @@ def hide_message(request):
                         message_id = request.data.get('message_id')
 
                         with connections[school_name].cursor() as cursor:
+
                             cursor.execute(
-                                "UPDATE public.message_student SET show_message=not(show_message) WHERE id=%s;",
+                                "select show_message from message_student WHERE id =%s",
                                 [ message_id])
+                            message_student = cursor.fetchall()
+                            if message_student[0][0]:
+                                cursor.execute(
+                                    "UPDATE public.message_student SET show_message=not(show_message) WHERE id=%s;",
+                                    [ message_id])
+                            else:
+                                cursor.execute(
+                                    "UPDATE public.message_student SET show_message=false WHERE id=%s;",
+                                    [message_id])
                             result = {'status': 'ok', }
                             return Response(result)
                     else:
@@ -1353,7 +1363,7 @@ def get_school_message_new(student_id, school_name, school_message, student_name
                             get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title,
                                                  student_name, student_id,res[1],"Read" if res[2] else 'UnRead',"show" if res[3] else 'not show' ,action_id,'','','https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
                                                 student_image[0][0]) if student_image[0][0]else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',))
-    print(seen)
+
     return notifications
 def get_survey(student_id, school_name):
     notifications = []
@@ -1603,15 +1613,24 @@ def kids_hstory_new(request):
                                     [student[6]])
                                 branch_id = cursor.fetchall()
                                 cursor.execute(
-                                    "select  date,message_en,message_ar,title,title_ar from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s ORDER BY ID DESC",
+                                    "select  date,message_en,message_ar,title,title_ar,action_id,id from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
                                     [branch_id[0][0], student[5], student[0]])
                                 student_mes = cursor.fetchall()
                                 # cursor.execute(
-                                    #     "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
-                                    #     [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
-                                    #     year_id = fields.Many2one('academic.year', 'Academic Year', ondelete='cascade')
+                                #         "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
+                                #         [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
+                                #         year_id = fields.Many2one('academic.year', 'Academic Year', ondelete='cascade')
                                 avatar="https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                 for mes in student_mes:
+                                    action_id=mes[5]
+                                    if ('Event' in mes[3]):
+                                        cursor.execute(
+                                            " select id,event_id,state,new_added from school_event_registration where  student_id =%s and  event_id =%s  ORDER BY create_date DESC",
+                                            [student[0], mes[5]])
+                                        events = cursor.fetchall()
+
+                                        if events:
+                                            action_id = events[0][0]
                                     notifications.append(
                                         get_info_message_new(mes[0],
                                                              mes[1],
@@ -1619,7 +1638,7 @@ def kids_hstory_new(request):
                                                              mes[0].replace(
                                                                  second=0) if mes[0] else '',
                                                              mes[3],
-                                                             student[1], student[0], 0, None, None, '0', mes[4],
+                                                             student[1], student[0], mes[6], None, None, action_id if mes[5] else '0', mes[4],
                                                              mes[2]))
                             #
                             #     student_round = []
