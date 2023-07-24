@@ -177,13 +177,13 @@ def twoArgs(message_id,school_name):
             "select  message,title  from school_message where id = %s",
             [message_id])
         school_message = cursor.fetchall()
-        print(school_message)
+        # print(school_message)
 
         cursor.execute(
             "select  student_student_id  from school_message_student_student where school_message_id = %s",
             [message_id])
         school_message_student_student = cursor.fetchall()
-        print(school_message_student_student)
+        # print(school_message_student_student)
 
 
 
@@ -196,13 +196,14 @@ def twoArgs(message_id,school_name):
         if r_id:
            for std in r_id:
             cursor.execute(
-                "select  mother_id,father_id,responsible_id_value from student_student WHERE id = %s ",
+                "select  mother_id,father_id,responsible_id_value,display_name_search from student_student WHERE id = %s ",
                 [std])
             columns = (x.name for x in cursor.description)
             student = cursor.fetchall()
-
+            student_name=''
             id = []
             for rec in student:
+                student_name=rec[3]
                 if rec[0]:
                     id.append(rec[0])
                 if rec[1]:
@@ -210,6 +211,8 @@ def twoArgs(message_id,school_name):
                 if rec[2]:
                     id.append(rec[2])
             id = list(dict.fromkeys(id))
+
+
 
 
             # cursor.execute(
@@ -237,12 +240,33 @@ def twoArgs(message_id,school_name):
             registration_id = token
 
             message_title = school_message[0][1]
-            print(registration_id)
+            # print(registration_id)
             message_body = school_message[0][0]
+            if message_title == 'Badge':
+                message_title='Trackware- Badge'
+                message_body='Badge Awarded to '+ student_name
+            elif  message_title == 'Weekly Plan':
+                message_title='Trackware- Weekly Plan'
+                message_body= student_name+ ' - Weekly plans for the upcoming week have been added.'
+            elif message_title == 'Assignment':
+                message_title = 'Trackware- Online Assignment'
+                message_body = student_name + ' - '+message_body
+            elif message_title == 'Homework':
+                message_title = ' Trackware- Homework'
+                message_body = student_name + ' - ' + message_body
+            elif message_title == 'Event':
+                message_title = 'Trackware- School Event'
+                message_body = student_name + ' - ' + message_body
+            elif message_title == 'Meeting':
+                message_title = 'Trackware- '+message_body
+                message_body = student_name
+            elif message_title == 'Absence':
+                message_title = 'Trackware- Absence'
+                message_body = ' Absence has been '+'Approved'if 'Approval' in message_body else 'Rejected for ' +student_name
             result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
                                                           registration_ids=registration_id,
                                                           data_message={},sound='new_beeb.mp3')
-            print(result)
+            # print(result)
 
 
 

@@ -72,6 +72,7 @@ def parent_login(request):
             cursor.execute(
                 "UPDATE public.school_parent SET mobile_token=%s WHERE id=%s;",
                 [mobile_token, parent_id[0][0]])
+            print("sdasadsa",  parent_id[0][0],"           ",mobile_token)
             manager_parent = ManagerParent(token=unique_id, db_name=school_name, user_id=uid,
                                            parent_id=parent_id[0][0],
                                            school_id=company_id, mobile_token=mobile_token)
@@ -498,6 +499,7 @@ def kids_list(request):
                             for e in parent_id:
                                 parent_id = e[0]
                             with connections[school_name].cursor() as cursor:
+
                                 cursor.execute(
                                     "select activate_app_map from school_parent WHERE id = %s",
                                     [parent_id])
@@ -1218,23 +1220,23 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
 
     notificationsType = ''
     icon_tracking=''
-    if notifications_title == 'Weekly Plan' or notifications_title == 'Assignment' or notifications_title == 'Homework' or notifications_title == 'Exam' or notifications_title == 'educational':
+    if 'Weekly Plan' in notifications_title  or 'Assignment' in notifications_title or  'Homework' in notifications_title or  'Exam' in notifications_title or 'educational' in notifications_title:
         notificationsType = 'educational'
-        if (notifications_title == 'Weekly Plan' or notifications_title == 'educational'):
+        if ( 'Weekly Plan' in notifications_title or 'educational' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg'
-        elif (notifications_title == 'Assignment'):
+        elif ( 'Assignment' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg'
-        elif (notifications_title == 'Exam'):
+        elif ( 'Exam' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg'
-        elif (notifications_title == 'Homework'):
+        elif ('Homework' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg'
 
-    elif notifications_title == 'Pick Up By Parent' or notifications_title == 'Absence' or notifications_title == 'clinic' or notifications_title == 'library' :
+    elif 'Pick Up By Parent' in notifications_title or 'Absence' in notifications_title or  'clinic' in notifications_title or 'library' in notifications_title :
 
         notificationsType = 'Absence'
-        if (notifications_title == 'clinic'):
+        if ( 'clinic' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg'
-        elif (notifications_title == 'library'):
+        elif ( 'library' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg'
         else:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
@@ -1261,9 +1263,9 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         notificationsType = 'announcement'
         if (notifications_title == 'survey'):
             icon_tracking=show_notif
-        elif(notifications_title=='Event')  :
+        elif('Event' in notifications_title)  :
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg'
-        elif (notifications_title == 'Meeting'):
+        elif ( 'Meeting' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg'
         else:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
