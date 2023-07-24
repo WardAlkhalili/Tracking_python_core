@@ -1521,8 +1521,9 @@ def students_bus_checks(request):
                                                                                          Q(db_name=school_name),
                                                                                          Q(is_active=True)).values_list( 'mobile_token').order_by('-pk')
                                             if settings:
-                                                # print(settings)
+                                                print(settings)
                                                 if not('None' in str(settings)) :
+
                                                     data = json.loads(settings[0][0])
                                                     # if data['notifications']['check_in']:
                                                     lang = "en"
@@ -1534,7 +1535,7 @@ def students_bus_checks(request):
                                                     # check_out = True
                                                     # nearby = True
                                                     if type(data['notifications']) is dict:
-
+                                                        print("iiiiiiiiiiiiii")
                                                         check_in = data['notifications']['check_in']
                                                         check_out = data['notifications']['check_out']
                                                         nearby = data['notifications']['nearby']
@@ -1548,7 +1549,7 @@ def students_bus_checks(request):
                                                        check_in = True if "true" in li[1] else False,
                                                        check_out = True if "true" in li[2] else False
                                                        lang = "ar" if "ar" in li[3] else 'en'
-                                                       # print("dddddddddddddddddddddddddddddddddddddd",check_in)
+                                                       # print("dddddddddddddddddddddddddddddddddddddd",check_in[0])
                                                        date_string = datetime.datetime.now().strftime(
                                                            "%Y-%m-%d %H:%M:%S")
                                                        r = datetime.datetime.strptime(date_string,
@@ -1559,8 +1560,8 @@ def students_bus_checks(request):
                                                         if e[0] in mobile_token2:
                                                             continue
                                                         if status == 'in':
-                                                            print("dsfladdlldsldfsllflflflf")
-                                                            if check_in:
+                                                            # print("dsfladdlldsldfsllflflflf")
+                                                            if check_in[0]:
                                                                 mobile_token.append(e[0])
                                                             title = 'Bus notification'
                                                             title_ar = "اشعار من الحافلة"
@@ -1582,7 +1583,7 @@ def students_bus_checks(request):
                                                                                 message,
                                                                                 message_ar, driver_name[0][0],student_id=student_name[0][1])
                                                         elif status == 'out':
-                                                            if check_out:
+                                                            if check_out[0]:
                                                                 mobile_token.append(e[0])
                                                             title = 'Checkout Notification'
                                                             title_ar = 'اشعار من الحافلة'
