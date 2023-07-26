@@ -1549,6 +1549,10 @@ def students_bus_checks(request):
                                                        check_in = True if "true" in li[1] else False,
                                                        check_out = True if "true" in li[2] else False
                                                        lang = "ar" if "ar" in li[3] else 'en'
+                                                       check_in = check_in[0] if type(check_in) == list else check_in
+                                                       nearby = nearby[0] if type(nearby) == list else nearby
+                                                       check_out = check_out[0] if type(check_out) == list else check_out
+                                                       lang = lang[0] if type(lang) == list else lang
                                                        # print("dddddddddddddddddddddddddddddddddddddd",check_in[0])
                                                        date_string = datetime.datetime.now().strftime(
                                                            "%Y-%m-%d %H:%M:%S")
@@ -1560,8 +1564,7 @@ def students_bus_checks(request):
                                                         if e[0] in mobile_token2:
                                                             continue
                                                         if status == 'in':
-                                                            # print("dsfladdlldsldfsllflflflf")
-                                                            if check_in[0]:
+                                                            if check_in:
                                                                 mobile_token.append(e[0])
                                                             title = 'Bus notification'
                                                             title_ar = "اشعار من الحافلة"
@@ -1583,7 +1586,7 @@ def students_bus_checks(request):
                                                                                 message,
                                                                                 message_ar, driver_name[0][0],student_id=student_name[0][1])
                                                         elif status == 'out':
-                                                            if check_out[0]:
+                                                            if check_out:
                                                                 mobile_token.append(e[0])
                                                             title = 'Checkout Notification'
                                                             title_ar = 'اشعار من الحافلة'
@@ -1675,7 +1678,6 @@ def students_bus_checks(request):
                                                 else:
 
                                                     if status == 'in' :
-                                                        print("sdfkafkldsfkldfagfdklgklfdkgfkl")
                                                         mobile_token.append(e[0])
                                                         title = 'Bus notification'
                                                         title_ar ="اشعار من الحافلة"
@@ -1778,8 +1780,6 @@ def students_bus_checks(request):
                                                                                 message_ar, driver_name[0][0],student_id=student_name[0][1])
 
                                                     if not(round_info[0][3] == 'pick_up') and status == 'in':
-                                                        print("kdsfjajkdnfkasdnfndfgdakggkgk")
-
                                                         mobile_token.append(e[0])
                                                         title = "School Departure"
                                                         title_ar = "اشعار من الحافلة"
