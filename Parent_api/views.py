@@ -4366,7 +4366,11 @@ def post_library(request):
                                 #     [student_id])
                                 # branch_id = cursor.fetchall()
                                 # res.partner expected_return_date
-                                name='R00'+str(book_request[0][0]+1)
+                                print(book_request)
+                                if book_request:
+                                    name='R00'+str(book_request[0][0]+1)
+                                else:
+                                    name = 'R00' + str( 1)
                                 # select id from stock_warehouse WHERE is_library =true ORDER BY ID DESC LIMIT 1
                                 cursor.execute(
                                     "INSERT INTO book_request(borrower_id,book_id,name,request_soft_copy,library_id,state,create_date,student_id,branch_id,academic_year,requested_borrow_days)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
