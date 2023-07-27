@@ -81,24 +81,95 @@ WSGI_APPLICATION = 'wsgi.application'
 
 
 DATABASES = {
-    'default': {'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),},
-    'iks': {
-        'NAME': 'iksaaa',
+    'default': {
+        'NAME': 'twc',
         'ENGINE': 'django.db.backends.postgresql',
-        'USER': 'odoo',
-        'PASSWORD': '123',
-        'HOST':'localhost',
-        'PORT':'5432',
+        'USER': 'postgres',
+        'PASSWORD': 'P0sTgR3$*981',
+        'HOST': '3.69.79.200',
+        'PORT': '5432'
+    },
+    'iks': {
+        'NAME': 'iks',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'postgres',
+        'PASSWORD': 'P0sTgR3$*981',
+        'HOST': '3.69.79.200',
+        'PORT': '5432',
     },
     'cbis': {
         'NAME': 'cbis',
         'ENGINE': 'django.db.backends.postgresql',
-        'USER': 'odoo',
-        'PASSWORD': '123',
-        'HOST':'localhost',
-        'PORT':'5432',
-    }
+        'USER': 'postgres',
+        'PASSWORD': 'P0sTgR3$*981',
+        'HOST': '3.69.79.200',
+        'PORT': '5432',
+    },
+    'ghs': {
+        'NAME': 'ghs',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'postgres',
+        'PASSWORD': 'P0sTgR3$*981',
+        'HOST': '3.69.79.200',
+        'PORT': '5432',
+    },
+    'tws': {
+        'NAME': 'tws',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'postgres',
+        'PASSWORD': 'P0sTgR3$*981',
+        'HOST': '3.69.79.200',
+        'PORT': '5432',
+    },
+    'twc': {
+        'NAME': 'twc',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'postgres',
+        'PASSWORD': 'P0sTgR3$*981',
+        'HOST': '3.69.79.200',
+        'PORT': '5432',
+    },
+    'ics': {
+        'NAME': 'ics',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'postgres',
+        'PASSWORD': 'P0sTgR3$*981',
+        'HOST': '3.69.79.200',
+        'PORT': '5432',
+    },
+    'rsi': {
+        'NAME': 'rsi',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'postgres',
+        'PASSWORD': 'P0sTgR3$*981',
+        'HOST': '3.69.79.200',
+        'PORT': '5432',
+    },
+    'bia': {
+        'NAME': 'bia',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'postgres',
+        'PASSWORD': 'P0sTgR3$*981',
+        'HOST': '3.69.79.200',
+        'PORT': '5432',
+    },
+    'twa': {
+        'NAME': 'twa',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'postgres',
+        'PASSWORD': 'P0sTgR3$*981',
+        'HOST': '3.69.79.200',
+        'PORT': '5432',
+    },
+    'uis': {
+        'NAME': 'uis',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'postgres',
+        'PASSWORD': 'P0sTgR3$*981',
+        'HOST': '3.69.79.200',
+        'PORT': '5432',
+    },
+
 }
 
 
