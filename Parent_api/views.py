@@ -1256,6 +1256,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         elif "has just been checked into the bus." in notifications_text:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-get-on-bus.svg'
         elif notifications_title == "Absence notification":
+            notifications_title="bsence notification"
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
         else:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-shuttle-bus.svg'
