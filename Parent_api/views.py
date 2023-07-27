@@ -1231,7 +1231,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         elif ('Homework' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg'
 
-    elif 'Pick Up By Parent' in notifications_title or 'Absence' in notifications_title or  'clinic' in notifications_title or 'library' in notifications_title :
+    elif 'Pick Up By Parent' in notifications_title or ('Absence' in notifications_title and  notifications_title  != "Absence notification" ) or  'clinic' in notifications_title or 'library' in notifications_title :
 
         notificationsType = 'Absence'
         if ( 'clinic' in notifications_title):
@@ -2673,8 +2673,8 @@ def notify(request):
                                 branch_id = cursor.fetchall()
                                 cursor.execute(
                                     "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
-                                    [r, 'App\Model\Parents', message_en, message_en, type,
-                                     type, r, student_name[0][1], branch_id[0][0], student_id])
+                                    [r, 'App\Model\Parents', message_en, message_en, 'Absence notification',
+                                     'Absence notification', r, student_name[0][1], branch_id[0][0], student_id])
                                 cursor.execute(
                                     "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                     [r, 'App\Model\Parents', type, message_en, sender_name[0][0]])
@@ -2728,7 +2728,10 @@ def notify(request):
                                                 cursor.execute("select token from res_partner WHERE id = %s",
                                                                [round_info[0][0]])
                                                 driver_name = cursor.fetchall()
-                                                send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[1],'both',when)
+                                                print(driver_name[0][0])
+                                                if driver_name[0][0]:
+                                                    send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[1],'both',when)
+
                                                 cursor.execute(
                                                     "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                                     [lat, long, student_id, res[1], when, "absent-all",
@@ -2822,6 +2825,7 @@ def notify(request):
 
 
 def send_driver_notif(mobile_token,student_id,student_name,round_id,type,when):
+    print(mobile_token)
 
     # AAAAXj2DTK0:APA91bFSxi4txQ8WffLYLBrxFVd3JMCSP5n9WfZafPnLpxC2i9cXHi2SofNoNSBgFWt2tgqjEstSeVkre-1FklyKn4NIy0AuYSwafkQt-RhXcVCth3RJdt8GUbTw9aZI70XFmYBshjuy
     # push_service = FCMNotification(
