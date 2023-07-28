@@ -53,7 +53,8 @@ database = firebase.database()
 @api_view(['GET'])
 def Get_last_bus_location(request, bus_id, school_name):
     if request.method == 'GET':
-        fullRound = school_name + "-stg-round-" + str(bus_id)
+        # fullRound = school_name + "-stg-round-" + str(bus_id)
+        fullRound = school_name + "-round-" + str(bus_id)
         # print(fullRound)
         curr_date = date.today()
         #     # here we are doing firebase authentication

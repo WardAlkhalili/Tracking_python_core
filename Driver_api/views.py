@@ -184,60 +184,61 @@ def round_list(request):
                                     "select id,day_id from round_schedule WHERE round_id = %s and day_id = %s",
                                     [id['id'], day_id[0][0]])
                                 rounds_details = cursor.fetchall()
-                                cursor.execute(
-                                    "select student_id,sequence,transfer_state,source_round_id from transport_participant WHERE round_schedule_id = %s ORDER BY sequence ASC",
-                                    [rounds_details[0][0]])
-                                round_state_student = cursor.fetchall()
-                                if round_state_student:
-                                    start = datetime.datetime(datetime.datetime.now().year,datetime.datetime.now().month, datetime.datetime.now().day)
-                                    end = datetime.datetime(datetime.datetime.now().year,
-                                                              datetime.datetime.now().month,
-                                                              datetime.datetime.now().day+1)
-                                    today=str(datetime.datetime.now().year)+"-"+str(datetime.datetime.now().month)+"-"+str(datetime.datetime.now().day)
-                                    for student_state in round_state_student:
-                                        type_round="drop_off" if 'drop' == request.data.get('round_type') else "pick_up"
-                                        cursor.execute(
-                                            "select * FROM student_round_transfer  WHERE student_id = %s  and state= %s and date_from <= %s and date_to >=%s and type =%s ",
-                                            [student_state[0], 'approve', today,today, type_round])
-                                        student_round_transfer = cursor.fetchall()
-
-
-                                        if 'drop' == request.data.get('round_type'):
-                                            cursor.execute("select display_name_search from student_student WHERE id = %s ",
-                                                           [student_state[0]])
-                                            student_student2 = cursor.fetchall()
+                                if rounds_details:
+                                    cursor.execute(
+                                        "select student_id,sequence,transfer_state,source_round_id from transport_participant WHERE round_schedule_id = %s ORDER BY sequence ASC",
+                                        [rounds_details[0][0]])
+                                    round_state_student = cursor.fetchall()
+                                    if round_state_student:
+                                        start = datetime.datetime(datetime.datetime.now().year,datetime.datetime.now().month, datetime.datetime.now().day)
+                                        end = datetime.datetime(datetime.datetime.now().year,
+                                                                  datetime.datetime.now().month,
+                                                                  datetime.datetime.now().day+1)
+                                        today=str(datetime.datetime.now().year)+"-"+str(datetime.datetime.now().month)+"-"+str(datetime.datetime.now().day)
+                                        for student_state in round_state_student:
+                                            type_round="drop_off" if 'drop' == request.data.get('round_type') else "pick_up"
                                             cursor.execute(
-                                                "select * FROM school_message  WHERE title = %s  and driver_id= %s and date >= %s and date <= %s and search_type=%s and message=%s",
-                                                ['Pick Up By Parent', driver_id, start, datetime.datetime.now(),'buses',student_student2[0][0]])
-                                            school_message = cursor.fetchall()
-                                            cursor.execute(
-                                                "select * FROM pickup_request  WHERE student_name_id = %s  and state= %s and date >= %s and date <= %s",
-                                                [student_state[0], 'done',start, datetime.datetime.now()])
-                                            pickup_request = cursor.fetchall()
-                                            if pickup_request or school_message:
+                                                "select * FROM student_round_transfer  WHERE student_id = %s  and state= %s and date_from <= %s and date_to >=%s and type =%s ",
+                                                [student_state[0], 'approve', today,today, type_round])
+                                            student_round_transfer = cursor.fetchall()
 
-                                                moved_students.append(student_student2[0][0] + "</font></b><br> , has been picked up by parents")
 
-                                        if  student_round_transfer:
+                                            if 'drop' == request.data.get('round_type'):
+                                                cursor.execute("select display_name_search from student_student WHERE id = %s ",
+                                                               [student_state[0]])
+                                                student_student2 = cursor.fetchall()
+                                                cursor.execute(
+                                                    "select * FROM school_message  WHERE title = %s  and driver_id= %s and date >= %s and date <= %s and search_type=%s and message=%s",
+                                                    ['Pick Up By Parent', driver_id, start, datetime.datetime.now(),'buses',student_student2[0][0]])
+                                                school_message = cursor.fetchall()
+                                                cursor.execute(
+                                                    "select * FROM pickup_request  WHERE student_name_id = %s  and state= %s and date >= %s and date <= %s",
+                                                    [student_state[0], 'done',start, datetime.datetime.now()])
+                                                pickup_request = cursor.fetchall()
+                                                if pickup_request or school_message:
 
-                                            cursor.execute(
-                                                "SELECT *FROM public.school_day_student_round_transfer_rel WHERE school_day_id =%s and student_round_transfer_id=%s",
-                                                [day_id[0][0],student_round_transfer[0][0] ])
-                                            school_day_student_round_transfer_rel = cursor.fetchall()
+                                                    moved_students.append(student_student2[0][0] + "</font></b><br> , has been picked up by parents")
 
-                                            if school_day_student_round_transfer_rel:
-                                                if not student_state[3]:
-                                                    cursor.execute("select display_name_search from student_student WHERE id = %s ",
-                                                                   [student_state[0]])
-                                                    student_student21 = cursor.fetchall()
-                                                    moved_students.append( "The student <br><b><font color='#CE3337'>"+str(student_student21[0][0])+"</font></b><br> has been moved from this bus for this round only")
-                                                else:
-                                                    cursor.execute("select display_name_search from student_student WHERE id = %s ",
-                                                                   [student_state[0]])
-                                                    student_student21 = cursor.fetchall()
-                                                    moved_students.append(
-                                                        "The student <br><b><font color='#CE3337'>" + str(student_student21[0][
-                                                            0]) + "</font></b><br> has been added to this round. Before you start the round please check the availability of the student on the bus and the pickup location of the studen")
+                                            if  student_round_transfer:
+
+                                                cursor.execute(
+                                                    "SELECT *FROM public.school_day_student_round_transfer_rel WHERE school_day_id =%s and student_round_transfer_id=%s",
+                                                    [day_id[0][0],student_round_transfer[0][0] ])
+                                                school_day_student_round_transfer_rel = cursor.fetchall()
+
+                                                if school_day_student_round_transfer_rel:
+                                                    if not student_state[3]:
+                                                        cursor.execute("select display_name_search from student_student WHERE id = %s ",
+                                                                       [student_state[0]])
+                                                        student_student21 = cursor.fetchall()
+                                                        moved_students.append( "The student <br><b><font color='#CE3337'>"+str(student_student21[0][0])+"</font></b><br> has been moved from this bus for this round only")
+                                                    else:
+                                                        cursor.execute("select display_name_search from student_student WHERE id = %s ",
+                                                                       [student_state[0]])
+                                                        student_student21 = cursor.fetchall()
+                                                        moved_students.append(
+                                                            "The student <br><b><font color='#CE3337'>" + str(student_student21[0][
+                                                                0]) + "</font></b><br> has been added to this round. Before you start the round please check the availability of the student on the bus and the pickup location of the studen")
 
                                 moved_students1.append(moved_students)
                             if r_id:
@@ -1374,6 +1375,7 @@ def students_bus_checks(request):
                             school_name = Manager.pincode(school_name)
                             with connections[school_name].cursor() as cursor:
                                 students = request.data.get('students')
+                                print(students)
                                 for rec in students:
                                     # print(rec)
                                     round_id = rec['round_id']
