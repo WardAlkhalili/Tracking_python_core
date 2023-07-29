@@ -3120,7 +3120,7 @@ def get_attendance(request, student_id):
                                                              'reason': 'Death of A Relative' if s[3] == 'death' else s[
                                                                  3],
                                                              'type': s[4],
-                                                             'arrival_time': s[5] if s[5] else "0"
+                                                             'arrival_time': str(s[5] )if s[5] else "0"
                                                              })
                                 else:
                                     daily_attendance.append({'leave_id': s[1],
@@ -3130,7 +3130,7 @@ def get_attendance(request, student_id):
                                                              'reason': 'Death of A Relative' if s[3] == 'death' else s[
                                                                  3],
                                                              'type': s[4],
-                                                             'arrival_time': s[5] if s[5] else "0"
+                                                             'arrival_time': str(s[5]) if s[5] else "0"
                                                              })
                             for st in studentleaves:
                                 arrival_time = calculate_time(st[7])
