@@ -4133,6 +4133,9 @@ def get_event_form_view_data(request, event, std):
                                     " select id,event_id,state,new_added from school_event_registration where  id =%s   ORDER BY create_date DESC",
                                     [event])
                                 events = cursor.fetchall()
+                                cursor.execute(
+                                    "Update school_event_registration SET new_added = False  WHERE id=%s",
+                                    [event])
 
                                 data = []
 
