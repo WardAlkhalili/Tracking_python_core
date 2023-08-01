@@ -2715,7 +2715,7 @@ def notify(request):
                                     student_history1=[]
                                     for res in student_history:
                                         student_history1.append(res[0])
-                                    if "in" in student_history1 or "out" in student_history1 or "absent" in student_history1:
+                                    if "in" in student_history1 or "out" in student_history1 or "absent" in student_history1 or 'absent-all' in student_history1:
                                         pass
                                     else:
                                         student_history=[]
