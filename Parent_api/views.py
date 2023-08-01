@@ -2715,7 +2715,8 @@ def notify(request):
                                     student_history1=[]
                                     for res in student_history:
                                         student_history1.append(res[0])
-                                    if "in" in student_history1 or "out" in student_history1 or "absent" in student_history1:
+
+                                    if "in" in student_history1 or "out" in student_history1 or "absent" in student_history1 or 'absent-all' in student_history1:
                                         pass
                                     else:
                                         student_history=[]
@@ -2774,8 +2775,6 @@ def notify(request):
                                                     "UPDATE   transport_participant SET transport_state=%s  WHERE student_id = %s and round_schedule_id = %s",
                                                     ['absent', student_id, res[0]])
                                         result = {'result': "ok"}
-
-
                                 return Response(result)
                         elif name == 'changed_location':
                             with connections[school_name].cursor() as cursor:
@@ -2826,7 +2825,6 @@ def notify(request):
 
 
 def send_driver_notif(mobile_token,student_id,student_name,round_id,type,when):
-    print(mobile_token)
 
     # AAAAXj2DTK0:APA91bFSxi4txQ8WffLYLBrxFVd3JMCSP5n9WfZafPnLpxC2i9cXHi2SofNoNSBgFWt2tgqjEstSeVkre-1FklyKn4NIy0AuYSwafkQt-RhXcVCth3RJdt8GUbTw9aZI70XFmYBshjuy
     # push_service = FCMNotification(
@@ -4132,6 +4130,9 @@ def get_event_form_view_data(request, event, std):
                                     " select id,event_id,state,new_added from school_event_registration where  id =%s   ORDER BY create_date DESC",
                                     [event])
                                 events = cursor.fetchall()
+                                cursor.execute(
+                                    "Update school_event_registration SET new_added = False  WHERE id=%s",
+                                    [event])
 
                                 data = []
 
