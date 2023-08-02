@@ -2915,7 +2915,7 @@ def get_badge(request, student_id):
                                     [b[2]])
                                 subject_name = cursor.fetchall()
                                 cursor.execute(
-                                    "select badge_duration from res_company",
+                                    "select badge_duration from res_company WHERE badge_duration IS NOT NULL  ORDER BY ID DESC LIMIT 1",
                                     [])
                                 badge_duration = cursor.fetchall()
 
@@ -2933,7 +2933,7 @@ def get_badge(request, student_id):
                                          'subject': subject_name[0][0] if subject_name else '',
                                          'description': school_badge[0][1],
                                          'new_badge': b[4],
-                                         'disable': delta.days < badge_duration[0][0] if delta else True,
+                                         'disable': delta.days < badge_duration[0][0] if delta and badge_duration else True,
                                          'job_name':job_name[0][0] if  job_name else '',
                                          'image_teacher':'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(teacher_name[0][1]) if teacher_name[0][1] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png",
 
