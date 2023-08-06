@@ -72,7 +72,7 @@ def parent_login(request):
             cursor.execute(
                 "UPDATE public.school_parent SET mobile_token=%s WHERE id=%s;",
                 [mobile_token, parent_id[0][0]])
-            print("sdasadsa",  parent_id[0][0],"           ",mobile_token)
+            # print("sdasadsa",  parent_id[0][0],"           ",mobile_token)
             manager_parent = ManagerParent(token=unique_id, db_name=school_name, user_id=uid,
                                            parent_id=parent_id[0][0],
                                            school_id=company_id, mobile_token=mobile_token)
@@ -2729,7 +2729,7 @@ def notify(request):
                                                 cursor.execute("select token from res_partner WHERE id = %s",
                                                                [round_info[0][0]])
                                                 driver_name = cursor.fetchall()
-                                                print(driver_name[0][0])
+                                                # print(driver_name[0][0])
                                                 if driver_name[0][0]:
                                                     send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[1],'both',when)
 
@@ -2826,7 +2826,7 @@ def notify(request):
 
 
 def send_driver_notif(mobile_token,student_id,student_name,round_id,type,when):
-    print(mobile_token)
+    # print(mobile_token)
 
     # AAAAXj2DTK0:APA91bFSxi4txQ8WffLYLBrxFVd3JMCSP5n9WfZafPnLpxC2i9cXHi2SofNoNSBgFWt2tgqjEstSeVkre-1FklyKn4NIy0AuYSwafkQt-RhXcVCth3RJdt8GUbTw9aZI70XFmYBshjuy
     # push_service = FCMNotification(
@@ -3469,7 +3469,8 @@ def get_exam(request, student_id):
                                                 minutes=allowed_time_to_start_exam.minute)
 
                                             if type(start_time2) == str:
-                                                print("")
+                                                # print("")
+                                                pass
                                             else:
                                                 if start_time2 <= now_time <= exam_start_sss:
                                                     allowed_time_to_start_exams = True
@@ -4375,7 +4376,7 @@ def post_library(request):
                                 #     [student_id])
                                 # branch_id = cursor.fetchall()
                                 # res.partner expected_return_date
-                                print(book_request)
+                                # print(book_request)
                                 if book_request:
                                     name='R00'+str(book_request[0][0]+1)
                                 else:

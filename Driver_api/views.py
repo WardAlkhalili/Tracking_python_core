@@ -22,7 +22,7 @@ def driver_login(request):
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  driver_id,bus_no,id  from fleet_vehicle WHERE bus_pin = %s", [pincode])
             data_id_bus = cursor.fetchall()
-            print(data_id_bus,mobile_token)
+            # print(data_id_bus,mobile_token)
             # Authentication
             user = User.objects.all().first()
             token_auth, created = Token.objects.get_or_create(user=user)
@@ -994,7 +994,7 @@ def save_message_wizard(school_name,round_id,date,from_type,message_title,messag
             "select  year_id,user_id from student_student WHERE id = %s",
             [student_id])
         student_name = cursor.fetchall()
-        print(student_name)
+        # print(student_name)
         cursor.execute(
             " select branch_id from res_users where id=%s",
             [student_name[0][1]])
@@ -1375,7 +1375,7 @@ def students_bus_checks(request):
                             school_name = Manager.pincode(school_name)
                             with connections[school_name].cursor() as cursor:
                                 students = request.data.get('students')
-                                print(students)
+                                # print(students)
                                 for rec in students:
                                     # print(rec)
                                     round_id = rec['round_id']
@@ -1410,7 +1410,7 @@ def students_bus_checks(request):
                                                     [round_id, student_id, datetime.datetime.now(),
                                                      datetime.datetime.now(), round_history[0][0], lat, long, status])
                                                 if status == 'in':
-                                                    print("dsfkafldfsgklkgkggogoo")
+                                                    # print("dsfkafldfsgklkgkggogoo")
                                                     cursor.execute(
                                                         "UPDATE public.round_student_history SET bus_check_in = %s WHERE id =%s ",
                                                         [datetime.datetime.now(), student_history[0][1]])
@@ -1523,7 +1523,7 @@ def students_bus_checks(request):
                                                                                          Q(db_name=school_name),
                                                                                          Q(is_active=True)).values_list( 'mobile_token').order_by('-pk')
                                             if settings:
-                                                print(settings)
+                                                # print(settings)
                                                 if not('None' in str(settings)) :
 
                                                     data = json.loads(settings[0][0])
@@ -1537,7 +1537,7 @@ def students_bus_checks(request):
                                                     # check_out = True
                                                     # nearby = True
                                                     if type(data['notifications']) is dict:
-                                                        print("iiiiiiiiiiiiii")
+                                                        # print("iiiiiiiiiiiiii")
                                                         check_in = data['notifications']['check_in']
                                                         check_out = data['notifications']['check_out']
                                                         nearby = data['notifications']['nearby']

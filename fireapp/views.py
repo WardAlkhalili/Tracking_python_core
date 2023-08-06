@@ -332,7 +332,7 @@ def send_dri(request):
         #         [data_id_bus[0][0]])
         #     signup_token = cursor.fetchall()
         # mobile_token = signup_token[0][0]
-        print(mobile_token)
+        # print(mobile_token)
         # dFcb6UaVQAeAbMrAgnCF59:APA91bExNfxIYZF9QOZMHrp1bDABtihTkDc-8boLfqBvHIg76mlHv8zgEayFM3gT08YoMaeLTnwfGZKGCVNVd_x1zAbGFx4WjOE2_NTZGjRRT3s4clNxHk3XmJZdfvWl3beQDahHsFSc
         if mobile_token:
             # push_service = FCMNotification(
