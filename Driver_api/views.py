@@ -38,7 +38,7 @@ def driver_login(request):
             # *------------------------------------------------------------------------------------------------*
             # Details for login setting
             cursor.execute("""
-            select nearby_distance,lat,lng,battery_low,location_refresh_rate,timezone,utc_offset,speed_limit_watch,standstill_watch,notify_if_driver_check_in_out_geo_fence,notify_on_battery_low_of_drivers_app,notify_it_driver_turns_off_gps,user_speed_exceeded,user_no_move_time_exceeded,use_round_order from transport_setting ORDER BY ID DESC LIMIT 1
+            select nearby_distance,lat,lng,battery_low,location_refresh_rate,timezone,utc_offset,speed_limit_watch,standstill_watch,notify_if_driver_check_in_out_geo_fence,notify_on_battery_low_of_drivers_app,notify_it_driver_turns_off_gps,user_speed_exceeded,user_no_move_time_exceeded,use_round_order,auto_round_ending,lat_end,lng_end from transport_setting ORDER BY ID DESC LIMIT 1
             """)
             login_details = cursor.fetchall()
             login_details1 = []
@@ -64,6 +64,9 @@ def driver_login(request):
                 "bus_number": data_id_bus[0][1],
                 "driver_id": data_id_bus[0][0],
                 "nearby_distance": login_details1[0]['nearby_distance'],
+                "auto_round_ending":   login_details1[0]['auto_round_ending']  if login_details1[0]['auto_round_ending']  else False,
+                "lat_end": login_details1[0]['lat_end'],
+                "lng_end": login_details1[0]['lng_end'],
                 "use_round_order":login_details1[0]['use_round_order'] if login_details1[0]['use_round_order'] else False,
                 "notifications_text": [
                     {
@@ -139,7 +142,6 @@ def driver_login(request):
                 ],
                 "geofenses": [],
                 "Authorization": "Bearer " + unique_id, }
-
         return Response(result)
 
 @api_view(['POST'])
