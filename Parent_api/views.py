@@ -528,7 +528,7 @@ def kids_list(request):
                                     [school_id])
 
                                 lang = cursor.fetchall()
-                                print(lang,"yousef 531")
+
                                 cursor.execute(
                                     "select link  from res_company  ORDER BY ID DESC LIMIT 1",
                                     [])
@@ -885,11 +885,9 @@ def kids_list(request):
 
 
                                     if any('English' in x[0]  for x in lang):
-                                        print(student1[rec]['name'], "yousef 888")
                                         fname = student1[rec]['name']
 
                                     else:
-                                        print(student1[rec]['name_ar'], "yousef 892")
                                         fname = student1[rec]['name_ar']
                                     # password,national_id
                                     user_name=student1[rec]['national_id']
