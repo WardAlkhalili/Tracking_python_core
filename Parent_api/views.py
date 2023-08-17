@@ -524,8 +524,8 @@ def kids_list(request):
                                 setting = cursor.fetchall()
                                 show_map = True
                                 cursor.execute(
-                                    "select name from res_lang WHERE id =(select first_lang  from res_company  ORDER BY ID DESC LIMIT 1) ",
-                                    [])
+                                    "select name from res_lang WHERE id =(select first_lang  from res_company  WHERE id = %s ORDER BY ID DESC LIMIT 1) ",
+                                    [school_id])
 
                                 lang = cursor.fetchall()
                                 cursor.execute(
