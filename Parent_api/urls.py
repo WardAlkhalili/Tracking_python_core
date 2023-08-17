@@ -4,6 +4,7 @@ from Parent_api import views
 
 urlpatterns = [
     path('parents/login/', views.parent_login),
+    path('parents/logout/', views.logout),
     path('parents/feed-back/', views.feed_back),
     path('parents/settings', views.settings),
     path('parents/is-student-served/', views.student_served),

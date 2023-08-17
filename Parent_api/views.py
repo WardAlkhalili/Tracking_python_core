@@ -4449,3 +4449,37 @@ def get_marks(request, student_id):
                               'book':book_all_r}
 
                     return Response(result)
+
+
+@api_view(['POST'])
+def logout(request):
+    if request.method == 'POST':
+        # print("sdasadsafffyyyyyyy" )
+        if request.headers:
+            # print("sdasadsafffyyyyyyyaa")
+            if request.headers.get('Authorization'):
+                # print("sdasadsafffyyyyyyssy",request.headers.get('Authorization'))
+                # parent_id
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+                # print("sdasadsafff", parent_id,)
+                if parent_id:
+                    for e in parent_id:
+                            parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+                with connections[school_name].cursor() as cursor:
+                    cursor.execute(
+                        "UPDATE public.school_parent SET mobile_token=%s WHERE id=%s;",
+                        ['', parent_id[0][0]])
+                result = {'result': 'ok'}
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
