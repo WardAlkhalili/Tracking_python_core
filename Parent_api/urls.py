@@ -39,6 +39,8 @@ urlpatterns = [
     path('api/get_library/<int:student_id>', views.get_library),
     path('parents/post_library', views.post_library),
     path('api/get_marks/<int:student_id>', views.get_marks),
+    path('api/get_time_table/<int:student_id>', views.get_time_table),
+#     get_time_table
 #     get_marks
 
 

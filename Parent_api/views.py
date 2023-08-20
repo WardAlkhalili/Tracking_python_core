@@ -72,7 +72,7 @@ def parent_login(request):
             cursor.execute(
                 "UPDATE public.school_parent SET mobile_token=%s WHERE id=%s;",
                 [mobile_token, parent_id[0][0]])
-            print("sdasadsa",  parent_id[0][0],"           ",mobile_token)
+            # print("sdasadsa",  parent_id[0][0],"           ",mobile_token)
             manager_parent = ManagerParent(token=unique_id, db_name=school_name, user_id=uid,
                                            parent_id=parent_id[0][0],
                                            school_id=company_id, mobile_token=mobile_token)
@@ -678,12 +678,23 @@ def kids_list(request):
                                              "arabic_name": "العيادة",
                                              "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
                                              "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg"
+                                             },
+                                        "Timetable":
+                                            {"name": "Timetable",
+                                             "name_ar": "الجدول الدراسي",
+                                             # "url": "https://" + school_name + ".staging.trackware.com/my/Clinic/",
+                                             # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Clinic/",
+                                             "url": "https://tst.tracking.trackware.com/my/Timetable/",
+                                             "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Timetable/",
+                                             "arabic_name": "الجدول الدراسي",
+                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/icons8-curriculum-48.png",
+                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/icons8-curriculum-48.svg"
                                              }
 
                                     }
                                     url_m = {}
                                     model_list = ( "Badges", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
-                                        "Weekly Plans", 'Online Exams','Library')
+                                        "Weekly Plans", 'Online Exams','Library','Timetable')
                                     cursor.execute("select name from ir_ui_menu where name in %s", [model_list])
                                     list = cursor.fetchall()
                                     res = []
@@ -741,10 +752,15 @@ def kids_list(request):
                                             x['Clinic']['url'] = x['Clinic']['url'] + str(student1[rec]['user_id'])
                                             model.append(x['Clinic'])
                                         if 'Library'==rec1:
-                                            x['Library']['arabic_url'] = x['Clinic']['arabic_url'] + str(
+                                            x['Library']['arabic_url'] = x['Library']['arabic_url'] + str(
                                                 student1[rec]['user_id'])
                                             x['Library']['url'] = x['Library']['url'] + str(student1[rec]['user_id'])
                                             model.append(x['Library'])
+                                        if 'Timetable' == rec1:
+                                            x['Timetable']['arabic_url'] = x['Timetable']['arabic_url'] + str(
+                                                student1[rec]['user_id'])
+                                            x['Timetable']['url'] = x['Timetable']['url'] + str(student1[rec]['user_id'])
+                                            model.append(x['Timetable'])
                                     cursor.execute(
                                         "select name from ir_ui_menu where name ='Live Tracking'  LIMIT 1")
                                     tracking = cursor.fetchall()
@@ -1838,18 +1854,7 @@ def kids_hstory_new(request):
                                     # cursor.execute(
                                     #     "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
                                     #     [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
-                            #     year_id = fields.Many2one('academic.year', 'Academic Year', ondelete='cascade')
-                            #     branch_id = fields.Many2one('school.branch', 'Branch')
-                            #     type = fields.Char()
-                            #     sender_name = fields.Char()
-                            #     student_id = fields.Many2one('student.student', 'Student')
-                            #     message_ar = fields.Text(string="Message")
-                            #     message_en = fields.Text(string="Message")
-                            #     title = fields.Char(string="title")
-                            #     title_ar = fields.Char(string="title")
-                            #     from_type = fields.Char()
-                            #     read1 = fields.Boolean(default=False)
-                            #     date = fields.Datetime()
+
 
                             result = {"notifications": notifications_not_d}
                             return Response(result)
@@ -2730,7 +2735,7 @@ def notify(request):
                                                 cursor.execute("select token from res_partner WHERE id = %s",
                                                                [round_info[0][0]])
                                                 driver_name = cursor.fetchall()
-                                                print(driver_name[0][0])
+                                                # print(driver_name[0][0])
                                                 if driver_name[0][0]:
                                                     send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[1],'both',when)
 
@@ -3839,6 +3844,7 @@ def get_weekly_plan_lines(request, plan_id, student_id, week_name):
                                 data['notes'] = notes
 
                         result = {'result': data}
+                        # print(result)
                         return Response(result)
 
 
@@ -4372,7 +4378,7 @@ def post_library(request):
                                 #     [student_id])
                                 # branch_id = cursor.fetchall()
                                 # res.partner expected_return_date
-                                print(book_request)
+                                # print(book_request)
                                 if book_request:
                                     name='R00'+str(book_request[0][0]+1)
                                 else:
@@ -4480,3 +4486,157 @@ def logout(request):
             return Response(result)
         result = {'result': 'Not headers'}
         return Response(result)
+
+
+@api_view(['GET'])
+def get_time_table(request, student_id):
+    if request.method == 'GET':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+
+                    with connections[school_name].cursor() as cursor:
+
+                        data = {}
+                        days = []
+                        cursor.execute(
+                            "select user_id,year_id from student_student where id=%s",
+                            [student_id])
+                        student = cursor.fetchall()
+                        if student:
+
+                            cursor.execute(
+                                " select partner_id from res_users where id=%s",
+                                [student[0][0]])
+                            partner_id = cursor.fetchall()
+                            if partner_id:
+
+                                cursor.execute(
+                                    "select class_id from res_partner where id=%s",
+                                    [partner_id[0][0]])
+                                class_id = cursor.fetchall()
+
+                                cursor.execute(
+                                    "SELECT id, name FROM school_day WHERE checkbox_day=true;",
+                                    [])
+                                school_day = cursor.fetchall()
+                                subject_lines = []
+                                for line in school_day:
+                                    day_id=0
+                                    if 'Saturday' in line and 'Saturday' not in days:
+                                        days.append('Saturday')
+                                        day_id=5
+                                    elif 'Sunday' in line and 'Sunday' not in days:
+                                        days.append('Sunday')
+                                        day_id =6
+                                    elif 'Monday' in line and 'Monday' not in days:
+                                        days.append('Monday')
+                                        day_id = 0
+                                    elif 'Tuesday' in line and 'Tuesday' not in days:
+                                        days.append('Tuesday')
+                                        day_id = 1
+                                    elif 'Wednesday' in line and 'Wednesday' not in days:
+                                        days.append('Wednesday')
+                                        day_id = 2
+                                    elif 'Thursday' in line and 'Thursday' not in days:
+                                        days.append('Thursday')
+                                        day_id = 3
+                                    elif 'Friday' in line and 'Friday' not in days:
+                                        days.append('Friday')
+                                        day_id = 4
+                                    cursor.execute(
+                                        "SELECT lecture_id,subject_id,  from_time, to_time ,sequence FROM public.add_day_subject WHERE class_id=%s and week_day=%s ORDER by sequence ASC; ",
+                                        [class_id[0][0],str(day_id)])
+                                    add_day_subject = cursor.fetchall()
+
+                                    for subject in add_day_subject:
+
+                                        subject_name='break'
+                                        if subject[1]:
+                                            cursor.execute(
+                                                "select  name  from school_subject WHERE id = %s ",
+                                                [subject[1]])
+                                            s_name = cursor.fetchall()
+                                            subject_name=s_name[0][0]
+
+
+
+                                        line = {'subject_id': subject[1], 'subject_name': subject_name,
+                                                }
+
+                                        from_time='{0:02.0f}:{1:02.0f}'.format(*divmod(float(subject[2]) * 60, 60))
+                                        to_time = '{0:02.0f}:{1:02.0f}'.format(*divmod(float(subject[3]) * 60, 60))
+
+                                        if  day_id==5:
+                                            line['Saturday'] = str(from_time)+" - "+str(to_time)
+                                        else:
+                                            line['Saturday'] = ''
+                                        if day_id==6:
+                                            line['Sunday'] = str(from_time)+" - "+str(to_time)
+                                        else:
+                                            line['Sunday'] = ''
+                                        if day_id==0:
+                                            line['Monday'] =str(from_time)+" - "+str(to_time)
+                                        else:
+                                            line['Monday'] = ''
+                                        if day_id==1:
+                                            line['Tuesday'] = str(from_time)+" - "+str(to_time)
+                                        else:
+                                            line['Tuesday'] = ''
+                                        if day_id==2:
+                                            line['Wednesday'] =str(from_time)+" - "+str(to_time)
+                                        else:
+                                            line['Wednesday'] = ''
+                                        if day_id==3:
+                                            line['Thursday'] = str(from_time)+" - "+str(to_time)
+                                        else:
+                                            line['Thursday'] = ''
+                                        if day_id==4:
+                                            line['Friday'] = str(from_time)+" - "+str(to_time)
+                                        else:
+                                            line['Friday'] = ''
+
+                                        subject_lines.append(line)
+                                    # print("-----------------")
+                                days = list(set(days))
+
+                                columns = {'days': {}}
+
+                                for day in days:
+                                    if day == 'Saturday':
+                                        columns['days'][0] = 'Saturday'
+                                    if day == 'Sunday':
+                                        columns['days'][1] = 'Sunday'
+                                    if day == 'Monday':
+                                        columns['days'][2] = 'Monday'
+                                    if day == 'Tuesday':
+                                        columns['days'][3] = 'Tuesday'
+                                    if day == 'Wednesday':
+                                        columns['days'][4] = 'Wednesday'
+                                    if day == 'Thursday':
+                                        columns['days'][5] = 'Thursday'
+                                    if day == 'Friday':
+                                        columns['days'][6] = 'Friday'
+                                columns = sorted(columns['days'].items())
+                                dayss = []
+
+                                for col in columns:
+                                    dayss.append({
+                                        "id": col[0],
+                                        "day": col[1]
+                                    })
+                                data['columns'] = dayss
+
+                                data['lines'] = subject_lines
+                                # notes = ''
+                                # data['notes'] = notes
+
+                        result = {'result': data}
+                        # print(result)
+                        return Response(result)
