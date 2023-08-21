@@ -2710,10 +2710,10 @@ def notify(request):
                                     rounds_details = cursor.fetchall()
                                     cursor.execute("select activity_type from student_history WHERE student_id = %s and datetime >= %s  ",
                                                    [student_id,when])
-                                    student_history = cursor.fetchall()
+                                    student_history12 = cursor.fetchall()
                                     result = {'result': "attendance"}
                                     student_history1=[]
-                                    for res in student_history:
+                                    for res in student_history12:
                                         student_history1.append(res[0])
                                     if "in" in student_history1 or "out" in student_history1 or "absent" in student_history1 or 'absent-all' in student_history1:
                                         pass
