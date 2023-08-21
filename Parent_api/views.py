@@ -2702,7 +2702,7 @@ def notify(request):
                                 r_id = []
                                 for rec in round_schedule_id:
                                     r_id.append(rec[0])
-                                print(r_id)
+
                                 if r_id:
 
                                     cursor.execute(
@@ -2716,9 +2716,9 @@ def notify(request):
                                     student_history1=[]
                                     for res in student_history12:
                                         student_history1.append(res[0])
-                                    print("yousef "+student_history1)
+
                                     if "in" in student_history1 or "out" in student_history1 or "absent" in student_history1 or 'absent-all' in student_history1:
-                                        print("kkkkkkkkkkkkkkkkkkkkkkkkkk")
+
                                         pass
                                     else:
                                         student_history=[]
