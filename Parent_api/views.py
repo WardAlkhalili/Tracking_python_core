@@ -2652,6 +2652,7 @@ def notify(request):
                             target_rounds = request.data.get('target_rounds')
                             # round_id=request.data.get('status')
                             with connections[school_name].cursor() as cursor:
+                                result = {'result': "ok"}
                                 type = "absent-all" if target_rounds == 'both' else "absent"
 
                                 cursor.execute("select  display_name_search,year_id,user_id from student_student WHERE id = %s",
