@@ -2702,7 +2702,7 @@ def notify(request):
                                 r_id = []
                                 for rec in round_schedule_id:
                                     r_id.append(rec[0])
-                                print("yousef 11" + r_id)
+                                print(r_id)
                                 if r_id:
 
                                     cursor.execute(
