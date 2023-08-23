@@ -1202,14 +1202,15 @@ def hide_message(request):
         else:
             result = {'result': 'error4'}
             return Response(result)
-def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0',notifications_title_ar='',notifications_text_ar='',student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png'):
+def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0',notifications_title_ar='',notifications_text_ar='',student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',image_link='',plan_name=''):
     show=show_notif
     # if student_image:
     #     print(student_image)
     stutes=stutes_notif
-    if stutes=='Read':
+    # print(stutes)
+    if stutes=='Read' or stutes:
         stutes="Mark As UnRead"
-    elif  stutes=='UnRead' :
+    elif  stutes=='UnRead' or not stutes :
         stutes = "Mark As Read"
     else:
         stutes = "Mark As Read"
@@ -1289,6 +1290,9 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             "action_id": str(action_id),
             "notifications_text_ar": notifications_text_ar if notifications_text_ar else  notifications_text,
             "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
+            "imageLink":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(image_link)if image_link else '',
+            "plan_name": plan_name if plan_name else ''
+
 
         }
     else:
@@ -1308,6 +1312,8 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             "action_id": str(action_id),
             "notifications_text_ar": notifications_text_ar if notifications_text_ar else notifications_text,
             "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
+            "imageLink": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(image_link)if image_link else '',
+            "plan_name": plan_name if plan_name else ''
 
         }
 
@@ -1614,10 +1620,24 @@ def kids_hstory_new(request):
                                     " select branch_id from res_users where id=%s",
                                     [student[6]])
                                 branch_id = cursor.fetchall()
+                                # SELECT column_name
+                                # FROM information_schema.columns
+                                # WHERE table_name='res_partner' and column_name='yousef';
+
                                 cursor.execute(
-                                    "select  date,message_en,message_ar,title,title_ar,action_id,id from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
-                                    [branch_id[0][0], student[5], student[0]])
-                                student_mes = cursor.fetchall()
+                                    "SELECT column_name FROM information_schema.columns WHERE table_name='message_student' and column_name='image_link'",
+                                    [])
+                                information_schema = cursor.fetchall()
+                                if information_schema:
+                                    cursor.execute(
+                                        "select  date,message_en,message_ar,title,title_ar,action_id,id,image_link,read_message,plan_name from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
+                                        [branch_id[0][0], student[5], student[0]])
+                                    student_mes = cursor.fetchall()
+                                else:
+                                    cursor.execute(
+                                        "select  date,message_en,message_ar,title,title_ar,action_id,id,read_message from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
+                                        [branch_id[0][0], student[5], student[0]])
+                                    student_mes = cursor.fetchall()
                                 # cursor.execute(
                                 #         "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
                                 #         [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
@@ -1640,8 +1660,8 @@ def kids_hstory_new(request):
                                                              mes[0].replace(
                                                                  second=0) if mes[0] else '',
                                                              mes[3],
-                                                             student[1], student[0], mes[6], None, None, action_id if mes[5] else '0', mes[4],
-                                                             mes[2]))
+                                                             student[1], student[0], mes[6], mes[8] if information_schema else mes[7], None, action_id if mes[5] else '0', mes[4],
+                                                             mes[2],'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',mes[7]if information_schema else '',plan_name=mes[9]if information_schema else ''))
                             #
                             #     student_round = []
                             #     if  any('English'  in x[0]  for x in lang):
@@ -1837,18 +1857,7 @@ def kids_hstory_new(request):
                                     # cursor.execute(
                                     #     "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
                                     #     [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
-                            #     year_id = fields.Many2one('academic.year', 'Academic Year', ondelete='cascade')
-                            #     branch_id = fields.Many2one('school.branch', 'Branch')
-                            #     type = fields.Char()
-                            #     sender_name = fields.Char()
-                            #     student_id = fields.Many2one('student.student', 'Student')
-                            #     message_ar = fields.Text(string="Message")
-                            #     message_en = fields.Text(string="Message")
-                            #     title = fields.Char(string="title")
-                            #     title_ar = fields.Char(string="title")
-                            #     from_type = fields.Char()
-                            #     read1 = fields.Boolean(default=False)
-                            #     date = fields.Datetime()
+
 
                             result = {"notifications": notifications_not_d}
                             return Response(result)
@@ -1864,6 +1873,7 @@ def kids_hstory_new(request):
         else:
             result = {'status': 'Not found headers'}
             return Response(result)
+
 
 
 
