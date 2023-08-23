@@ -1133,9 +1133,15 @@ def read_message(request):
                                 " select read_message from school_message_student_student where id=%s ",
                                 [message_id])
                             read_message = cursor.fetchall()
+                            # print(read_message[0][0])
                             if read_message[0][0]:
+                                # print("ddddddddddddddddddddddddd")
                                 cursor.execute("UPDATE public.message_student SET read_message=not(read_message) WHERE id=%s;", [message_id])
                             else:
+                                # print("ddddddddddddddddddddddddqqd")
+                                cursor.execute(
+                                    "UPDATE public.school_message_student_student SET read_message=true WHERE id=%s;",
+                                    [message_id])
                                 cursor.execute(
                                     "UPDATE public.message_student SET read_message=true WHERE id=%s;",
                                     [message_id])
