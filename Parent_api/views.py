@@ -2721,8 +2721,8 @@ def notify(request):
 
                                         pass
                                     else:
-                                        student_history=[]
-                                    if not student_history :
+                                        student_history12=[]
+                                    if not student_history12 :
                                         if target_rounds == 'both':
                                             for res in rounds_details:
                                                 cursor.execute(
