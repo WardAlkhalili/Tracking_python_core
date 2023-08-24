@@ -37,10 +37,21 @@ def driver_login(request):
 
             # *------------------------------------------------------------------------------------------------*
             # Details for login setting
-            cursor.execute("""
-            select nearby_distance,lat,lng,battery_low,location_refresh_rate,timezone,utc_offset,speed_limit_watch,standstill_watch,notify_if_driver_check_in_out_geo_fence,notify_on_battery_low_of_drivers_app,notify_it_driver_turns_off_gps,user_speed_exceeded,user_no_move_time_exceeded,use_round_order from transport_setting ORDER BY ID DESC LIMIT 1
-            """)
-            login_details = cursor.fetchall()
+            cursor.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name='transport_setting' and column_name='auto_round_ending'",
+                [])
+            information_schema = cursor.fetchall()
+            if information_schema:
+                cursor.execute("""
+                             select nearby_distance,lat,lng,battery_low,location_refresh_rate,timezone,utc_offset,speed_limit_watch,standstill_watch,notify_if_driver_check_in_out_geo_fence,notify_on_battery_low_of_drivers_app,notify_it_driver_turns_off_gps,user_speed_exceeded,user_no_move_time_exceeded,use_round_order,auto_round_ending,lat_end,lng_end from transport_setting ORDER BY ID DESC LIMIT 1
+
+                             """)
+                login_details = cursor.fetchall()
+            else:
+                cursor.execute("""
+                    select nearby_distance,lat,lng,battery_low,location_refresh_rate,timezone,utc_offset,speed_limit_watch,standstill_watch,notify_if_driver_check_in_out_geo_fence,notify_on_battery_low_of_drivers_app,notify_it_driver_turns_off_gps,user_speed_exceeded,user_no_move_time_exceeded,use_round_order from transport_setting ORDER BY ID DESC LIMIT 1
+                    """)
+                login_details = cursor.fetchall()
             login_details1 = []
             columnNames = [column[0] for column in cursor.description]
             for record in login_details:
@@ -65,6 +76,12 @@ def driver_login(request):
                 "driver_id": data_id_bus[0][0],
                 "nearby_distance": login_details1[0]['nearby_distance'],
                 "use_round_order":login_details1[0]['use_round_order'] if login_details1[0]['use_round_order'] else False,
+                "auto_round_ending": login_details1[0]['auto_round_ending'] if login_details1[0][
+                    'auto_round_ending'] else False,
+                "lat_end": str(login_details1[0]['lat_end']) if login_details1[0]['lat_end'] else str(
+                    login_details1[0]['lat']),
+                "lng_end": str(login_details1[0]['lng_end']) if login_details1[0]['lng_end'] else str(
+                    login_details1[0]['lng']),
                 "notifications_text": [
                     {
                         "type": "drop-off",
