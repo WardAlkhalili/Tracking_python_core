@@ -1648,10 +1648,11 @@ def kids_hstory_new(request):
                                 # FROM information_schema.columns
                                 # WHERE table_name='res_partner' and column_name='yousef';
 
-                                cursor.execute(
-                                    "SELECT column_name FROM information_schema.columns WHERE table_name='message_student' and column_name='image_link'",
-                                    [])
-                                information_schema = cursor.fetchall()
+                                # cursor.execute(
+                                #     "SELECT column_name FROM information_schema.columns WHERE table_name='message_student' and column_name='image_link'",
+                                #     [])
+                                # information_schema = cursor.fetchall()
+                                information_schema=[]
                                 if information_schema:
                                     cursor.execute(
                                         "select  date,message_en,message_ar,title,title_ar,action_id,id,image_link,read_message,plan_name from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
