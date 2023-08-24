@@ -1506,6 +1506,7 @@ def students_bus_checks(request):
                                     mobile_token = []
                                     id=[]
                                     if student_info:
+                                        print(student_info, "yousef________________________________1509")
                                         if student_info[0][0]:
                                             id.append(student_info[0][0])
                                         if student_info[0][1]:
@@ -1513,6 +1514,7 @@ def students_bus_checks(request):
                                         if student_info[0][2]:
                                             id.append(student_info[0][2])
                                         id = list(dict.fromkeys(id))
+                                        print(id, "yousef________________________________1517")
                                         for rec in id:
                                             cursor.execute("select  settings from school_parent WHERE id = %s", [rec])
                                             settings = cursor.fetchall()
