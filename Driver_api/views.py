@@ -77,10 +77,12 @@ def driver_login(request):
                 "nearby_distance": login_details1[0]['nearby_distance'],
                 "use_round_order":login_details1[0]['use_round_order'] if login_details1[0]['use_round_order'] else False,
                 "auto_round_ending": login_details1[0]['auto_round_ending'] if login_details1[0][
-                    'auto_round_ending'] else False,
+                    'auto_round_ending'] else False if information_schema else False  ,
                 "lat_end": str(login_details1[0]['lat_end']) if login_details1[0]['lat_end'] else str(
+                    login_details1[0]['lat'])if information_schema else str(
                     login_details1[0]['lat']),
                 "lng_end": str(login_details1[0]['lng_end']) if login_details1[0]['lng_end'] else str(
+                    login_details1[0]['lng']) if information_schema else str(
                     login_details1[0]['lng']),
                 "notifications_text": [
                     {
