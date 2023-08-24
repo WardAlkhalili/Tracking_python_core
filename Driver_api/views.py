@@ -2170,9 +2170,11 @@ def notify(request):
 
                                 mobile_token = []
                                 lang = 'en'
+
                                 for rec in student_info[0]:
                                     cursor.execute("select  settings from school_parent WHERE id = %s", [rec])
                                     setting = cursor.fetchall()
+
                                     if setting:
 
                                         if not('None' in str(setting)) :
@@ -2190,6 +2192,7 @@ def notify(request):
                                     mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec),
                                                                                  Q(db_name=school_name),
                                                                                  Q(is_active=True)).values_list( 'mobile_token').order_by('-pk')
+
                                     for e in mobile_token1:
                                             mobile_token.append(e[0])
 
@@ -2197,13 +2200,13 @@ def notify(request):
                                         api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
 
                                 if mobile_token:
-                                    registration_id = mobile_token[0]
+                                    registration_id = mobile_token
                                     message_title_ar="اشعار من الحافلة"
                                     message_body_ar =" لقد وصلت الحافلة " + str(bus_num[0][0]) +" إلى المنزل " if round_type=="dropoff" else "لقد وصلت الحافلة " + str(bus_num[0][0]) + ".الرجاء إرسال " +student_name[0][0]+"للصعود للحافلة"
                                     message_title = "Arrival - Parent" if round_type=="dropoff" else "Bus Arrival"
                                     message_body = "The bus " + str(bus_num[0][0]) + "has arrived at your home"
 
-                                    result = push_service.notify_single_device(registration_id=registration_id,
+                                    result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                                message_title=message_title if lang =="en" else message_title_ar,
                                                                                message_body=message_body if lang =="en" else message_body_ar,sound='new_beeb.mp3')
 
