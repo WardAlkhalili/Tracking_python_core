@@ -55,7 +55,7 @@ def Get_last_bus_location(request, bus_id, school_name):
     if request.method == 'GET':
         # fullRound = school_name + "-stg-round-" + str(bus_id)
         fullRound = school_name + "-round-" + str(bus_id)
-        # print(fullRound)
+        print(fullRound)
         curr_date = date.today()
         #     # here we are doing firebase authentication
         # print("name sssssssssss11", request.build_absolute_uri())
@@ -94,6 +94,8 @@ def Get_last_bus_location(request, bus_id, school_name):
             now = datetime.today()
             # print(database.child(fullRound).child('2022-08-14').child('1660461821').get().val())
             location = database.child(fullRound).child(str(now.date())).get().val()
+            print(str(now.date()))
+            print(location)
 
             # for key, value in database.child(fullRound).child('2022-08-14').child('1660461821').get().val():
             #     route.append(value)
