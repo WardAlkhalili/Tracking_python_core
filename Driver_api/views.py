@@ -707,6 +707,7 @@ def student_list(request, round_id):
 
                                         student_info[std_id] = {
                                             "id": student_student12[0]['id'],
+                                            "nfc_id": str(student_student12[0]['id']),
                                             "year_id": student_student12[0]['year_id'],
                                             "emergency_call": student_student12[0]['emergency_call'],
                                             "display_name_search": student_student12[0]['display_name_search'],
