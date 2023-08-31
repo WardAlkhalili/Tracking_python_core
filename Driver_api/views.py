@@ -210,9 +210,9 @@ def round_list(request):
                                     round_state_student = cursor.fetchall()
                                     if round_state_student:
                                         start = datetime.datetime(datetime.datetime.now().year,datetime.datetime.now().month, datetime.datetime.now().day)
-                                        end = datetime.datetime(datetime.datetime.now().year,
-                                                                  datetime.datetime.now().month,
-                                                                  datetime.datetime.now().day+1)
+                                        # end = datetime.datetime(datetime.datetime.now().year,
+                                        #                           datetime.datetime.now().month,
+                                        #                           datetime.datetime.now().day+1)
                                         today=str(datetime.datetime.now().year)+"-"+str(datetime.datetime.now().month)+"-"+str(datetime.datetime.now().day)
                                         for student_state in round_state_student:
                                             type_round="drop_off" if 'drop' == request.data.get('round_type') else "pick_up"
