@@ -759,7 +759,7 @@ def student_list(request, round_id):
                                             "write_uid": student_student12[0]['write_uid'],
                                             "write_date": student_student12[0]['write_date'],
                                             "is_banned": student_student12[0]['is_banned'],
-                                            "currency_id": student_student12[0]['currency_id'],
+                                            # "currency_id": student_student12[0]['currency_id'],
                                             "name_ar": student_student12[0]['name_ar'],
                                             "second_name_ar": student_student12[0]['second_name_ar'],
                                             "third_name_ar": student_student12[0]['third_name_ar'],
