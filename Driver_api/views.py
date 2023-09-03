@@ -1253,32 +1253,32 @@ def set_round_status(request):
                                                        
                                                         if round_info[0][3] == 'pick_up':
                                                             cursor.execute(
-                                                                "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id in %s AND round_schedule_id= %s",
-                                                                ["out", datetime.datetime.now(), tuple(stds),
+                                                                "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id = %s AND round_schedule_id= %s",
+                                                                ["out", datetime.datetime.now(),rec[0],
                                                                  rounds_details[0][0]])
                                                         else:
 
                                                             cursor.execute(
-                                                                "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id in %s AND round_schedule_id= %s",
-                                                                ["in", datetime.datetime.now(), tuple(stds),
+                                                                "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id = %s AND round_schedule_id= %s",
+                                                                ["in", datetime.datetime.now(), rec[0],
                                                                  rounds_details[0][0]])
                                                     else:
                                                         cursor.execute(
-                                                            "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id in %s AND round_schedule_id= %s",
-                                                            [student_history_yousef[0][0], datetime.datetime.now(), tuple(stds),
+                                                            "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id = %s AND round_schedule_id= %s",
+                                                            [student_history_yousef[0][0], datetime.datetime.now(), rec[0],
                                                              rounds_details[0][0]])
                                                 else:
 
                                                     if round_info[0][3] == 'pick_up':
 
                                                         cursor.execute(
-                                                            "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id in %s AND round_schedule_id= %s",
-                                                            ["out", datetime.datetime.now(), tuple(stds),
+                                                            "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id = %s AND round_schedule_id= %s",
+                                                            ["out", datetime.datetime.now(), rec[0],
                                                              rounds_details[0][0]])
                                                     else:
                                                         cursor.execute(
-                                                            "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id in %s AND round_schedule_id= %s",
-                                                            ["in", datetime.datetime.now(), tuple(stds),
+                                                            "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id = %s AND round_schedule_id= %s",
+                                                            ["in", datetime.datetime.now(), rec[0],
                                                              rounds_details[0][0]])
                                                 # print(student_history_yousef)
 
