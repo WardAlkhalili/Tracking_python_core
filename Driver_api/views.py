@@ -1244,10 +1244,47 @@ def set_round_status(request):
                                             stds = []
                                             for rec in rounds_count_student:
                                                 stds.append(rec[0])
+                                                cursor.execute(
+                                                    "select  activity_type from student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
+                                                    [round_id, rec[0], round_history[0][1]])
+                                                student_history_yousef = cursor.fetchall()
+                                                if student_history_yousef:
+                                                    if student_history_yousef[0][0]=='near':
+                                                       
+                                                        if round_info[0][3] == 'pick_up':
+                                                            cursor.execute(
+                                                                "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id in %s AND round_schedule_id= %s",
+                                                                ["out", datetime.datetime.now(), tuple(stds),
+                                                                 rounds_details[0][0]])
+                                                        else:
 
-                                            cursor.execute(
-                                                "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id in %s AND round_schedule_id= %s",
-                                                ["",datetime.datetime.now(), tuple(stds), rounds_details[0][0]])
+                                                            cursor.execute(
+                                                                "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id in %s AND round_schedule_id= %s",
+                                                                ["in", datetime.datetime.now(), tuple(stds),
+                                                                 rounds_details[0][0]])
+                                                    else:
+                                                        cursor.execute(
+                                                            "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id in %s AND round_schedule_id= %s",
+                                                            [student_history_yousef[0][0], datetime.datetime.now(), tuple(stds),
+                                                             rounds_details[0][0]])
+                                                else:
+
+                                                    if round_info[0][3] == 'pick_up':
+
+                                                        cursor.execute(
+                                                            "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id in %s AND round_schedule_id= %s",
+                                                            ["out", datetime.datetime.now(), tuple(stds),
+                                                             rounds_details[0][0]])
+                                                    else:
+                                                        cursor.execute(
+                                                            "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id in %s AND round_schedule_id= %s",
+                                                            ["in", datetime.datetime.now(), tuple(stds),
+                                                             rounds_details[0][0]])
+                                                # print(student_history_yousef)
+
+                                            # cursor.execute(
+                                            #     "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id in %s AND round_schedule_id= %s",
+                                            #     ["",datetime.datetime.now(), tuple(stds), rounds_details[0][0]])
 
                                             cursor.execute(
                                                 "INSERT INTO  round_history (round_name,round_id,distance,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
