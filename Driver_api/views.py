@@ -1569,10 +1569,10 @@ def students_bus_checks(request):
                                                     for e in mobile_token1:
 
                                                         # print("dddddd",student_name[0][0])
-                                                        if e[0] in mobile_token2:
-                                                            continue
-                                                        if chack_save==0:
-                                                            chack_save+=1
+                                                            if e[0] in mobile_token2:
+                                                                continue
+                                                        # if chack_save==0:
+                                                        #     chack_save+=1
                                                             if status == 'in':
                                                                 if check_in:
                                                                     mobile_token.append(e[0])
@@ -1590,11 +1590,13 @@ def students_bus_checks(request):
                                                                     "%Y-%m-%d %H:%M:%S")
                                                                 r = datetime.datetime.strptime(date_string,
                                                                                                '%Y-%m-%d %H:%M:%S')
-                                                                save_message_wizard(school_name, round_id, r,
-                                                                                    'App\Model\sta' + str(rec),
-                                                                                    title, title_ar,
-                                                                                    message,
-                                                                                    message_ar, driver_name[0][0],student_id=student_name[0][1])
+                                                                if chack_save == 0:
+                                                                    chack_save += 1
+                                                                    save_message_wizard(school_name, round_id, r,
+                                                                                        'App\Model\sta' + str(rec),
+                                                                                        title, title_ar,
+                                                                                        message,
+                                                                                        message_ar, driver_name[0][0],student_id=student_name[0][1])
                                                             elif status == 'out':
                                                                 if check_out:
                                                                     mobile_token.append(e[0])
@@ -1610,11 +1612,13 @@ def students_bus_checks(request):
                                                                     "%Y-%m-%d %H:%M:%S")
                                                                 r = datetime.datetime.strptime(date_string,
                                                                                                '%Y-%m-%d %H:%M:%S')
-                                                                save_message_wizard(school_name, round_id, r,
-                                                                                    'App\Model\sta' + str(rec),
-                                                                                    title, title_ar,
-                                                                                    message,
-                                                                                    message_ar, driver_name[0][0],student_id=student_name[0][1])
+                                                                if chack_save == 0:
+                                                                    chack_save += 1
+                                                                    save_message_wizard(school_name, round_id, r,
+                                                                                        'App\Model\sta' + str(rec),
+                                                                                        title, title_ar,
+                                                                                        message,
+                                                                                        message_ar, driver_name[0][0],student_id=student_name[0][1])
                                                             elif status == 'near':
                                                                 if nearby:
                                                                     mobile_token.append(e[0])
@@ -1651,11 +1655,13 @@ def students_bus_checks(request):
                                                                     "%Y-%m-%d %H:%M:%S")
                                                                 r = datetime.datetime.strptime(date_string,
                                                                                                '%Y-%m-%d %H:%M:%S')
-                                                                save_message_wizard(school_name, round_id, r,
-                                                                                    'App\Model\sta' + str(rec),
-                                                                                    'Absence notification', title_ar,
-                                                                                    message,
-                                                                                    message_ar, driver_name[0][0],student_id=student_name[0][1])
+                                                                if chack_save == 0:
+                                                                    chack_save += 1
+                                                                    save_message_wizard(school_name, round_id, r,
+                                                                                        'App\Model\sta' + str(rec),
+                                                                                        'Absence notification', title_ar,
+                                                                                        message,
+                                                                                        message_ar, driver_name[0][0],student_id=student_name[0][1])
                                                             elif status == 'no-show':
                                                                 mobile_token.append(e[0])
                                                                 title = ' No Show Notification'
@@ -1663,13 +1669,14 @@ def students_bus_checks(request):
                                                                 message_ar = "لم يظهر اليوم." + student_name[0][0]
                                                                 message = student_name[0][
                                                                               0] + ' did not check into the bus today'
-
-                                                                save_message_wizard(school_name, round_id, r,
-                                                                                    'App\Model\sta' + str(rec),
-                                                                                    title, title_ar,
-                                                                                    message,
-                                                                                    message_ar, driver_name[0][0],
-                                                                                    student_id=student_name[0][1])
+                                                                if chack_save == 0:
+                                                                    chack_save += 1
+                                                                    save_message_wizard(school_name, round_id, r,
+                                                                                        'App\Model\sta' + str(rec),
+                                                                                        title, title_ar,
+                                                                                        message,
+                                                                                        message_ar, driver_name[0][0],
+                                                                                        student_id=student_name[0][1])
 
 
                                                     else:
@@ -1683,12 +1690,13 @@ def students_bus_checks(request):
                                                                 message_ar = "لم يظهر اليوم." + student_name[0][0]
                                                                 message = student_name[0][
                                                                               0] + ' did not check into the bus today'
-
-                                                                save_message_wizard(school_name, round_id, r,
-                                                                                    'App\Model\sta' + str(rec),
-                                                                                    title, title_ar,
-                                                                                    message,
-                                                                                    message_ar, driver_name[0][0],student_id=student_name[0][1])
+                                                                if chack_save == 0:
+                                                                    chack_save += 1
+                                                                    save_message_wizard(school_name, round_id, r,
+                                                                                        'App\Model\sta' + str(rec),
+                                                                                        title, title_ar,
+                                                                                        message,
+                                                                                        message_ar, driver_name[0][0],student_id=student_name[0][1])
                                                             # yousef aa
                                                             elif status == 'absent':
 
@@ -1702,11 +1710,13 @@ def students_bus_checks(request):
                                                                     "%Y-%m-%d %H:%M:%S")
                                                                 r = datetime.datetime.strptime(date_string,
                                                                                                '%Y-%m-%d %H:%M:%S')
-                                                                save_message_wizard(school_name, round_id, r,
-                                                                                    'App\Model\sta' + str(rec),
-                                                                                    'Absence notification', title_ar,
-                                                                                    message,
-                                                                                    message_ar, driver_name[0][0],student_id=student_name[0][1])
+                                                                if chack_save == 0:
+                                                                    chack_save += 1
+                                                                    save_message_wizard(school_name, round_id, r,
+                                                                                        'App\Model\sta' + str(rec),
+                                                                                        'Absence notification', title_ar,
+                                                                                        message,
+                                                                                        message_ar, driver_name[0][0],student_id=student_name[0][1])
 
                                                     push_service = FCMNotification(
                                                         api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
@@ -1801,7 +1811,7 @@ def students_bus_checks(request):
                                                             message_ar = " علو وصول إلى المنزل " + student_name[0][0]
                                                             message = ' You are next on the route. ' + student_name[0][
                                                                 0] + ' is about to arrive.'
-                                                    if status == 'no-show':
+                                                    elif status == 'no-show':
                                                         mobile_token.append(e[0])
                                                         title = ' No Show Notification'
                                                         title_ar = ' إشعار الغياب'
@@ -1894,6 +1904,101 @@ def students_bus_checks(request):
                                                         message_title = title if "en" =="en" else title_ar
                                                         message_body = message if "en" =="en" else message_ar
                                                         send_notification(mobile_token1, message_title, message_body)
+                                            else:
+                                                if status == 'in':
+
+                                                    title = 'Bus notification'
+                                                    title_ar = "اشعار من الحافلة"
+                                                    if round_info[0][3] != 'pick_up':
+                                                        title = "School Departure"
+                                                        title_ar = "اشعار من الحافلة"
+
+                                                    message_ar = "صعد إلى الحافلة" + student_name[0][0] + str(bus_num[
+                                                                                                                  0][0])
+                                                    message = student_name[0][0] + ' has just been checked into the bus'
+                                                    date_string = datetime.datetime.now().strftime(
+                                                        "%Y-%m-%d %H:%M:%S")
+                                                    r = datetime.datetime.strptime(date_string,
+                                                                                   '%Y-%m-%d %H:%M:%S')
+
+                                                    # cursor.execute(
+                                                    #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+                                                    #     [round_id, r, 'App\Model\sta'+str(rec), title, message, message_ar,
+                                                    #      driver_name[0][0],title_ar])
+                                                    if chack_save == 0:
+                                                        chack_save += 1
+                                                        save_message_wizard(school_name, round_id, r,
+                                                                            'App\Model\sta' + str(rec),
+                                                                            title, title_ar,
+                                                                            message,
+                                                                            message_ar, driver_name[0][0],
+                                                                            student_id=student_name[0][1])
+                                                elif status == 'absent':
+
+
+                                                    title = 'Absence notification'
+                                                    title_ar = 'اشعار من الحافلة'
+                                                    message_ar = "غائب اليوم." + student_name[0][0]
+                                                    message = ' Your child ' + student_name[0][
+                                                        0] + ' has not checked into the bus and is absent today.'
+                                                    date_string = datetime.datetime.now().strftime(
+                                                        "%Y-%m-%d %H:%M:%S")
+                                                    r = datetime.datetime.strptime(date_string,
+                                                                                   '%Y-%m-%d %H:%M:%S')
+                                                    if chack_save == 0:
+                                                        chack_save += 1
+                                                        save_message_wizard(school_name, round_id, r,
+                                                                            'App\Model\sta' + str(rec),
+                                                                            'Absence notification', title_ar,
+                                                                            message,
+                                                                            message_ar, driver_name[0][0],
+                                                                            student_id=student_name[0][1])
+                                                elif status == 'out':
+
+                                                    title = 'Checkout Notification'
+                                                    title_ar = 'اشعار من الحافلة'
+                                                    message_ar = 'وصل إلى المنزل.' + student_name[0][0]
+                                                    message = 'The bus ' + str(
+                                                        bus_num[0]) + 'has arrived at your home and ' + \
+                                                              student_name[0][0] + ' has been checked out of the bus. '
+
+                                                    date_string = datetime.datetime.now().strftime(
+                                                        "%Y-%m-%d %H:%M:%S")
+                                                    r = datetime.datetime.strptime(date_string,
+                                                                                   '%Y-%m-%d %H:%M:%S')
+                                                    if round_info[0][3] == 'pick_up':
+
+                                                        # cursor.execute(
+                                                        #     "INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES (%s,%s,%s,%s,%s,%s,%s,%s);",
+                                                        #     [round_id, r, 'App\Model\sta'+str(rec), title,message, message_ar,driver_name[0][0],title_ar])
+                                                        if chack_save == 0:
+                                                            chack_save += 1
+                                                            save_message_wizard(school_name, round_id, r,
+                                                                                'App\Model\sta' + str(rec),
+                                                                                title, title_ar,
+                                                                                message,
+                                                                                message_ar, driver_name[0][0],
+                                                                                student_id=student_name[0][1])
+                                                elif status == 'no-show':
+
+                                                    title = ' No Show Notification'
+                                                    title_ar = ' إشعار الغياب'
+                                                    message_ar = "لم يظهر اليوم." + student_name[0][0]
+                                                    message = student_name[0][
+                                                                  0] + ' did not check into the bus today'
+                                                    date_string = datetime.datetime.now().strftime(
+                                                        "%Y-%m-%d %H:%M:%S")
+                                                    r = datetime.datetime.strptime(date_string,
+                                                                                   '%Y-%m-%d %H:%M:%S')
+                                                    if chack_save == 0:
+                                                        chack_save += 1
+                                                        save_message_wizard(school_name, round_id, r,
+                                                                            'App\Model\sta' + str(rec),
+                                                                            title, title_ar,
+                                                                            message,
+                                                                            message_ar, driver_name[0][0],
+                                                                            student_id=student_name[0][1])
+                                                    # yousef    qqqq
 
 
 
