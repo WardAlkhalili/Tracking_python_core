@@ -1604,8 +1604,14 @@ def kids_hstory_new(request):
                             elif not start_date and not end_date:
                                 cursor.execute("select  id  from school_message ")
                                 school_message = cursor.fetchall()
+                            cursor.execute(
+                                "SELECT column_name FROM information_schema.columns WHERE table_name='survey_user_input' and column_name='read_message'",
+                                [])
+                            information_schema_survey = cursor.fetchall()
+                            if information_schema_survey:
+                                notifications += get_survey(parent_id, school_name)
 
-                            notifications +=get_survey(parent_id,school_name)
+                            # notifications +=get_survey(parent_id,school_name)
                             cursor.execute(
                                 "select  id,display_name_search,image_url,name,name_ar,year_id,user_id from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
