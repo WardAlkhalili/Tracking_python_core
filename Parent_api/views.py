@@ -4508,6 +4508,8 @@ def logout(request):
                             parent_id = e[0]
                 ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
                     mobile_token='')
+                # ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                #     token='')
                 with connections[school_name].cursor() as cursor:
                     cursor.execute(
                         "UPDATE public.school_parent SET mobile_token=%s WHERE id=%s;",
@@ -4672,3 +4674,167 @@ def get_time_table(request, student_id):
                         result = {'result': data}
                         # print(result)
                         return Response(result)
+
+@api_view(['GET','POST'])
+def get_Allergies(request):
+    if request.method == 'GET':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                            parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+                date=[]
+                with connections['tst'].cursor() as cursor:
+
+                    cursor.execute("select id,name from product_attribute_value WHERE attribute_id = (select id from product_attribute WHERE name = 'allergies' or name = 'Allergies')",
+                                   [])
+                    product_attribute_value = cursor.fetchall()
+
+                    for allergies in product_attribute_value:
+                        date.append({"id":allergies[0],
+                                     "name": allergies[1]
+
+                        })
+
+
+                result = {'result': date}
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
+
+@api_view(['POST'])
+def post_spending(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                            parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+                student_id = request.data.get('student_id')
+                canteen_spending = request.data.get('canteen_spending')
+                result = {'result': 'erorr'}
+                with connections['tst'].cursor() as cursor:
+                   try:
+                        cursor.execute(
+                            "UPDATE public.student_student SET canteen_spending=%s WHERE id=%s;",
+                            [canteen_spending,student_id])
+                        result = {'result': 'ok'}
+                   except:
+                       result = {'result': ' does not exist canteen_spending'}
+
+
+
+
+
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
+
+
+@api_view(['POST'])
+def get_info_canteen_student(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                            parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+                date_allergies=[]
+                date_schdule = []
+                date_spending=[]
+                with connections['tst'].cursor() as cursor:
+                    # canteen_spending
+                    student_id = request.data.get('student_id')
+                    cursor.execute(
+                        "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
+                        [student_id])
+                    student_info = cursor.fetchall()
+
+                    cursor.execute(
+                        "select branch_id,company_id from res_users WHERE id=%s",
+                        [student_info[0][1]])
+                    student_info_users = cursor.fetchall()
+
+                    cursor.execute("select attribute_value_id from allergies_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
+                                   [student_id,student_info[0][0],student_info_users[0][0],student_info_users[0][0]])
+                    allergies_food = cursor.fetchall()
+
+                    cursor.execute(
+                        "select id from banned_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
+                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
+                    banned_food = cursor.fetchall()
+                    # # SELECT * FROM public.res_company_school_day_rel
+                    # cursor.execute(
+                    #     "SELECT school_day_id FROM public.res_company_school_day_rel where res_company_id=%s",
+                    #     [])
+                    cursor.execute(
+                        "SELECT id, name FROM school_day WHERE id in (SELECT school_day_id FROM public.res_company_school_day_rel where res_company_id=%s)",
+                        [student_info_users[0][0]])
+                    school_day = cursor.fetchall()
+                    student_spending=1
+                    date_spending.append({
+                        "canteen_spending":str(student_info[0][2]),
+                        "student_spending": str(student_spending),
+                        "per_spending": float(student_spending/student_info[0][2]) if student_info[0][2] and student_info[0][2] !=0 else 0.0,
+
+                    })
+                    for day in school_day:
+                        cursor.execute(
+                            "SELECT id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
+                            [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0],day[0]])
+                        student_food_day = cursor.fetchall()
+                        date_schdule.append({'name':day[1],"len_item":str(len(student_food_day))})
+                    # allergies.food.day
+                    for allergies in allergies_food:
+                        cursor.execute(
+                            "select name from product_attribute_value WHERE id = %s ",
+                            [allergies[0]])
+                        allergies_food = cursor.fetchall()
+
+                        date_allergies.append({"name":allergies_food[0][0],
+
+
+                        })
+
+
+                result = {'food_allegies': date_allergies,"banned_food":str(len(banned_food)),"schdule_meals":date_schdule,"spending":date_spending}
+                print(result)
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
