@@ -683,9 +683,13 @@ def kids_list(request):
 
                                     }
                                     url_m = {}
-                                    model_list = ( "Badges", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
-                                        "Weekly Plans", 'Online Exams','Library')
-                                    cursor.execute("select name from ir_ui_menu where name in %s", [model_list])
+                                    model_list = ( "Achievements", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
+                                        "Plans", 'Online Exams','Library')
+                                    model_list_icon=("school_registration,static/src/img/icons/Achievements.svg",
+                                                     "school_clinic,static/src/img/icons/Clinic.svg","school_library,static/src/img/icons/Library.svg",
+                                                     "school_base,static/src/img/icons/calendar@2x.svg","school_registration,static/src/img/icons/Plans.svg","website_slides_assignment,static/src/img/icons/Exams.svg"
+                                                     ,"school_event,static/src/img/icons/Events.svg","school_worksheet,static/src/img/icons/Homework.svg","school_assignment,static/src/img/icons/Online-Assignments.svg")
+                                    cursor.execute("select name from ir_ui_menu where name in %s and active=true and web_icon in %s  ", [model_list,model_list_icon])
                                     list = cursor.fetchall()
                                     res = []
                                     [res.append(x[0]) for x in list if x[0] not in res]
@@ -693,7 +697,7 @@ def kids_list(request):
                                     show_absence = False
                                     for rec1 in res:
 
-                                        if 'Weekly Plans' == rec1:
+                                        if 'Plans' == rec1:
                                             x['Weeklyplans']['arabic_url'] = x['Weeklyplans']['arabic_url'] + str(
                                                 student1[rec]['user_id'])
                                             x['Weeklyplans']['url'] = x['Weeklyplans']['url'] + str(
@@ -724,7 +728,7 @@ def kids_list(request):
                                             x['Homeworks']['url'] = x['Homeworks']['url'] + str(student1[rec]['user_id'])
                                             model.append(x['Homeworks'])
 
-                                        if 'Badges' == rec1:
+                                        if 'Achievements' == rec1:
                                             x['Badges']['arabic_url'] = x['Badges']['arabic_url'] + str(
                                                 student1[rec]['user_id'])
                                             x['Badges']['url'] = x['Badges']['url'] + str(student1[rec]['user_id'])
@@ -747,7 +751,7 @@ def kids_list(request):
                                             x['Library']['url'] = x['Library']['url'] + str(student1[rec]['user_id'])
                                             model.append(x['Library'])
                                     cursor.execute(
-                                        "select name from ir_ui_menu where name ='Live Tracking'  LIMIT 1")
+                                        "select name from ir_ui_menu where name ='Live Tracking'  and active=true  LIMIT 1")
                                     tracking = cursor.fetchall()
                                     if len(tracking) > 0:
 
