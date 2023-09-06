@@ -751,7 +751,7 @@ def kids_list(request):
                                             x['Library']['url'] = x['Library']['url'] + str(student1[rec]['user_id'])
                                             model.append(x['Library'])
                                     cursor.execute(
-                                        "select name from ir_ui_menu where name ='Live Tracking'  and active=true  LIMIT 1")
+                                        "select name from ir_ui_menu where name ='Attendance'  and active=true and web_icon ='school_attendance,static/src/img/icons/Attendance.svg' LIMIT 1")
                                     tracking = cursor.fetchall()
                                     if len(tracking) > 0:
 
