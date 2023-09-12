@@ -43,6 +43,17 @@ urlpatterns = [
     path('api/canteen', views.get_info_canteen_student),
     path('api/get_marks/<int:student_id>', views.get_marks),
     path('api/get_time_table/<int:student_id>', views.get_time_table),
+    path('api/get_category', views.get_category),
+    path('api/post_banned', views.post_banned),
+    path('api/get_Item', views.get_category_Item),
+    path('api/post_banned_item', views.post_banned_item),
+    path('api/post_sec_item', views.post_sec_item),
+    path('api/get_banned_student', views.get_banned_food_s),
+    path('api/delete_banned', views.delete_banned),
+    path('api/get_food_s', views.get_food_s),
+    path('api/delete_food', views.delete_food),
+#   get_banned_food_s  get_category_Item post_banned_item post_sec_item delete_banned get_food_s delete_food
+# post_banned
 
 
 ]
