@@ -4694,20 +4694,84 @@ def get_Allergies(request):
                 ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
                     mobile_token='')
                 date=[]
-                with connections['tst'].cursor() as cursor:
+                with connections[school_name].cursor() as cursor:
 
                     cursor.execute("select id,name from product_attribute_value WHERE attribute_id = (select id from product_attribute WHERE name = 'allergies' or name = 'Allergies')",
                                    [])
                     product_attribute_value = cursor.fetchall()
 
-                    for allergies in product_attribute_value:
-                        date.append({"id":allergies[0],
-                                     "name": allergies[1]
 
-                        })
+                    for allergies in product_attribute_value:
+                        if allergies[1]:
+                            date.append({"id":allergies[0],
+                                         "name": allergies[1],
+                                         "icon":"https://trackware-schools.s3.eu-central-1.amazonaws.com/allergic.svg",
+                                        "des":""
+
+                            })
 
 
                 result = {'result': date}
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                        parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+
+                with connections[school_name].cursor() as cursor:
+                    student_id = request.data.get('student_id')
+                    list_al = request.data.get('list_al')
+                    # allergies.food
+                    cursor.execute(
+                        "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
+                        [student_id])
+                    student_info = cursor.fetchall()
+
+                    cursor.execute(
+                        "select branch_id,company_id from res_users WHERE id=%s",
+                        [student_info[0][1]])
+                    student_info_users = cursor.fetchall()
+
+                    cursor.execute(
+                        "select attribute_value_id from allergies_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
+                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
+                    allergies_food = cursor.fetchall()
+
+                    allergies_food = list(set(allergies_food))
+                    cursor.execute(
+                        "delete from allergies_food where student_id=%s",
+                        [student_id])
+
+                    for allergies in allergies_food:
+
+                        if allergies not  in list_al:
+                            cursor.execute(
+                                "INSERT INTO allergies_food(year_id, student_id, branch_id,company_id,attribute_value_id)VALUES (%s,%s,%s,%s,%s);",
+                                [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                                 allergies])
+                    for allergies in list_al:
+
+                        cursor.execute(
+                            "INSERT INTO allergies_food(year_id, student_id, branch_id,company_id,attribute_value_id)VALUES (%s,%s,%s,%s,%s);",
+                            [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],allergies])
+
+                result = {'result': 'ok'}
                 return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
@@ -4735,18 +4799,19 @@ def post_spending(request):
                 student_id = request.data.get('student_id')
                 canteen_spending = request.data.get('canteen_spending')
                 result = {'result': 'erorr'}
-                with connections['tst'].cursor() as cursor:
+                with connections[school_name].cursor() as cursor:
                    try:
                         cursor.execute(
                             "UPDATE public.student_student SET canteen_spending=%s WHERE id=%s;",
                             [canteen_spending,student_id])
+                        print(student_id)
                         result = {'result': 'ok'}
                    except:
                        result = {'result': ' does not exist canteen_spending'}
 
 
 
-
+                print(result)
 
                 return Response(result)
             result = {'result': 'Not Authorization'}
@@ -4776,9 +4841,9 @@ def get_info_canteen_student(request):
                 date_allergies=[]
                 date_schdule = []
                 date_spending=[]
-                with connections['tst'].cursor() as cursor:
-                    # canteen_spending
+                with connections[school_name].cursor() as cursor:
                     student_id = request.data.get('student_id')
+
                     cursor.execute(
                         "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
                         [student_id])
@@ -4793,46 +4858,619 @@ def get_info_canteen_student(request):
                                    [student_id,student_info[0][0],student_info_users[0][0],student_info_users[0][0]])
                     allergies_food = cursor.fetchall()
 
+                    allergies_food = list(set(allergies_food))
+
                     cursor.execute(
                         "select id from banned_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
                         [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
                     banned_food = cursor.fetchall()
-                    # # SELECT * FROM public.res_company_school_day_rel
-                    # cursor.execute(
-                    #     "SELECT school_day_id FROM public.res_company_school_day_rel where res_company_id=%s",
-                    #     [])
                     cursor.execute(
                         "SELECT id, name FROM school_day WHERE id in (SELECT school_day_id FROM public.res_company_school_day_rel where res_company_id=%s)",
                         [student_info_users[0][0]])
                     school_day = cursor.fetchall()
                     student_spending=1
                     date_spending.append({
-                        "canteen_spending":str(student_info[0][2]),
+                        "canteen_spending":str(student_info[0][2]) if student_info[0][2] else "0",
                         "student_spending": str(student_spending),
                         "per_spending": float(student_spending/student_info[0][2]) if student_info[0][2] and student_info[0][2] !=0 else 0.0,
-
                     })
                     for day in school_day:
                         cursor.execute(
                             "SELECT id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
                             [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0],day[0]])
                         student_food_day = cursor.fetchall()
-                        date_schdule.append({'name':day[1],"len_item":str(len(student_food_day))})
+                        date_schdule.append({'name':day[1],"len_item":str(len(student_food_day)),"day_id":day[0]})
                     # allergies.food.day
                     for allergies in allergies_food:
                         cursor.execute(
                             "select name from product_attribute_value WHERE id = %s ",
                             [allergies[0]])
-                        allergies_food = cursor.fetchall()
+                        allergies_food1 = cursor.fetchall()
+                        date_allergies.append({"name":allergies_food1[0][0],
+                        })
 
-                        date_allergies.append({"name":allergies_food[0][0],
+                result = {'food_allegies': date_allergies,"banned_food":str(len(banned_food)),"schdule_meals":date_schdule,"spending":date_spending}
+
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
+
+
+@api_view(['GET'])
+def get_category(request):
+    if request.method == 'GET':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                            parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+                date=[]
+                with connections[school_name].cursor() as cursor:
+                    # canteen_spending
+                    # student_id = request.data.get('student_id')
+                    # cursor.execute(
+                    #     "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
+                    #     [student_id])
+                    # student_info = cursor.fetchall()
+                    #
+                    # cursor.execute(
+                    #     "select branch_id,company_id from res_users WHERE id=%s",
+                    #     [student_info[0][1]])
+                    # student_info_users = cursor.fetchall()
+
+                    cursor.execute("select id,name,parent_id from pos_category",
+                                   [])
+                    pos_category = cursor.fetchall()
+
+
+                    for category in pos_category:
+                        cursor.execute("select id,name from pos_category WHERE parent_id=%s",
+                                       [category[0]])
+                        pos_category_sub = cursor.fetchall()
+                        subMenu = []
+                        for category_sub in pos_category_sub:
+                            subMenu.append({"name":category_sub[1], "icon":"https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg",
+                                            "id":category_sub[0],"stutes":False
+
+                        })
+                        if not category[2]:
+                            date.append({"name":category[1], "id":category[0],"stutes":False, "icon":"https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg",
+                                         "subMenu":subMenu
+                            })
+
+
+                result = {'result': date}
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
+
+
+
+@api_view(['POST'])
+def post_banned(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                            parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+                student_id = request.data.get('student_id')
+                canteen_banned = request.data.get('canteen_banned')
+                result = {'result': 'erorr'}
+                with connections[school_name].cursor() as cursor:
+                    cursor.execute(
+                        "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
+                        [student_id])
+                    student_info = cursor.fetchall()
+
+                    cursor.execute(
+                        "select branch_id,company_id from res_users WHERE id=%s",
+                        [student_info[0][1]])
+                    student_info_users = cursor.fetchall()
+
+                    cursor.execute(
+                        "select id from banned_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
+                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
+                    allergies_food = cursor.fetchall()
+
+                    allergies_food = list(set(allergies_food))
+                    if allergies_food:
+                        cursor.execute(
+                            "select id,product_id,pos_category from banned_food WHERE id in %s",
+                            [tuple(allergies_food)])
+                        allergies_food1 = cursor.fetchall()
+                        cursor.execute(
+                            "delete from banned_food where student_id=%s",
+                            [student_id])
+                        for allergies in range(len(allergies_food)):
+                            if allergies_food[allergies] not in canteen_banned:
+
+                                if allergies_food1[allergies][2]:
+
+                                    cursor.execute(
+                                        "INSERT INTO banned_food(year_id, student_id, branch_id,company_id,pos_category)VALUES (%s,%s,%s,%s,%s);",
+                                        [student_info[0][0], student_id, student_info_users[0][0],
+                                         student_info_users[0][0],
+                                         allergies_food1[allergies][2]])
+                                else:
+                                    cursor.execute(
+                                        "INSERT INTO banned_food(year_id, student_id, branch_id,company_id,product_id)VALUES (%s,%s,%s,%s,%s);",
+                                        [student_info[0][0], student_id, student_info_users[0][0],
+                                         student_info_users[0][0],
+                                         allergies_food1[allergies][1]])
+
+
+                    for allergies in canteen_banned:
+
+                        cursor.execute(
+                            "INSERT INTO banned_food(year_id, student_id, branch_id,company_id,pos_category)VALUES (%s,%s,%s,%s,%s);",
+                            [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                             allergies])
+            result = {'result': 'ok'}
+            return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
+
+
+@api_view(['GET'])
+def get_category_Item(request):
+    if request.method == 'GET':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                            parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+                date=[]
+                category=[]
+                with connections[school_name].cursor() as cursor:
+                    # canteen_spending
+                    # student_id = request.data.get('student_id')
+                    # cursor.execute(
+                    #     "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
+                    #     [student_id])
+                    # student_info = cursor.fetchall()
+                    #
+                    # cursor.execute(
+                    #     "select branch_id,company_id from res_users WHERE id=%s",
+                    #     [student_info[0][1]])
+                    # student_info_users = cursor.fetchall()
+                    # res.config.settings
+                    # cursor.execute("select currency_id from  res_config_settings ",
+                    #                [])
+                    # currency_id = cursor.fetchall()
+                    # cursor.execute("select name from res_currency WHERE id=%s",
+                    #                [currency_id[0][0]])
+                    # currency = cursor.fetchall()
+                    category.append({"name": 'all',
+                                     "id": 0,
+                                     "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/allergic.svg",
+                                     "sta": True
+
+                                     })
+
+                    cursor.execute("select id,name,parent_id from pos_category",
+                                   [])
+                    pos_category1 = cursor.fetchall()
+
+                    cursor.execute("select id,name,pos_categ_id,list_price,image_url from product_template WHERE is_canteen=%s",
+                                   [True])
+                    product_template = cursor.fetchall()
+                    for category1 in product_template:
+                        type='all'
+                        if category1[2]:
+                            cursor.execute("select id,name from pos_category WHERE id=%s",
+                                           [category1[2]])
+                            pos_category = cursor.fetchall()
+                            type=pos_category[0][1]
+                        date.append({
+                            "name":str(category1[1]),
+                            "id": category1[0],
+                            "type": str(type),
+                            "price": str(category1[3])+" "+str('JOD'),
+                            "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" +category1[4] if category1[4] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png',
 
 
                         })
 
+                    for category1 in pos_category1:
+                    #
+                            category.append({"name": category1[1],
+"id": category1[0], "icon":"https://trackware-schools.s3.eu-central-1.amazonaws.com/allergic.svg","sta":False
 
-                result = {'food_allegies': date_allergies,"banned_food":str(len(banned_food)),"schdule_meals":date_schdule,"spending":date_spending}
-                print(result)
+                                         })
+
+                result = {'category': category,"product":date}
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
+
+
+
+@api_view(['POST'])
+def post_banned_item(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                            parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+                student_id = request.data.get('student_id')
+                canteen_banned = request.data.get('canteen_banned')
+                result = {'result': 'erorr'}
+                with connections[school_name].cursor() as cursor:
+                    cursor.execute(
+                        "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
+                        [student_id])
+                    student_info = cursor.fetchall()
+
+                    cursor.execute(
+                        "select branch_id,company_id from res_users WHERE id=%s",
+                        [student_info[0][1]])
+                    student_info_users = cursor.fetchall()
+
+                    cursor.execute(
+                        "select id from banned_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
+                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
+                    allergies_food = cursor.fetchall()
+
+                    allergies_food = list(set(allergies_food))
+                    canteen_banned=list(set(canteen_banned))
+                    if allergies_food:
+                        cursor.execute(
+                            "select id,product_id,pos_category from banned_food WHERE id in %s",
+                            [tuple(allergies_food)])
+                        allergies_food1 = cursor.fetchall()
+                        cursor.execute(
+                            "delete from banned_food where student_id=%s",
+                            [student_id])
+
+                        for allergies in range(len(allergies_food)):
+                            if allergies_food[ allergies] not in canteen_banned:
+
+                                if allergies_food1[allergies][2]:
+
+                                    cursor.execute(
+                                        "INSERT INTO banned_food(year_id, student_id, branch_id,company_id,pos_category)VALUES (%s,%s,%s,%s,%s);",
+                                        [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                                         allergies_food1[allergies][2]])
+                                else:
+                                    cursor.execute(
+                                        "INSERT INTO banned_food(year_id, student_id, branch_id,company_id,product_id)VALUES (%s,%s,%s,%s,%s);",
+                                        [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                                         allergies_food1[allergies][1]])
+                    for allergies in canteen_banned:
+
+                        cursor.execute(
+                            "INSERT INTO banned_food(year_id, student_id, branch_id,company_id,product_id)VALUES (%s,%s,%s,%s,%s);",
+                            [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                             allergies])
+            result = {'result': 'ok'}
+            return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
+
+
+
+@api_view(['POST'])
+def post_sec_item(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                            parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+                student_id = request.data.get('student_id')
+                canteen_banned = request.data.get('canteen_banned')
+                day_id= request.data.get('day_id')
+                with connections[school_name].cursor() as cursor:
+                    cursor.execute(
+                        "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
+                        [student_id])
+                    student_info = cursor.fetchall()
+
+                    cursor.execute(
+                        "select branch_id,company_id from res_users WHERE id=%s",
+                        [student_info[0][1]])
+                    student_info_users = cursor.fetchall()
+                    cursor.execute(
+                        "SELECT id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
+                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0],day_id])
+                    student_food_day = cursor.fetchall()
+                    student_food_day = list(set(student_food_day))
+                    canteen_banned=list(set(canteen_banned))
+                    cursor.execute(
+                        "delete from banned_food where student_id=%s",
+                        [student_id])
+
+                    for allergies in student_food_day:
+                        if allergies[0] not in canteen_banned:
+                            cursor.execute(
+                                "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_id,day_id)VALUES (%s,%s,%s,%s,%s,%s);",
+                                [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                                 allergies,day_id])
+                    for allergies in canteen_banned:
+                        cursor.execute(
+                            "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_id,day_id)VALUES (%s,%s,%s,%s,%s,%s);",
+                            [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                             allergies,day_id])
+            result = {'result': 'ok'}
+            return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
+
+@api_view(['POST'])
+def get_banned_food_s(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                            parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+                student_id = request.data.get('student_id')
+                data_cat=[]
+                date_ite=[]
+                with connections[school_name].cursor() as cursor:
+                    cursor.execute(
+                        "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
+                        [student_id])
+                    student_info = cursor.fetchall()
+
+                    cursor.execute(
+                        "select branch_id,company_id from res_users WHERE id=%s",
+                        [student_info[0][1]])
+                    student_info_users = cursor.fetchall()
+
+                    cursor.execute(
+                        "select id,pos_category,product_id from banned_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s ",
+                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
+                    banned_food = cursor.fetchall()
+                    for allergies in banned_food:
+
+                        if allergies[1] :
+                            category_sup=''
+                            cursor.execute("select id,name from pos_category WHERE id=%s",
+                                           [allergies[1]])
+                            pos_category = cursor.fetchall()
+                            if pos_category[0]:
+                                cursor.execute("select id,name from pos_category WHERE parent_id=%s ",
+                                               [pos_category[0][0]])
+                                pos_category_sup = cursor.fetchall()
+                                if pos_category_sup:
+                                    for category in pos_category_sup:
+                                        category_sup +=category[1]+''
+
+                            data_cat.append({
+                                "name":pos_category[0][1],
+                                "id":allergies[0],
+                                "category_sup":category_sup
+
+                            })
+                        else:
+                            cursor.execute(
+                                "select id,name,pos_categ_id,list_price,is_canteen,image_url from product_template WHERE id=%s ",
+                                [allergies[2]])
+                            product_template = cursor.fetchall()
+                            type=''
+                            if product_template[0][2]:
+                                cursor.execute("select id,name from pos_category WHERE id=%s",
+                                               [product_template[0][2]])
+                                pos_category = cursor.fetchall()
+                                type = pos_category[0][1] if pos_category[0][1] else ''
+                            date_ite.append({
+                                "name": str(product_template[0][1]),
+                                "id": allergies[0],
+                                "price": str(product_template[0][3]) + " " + str('JOD'),
+                                "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" +product_template[0][5] if product_template[0][5] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png',
+
+                                "type":type
+
+                            })
+
+                result = {'date_ite': date_ite,"data_cat":data_cat}
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
+
+
+@api_view(['POST'])
+def delete_banned(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                        parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+
+                banned_id = request.data.get('banned_id')
+
+
+                with connections[school_name].cursor() as cursor:
+                    cursor.execute(
+                        "delete from banned_food where id=%s",
+                        [banned_id])
+                result = {'result': 'ok'}
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
+
+
+@api_view(['POST'])
+def delete_food(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                        parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+
+                id = request.data.get('id')
+
+
+                with connections[school_name].cursor() as cursor:
+                    cursor.execute(
+                        "delete from allergies_food_day where id=%s",
+                        [id])
+                result = {'result': 'ok'}
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
+
+@api_view(['POST'])
+def get_food_s(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                            parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+                student_id = request.data.get('student_id')
+                day_id = request.data.get('day_id')
+
+                date_ite=[]
+                with connections[school_name].cursor() as cursor:
+                    cursor.execute(
+                        "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
+                        [student_id])
+                    student_info = cursor.fetchall()
+
+                    cursor.execute(
+                        "select branch_id,company_id from res_users WHERE id=%s",
+                        [student_info[0][1]])
+                    student_info_users = cursor.fetchall()
+                    cursor.execute(
+                        "SELECT id,product_id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
+                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0], day_id])
+                    student_food_day = cursor.fetchall()
+                    for allergies in student_food_day:
+
+                            cursor.execute(
+                                "select id,name,pos_categ_id,list_price,is_canteen,image_url from product_template WHERE id=%s ",
+                                [allergies[1]])
+                            product_template = cursor.fetchall()
+                            type=''
+                            if product_template[0][2]:
+                                cursor.execute("select id,name from pos_category WHERE id=%s",
+                                               [product_template[0][2]])
+                                pos_category = cursor.fetchall()
+                                type = pos_category[0][1] if pos_category[0][1] else ''
+                            date_ite.append({
+                                "name": str(product_template[0][1]),
+                                "id": allergies[0],
+                                "price": str(product_template[0][3]) + " " + str('JOD'),
+                                "image":"https://trackware-schools.s3.eu-central-1.amazonaws.com/" +product_template[0][5] if product_template[0][5] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png',
+                                "type":type
+
+                            })
+
+                result = {'date_item': date_ite}
                 return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
