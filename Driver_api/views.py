@@ -1384,9 +1384,10 @@ def set_round_status(request):
                                                                     message_body=message_body if lang=='en' else message_body_ar,sound='new_beeb.mp3')
                                                     else:
                                                         if student_history[0][2]:
-                                                            cursor.execute(
-                                                                "UPDATE public.round_student_history SET bus_check_in = %s WHERE id =%s ",
-                                                                [datetime.datetime.now(),student_history[0][1]])
+                                                            pass
+                                                            # cursor.execute(
+                                                            #     "UPDATE public.round_student_history SET bus_check_in = %s WHERE id =%s ",
+                                                            #     [datetime.datetime.now(),student_history[0][1]])
 
                                     cursor.execute(
                                         "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
@@ -1522,7 +1523,6 @@ def students_bus_checks(request):
 
                                                 if status == 'out' or status == 'in':
 
-                                                    # print(status,"ooooooooooododododo")
                                                     cursor.execute(
                                                         "INSERT INTO  round_student_history (round_id,student_id,driver_waiting,bus_check_in,datetime,history_id) VALUES (%s,%s,%s,%s,%s,%s); ",
                                                         [round_id, student_id, waiting_minutes, datetime.datetime.now(),
