@@ -10,8 +10,6 @@ urlpatterns = [
     path('parents/is-student-served/', views.student_served),
     path('parents/student-pick-up-status/', views.student_pick_up),
     path('parents/kids_list', views.kids_list),
-    path('parents/kids-history', views.kids_hstory),
-    # hide_message
     path('parents/hide-message', views.hide_message),
     path('parents/read-message', views.read_message),
     path('parents/hide-survey', views.hide_survey),
@@ -52,10 +50,7 @@ urlpatterns = [
     path('api/delete_banned', views.delete_banned),
     path('api/get_food_s', views.get_food_s),
     path('api/delete_food', views.delete_food),
-#   get_banned_food_s  get_category_Item post_banned_item post_sec_item delete_banned get_food_s delete_food
-# post_banned
+
 
 
 ]
-# get_info_canteen_student
-# https://iks.staging.trackware.com/web/session/authenticate

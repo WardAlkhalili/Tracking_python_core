@@ -72,7 +72,6 @@ def parent_login(request):
             cursor.execute(
                 "UPDATE public.school_parent SET mobile_token=%s WHERE id=%s;",
                 [mobile_token, parent_id[0][0]])
-            # print("sdasadsa",  parent_id[0][0],"           ",mobile_token)
             manager_parent = ManagerParent(token=unique_id, db_name=school_name, user_id=uid,
                                            parent_id=parent_id[0][0],
                                            school_id=company_id, mobile_token=mobile_token)
@@ -128,12 +127,10 @@ def feed_back(request):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-                        school_name = ManagerParent.pincode(school_name)
                         student_id = request.data.get('student_id')
                         feed_back = request.data.get('feed_back')
                         impression = request.data.get('impression')
 
-                        # school_name = ManagerParent.pincode('iks')
                         impression1 = 3
                         if impression == "Good":
 
@@ -181,24 +178,15 @@ def settings(request):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-                        school_name = ManagerParent.pincode(school_name)
                         notifications = request.data
-
-                        # school_name = ManagerParent.pincode('iks')
                         with connections[school_name].cursor() as cursor:
-
                             y = json.dumps(notifications['notifications'])
-
                             settings = "{\"notifications\":" + y + "}"
-
                             cursor.execute(
                                 "UPDATE public.school_parent SET settings=%s WHERE id=%s;",
                                 [settings, parent_id])
-
-
                             result = {
                                 'status': 'ok', }
-
                             return Response(result)
                     else:
                         result = {'result': 'error1'}
@@ -224,8 +212,6 @@ def settings(request):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-                        school_name = ManagerParent.pincode(school_name)
-                        # school_name = ManagerParent.pincode('iks')
                         with connections[school_name].cursor() as cursor:
                             cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                             data_id_bus = cursor.fetchall()
@@ -288,11 +274,9 @@ def student_served(request):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-                        school_name = ManagerParent.pincode(school_name)
                         round_id = request.data.get('round_id')
                         student_id = request.data.get('student_id')
                         datetime_c = datetime.datetime.now()
-                        # school_name = ManagerParent.pincode('iks')
                         with connections[school_name].cursor() as cursor:
                             cursor.execute(
                                 "select  activity_type from student_history WHERE round_id = %s AND student_id = %s AND datetime = %s ",
@@ -335,8 +319,6 @@ def student_pick_up(request):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-
-                        school_name = ManagerParent.pincode(school_name)
 
                         status = request.data.get('status')
                         student_id = request.data.get('student_id')
@@ -423,7 +405,6 @@ def student_pick_up(request):
                         for e in db_name:
                             school_name = e[0]
 
-                        school_name = ManagerParent.pincode(school_name)
                         d = datetime.datetime.now().strftime('%Y-%m-%d 00:00:00')
                         result = {}
                         with connections[school_name].cursor() as cursor:
@@ -450,11 +431,217 @@ def student_pick_up(request):
             result = {'status': 'error'}
             return Response(result)
 
+def model_odoo(school_name):
+    if school_name=='tst':
+        return  {
+            "Exams": {
+
+                "url": "https://tst.tracking.trackware.com/my/Exams/",
+                "arabic_url": "tst.tracking.trackware.com/ar_SY/my/Exams/",
+                "name": "Exams",
+                "name_ar": "امتحانات",
+                "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png",
+                "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg"
+            },
+            "Badges": {
+                "url": "https://tst.tracking.trackware.com/my/Badges/",
+                "arabic_url": "tst.tracking.trackware.com/ar_SY/my/Badges/",
+                "name": "Badges",
+                "name_ar": "الشارات",
+                "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Badge.png",
+                "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Badge.svg"
+            },
+            "Weeklyplans":
+                {
+
+                    "url": "https://tst.tracking.trackware.com/my/Weekly-plans/",
+                    "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Weekly-plans/",
+                    "name": "Weekly plans",
+                    "name_ar": "الخطط الأسبوعية",
+                    "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Weekly+Plans.png",
+                    "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg"
+                },
+            "Assignments": {
+                "url": "https://tst.tracking.trackware.com/my/Assignments/",
+                "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Assignments/",
+
+                "name": "Assignments",
+                "name_ar": "الواجبات الالكترونية",
+                "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png",
+                "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg"
+            },
+
+            "Events":
+                {"name": "Events",
+                 "name_ar": "الفعاليات و الانشطة",
+
+                 "url": "https://tst.tracking.trackware.com/my/Events/",
+                 "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Events/",
+                 "arabic_name": "الفعاليات و الانشطة",
+                 "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Events.png",
+                 "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg"
+                 },
+            "Homeworks":
+                {"name": "Homework",
+
+                 "url": "https://tst.tracking.trackware.com/my/Homeworks/",
+                 "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Homeworks/",
+                 "name_ar": "الواجبات المنزلية",
+                 "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/worksheets.png",
+                 "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg"
+                 },
+            "Calendar":
+                {"name": "Calendar",
+                 "url": "https://tst.tracking.trackware.com/my/Calendar/",
+                 "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Calendar/",
+
+                 "name_ar": "التقويم",
+                 "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/School+Calendar.png",
+                 "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg"
+                 },
+
+            "Clinic":
+                {"name": "Clinic",
+                 "name_ar": "العيادة",
+
+                 "url": "https://tst.tracking.trackware.com/my/Clinic/",
+                 "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Clinic/",
+                 "arabic_name": "العيادة",
+                 "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
+                 "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg"
+                 },
+
+            "Library":
+                {"name": "Library",
+                 "name_ar": "المكتبه",
+
+                 "url": "https://tst.tracking.trackware.com/my/Library/",
+                 "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Library/",
+                 "arabic_name": "العيادة",
+                 "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
+                 "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg"
+                 },
+            "Timetable":
+                {"name": "Timetable",
+                 "name_ar": "الجدول الدراسي",
+
+                 "url": "https://tst.tracking.trackware.com/my/Timetable/",
+                 "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Timetable/",
+                 "arabic_name": "الجدول الدراسي",
+                 "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/icons8-curriculum-48.png",
+                 "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/icons8-curriculum-48.svg"
+                 }
+
+        }
+    else:
+      return  {
+            "Exams": {
+                # "url": "https://" + school_name + ".staging.trackware.com/my/Badges/",tst.tracking.trackware.com
+                # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Badges/",
+                "url": "https://" + school_name + ".trackware.com/my/Exams/",
+                "arabic_url": school_name + ".trackware.com/ar_SY/my/Exams/",
+                "name": "Exams",
+                "name_ar": "امتحانات",
+                "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png",
+                "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg"
+            },
+            "Badges": {
+                # "url": "https://" + school_name + ".staging.trackware.com/my/Badges/",tst.tracking.trackware.com
+                # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Badges/",
+                "url": "https://" + school_name + ".trackware.com/my/Badges/",
+                "arabic_url": school_name + ".trackware.com/ar_SY/my/Badges/",
+                "name": "Badges",
+                "name_ar": "الشارات",
+                "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Badge.png",
+                "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Badge.svg"
+            },
+            "Weeklyplans":
+                {
+                    # "url": "https://" + school_name + ".staging.trackware.com/my/Weekly-plans/",
+                    # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Weekly-plans/",
+                    "url": "https://" + school_name + ".trackware.com/my/Weekly-plans/",
+                    "arabic_url": "https://" + school_name + ".trackware.com/ar_SY/my/Weekly-plans/",
+                    "name": "Weekly plans",
+                    "name_ar": "الخطط الأسبوعية",
+                    "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Weekly+Plans.png",
+                    "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg"
+                },
+            "Assignments": {
+                "url": "https://" + school_name + ".trackware.com/my/Assignments/",
+                "arabic_url": "https://" + school_name + ".trackware.com/ar_SY/my/Assignments/",
+                # "url": "https://" + school_name + ".staging.trackware.com/my/Assignments/",
+                # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Assignments/",
+                "name": "Assignments",
+                "name_ar": "الواجبات الالكترونية",
+                "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png",
+                "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg"
+            },
+            # "Exam": {
+            #     "url": "my/exam/",
+            #     "arabic_url": "ar_SY/my/exam",
+            #     "arabic_name": "امتحانات",
+            #     "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png"
+            # },
+            "Events":
+                {"name": "Events",
+                 "name_ar": "الفعاليات و الانشطة",
+                 # "url": "https://" + school_name + ".staging.trackware.com/my/Events/",
+                 # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Events/",
+                 "url": "https://" + school_name + ".trackware.com/my/Events/",
+                 "arabic_url": "https://" + school_name + ".trackware.com/ar_SY/my/Events/",
+                 "arabic_name": "الفعاليات و الانشطة",
+                 "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Events.png",
+                 "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg"
+                 },
+            "Homeworks":
+                {"name": "Homework",
+                 # "url": "https://" + school_name + ".staging.trackware.com/my/Homeworks/",
+                 # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Homeworks/",
+                 "url": "https://" + school_name + ".trackware.com/my/Homeworks/",
+                 "arabic_url": "https://" + school_name + ".trackware.com/ar_SY/my/Homeworks/",
+                 "name_ar": "الواجبات المنزلية",
+                 "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/worksheets.png",
+                 "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg"
+                 },
+            "Calendar":
+                {"name": "Calendar",
+                 "url": "https://" + school_name + ".trackware.com/my/Calendar/",
+                 "arabic_url": "https://" + school_name + ".trackware.com/ar_SY/my/Calendar/",
+                 # "url": "https://" + school_name + ".staging.trackware.com/my/Calendar/",
+                 # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Calendar/",
+                 "name_ar": "التقويم",
+                 "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/School+Calendar.png",
+                 "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg"
+                 },
+
+            "Clinic":
+                {"name": "Clinic",
+                 "name_ar": "العيادة",
+                 # "url": "https://" + school_name + ".staging.trackware.com/my/Clinic/",
+                 # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Clinic/",
+                 "url": "https://" + school_name + ".trackware.com/my/Clinic/",
+                 "arabic_url": "https://" + school_name + ".trackware.com/ar_SY/my/Clinic/",
+                 "arabic_name": "العيادة",
+                 "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
+                 "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg"
+                 },
+
+            "Library":
+                {"name": "Library",
+                 "name_ar": "المكتبه",
+                 # "url": "https://" + school_name + ".staging.trackware.com/my/Clinic/",
+                 # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Clinic/",
+                 "url": "https://" + school_name + ".trackware.com/my/Library/",
+                 "arabic_url": "https://" + school_name + ".trackware.com/ar_SY/my/Library/",
+                 "arabic_name": "العيادة",
+                 "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
+                 "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg"
+                 }
+
+        }
 
 @api_view(['POST', 'GET'])
 def kids_list(request):
-
-
     if request.method == 'POST':
         if request.headers:
             if request.headers.get('Authorization'):
@@ -493,7 +680,6 @@ def kids_list(request):
 
                             school_name = e
 
-                            school_name = ManagerParent.pincode(school_name)
                             parent_id = ManagerParent.objects.filter(Q(mobile_token=mobile_token),
                                                                      Q(db_name=school_name)).values_list('parent_id')
                             for e in parent_id:
@@ -510,11 +696,6 @@ def kids_list(request):
                                     [parent_id, parent_id, parent_id])
                                 student = cursor.fetchall()
 
-                                # cursor.execute(
-                                #     "select  id,display_name_search from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
-                                #     [parent_id, parent_id, parent_id])
-                                # student121 = cursor.fetchall()
-                                # print(student121)
                                 student1 = []
                                 columnNames = [column[0] for column in cursor.description]
                                 for record in student:
@@ -576,122 +757,7 @@ def kids_list(request):
                                                 student_round_id = rounds[0][0]
                                                 is_active_round = is_active[0][0]
 
-                                    x = {
-                                        "Exams": {
-                                            # "url": "https://" + school_name + ".staging.trackware.com/my/Badges/",tst.tracking.trackware.com
-                                            # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Badges/",
-                                            "url": "https://tst.tracking.trackware.com/my/Exams/",
-                                            "arabic_url": "tst.tracking.trackware.com/ar_SY/my/Exams/",
-                                            "name": "Exams",
-                                            "name_ar": "امتحانات",
-                                            "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png",
-                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg"
-                                        },
-                                        "Badges": {
-                                            # "url": "https://" + school_name + ".staging.trackware.com/my/Badges/",tst.tracking.trackware.com
-                                            # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Badges/",
-                                            "url": "https://tst.tracking.trackware.com/my/Badges/",
-                                            "arabic_url": "tst.tracking.trackware.com/ar_SY/my/Badges/",
-                                            "name": "Badges",
-                                            "name_ar": "الشارات",
-                                            "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Badge.png",
-                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Badge.svg"
-                                        },
-                                        "Weeklyplans":
-                                            {
-                                                # "url": "https://" + school_name + ".staging.trackware.com/my/Weekly-plans/",
-                                                # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Weekly-plans/",
-                                                "url": "https://tst.tracking.trackware.com/my/Weekly-plans/",
-                                                "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Weekly-plans/",
-                                                "name": "Weekly plans",
-                                                "name_ar": "الخطط الأسبوعية",
-                                                "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Weekly+Plans.png",
-                                                "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg"
-                                            },
-                                        "Assignments": {
-                                            "url": "https://tst.tracking.trackware.com/my/Assignments/",
-                                            "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Assignments/",
-                                            # "url": "https://" + school_name + ".staging.trackware.com/my/Assignments/",
-                                            # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Assignments/",
-                                            "name": "Assignments",
-                                            "name_ar": "الواجبات الالكترونية",
-                                            "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png",
-                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg"
-                                        },
-                                        # "Exam": {
-                                        #     "url": "my/exam/",
-                                        #     "arabic_url": "ar_SY/my/exam",
-                                        #     "arabic_name": "امتحانات",
-                                        #     "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png"
-                                        # },
-                                        "Events":
-                                            {"name": "Events",
-                                             "name_ar": "الفعاليات و الانشطة",
-                                             # "url": "https://" + school_name + ".staging.trackware.com/my/Events/",
-                                             # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Events/",
-                                             "url": "https://tst.tracking.trackware.com/my/Events/",
-                                             "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Events/",
-                                             "arabic_name": "الفعاليات و الانشطة",
-                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Events.png",
-                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg"
-                                             },
-                                        "Homeworks":
-                                            {"name": "Homework",
-                                             # "url": "https://" + school_name + ".staging.trackware.com/my/Homeworks/",
-                                             # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Homeworks/",
-                                             "url": "https://tst.tracking.trackware.com/my/Homeworks/",
-                                             "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Homeworks/",
-                                             "name_ar": "الواجبات المنزلية",
-                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/worksheets.png",
-                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg"
-                                             },
-                                        "Calendar":
-                                            {"name": "Calendar",
-                                             "url": "https://tst.tracking.trackware.com/my/Calendar/",
-                                             "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Calendar/",
-                                             # "url": "https://" + school_name + ".staging.trackware.com/my/Calendar/",
-                                             # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Calendar/",
-                                             "name_ar": "التقويم",
-                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/School+Calendar.png",
-                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg"
-                                             },
-
-                                        "Clinic":
-                                            {"name": "Clinic",
-                                             "name_ar": "العيادة",
-                                             # "url": "https://" + school_name + ".staging.trackware.com/my/Clinic/",
-                                             # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Clinic/",
-                                             "url": "https://tst.tracking.trackware.com/my/Clinic/",
-                                             "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Clinic/",
-                                             "arabic_name": "العيادة",
-                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
-                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg"
-                                             },
-
-                                        "Library":
-                                            {"name": "Library",
-                                             "name_ar": "المكتبه",
-                                             # "url": "https://" + school_name + ".staging.trackware.com/my/Clinic/",
-                                             # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Clinic/",
-                                             "url": "https://tst.tracking.trackware.com/my/Library/",
-                                             "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Library/",
-                                             "arabic_name": "العيادة",
-                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
-                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg"
-                                             },
-                                        "Timetable":
-                                            {"name": "Timetable",
-                                             "name_ar": "الجدول الدراسي",
-                                             # "url": "https://" + school_name + ".staging.trackware.com/my/Clinic/",
-                                             # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Clinic/",
-                                             "url": "https://tst.tracking.trackware.com/my/Timetable/",
-                                             "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Timetable/",
-                                             "arabic_name": "الجدول الدراسي",
-                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/icons8-curriculum-48.png",
-                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/icons8-curriculum-48.svg"
-                                             }
-
-                                    }
+                                    x = model_odoo(school_name)
                                     url_m = {}
                                     model_list = ( "Badges", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
                                         "Weekly Plans", 'Online Exams','Library','Timetable')
@@ -701,76 +767,73 @@ def kids_list(request):
                                     [res.append(x[0]) for x in list if x[0] not in res]
                                     model = []
                                     show_absence = False
-                                    for rec1 in res:
+                                    # for rec1 in res:
 
-                                        if 'Weekly Plans' == rec1:
-                                            x['Weeklyplans']['arabic_url'] = x['Weeklyplans']['arabic_url'] + str(
-                                                student1[rec]['user_id'])
-                                            x['Weeklyplans']['url'] = x['Weeklyplans']['url'] + str(
-                                                student1[rec]['user_id'])
-                                            model.append(x['Weeklyplans'])
+                                    if 'Weekly Plans' in res:
+                                        x['Weeklyplans']['arabic_url'] = x['Weeklyplans']['arabic_url'] + str(
+                                            student1[rec]['user_id'])
+                                        x['Weeklyplans']['url'] = x['Weeklyplans']['url'] + str(
+                                            student1[rec]['user_id'])
+                                        model.append(x['Weeklyplans'])
 
-                                        if 'Events' == rec1:
-                                            x['Events']['arabic_url'] = x['Events']['arabic_url'] + str(
-                                                student1[rec]['user_id'])
-                                            x['Events']['url'] = x['Events']['url'] + str(student1[rec]['user_id'])
-                                            model.append(x['Events'])
-                                        if 'Online Exams' == rec1:
-                                            x['Exams']['arabic_url'] = x['Exams']['arabic_url'] + str(
-                                                student1[rec]['user_id'])
-                                            x['Exams']['url'] = x['Exams']['url'] + str(student1[rec]['user_id'])
-                                            model.append(x['Exams'])
+                                    if 'Events' in res:
+                                        x['Events']['arabic_url'] = x['Events']['arabic_url'] + str(
+                                            student1[rec]['user_id'])
+                                        x['Events']['url'] = x['Events']['url'] + str(student1[rec]['user_id'])
+                                        model.append(x['Events'])
+                                    if 'Online Exams' in res:
+                                        x['Exams']['arabic_url'] = x['Exams']['arabic_url'] + str(
+                                            student1[rec]['user_id'])
+                                        x['Exams']['url'] = x['Exams']['url'] + str(student1[rec]['user_id'])
+                                        model.append(x['Exams'])
 
-                                        if 'Online Assignments' == rec1:
-                                            x['Assignments']['arabic_url'] = x['Assignments']['arabic_url'] + str(
-                                                student1[rec]['user_id'])
-                                            x['Assignments']['url'] = x['Assignments']['url'] + str(
-                                                student1[rec]['user_id'])
-                                            model.append(x['Assignments'])
+                                    if 'Online Assignments' in res:
+                                        x['Assignments']['arabic_url'] = x['Assignments']['arabic_url'] + str(
+                                            student1[rec]['user_id'])
+                                        x['Assignments']['url'] = x['Assignments']['url'] + str(
+                                            student1[rec]['user_id'])
+                                        model.append(x['Assignments'])
 
-                                        if 'Homework' == rec1:
-                                            x['Homeworks']['arabic_url'] = x['Homeworks']['arabic_url'] + str(
-                                                student1[rec]['user_id'])
-                                            x['Homeworks']['url'] = x['Homeworks']['url'] + str(student1[rec]['user_id'])
-                                            model.append(x['Homeworks'])
+                                    if 'Homework' in res:
+                                        x['Homeworks']['arabic_url'] = x['Homeworks']['arabic_url'] + str(
+                                            student1[rec]['user_id'])
+                                        x['Homeworks']['url'] = x['Homeworks']['url'] + str(student1[rec]['user_id'])
+                                        model.append(x['Homeworks'])
 
-                                        if 'Badges' == rec1:
-                                            x['Badges']['arabic_url'] = x['Badges']['arabic_url'] + str(
-                                                student1[rec]['user_id'])
-                                            x['Badges']['url'] = x['Badges']['url'] + str(student1[rec]['user_id'])
-                                            model.append(x['Badges'])
+                                    if 'Badges' in res:
+                                        x['Badges']['arabic_url'] = x['Badges']['arabic_url'] + str(
+                                            student1[rec]['user_id'])
+                                        x['Badges']['url'] = x['Badges']['url'] + str(student1[rec]['user_id'])
+                                        model.append(x['Badges'])
 
-                                        if 'Calendar' == rec1:
-                                            x['Calendar']['url'] = x['Calendar']['url'] + str(student1[rec]['user_id'])
-                                            x['Calendar']['arabic_url'] = x['Calendar']['arabic_url'] + str(
-                                                student1[rec]['user_id'])
-                                            model.append(x['Calendar'])
+                                    if 'Calendar' in res:
+                                        x['Calendar']['url'] = x['Calendar']['url'] + str(student1[rec]['user_id'])
+                                        x['Calendar']['arabic_url'] = x['Calendar']['arabic_url'] + str(
+                                            student1[rec]['user_id'])
+                                        model.append(x['Calendar'])
 
-                                        if 'Clinic' == rec1:
-                                            x['Clinic']['arabic_url'] = x['Clinic']['arabic_url'] + str(
-                                                student1[rec]['user_id'])
-                                            x['Clinic']['url'] = x['Clinic']['url'] + str(student1[rec]['user_id'])
-                                            model.append(x['Clinic'])
-                                        if 'Library'==rec1:
-                                            x['Library']['arabic_url'] = x['Library']['arabic_url'] + str(
-                                                student1[rec]['user_id'])
-                                            x['Library']['url'] = x['Library']['url'] + str(student1[rec]['user_id'])
-                                            model.append(x['Library'])
-                                        if 'Timetable' == rec1:
-                                            x['Timetable']['arabic_url'] = x['Timetable']['arabic_url'] + str(
-                                                student1[rec]['user_id'])
-                                            x['Timetable']['url'] = x['Timetable']['url'] + str(student1[rec]['user_id'])
-                                            model.append(x['Timetable'])
+                                    if 'Clinic' in res:
+                                        x['Clinic']['arabic_url'] = x['Clinic']['arabic_url'] + str(
+                                            student1[rec]['user_id'])
+                                        x['Clinic']['url'] = x['Clinic']['url'] + str(student1[rec]['user_id'])
+                                        model.append(x['Clinic'])
+                                    if 'Library' in res:
+                                        x['Library']['arabic_url'] = x['Library']['arabic_url'] + str(
+                                            student1[rec]['user_id'])
+                                        x['Library']['url'] = x['Library']['url'] + str(student1[rec]['user_id'])
+                                        model.append(x['Library'])
+                                    if 'Timetable' in res:
+                                        x['Timetable']['arabic_url'] = x['Timetable']['arabic_url'] + str(
+                                            student1[rec]['user_id'])
+                                        x['Timetable']['url'] = x['Timetable']['url'] + str(student1[rec]['user_id'])
+                                        model.append(x['Timetable'])
                                     cursor.execute(
                                         "select name from ir_ui_menu where name ='Live Tracking'  LIMIT 1")
                                     tracking = cursor.fetchall()
                                     if len(tracking) > 0:
 
                                         model.append({
-                                            # "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(
-                                            #     student1[rec]['user_id']),
-                                            # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Absence/" + str(
-                                            #     student1[rec]['user_id']),
+
                                             "url": "https://tst.tracking.trackware.com/my/Absence/" + str(
                                                 student1[rec]['user_id']),
                                             "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Absence/" + str(
@@ -792,10 +855,7 @@ def kids_list(request):
                                         model = {
                                             "Absence":
                                                 {
-                                                    # "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(
-                                                    #     student1[rec]['user_id']),
-                                                    # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Absence/" + str(
-                                                    #     student1[rec]['user_id']),
+
                                                     "url": "https://tst.tracking.trackware.com/my/Absence/" + str(
                                                         student1[rec]['user_id']),
                                                     "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Absence/" + str(
@@ -826,9 +886,9 @@ def kids_list(request):
                                     bus_id = 0
                                     round_type = ''
                                     round_name = ''
-                                    # print(is_active_round)
+
                                     if bool(is_active_round):
-                                        # print(rounds_count_student[0][1])
+
                                         start = datetime.datetime(datetime.datetime.now().year,
                                                                   datetime.datetime.now().month,
                                                                   datetime.datetime.now().day)
@@ -906,13 +966,11 @@ def kids_list(request):
                                     else:
 
                                         fname = student1[rec]['name_ar']
-                                    # password,national_id
                                     user_name=student1[rec]['national_id']
                                     password = student1[rec]['national_id']
                                     if student1[rec]['password']:
                                          password=student1[rec]['password']
                                     url = 'https://tst.tracking.trackware.com/web/session/authenticate'
-                                    # url = 'http://192.168.1.82:9098/web/session/authenticate'
                                     try:
 
                                         body = json.dumps(
@@ -929,7 +987,7 @@ def kids_list(request):
                                         if "error" in response:
                                             result = {
                                                 "status": "erorrq"}
-                                            # return Response(result)
+
                                         session = response1.cookies
                                         uid = response['result']['uid']
                                         company_id = response['result']['company_id']
@@ -938,8 +996,6 @@ def kids_list(request):
                                         result = {
                                             "status": "erorr2"
                                                       ""}
-                                        # return Response(result)
-                                    # session = response1.cookies
 
                                     studen_list.append({
                                         "schoolImage": school_logo[0][0] if school_logo[0][0] else'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
@@ -1013,10 +1069,6 @@ def kids_list(request):
 
 
 def date_time(deadline):
-    # cursor.execute(
-    #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
-    # transport_setting = cursor.fetchall()
-    # date_tz = transport_setting[0][0]
     date_tz = 'Asia/Kuwait'
 
     if deadline:
@@ -1034,8 +1086,6 @@ def date_time(deadline):
         deadline.hour)
     minute = str(deadline.minute) if len(
         str(deadline.minute)) > 1 else "0" + str(deadline.minute)
-    second = str(deadline.second) if len(
-        str(deadline.second)) > 1 else "0" + str(deadline.second)
     return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + "00"
 
 
@@ -1054,7 +1104,6 @@ def read_survey(request):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-                        school_name = ManagerParent.pincode(school_name)
                         message_id = request.data.get('message_id')
 
                         with connections[school_name].cursor() as cursor:
@@ -1105,7 +1154,6 @@ def hide_survey(request):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-                        school_name = ManagerParent.pincode(school_name)
                         message_id = request.data.get('message_id')
 
                         with connections[school_name].cursor() as cursor:
@@ -1141,7 +1189,6 @@ def read_message(request):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-                        school_name = ManagerParent.pincode(school_name)
                         message_id = request.data.get('message_id')
 
                         with connections[school_name].cursor() as cursor:
@@ -1150,12 +1197,9 @@ def read_message(request):
                                 " select read_message from school_message_student_student where id=%s ",
                                 [message_id])
                             read_message = cursor.fetchall()
-                            # print(read_message[0][0])
                             if read_message[0][0]:
-                                # print("ddddddddddddddddddddddddd")
                                 cursor.execute("UPDATE public.message_student SET read_message=not(read_message) WHERE id=%s;", [message_id])
                             else:
-                                # print("ddddddddddddddddddddddddqqd")
                                 cursor.execute(
                                     "UPDATE public.school_message_student_student SET read_message=true WHERE id=%s;",
                                     [message_id])
@@ -1194,7 +1238,6 @@ def hide_message(request):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-                        school_name = ManagerParent.pincode(school_name)
                         message_id = request.data.get('message_id')
 
                         with connections[school_name].cursor() as cursor:
@@ -1227,10 +1270,7 @@ def hide_message(request):
             return Response(result)
 def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0',notifications_title_ar='',notifications_text_ar='',student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',image_link='',plan_name=''):
     show=show_notif
-    # if student_image:
-    #     print(student_image)
     stutes=stutes_notif
-    # print(stutes)
     if stutes=='Read' or stutes:
         stutes="Mark As UnRead"
     elif  stutes=='UnRead' or not stutes :
@@ -1596,32 +1636,8 @@ def kids_hstory_new(request):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-                        school_name = ManagerParent.pincode(school_name)
-                        start_date = request.data.get('start_date')
-                        end_date = request.data.get('end_date')
-                        student_round = []
-                        student_history_id = []
                         with connections[school_name].cursor() as cursor:
-                            if start_date and end_date:
-                                cursor.execute(
-                                    "select  id  from school_message WHERE create_date >= %s AND create_date <= %s",
-                                    [start_date, end_date])
-                                school_message = cursor.fetchall()
-                            elif start_date and not end_date:
-                                cursor.execute(
-                                    "select  id  from school_message WHERE create_date >= %s ",
-                                    [start_date])
 
-                                school_message = cursor.fetchall()
-                            elif not start_date and end_date:
-                                cursor.execute(
-                                    "select  id  from school_message WHERE  create_date <= %s",
-                                    [end_date])
-
-                                school_message = cursor.fetchall()
-                            elif not start_date and not end_date:
-                                cursor.execute("select  id  from school_message ")
-                                school_message = cursor.fetchall()
                             cursor.execute(
                                 "SELECT column_name FROM information_schema.columns WHERE table_name='survey_user_input' and column_name='read_message'",
                                 [])
@@ -1632,31 +1648,15 @@ def kids_hstory_new(request):
                                 "select  id,display_name_search,image_url,name,name_ar,year_id,user_id from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
                             student_info = cursor.fetchall()
-                            student_round_id = []
-
-                            cursor.execute(
-                                "select name from res_lang WHERE id = (select first_lang  from res_company  ORDER BY ID DESC LIMIT 1) ",
-                                [])
-                            #
-                            lang = cursor.fetchall()
-                            fname = ''
-                            fname_ar = ''
                             for student in student_info:
-                                # print("safkdsfkdkkfsdfkd")
-
                                 cursor.execute(
                                     " select branch_id from res_users where id=%s",
                                     [student[6]])
                                 branch_id = cursor.fetchall()
-                                # SELECT column_name
-                                # FROM information_schema.columns
-                                # WHERE table_name='res_partner' and column_name='yousef';
-
                                 cursor.execute(
                                     "SELECT column_name FROM information_schema.columns WHERE table_name='message_student' and column_name='image_link'",
                                     [])
                                 information_schema = cursor.fetchall()
-                                # information_schema=[]
                                 if information_schema:
                                     cursor.execute(
                                         "select  date,message_en,message_ar,title,title_ar,action_id,id,image_link,read_message,plan_name from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
@@ -1667,10 +1667,6 @@ def kids_hstory_new(request):
                                         "select  date,message_en,message_ar,title,title_ar,action_id,id,read_message from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
                                         [branch_id[0][0], student[5], student[0]])
                                     student_mes = cursor.fetchall()
-                                # cursor.execute(
-                                #         "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
-                                #         [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
-                                #         year_id = fields.Many2one('academic.year', 'Academic Year', ondelete='cascade')
                                 avatar="https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                 for mes in student_mes:
                                     action_id=mes[5]
@@ -1691,161 +1687,7 @@ def kids_hstory_new(request):
                                                              mes[3],
                                                              student[1], student[0], mes[6], mes[8] if information_schema else mes[7], None, action_id if mes[5] else '0', mes[4],
                                                              mes[2],'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',mes[7]if information_schema else '',plan_name=mes[9]if information_schema else ''))
-                            #
-                            #     student_round = []
-                            #     if  any('English'  in x[0]  for x in lang):
-                            #
-                            #         fname = student[3]
-                            #
-                            #     else:
-                            #
-                            #         fname = student[4]
-                            #     notifications += get_school_message_new(student[0], school_name, school_message, fname)
-                            #     notifications += get_student_history_new(student[0], school_name, fname)
-                            #     cursor.execute(
-                            #         "select  round_schedule_id from transport_participant WHERE student_id = %s",
-                            #         [student[0]])
-                            #     round_schedule_id = cursor.fetchall()
-                            #     #     get bus message
-                            #     for rec in round_schedule_id:
-                            #
-                            #         cursor.execute(
-                            #             "select  round_id from round_schedule WHERE id = %s",
-                            #             [rec[0]])
-                            #         round_schedule = cursor.fetchall()
-                            #
-                            #         round_schedules = []
-                            #         student_round_h = []
-                            #         for rec in round_schedule:
-                            #
-                            #             if rec[0] in student_round:
-                            #
-                            #                 continue
-                            #             else:
-                            #                 cursor.execute(
-                            #                     "select  type from transport_round WHERE id = %s",
-                            #                     [rec[0]])
-                            #
-                            #                 type = cursor.fetchall()
-                            #
-                            #                 if type[0][0] == 'pick_up':
-                            #                     student_round_h.append(rec[0])
-                            #                 student_round.append(rec[0])
-                            #                 round_schedules.append(rec[0])
-                            #         round_schedules = list(dict.fromkeys(student_round))
-                            #
-                            #         for rec_s in round_schedules:
-                            #             if rec_s in student_round_id:
-                            #                 pass
-                            #             else:
-                            #                 student_round_id.append(rec_s)
-                            #
-                            #                 cursor.execute(
-                            #                     "select  message_ar,create_date,type,round_id,id,type_ar,message_en from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
-                            #                     [rec_s, 'emergency',
-                            #                      'App\Model\sta' + str(parent_id)])
-                            #                 sh_message_wizard = cursor.fetchall()
-                            #
-                            #
-                            #
-                            #                 # save bus message
-                            #                 for message_wizard in range(len(sh_message_wizard)):
-                            #                     avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                            #                     for std in student_info:
-                            #                         if any('English'  not in x[0]  for x in lang):
-                            #                             fname = std[3]
-                            #                             fname_ar=std[4]
-                            #
-                            #                         else:
-                            #                             fname = std[4]
-                            #                             fname_ar = std[3]
-                            #
-                            #                         deadline = sh_message_wizard[message_wizard][1]
-                            #                         notifications_text = str(
-                            #                             sh_message_wizard[message_wizard][6]) if \
-                            #                             sh_message_wizard[message_wizard][6] else ''
-                            #                         notifications_text_ar = str(
-                            #                             sh_message_wizard[message_wizard][0]) if \
-                            #                             sh_message_wizard[message_wizard][0] else ''
-                            #
-                            #                         notifications += get_bus_notifition_student_new(school_name,
-                            #                                                                         fname,
-                            #                                                                         notifications_text,
-                            #                                                                         sh_message_wizard[
-                            #                                                                             message_wizard][
-                            #                                                                             2],
-                            #                                                                         deadline, rec_s,
-                            #                                                                         None,
-                            #                                                                         std[0],
-                            #                                                                         sh_message_wizard[
-                            #                                                                             message_wizard][
-                            #                                                                             5],
-                            #                                                                         notifications_text_ar,fname_ar)
-                            #
-                            #
-                            #             if student_round_h:
-                            #
-                            #                 cursor.execute(
-                            #                     "select  id,round_start from round_history WHERE round_id in %s and round_name in %s ORDER BY ID DESC LIMIT 1 ",
-                            #                     [tuple(student_round_h), tuple(student_round_h)])
-                            #                 round_history = cursor.fetchall()
-                            #
-                            #                 if round_history:
-                            #                     history_round = []
-                            #
-                            #                     for round_h in round_history:
-                            #                         history_round.append(round_h[0])
-                            #                     for std in student_info:
-                            #
-                            #                         cursor.execute(
-                            #                             "select  datetime,id,time_out,bus_check_in from round_student_history WHERE round_id in %s and student_id = %s and history_id in %s  ORDER BY ID DESC LIMIT 1 ",
-                            #                             [tuple(student_round_h), std[0], tuple(history_round)])
-                            #                         student_history = cursor.fetchall()
-                            #
-                            #                         if student_history:
-                            #
-                            #                             for student_history1 in student_history:
-                            #                                 if student_history1[3]:
-                            #
-                            #                                     if student_history1[1] in student_history_id:
-                            #                                         continue
-                            #                                     else:
-                            #                                         student_history_id.append(student_history1[1])
-                            #
-                            #                                         cursor.execute(
-                            #                                             "select time_out,student_id,bus_check_in from round_student_history WHERE id = %s  ",
-                            #                                             [student_history1[1]])
-                            #                                         time_out = cursor.fetchall()
-                            #                                         if time_out:
-                            #                                             cursor.execute(
-                            #                                                 "select  display_name_search,name,name_ar from student_student WHERE  id = %s",
-                            #                                                 [time_out[0][1]])
-                            #                                             name = cursor.fetchall()
-                            #
-                            #                                             if time_out[0][0] and time_out[0][2]:
-                            #                                                 if any('English'  in x[0]  for x in lang):
-                            #                                                     if name[0][1]:
-                            #                                                         fname = name[0][1]
-                            #                                                     else:
-                            #                                                         fname = name[0][2]
-                            #
-                            #                                                 else:
-                            #                                                     if not name[0][2]:
-                            #                                                         fname = name[0][1]
-                            #                                                     else:
-                            #                                                         fname = name[0][2]
-                            #
-                            #                                                 deadline = time_out[0][0] if time_out[0][
-                            #                                                     0] else time_out[0][2]
-                            #
-                            #                                                 notifications.append(
-                            #                                                     get_info_message_new(deadline,
-                            #                                                                      fname + " has just reached the school.  ",
-                            #                                                                      avatar,
-                            #                                                                      deadline.replace(
-                            #                                                                          second=0) if deadline else '',
-                            #                                                                      "Bus notification",
-                            #                                                                      fname, time_out[0][1],0,None,None,'0',"اشعار من الحافلة"," وصل إلى المدرسة."+ fname))
+
 
                             notifications.sort(key=get_year, reverse=True)
 
@@ -1856,37 +1698,6 @@ def kids_hstory_new(request):
                                     notifications_not_d.append(d)
                                     date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                                     r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
-                                    # print(d['notifications_text_ar'],d['notifications_title'])
-                                    #   return {
-                                    #             "avatar": avatar,
-                                    #             "date_time": date_time(deadline),
-                                    #             "notifications_text": notifications_text,
-                                    #             "create_date": create_date,
-                                    #             "notifications_title": notifications_title,
-                                    #             "student_id": str(student_id),
-                                    #             "notificationsType": notificationsType,
-                                    #             "icon_tracking":icon_tracking,
-                                    #             "id":id,
-                                    #             "stutes":stutes,
-                                    #             "show":show,
-                                    #             "student_image": student_image,
-                                    #             "action_id": str(action_id),
-                                    #             "notifications_text_ar": notifications_text_ar if notifications_text_ar else notifications_text,
-                                    #             "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
-                                    #
-                                    #         }
-                                    # cursor.execute(
-                                    #     "select  year_id,user_id from student_student WHERE id = %s",
-                                    #     [d['student_id']])
-                                    # student_name = cursor.fetchall()
-                                    # cursor.execute(
-                                    #     " select branch_id from res_users where id=%s",
-                                    #     [student_name[0][1]])
-                                    # branch_id = cursor.fetchall()
-                                    # cursor.execute(
-                                    #     "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
-                                    #     [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
-
 
                             result = {"notifications": notifications_not_d}
                             return Response(result)
@@ -1903,653 +1714,6 @@ def kids_hstory_new(request):
             result = {'status': 'Not found headers'}
             return Response(result)
 
-
-
-def get_info_message(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id):
-    notificationsType = ''
-    icon_tracking=''
-    if notifications_title == 'Weekly plan' or notifications_title == 'Assignment' or notifications_title == 'Homework' or notifications_title == 'Exam' or notifications_title == 'educational':
-        notificationsType = 'educational'
-    elif notifications_title == 'Pick Up By Parent' or notifications_title == 'Absence':
-        notificationsType = 'Absence'
-    elif notifications_title == 'School Departure' or notifications_title == 'Checkout Notification' or notifications_title == 'No Show Notification' or "has arrived at your home" in notifications_text or "has just reached the school." in notifications_text or "has just been checked into the bus." in notifications_text or notifications_title == "Absence notification" or 'Message from bus no' in notifications_title:
-
-        notificationsType = 'tracking'
-        if (notifications_title == 'School Departure'):
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-get-on-bus.svg'
-        elif (notifications_title == 'Checkout Notification'):
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
-        elif (notifications_title == 'No Show Notification'):
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-get-on-bus+(1).svg'
-        elif "has arrived at your home" in notifications_text:
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-house+(1).svg'
-        elif "has just reached the school." in notifications_text:
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
-        elif "has just been checked into the bus." in notifications_text:
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-get-on-bus.svg'
-        elif notifications_title == "Absence notification":
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
-        else:
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-shuttle-bus.svg'
-    else:
-
-        notificationsType = 'announcement'
-    if student_name:
-        return {
-            "avatar": avatar,
-            "date_time": date_time(deadline),
-            "notifications_text": notifications_text,
-            "create_date": create_date,
-            "notifications_title": notifications_title,
-            "student_name": student_name,
-            "student_id": str(student_id),
-            "notificationsType": notificationsType,
-            "icon_tracking":icon_tracking
-
-        }
-    else:
-        return {
-            "avatar": avatar,
-            "date_time": date_time(deadline),
-            "notifications_text": notifications_text,
-            "create_date": create_date,
-            "notifications_title": notifications_title,
-            "student_id": str(student_id),
-            "notificationsType": notificationsType,
-        "icon_tracking":icon_tracking
-        }
-
-
-# get school message
-def get_school_message(student_id, school_name, school_message, student_name):
-    notifications = []
-    with connections[school_name].cursor() as cursor:
-        message_ids = []
-        for rec in school_message:
-            message_ids.append(rec[0])
-        message_ids = list(dict.fromkeys(message_ids))
-
-        if message_ids:
-            cursor.execute(
-                "select  school_message_id from school_message_student_student WHERE school_message_id in %s AND student_student_id = %s",
-                [tuple(message_ids), student_id])
-            message_student = cursor.fetchall()
-            message_id = []
-            for rec in message_student:
-                message_id.append(rec[0])
-
-            if message_id:
-
-                cursor.execute(
-                    "select  id,search_type,title,message,create_date,date from school_message WHERE id in %s",
-                    [tuple(list(dict.fromkeys(message_id)))])
-                school_message1 = cursor.fetchall()
-
-                for rec in range(len(school_message1)):
-                    deadline = school_message1[rec][4]
-                    notifications_text = school_message1[rec][3] if school_message1[rec][3] else ''
-                    avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_msg_admin.png"
-                    create_date = school_message1[rec][4].replace(second=0) if school_message1[rec][4] else ''
-                    notifications_title = school_message1[rec][2] if school_message1[rec][2] else ''
-
-                    notifications.append(
-                        get_info_message(deadline, notifications_text, avatar, create_date, notifications_title,
-                                         student_name, student_id))
-
-    return notifications
-
-
-def get_student_history(student_id, school_name, student_name):
-    notifications = []
-    with connections[school_name].cursor() as cursor:
-        list_hist_student = []
-        cursor.execute(
-            " SELECT  notification_id,round_id FROM student_history WHERE (activity_type='absent-all' or activity_type='absent') and student_id=%s",
-            [student_id])
-        student_history = cursor.fetchall()
-
-        for mas in student_history:
-            cursor.execute(
-                "select  vehicle_id from transport_round WHERE id = %s",
-                [mas[1]])
-
-            vehicle_id = cursor.fetchall()
-            cursor.execute(
-                "select bus_no from fleet_vehicle WHERE id = %s  ",
-                [vehicle_id[0][0]])
-            bus_num = cursor.fetchall()
-
-            if mas[0] in list_hist_student:
-                continue
-            else:
-                list_hist_student.append(mas[0])
-
-            cursor.execute(
-                "select  message_en,create_date,type,id from sh_message_wizard WHERE id=%s ORDER BY ID DESC LIMIT 50",
-                [mas[0]])
-            sh_message_wizard1 = cursor.fetchall()
-
-            for sh_message_bus in range(len(sh_message_wizard1)):
-                deadline = sh_message_wizard1[sh_message_bus][1]
-
-                notifications_text = sh_message_wizard1[sh_message_bus][0]
-                avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                create_date = deadline.replace(second=0) if deadline else ''
-                notifications_title = "Message from bus no. " + str(bus_num[0][0]) + "   " + str(student_name)
-                notifications_title_ar = str(student_name) + " " + str(bus_num[0][0]) + "   " + "رسالة من الحافلة رقم . "
-                notifications.append(
-                    get_info_message(deadline, notifications_text, avatar, create_date, notifications_title,
-                                     student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text))
-    return notifications
-
-
-def get_bus_notifition_student(school_name, student_name, notifications_text, notifications_title, deadline, round_id,
-                               attendance_round, student_id):
-    notifications = []
-
-    avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-    with connections[school_name].cursor() as cursor:
-        create_date = deadline.replace(second=0) if deadline else ''
-        cursor.execute(
-            "select  vehicle_id from transport_round WHERE id = %s",
-            [round_id])
-
-        vehicle_id = cursor.fetchall()
-        cursor.execute(
-            "select bus_no from fleet_vehicle WHERE id = %s  ",
-            [vehicle_id[0][0]])
-        bus_num = cursor.fetchall()
-
-
-        if "just been" in notifications_text:
-
-
-            if str(student_name) in notifications_text:
-
-                if notifications_title == 'School Departure':
-                    notifications_title = 'School Departure'
-                else:
-                    notifications_title = 'Bus notification'
-                notifications.append(
-                    get_info_message(deadline, notifications_text, avatar, create_date, notifications_title,
-                                     student_name, student_id))
-        elif "did not check into the bus today" in notifications_text:
-
-            if str(student_name) in notifications_text:
-                notifications.append(
-                    get_info_message(deadline, notifications_text, avatar, create_date, "No Show Notification",
-                                     student_name, student_id))
-
-        elif "has not checked into the bus" in notifications_text:
-
-            if str(student_name) in notifications_text:
-                notifications.append(
-                    get_info_message(deadline, notifications_text, avatar, create_date, "Absence notification",
-                                     student_name, student_id))
-
-
-        elif "has arrived at your home and" in notifications_text:
-
-            if str(student_name) in notifications_text:
-                notifications.append(
-                    get_info_message(deadline, notifications_text, avatar, create_date, "Checkout Notification",
-                                     student_name, student_id))
-
-        elif "just reached" in notifications_text:
-            if str(student_name) in notifications_text:
-                notifications.append(
-                    get_info_message(deadline, notifications_text, avatar, create_date, "Bus notification",
-                                     student_name, student_id))
-
-        else:
-
-            cursor.execute(
-                "select  is_active,type from transport_round WHERE id = %s  ",
-                [round_id])
-            is_active = cursor.fetchall()
-
-            time = ''
-            if attendance_round:
-                if is_active[0][1] == 'pick_up':
-                    time = attendance_round[0][2]
-                else:
-                    time = attendance_round[0][3]
-            notifications_title_ar = str(student_name) + " " + str(bus_num[0][0]) + "   " + "رسالة من الحافلة رقم . "
-            if time:
-                if time > deadline:
-                    notifications.append(
-                        get_info_message(deadline, notifications_text, avatar, create_date,
-                                         "Message from bus no. " + str(
-                                             bus_num[0][0]) + "  " + str(student_name), student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text))
-
-
-            else:
-                notifications.append(
-                    get_info_message(deadline, notifications_text, avatar, create_date, "Message from bus no. " + str(
-                        bus_num[0][0]) + "  " + str(student_name), student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text))
-    return notifications
-
-
-@api_view(['POST'])
-def kids_hstory(request):
-    if request.method == 'POST':
-        if request.headers:
-            if request.headers.get('Authorization'):
-                if 'Bearer' in request.headers.get('Authorization'):
-                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
-
-                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
-                    parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
-
-                    notifications = []
-                    notifications_not_d = []
-                    seen = set()
-                    for e in parent_id:
-                        parent_id = e[0]
-                    if db_name:
-                        for e in db_name:
-                            school_name = e[0]
-                        school_name = ManagerParent.pincode(school_name)
-                        start_date = request.data.get('start_date')
-                        end_date = request.data.get('end_date')
-                        student_round = []
-                        student_history_id = []
-                        with connections[school_name].cursor() as cursor:
-                            if start_date and end_date:
-                                cursor.execute(
-                                    "select  id  from school_message WHERE create_date >= %s AND create_date <= %s",
-                                    [start_date, end_date])
-                                school_message = cursor.fetchall()
-                            elif start_date and not end_date:
-                                cursor.execute(
-                                    "select  id  from school_message WHERE create_date >= %s ",
-                                    [start_date])
-
-                                school_message = cursor.fetchall()
-                            elif not start_date and end_date:
-                                cursor.execute(
-                                    "select  id  from school_message WHERE  create_date <= %s",
-                                    [end_date])
-
-                                school_message = cursor.fetchall()
-                            elif not start_date and not end_date:
-                                cursor.execute("select  id  from school_message ")
-                                school_message = cursor.fetchall()
-                            cursor.execute(
-                                "select  id,display_name_search,image_url,name,name_ar from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
-                                [parent_id, parent_id, parent_id])
-                            student_info = cursor.fetchall()
-                            student_round_id = []
-                            cursor.execute(
-                                "select first_lang  from res_company  ORDER BY ID DESC LIMIT 1")
-
-                            first_lang = cursor.fetchall()
-                            cursor.execute(
-                                "select name from res_lang WHERE id = %s ",
-                                [first_lang[0][0]])
-
-                            lang = cursor.fetchall()
-                            fname = ''
-
-                            for student in student_info:
-
-                                student_round = []
-                                if "Arabic" not in lang:
-                                    fname = student[3]
-
-                                else:
-                                    fname = student[4]
-                                notifications += get_school_message(student[0], school_name, school_message, fname)
-                                notifications += get_student_history(student[0], school_name, fname)
-                                cursor.execute(
-                                    "select  round_schedule_id from transport_participant WHERE student_id = %s",
-                                    [student[0]])
-                                round_schedule_id = cursor.fetchall()
-                                #     get bus message
-                                for rec in round_schedule_id:
-
-                                    cursor.execute(
-                                        "select  round_id from round_schedule WHERE id = %s",
-                                        [rec[0]])
-                                    round_schedule = cursor.fetchall()
-
-                                    round_schedules = []
-                                    student_round_h = []
-                                    for rec in round_schedule:
-
-                                        if rec[0] in student_round:
-
-                                            continue
-                                        else:
-                                            cursor.execute(
-                                                "select  type from transport_round WHERE id = %s",
-                                                [rec[0]])
-
-                                            type = cursor.fetchall()
-
-                                            if type[0][0] == 'pick_up':
-                                                student_round_h.append(rec[0])
-                                            student_round.append(rec[0])
-                                            round_schedules.append(rec[0])
-                                    round_schedules = list(dict.fromkeys(student_round))
-
-                                    for rec_s in round_schedules:
-                                        if rec_s in student_round_id:
-                                            pass
-                                        else:
-                                            student_round_id.append(rec_s)
-                                            cursor.execute(
-                                                "select  message_ar,create_date,type,round_id,id from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
-                                                [rec_s, 'emergency',
-                                                 'App\Model\sta' + str(parent_id)])
-                                            sh_message_wizard = cursor.fetchall()
-                                            # save bus message
-                                            for message_wizard in range(len(sh_message_wizard)):
-                                                avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                                for std in student_info:
-                                                    if "Arabic" not in lang:
-                                                        fname = std[3]
-
-                                                    else:
-                                                        fname = std[4]
-
-                                                    cursor.execute(
-                                                        "select  id,round_id,bus_check_in,time_out,history_id from round_student_history WHERE student_id = %s And driver_waiting is not  null  AND round_id=%s AND bus_check_in is  null AND  datetime >= %s AND  datetime < %s ",
-                                                        [std[0], rec, datetime.datetime(
-                                                            sh_message_wizard[message_wizard][1].year,
-                                                            sh_message_wizard[message_wizard][1].month,
-                                                            sh_message_wizard[message_wizard][1].day),
-                                                         datetime.datetime(
-                                                             sh_message_wizard[message_wizard][1].year,
-                                                             sh_message_wizard[message_wizard][1].month,
-                                                             sh_message_wizard[message_wizard][1].day + 1)])
-                                                    attendance_round = cursor.fetchall()
-
-                                                    if not attendance_round:
-                                                        cursor.execute(
-                                                            "select  is_active,type,write_date from transport_round WHERE id = %s  ",
-                                                            [rec_s])
-                                                        is_active = cursor.fetchall()
-                                                        date_time_message = datetime.datetime(
-                                                            sh_message_wizard[message_wizard][1].year,
-                                                            sh_message_wizard[message_wizard][1].month,
-                                                            sh_message_wizard[message_wizard][1].day)
-
-                                                        car_time = datetime.datetime(datetime.datetime.now().year,
-                                                                                     datetime.datetime.now().month,
-                                                                                     datetime.datetime.now().day)
-
-                                                        if (is_active[0][0] and car_time == date_time_message) or (
-                                                                not is_active[0][0] and car_time == date_time_message):
-
-                                                            cursor.execute(
-                                                                "select  round_schedule_id from transport_participant WHERE student_id = %s",
-                                                                [std[0]])
-                                                            round_schedule_id_tst = cursor.fetchall()
-                                                            schedule_id = []
-                                                            for cha_round_s in round_schedule_id_tst:
-                                                                schedule_id.append(cha_round_s[0])
-                                                            if schedule_id:
-                                                                cursor.execute(
-                                                                    "select  round_id from round_schedule WHERE id in %s",
-                                                                    [tuple(schedule_id)])
-                                                                round_id_tst = cursor.fetchall()
-                                                                round_id_student = []
-                                                                for r_id in round_id_tst:
-                                                                    round_id_student.append(r_id[0])
-                                                                if rec_s in round_id_student:
-                                                                    cursor.execute(
-                                                                        "select  id,round_id,bus_check_in,time_out,history_id from round_student_history WHERE student_id = %s And driver_waiting is not  null  AND round_id=%s AND bus_check_in is not null AND  datetime >= %s AND  datetime < %s ",
-                                                                        [std[0], rec, datetime.datetime(
-                                                                            sh_message_wizard[message_wizard][1].year,
-                                                                            sh_message_wizard[message_wizard][1].month,
-                                                                            sh_message_wizard[message_wizard][1].day),
-                                                                         datetime.datetime(
-                                                                             sh_message_wizard[message_wizard][1].year,
-                                                                             sh_message_wizard[message_wizard][1].month,
-                                                                             sh_message_wizard[message_wizard][
-                                                                                 1].day + 1)])
-                                                                    attendance_round_yousef = cursor.fetchall()
-                                                                    start = datetime.datetime(
-                                                                        sh_message_wizard[message_wizard][1].year,
-                                                                        sh_message_wizard[message_wizard][1].month,
-                                                                        sh_message_wizard[message_wizard][1].day)
-                                                                    end = datetime.datetime(
-                                                                        sh_message_wizard[message_wizard][1].year,
-                                                                        sh_message_wizard[message_wizard][1].month,
-                                                                        sh_message_wizard[message_wizard][1].day + 1)
-                                                                    if attendance_round_yousef:
-                                                                        cursor.execute(
-                                                                            "select  id,round_start,round_end,na from round_history WHERE id=%s",
-                                                                            [attendance_round_yousef[0][4]])
-                                                                        round_history = cursor.fetchall()
-                                                                        cursor.execute(
-                                                                            "select  activity_type,lat,long,datetime from student_history WHERE round_id = %s and student_id=%s and history_id = %s ORDER BY ID DESC  ",
-                                                                            [rec_s, std[0], round_history[0][0]])
-                                                                        student_history = cursor.fetchall()
-
-                                                                        cursor.execute(
-                                                                            "select  is_active,type,write_date from transport_round WHERE id = %s  ",
-                                                                            [rec_s])
-                                                                        is_active = cursor.fetchall()
-                                                                        cursor.execute(
-                                                                            "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and datetime >= %s and datetime <= %s   ORDER BY ID DESC LIMIT 1 ",
-                                                                            [rec_s, std[0],
-                                                                             start, end])
-                                                                        student_history1 = cursor.fetchall()
-
-                                                                    cursor.execute(
-                                                                        "select  activity_type,lat,long from student_history WHERE round_id = %s and student_id=%s and datetime >= %s and datetime <= %s   ORDER BY ID DESC LIMIT 1 ",
-                                                                        [rec_s, std[0],
-                                                                         start, end])
-                                                                    student_history1 = cursor.fetchall()
-
-                                                                    if student_history1:
-                                                                        if student_history1[0][0] == 'absent' or \
-                                                                                student_history1[0][0] == 'absent-all':
-                                                                            continue
-
-                                                                    deadline = sh_message_wizard[message_wizard][1]
-                                                                    notifications_text = str(
-                                                                        sh_message_wizard[message_wizard][0]) if \
-                                                                        sh_message_wizard[message_wizard][0] else ''
-                                                                    notifications += get_bus_notifition_student(
-                                                                        school_name, fname,
-                                                                        notifications_text,
-                                                                        sh_message_wizard[message_wizard][2],
-                                                                        deadline, rec_s,
-                                                                        attendance_round_yousef, std[0])
-
-                                                        continue
-                                                    cursor.execute(
-                                                        "select  id,round_start,round_end,na from round_history WHERE id=%s",
-                                                        [attendance_round[0][4]])
-                                                    round_history = cursor.fetchall()
-                                                    cursor.execute(
-                                                        "select  activity_type,lat,long,datetime from student_history WHERE round_id = %s and student_id=%s and history_id = %s ORDER BY ID DESC LIMIT 1 ",
-                                                        [rec_s, std[0], round_history[0][0]])
-                                                    student_history = cursor.fetchall()
-
-                                                    cursor.execute(
-                                                        "select  is_active,type,write_date from transport_round WHERE id = %s  ",
-                                                        [rec_s])
-                                                    is_active = cursor.fetchall()
-
-                                                    if is_active[0][0]:
-
-                                                        if sh_message_wizard[message_wizard][1] < round_history[0][1]:
-                                                            deadline = sh_message_wizard[message_wizard][1]
-                                                            notifications_text = str(
-                                                                sh_message_wizard[message_wizard][0]) if \
-                                                                sh_message_wizard[message_wizard][0] else ''
-
-                                                            notifications += get_bus_notifition_student(school_name,
-                                                                                                        fname,
-                                                                                                        notifications_text,
-                                                                                                        sh_message_wizard[
-                                                                                                            message_wizard][
-                                                                                                            2],
-                                                                                                        deadline, rec_s,
-                                                                                                        attendance_round,
-                                                                                                        std[0])
-                                                        if is_active[0][1] == 'pick_up':
-                                                            if (student_history[0][0] == 'absent-all' or
-                                                                student_history[0][0] == 'in' or
-                                                                student_history[0][0] == 'Onboard' or
-                                                                student_history[0][0] == 'absent' or
-                                                                student_history[0][0] == 'no-show') and (
-                                                                    sh_message_wizard[message_wizard][1] >
-                                                                    student_history[0][3]):
-                                                                continue
-                                                            deadline = sh_message_wizard[message_wizard][1]
-                                                            notifications_text = str(
-                                                                sh_message_wizard[message_wizard][0]) if \
-                                                                sh_message_wizard[message_wizard][0] else ''
-
-                                                            notifications += get_bus_notifition_student(school_name,
-                                                                                                        fname,
-                                                                                                        notifications_text,
-                                                                                                        sh_message_wizard[
-                                                                                                            message_wizard][
-                                                                                                            2],
-                                                                                                        deadline, rec_s,
-                                                                                                        attendance_round,
-                                                                                                        std[0])
-                                                        else:
-
-                                                            if (student_history[0][0] == 'absent-all' or
-                                                                student_history[0][0] == 'out' or
-                                                                student_history[0][0] == 'Offboard' or
-                                                                student_history[0][0] == 'absent' or
-                                                                student_history[0][0] == 'no-show') and (
-                                                                    sh_message_wizard[message_wizard][1] >
-                                                                    student_history[0][3]):
-
-                                                                continue
-
-                                                            deadline = sh_message_wizard[message_wizard][1]
-                                                            notifications_text = str(
-                                                                sh_message_wizard[message_wizard][0]) if \
-                                                                sh_message_wizard[message_wizard][0] else ''
-                                                            notifications += get_bus_notifition_student(school_name,
-                                                                                                        fname,
-                                                                                                        notifications_text,
-                                                                                                        sh_message_wizard[
-                                                                                                            message_wizard][
-                                                                                                            2],
-                                                                                                        deadline, rec_s,
-                                                                                                        attendance_round,
-                                                                                                        std[0])
-                                                    else:
-
-                                                        if sh_message_wizard[message_wizard][1] < is_active[0][2]:
-
-                                                            deadline = sh_message_wizard[message_wizard][1]
-                                                            notifications_text = str(
-                                                                sh_message_wizard[message_wizard][0]) if \
-                                                            sh_message_wizard[message_wizard][0] else ''
-
-
-                                                            if (sh_message_wizard[message_wizard][1] <
-                                                                    student_history[0][3]):
-                                                                notifications += get_bus_notifition_student(school_name,
-                                                                                                            fname,
-                                                                                                            notifications_text,
-                                                                                                            sh_message_wizard[
-                                                                                                                message_wizard][
-                                                                                                                2],
-                                                                                                            deadline,
-                                                                                                            rec_s,
-                                                                                                            attendance_round,
-                                                                                                            std[0])
-
-                                        if student_round_h:
-
-                                            cursor.execute(
-                                                "select  id,round_start from round_history WHERE round_id in %s and round_name in %s ORDER BY ID DESC LIMIT 1 ",
-                                                [tuple(student_round_h), tuple(student_round_h)])
-                                            round_history = cursor.fetchall()
-
-                                            if round_history:
-                                                history_round = []
-
-                                                for round_h in round_history:
-                                                    history_round.append(round_h[0])
-                                                for std in student_info:
-
-                                                    cursor.execute(
-                                                        "select  datetime,id,time_out,bus_check_in from round_student_history WHERE round_id in %s and student_id = %s and history_id in %s  ORDER BY ID DESC LIMIT 1 ",
-                                                        [tuple(student_round_h), std[0], tuple(history_round)])
-                                                    student_history = cursor.fetchall()
-
-                                                    #
-                                                    if student_history:
-
-                                                        for student_history1 in student_history:
-                                                            if student_history1[3]:
-
-                                                                if student_history1[1] in student_history_id:
-                                                                    continue
-                                                                else:
-                                                                    student_history_id.append(student_history1[1])
-
-                                                                    cursor.execute(
-                                                                        "select time_out,student_id,bus_check_in from round_student_history WHERE id = %s  ",
-                                                                        [student_history1[1]])
-                                                                    time_out = cursor.fetchall()
-                                                                    if time_out:
-                                                                        cursor.execute(
-                                                                            "select  display_name_search,name,name_ar from student_student WHERE  id = %s",
-                                                                            [time_out[0][1]])
-                                                                        name = cursor.fetchall()
-
-                                                                        if time_out[0][0] and time_out[0][2]:
-                                                                            if "Arabic" not in lang:
-                                                                                if name[0][1]:
-                                                                                    fname = name[0][1]
-                                                                                else:
-                                                                                    fname = name[0][2]
-
-                                                                            else:
-                                                                                if not name[0][2]:
-                                                                                    fname = name[0][1]
-                                                                                else:
-                                                                                    fname = name[0][2]
-
-                                                                            deadline = time_out[0][0] if time_out[0][
-                                                                                0] else time_out[0][2]
-
-                                                                            notifications.append(
-                                                                                get_info_message(deadline,
-                                                                                                 fname + " has just reached the school.  ",
-                                                                                                 avatar,
-                                                                                                 deadline.replace(
-                                                                                                     second=0) if deadline else '',
-                                                                                                 "Bus notification",
-                                                                                                 fname, time_out[0][1]))
-
-                            notifications.sort(key=get_year, reverse=True)
-
-                            for d in notifications:
-                                t = tuple(d.items())
-                                if t not in seen:
-                                    seen.add(t)
-                                    notifications_not_d.append(d)
-
-                            result = {"notifications": notifications_not_d}
-                            return Response(result)
-                    else:
-                        result = {'status': 'error'}
-                        return Response(result)
-                else:
-                    result = {'status': 'error Authorization'}
-                    return Response(result)
-            else:
-                result = {'status': 'Not found Authorization'}
-                return Response(result)
-        else:
-            result = {'status': 'Not found headers'}
-            return Response(result)
 
 
 def get_year(element):
@@ -2571,8 +1735,6 @@ def pre_arrive(request):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-
-                        school_name = ManagerParent.pincode(school_name)
 
                         status = request.data.get('status')
                         student_id = request.data.get('student_id')
@@ -2670,8 +1832,6 @@ def notify(request):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-
-                        school_name = ManagerParent.pincode(school_name)
                         type = request.data.get('location_type')
                         date = request.data.get('date')
                         student_id = request.data.get('student_id')
@@ -3201,7 +2361,6 @@ def post_attendance(request):
                         for e in db_name:
                             school_name = e[0]
 
-                        school_name = ManagerParent.pincode(school_name)
                         Session = request.data.get('session')
                         student_id = request.data.get('student_id')
                         start_date = request.data.get('start_date')
@@ -3254,7 +2413,6 @@ def post_workSheet(request):
                         for e in db_name:
                             school_name = e[0]
 
-                        school_name = ManagerParent.pincode(school_name)
 
                         Session = request.data.get('session')
                         student_id = request.data.get('student_id')
@@ -3303,8 +2461,6 @@ def post_Event(request):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-
-                        school_name = ManagerParent.pincode(school_name)
                         Session = request.data.get('session')
                         student_id = request.data.get('student_id')
                         wk_id = request.data.get('wk_id')
@@ -3351,7 +2507,6 @@ def cancel_event(request):
                     if db_name:
                         for e in db_name:
                             school_name = e[0]
-                        school_name = ManagerParent.pincode(school_name)
                         wk_id = request.data.get('wk_id')
                         with connections[school_name].cursor() as cursor:
                             cursor.execute(
@@ -4380,7 +3535,6 @@ def post_library(request):
                         if db_name:
                             for e in db_name:
                                 school_name = e[0]
-                            school_name = ManagerParent.pincode(school_name)
                             student_id = request.data.get('student_id')
                             book_id= request.data.get('book_id')
                             countDay=request.data.get('countDay')
