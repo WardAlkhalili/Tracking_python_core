@@ -1649,7 +1649,7 @@ def kids_hstory_new(request):
                                         "select  date,message_en,message_ar,title,title_ar,action_id,id,image_link,read_message,plan_name from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
                                         [branch_id[0][0], student[5], student[0]])
                                     student_mes = cursor.fetchall()
-                                    print("1653 line ",student_mes)
+                                    # print("1653 line ",student_mes)
                                 else:
                                     cursor.execute(
                                         "select  date,message_en,message_ar,title,title_ar,action_id,id,read_message from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
