@@ -177,6 +177,7 @@ def round_list(request):
                             school_name = e[0]
                         with connections[school_name].cursor() as cursor:
                             curr_date = date.today()
+                            print(calendar.day_name[curr_date.weekday()])
                             cursor.execute(
                                 "select  id  from school_day where name = %s",
                                 [calendar.day_name[curr_date.weekday()]])
@@ -199,6 +200,7 @@ def round_list(request):
                                     [request.data.get('bus_id'),
                                      'drop_off' if 'drop' in request.data.get('round_type') else 'pick_up'])
                                 list_round = cursor.fetchall()
+                            print(list_round)
                             list_round1 = []
                             columnNames = [column[0] for column in cursor.description]
                             for record in list_round:
@@ -277,6 +279,8 @@ def round_list(request):
                                     "select id,day_id,round_id from round_schedule WHERE round_id in %s and day_id =%s",
                                     [tuple(r_id), day_id[0][0]])
                                 rounds_details = cursor.fetchall()
+                                print(r_id,day_id)
+                                print(rounds_details)
                                 for id in rounds_details:
                                     l_round.append(id[2])
                                 for rec in range(len(rounds_details)):
