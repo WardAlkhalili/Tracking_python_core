@@ -5241,7 +5241,7 @@ def post_sec_item(request):
                     student_food_day = list(set(student_food_day))
                     canteen_banned=list(set(canteen_banned))
                     cursor.execute(
-                        "delete from banned_food where student_id=%s",
+                        "delete from allergies_food_day where student_id=%s",
                         [student_id])
 
                     for allergies in student_food_day:
@@ -5255,8 +5255,9 @@ def post_sec_item(request):
                             "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_id,day_id)VALUES (%s,%s,%s,%s,%s,%s);",
                             [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
                              allergies,day_id])
-            result = {'result': 'ok'}
-            return Response(result)
+
+                result = {'result': 'ok'}
+                return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
         result = {'result': 'Not headers'}
