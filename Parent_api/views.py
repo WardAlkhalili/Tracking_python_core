@@ -5452,6 +5452,7 @@ def get_food_s(request):
                         "SELECT id,product_id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
                         [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0], day_id])
                     student_food_day = cursor.fetchall()
+                    
                     for allergies in student_food_day:
 
                             cursor.execute(

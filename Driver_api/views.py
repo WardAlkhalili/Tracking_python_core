@@ -159,6 +159,7 @@ def round_list(request):
                             school_name = e[0]
                         with connections[school_name].cursor() as cursor:
                             curr_date = date.today()
+                            # print(calendar.day_name[curr_date.weekday()])
                             cursor.execute(
                                 "select  id  from school_day where name = %s",
                                 [calendar.day_name[curr_date.weekday()]])
@@ -172,15 +173,16 @@ def round_list(request):
                                 cursor.execute(
                                     "select name,start_time,pick_up_address,drop_off_address,pick_up_lat,pick_up_lng,drop_off_lat,drop_off_lng,route_id,id,is_active from transport_round WHERE vehicle_id = %s and  type = %s and  active_status='active' and year_id=%s",
                                     [request.data.get('bus_id'),
-                                     'drop_off' if 'drop' in request.data.get('round_type') else 'pick_up',
-                                     academic_year[0][0]])
+                                     'drop_off' if 'drop' in request.data.get('round_type') else 'pick_up',academic_year[0][0]])
                                 list_round = cursor.fetchall()
+
                             else:
                                 cursor.execute(
                                     "select name,start_time,pick_up_address,drop_off_address,pick_up_lat,pick_up_lng,drop_off_lat,drop_off_lng,route_id,id,is_active from transport_round WHERE vehicle_id = %s and  type = %s and  active_status='active'",
                                     [request.data.get('bus_id'),
                                      'drop_off' if 'drop' in request.data.get('round_type') else 'pick_up'])
                                 list_round = cursor.fetchall()
+                            # print(list_round)
                             list_round1 = []
                             columnNames = [column[0] for column in cursor.description]
                             for record in list_round:
@@ -197,60 +199,61 @@ def round_list(request):
                                     "select id,day_id from round_schedule WHERE round_id = %s and day_id = %s",
                                     [id['id'], day_id[0][0]])
                                 rounds_details = cursor.fetchall()
-                                cursor.execute(
-                                    "select student_id,sequence,transfer_state,source_round_id from transport_participant WHERE round_schedule_id = %s ORDER BY sequence ASC",
-                                    [rounds_details[0][0]])
-                                round_state_student = cursor.fetchall()
-                                if round_state_student:
-                                    start = datetime.datetime(datetime.datetime.now().year,datetime.datetime.now().month, datetime.datetime.now().day)
-                                    # end = datetime.datetime(datetime.datetime.now().year,
-                                    #                           datetime.datetime.now().month,
-                                    #                           datetime.datetime.now().day+1)
-                                    today=str(datetime.datetime.now().year)+"-"+str(datetime.datetime.now().month)+"-"+str(datetime.datetime.now().day)
-                                    for student_state in round_state_student:
-                                        type_round="drop_off" if 'drop' == request.data.get('round_type') else "pick_up"
-                                        cursor.execute(
-                                            "select * FROM student_round_transfer  WHERE student_id = %s  and state= %s and date_from <= %s and date_to >=%s and type =%s ",
-                                            [student_state[0], 'approve', today,today, type_round])
-                                        student_round_transfer = cursor.fetchall()
-
-
-                                        if 'drop' == request.data.get('round_type'):
-                                            cursor.execute("select display_name_search from student_student WHERE id = %s ",
-                                                           [student_state[0]])
-                                            student_student2 = cursor.fetchall()
+                                if rounds_details:
+                                    cursor.execute(
+                                        "select student_id,sequence,transfer_state,source_round_id from transport_participant WHERE round_schedule_id = %s ORDER BY sequence ASC",
+                                        [rounds_details[0][0]])
+                                    round_state_student = cursor.fetchall()
+                                    if round_state_student:
+                                        start = datetime.datetime(datetime.datetime.now().year,datetime.datetime.now().month, datetime.datetime.now().day)
+                                        # end = datetime.datetime(datetime.datetime.now().year,
+                                        #                           datetime.datetime.now().month,
+                                        #                           datetime.datetime.now().day+1)
+                                        today=str(datetime.datetime.now().year)+"-"+str(datetime.datetime.now().month)+"-"+str(datetime.datetime.now().day)
+                                        for student_state in round_state_student:
+                                            type_round="drop_off" if 'drop' == request.data.get('round_type') else "pick_up"
                                             cursor.execute(
-                                                "select * FROM school_message  WHERE title = %s  and driver_id= %s and date >= %s and date <= %s and search_type=%s and message=%s",
-                                                ['Pick Up By Parent', driver_id, start, datetime.datetime.now(),'buses',student_student2[0][0]])
-                                            school_message = cursor.fetchall()
-                                            cursor.execute(
-                                                "select * FROM pickup_request  WHERE student_name_id = %s  and state= %s and date >= %s and date <= %s",
-                                                [student_state[0], 'done',start, datetime.datetime.now()])
-                                            pickup_request = cursor.fetchall()
-                                            if pickup_request or school_message:
+                                                "select * FROM student_round_transfer  WHERE student_id = %s  and state= %s and date_from <= %s and date_to >=%s and type =%s ",
+                                                [student_state[0], 'approve', today,today, type_round])
+                                            student_round_transfer = cursor.fetchall()
 
-                                                moved_students.append(student_student2[0][0] + "</font></b><br> , has been picked up by parents")
 
-                                        if  student_round_transfer:
+                                            if 'drop' == request.data.get('round_type'):
+                                                cursor.execute("select display_name_search from student_student WHERE id = %s ",
+                                                               [student_state[0]])
+                                                student_student2 = cursor.fetchall()
+                                                cursor.execute(
+                                                    "select * FROM school_message  WHERE title = %s  and driver_id= %s and date >= %s and date <= %s and search_type=%s and message=%s",
+                                                    ['Pick Up By Parent', driver_id, start, datetime.datetime.now(),'buses',student_student2[0][0]])
+                                                school_message = cursor.fetchall()
+                                                cursor.execute(
+                                                    "select * FROM pickup_request  WHERE student_name_id = %s  and state= %s and date >= %s and date <= %s",
+                                                    [student_state[0], 'done',start, datetime.datetime.now()])
+                                                pickup_request = cursor.fetchall()
+                                                if pickup_request or school_message:
 
-                                            cursor.execute(
-                                                "SELECT *FROM public.school_day_student_round_transfer_rel WHERE school_day_id =%s and student_round_transfer_id=%s",
-                                                [day_id[0][0],student_round_transfer[0][0] ])
-                                            school_day_student_round_transfer_rel = cursor.fetchall()
+                                                    moved_students.append(student_student2[0][0] + "</font></b><br> , has been picked up by parents")
 
-                                            if school_day_student_round_transfer_rel:
-                                                if not student_state[3]:
-                                                    cursor.execute("select display_name_search from student_student WHERE id = %s ",
-                                                                   [student_state[0]])
-                                                    student_student21 = cursor.fetchall()
-                                                    moved_students.append( "The student <br><b><font color='#CE3337'>"+str(student_student21[0][0])+"</font></b><br> has been moved from this bus for this round only")
-                                                else:
-                                                    cursor.execute("select display_name_search from student_student WHERE id = %s ",
-                                                                   [student_state[0]])
-                                                    student_student21 = cursor.fetchall()
-                                                    moved_students.append(
-                                                        "The student <br><b><font color='#CE3337'>" + str(student_student21[0][
-                                                            0]) + "</font></b><br> has been added to this round. Before you start the round please check the availability of the student on the bus and the pickup location of the studen")
+                                            if  student_round_transfer:
+
+                                                cursor.execute(
+                                                    "SELECT *FROM public.school_day_student_round_transfer_rel WHERE school_day_id =%s and student_round_transfer_id=%s",
+                                                    [day_id[0][0],student_round_transfer[0][0] ])
+                                                school_day_student_round_transfer_rel = cursor.fetchall()
+
+                                                if school_day_student_round_transfer_rel:
+                                                    if not student_state[3]:
+                                                        cursor.execute("select display_name_search from student_student WHERE id = %s ",
+                                                                       [student_state[0]])
+                                                        student_student21 = cursor.fetchall()
+                                                        moved_students.append( "The student <br><b><font color='#CE3337'>"+str(student_student21[0][0])+"</font></b><br> has been moved from this bus for this round only")
+                                                    else:
+                                                        cursor.execute("select display_name_search from student_student WHERE id = %s ",
+                                                                       [student_state[0]])
+                                                        student_student21 = cursor.fetchall()
+                                                        moved_students.append(
+                                                            "The student <br><b><font color='#CE3337'>" + str(student_student21[0][
+                                                                0]) + "</font></b><br> has been added to this round. Before you start the round please check the availability of the student on the bus and the pickup location of the studen")
 
                                 moved_students1.append(moved_students)
                             if r_id:
@@ -258,9 +261,20 @@ def round_list(request):
                                     "select id,day_id,round_id from round_schedule WHERE round_id in %s and day_id =%s",
                                     [tuple(r_id), day_id[0][0]])
                                 rounds_details = cursor.fetchall()
+                                # print(r_id,day_id)
+                                # print(rounds_details)
                                 for id in rounds_details:
                                     l_round.append(id[2])
                                 for rec in range(len(rounds_details)):
+                                    cursor.execute(
+                                        "select name,start_time,pick_up_address,drop_off_address,pick_up_lat,pick_up_lng,drop_off_lat,drop_off_lng,route_id,id,is_active from transport_round WHERE id=%s",
+                                        [rounds_details[rec][2]])
+                                    list_round_yousef = cursor.fetchall()
+                                    #
+                                    # columnNames = [column[0] for column in cursor.description]
+                                    # for record in list_round_yousef:
+                                    #     list_round_yousef.append(dict(zip(columnNames, record)))
+                                    # print(list_round_yousef)
                                     day_list = {}
                                     day_name = calendar.day_name[curr_date.weekday()]
                                     cursor.execute(
@@ -284,12 +298,12 @@ def round_list(request):
 
                                     cursor.execute(
                                         "select  name,vehicle_id,driver_id from transport_round WHERE id = %s  ",
-                                        [list_round1[rec]['id']])
+                                        [list_round_yousef[0][9]])
                                     round_info = cursor.fetchall()
                                     cursor.execute(
                                         "select  id,round_start,round_end,na from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
-                                        [list_round1[rec]['id'], round_info[0][2], round_info[0][1],
-                                         list_round1[rec]['id']])
+                                        [list_round_yousef[0][9], round_info[0][2], round_info[0][1],
+                                         list_round_yousef[0][9]])
                                     round_history = cursor.fetchall()
                                     if round_history:
 
@@ -316,20 +330,16 @@ def round_list(request):
                                         cancel = False
                                     result1[rec] = {
 
-                                        "round_time": str(list_round1[rec]['start_time']),
-                                        "name": str(list_round1[rec]['name']),
+                                        "round_time": str(list_round_yousef[0][1]),
+                                        "name": str(list_round_yousef[0][0]),
                                         "date": None,
-                                        "pick_up_address": list_round1[rec]['pick_up_address'],
-                                        "drop_off_address": list_round1[rec]['drop_off_address'],
-                                        "pick_up_lat": list_round1[rec]['pick_up_lat'] if list_round1[rec][
-                                            'pick_up_lat'] else 0,
-                                        "pick_up_lng": list_round1[rec]['pick_up_lng'] if list_round1[rec][
-                                            'pick_up_lng'] else 0,
-                                        "drop_off_lat": list_round1[rec]['drop_off_lat'] if list_round1[rec][
-                                            'drop_off_lat'] else 0,
-                                        "drop_off_lng": list_round1[rec]['drop_off_lng'] if list_round1[rec][
-                                            'drop_off_lng'] else 0,
-                                        "route_id": list_round1[rec]['route_id'],
+                                        "pick_up_address": list_round_yousef[0][2],
+                                        "drop_off_address": list_round_yousef[0][3],
+                                        "pick_up_lat": list_round_yousef[0][4] if list_round_yousef[0][4] else 0,
+                                        "pick_up_lng": list_round_yousef[0][5]if list_round_yousef[0][5] else 0,
+                                        "drop_off_lat": list_round_yousef[0][6]if list_round_yousef[0][6] else 0,
+                                        "drop_off_lng": list_round_yousef[0][7] if list_round_yousef[0][7] else 0,
+                                        "route_id": list_round_yousef[0][8],
                                         "deleted_at": None,
                                         "round_canceled": cancel,
                                         "round_ended": end,
@@ -342,7 +352,7 @@ def round_list(request):
                                                 "vertices": []
                                             }
                                         },
-                                        "round_id": list_round1[rec]['id'],
+                                        "round_id": list_round_yousef[0][9],
                                         "moved_students":moved_students1[rec],
 
                                         "students_list": [day_list]
