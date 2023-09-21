@@ -1373,7 +1373,7 @@ def set_round_status(request):
 def checked(student_id, round_type, bus_num, student_name, round_id, driver_name, rec, school_name, parent_id):
     title = 'Bus notification'
     title_ar = "اشعار من الحافلة"
-    if round_type == 'pick_up':
+    if round_type != 'pick_up':
         title = "School Departure"
     message_ar = "صعد إلى الحافلة" + student_name + str(bus_num)
     message = student_name + ' has just been checked into the bus'
@@ -1788,7 +1788,6 @@ def students_bus_checks(request):
                                                 else:
                                                     ch_in = round_info[0][5] - 1
                                                     ch_out = round_info[0][4] + 1
-
                                                 cursor.execute(
                                                     "UPDATE public.transport_round SET total_checkedout_students= %s , total_checkedin_students= %s WHERE id=%s",
                                                     [ch_out, ch_in, round_id])
