@@ -1373,7 +1373,7 @@ def set_round_status(request):
 def checked(student_id,round_type,bus_num,student_name,round_id,driver_name,rec,school_name,parent_id):
     title = 'Bus notification'
     title_ar = "اشعار من الحافلة"
-    if round_type == 'pick_up':
+    if round_type != 'pick_up':
         title = "School Departure"
     message_ar = "صعد إلى الحافلة" + student_name + str(bus_num)
     message = student_name+ ' has just been checked into the bus'
