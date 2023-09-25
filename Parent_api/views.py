@@ -4946,12 +4946,12 @@ def get_category(request):
                         subMenu = []
                         for category_sub in pos_category_sub:
                             subMenu.append({"name":category_sub[1], "icon":"https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg",
-                                            "id":category_sub[0],"stutes":False
+                                            "id":category_sub[0],"stutes":False,"sub":True
 
                         })
                         if not category[2]:
                             date.append({"name":category[1], "id":category[0],"stutes":False, "icon":"https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg",
-                                         "subMenu":subMenu
+                                         "subMenu":subMenu,"sub":False
                             })
 
 
