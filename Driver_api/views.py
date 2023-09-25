@@ -1708,7 +1708,7 @@ def students_bus_checks(request):
                                         if student_name[0][4]:
                                             parent_id.append(student_name[0][4])
                                         parent_id = list(dict.fromkeys(parent_id))
-                                    print("line 1711",student_name)
+                                    # print("line 1711",student_name)
 
 
 
@@ -1723,8 +1723,8 @@ def students_bus_checks(request):
                                         "select name from res_partner WHERE id = %s  ",
                                         [driver_id])
                                     driver_name = cursor.fetchall()
-                                    print("line 1726", status)
-                                    print("round_history line 1727", round_history)
+                                    # print("line 1726", status)
+                                    # print("round_history line 1727", round_history)
                                     if round_history:
                                         now = datetime.date.today()
                                         if round_history[0][1].strftime('%Y-%m-%d') == str(now):
