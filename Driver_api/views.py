@@ -1690,8 +1690,11 @@ def students_bus_checks(request):
                         # for e in db_name:
                         school_name = db_name[0][0]
                         # school_name = Manager.pincode(school_name)
+
                         with connections[school_name].cursor() as cursor:
                             students = request.data.get('students')
+                            print(len(students))
+                            print(students)
                             for rec in students:
                                 round_id = rec['round_id']
                                 status = rec['status']
