@@ -164,6 +164,7 @@ def round_list(request):
                                 "select  id  from school_day where name = %s",
                                 [calendar.day_name[curr_date.weekday()]])
                             day_id = cursor.fetchall()
+
                             result = {}
                             cursor.execute(
                                 "SELECT id from academic_year WHERE state='active' ORDER BY ID DESC LIMIT 1",
@@ -1229,6 +1230,7 @@ def set_round_status(request):
                                                 "select student_id from transport_participant WHERE round_schedule_id = %s",
                                                 [rounds_details[0][0]])
                                             rounds_count_student = cursor.fetchall()
+
                                             ch_in = 0
                                             ch_out = 0
                                             if round_info[0][3] == 'pick_up':
@@ -1693,7 +1695,9 @@ def students_bus_checks(request):
 
                         with connections[school_name].cursor() as cursor:
                             students = request.data.get('students')
+
                             for rec in students:
+
                                 round_id = rec['round_id']
                                 status = rec['status']
                                 lat = rec['lat']
@@ -1752,12 +1756,14 @@ def students_bus_checks(request):
                                             "select  datetime,id from round_student_history WHERE round_id = %s and student_id=%s and history_id = %s  ORDER BY ID DESC LIMIT 1 ",
                                             [round_id, student_id, round_history[0][0]])
                                         student_history = cursor.fetchall()
+
                                         if student_history:
                                             cursor.execute(
                                                 "INSERT INTO  student_history (round_id,student_id,bus_check_in,datetime,history_id,lat,long,activity_type) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
                                                 [round_id, student_id, datetime.datetime.now(),
                                                  datetime.datetime.now(), round_history[0][0], lat, long, status])
                                             if status == 'in':
+
                                                 cursor.execute(
                                                     "UPDATE public.round_student_history SET bus_check_in = %s WHERE id =%s ",
                                                     [datetime.datetime.now(), student_history[0][1]])
@@ -1829,6 +1835,48 @@ def students_bus_checks(request):
                                                 "INSERT INTO  student_history (round_id,student_id,bus_check_in,datetime,history_id,lat,long,activity_type) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
                                                 [round_id, student_id, datetime.datetime.now(),
                                                  datetime.datetime.now(), round_history[0][0], lat, long, status])
+                                    else:
+
+                                        if status == 'out' or status == 'in':
+                                            total_checked_students(round_info[0][3], round_info[0][5],
+                                                                   round_info[0][4], round_id, school_name)
+                                            if status == 'in':
+
+                                                checked(student_id, round_info[0][3], bus_num[0][0],
+                                                        student_name[0][0],
+                                                        round_id,
+                                                        driver_name[0][0], student_id, school_name, parent_id)
+                                            elif status == 'out':
+                                                check_out(student_id, bus_num[0][0], student_name[0][0],
+                                                          round_id,
+                                                          driver_name[0][0], student_id, school_name, parent_id)
+
+                                            cursor.execute(
+                                                "INSERT INTO  round_student_history (round_id,student_id,driver_waiting,bus_check_in,datetime,history_id) VALUES (%s,%s,%s,%s,%s,%s); ",
+                                                [round_id, student_id, waiting_minutes, datetime.datetime.now(),
+                                                 datetime.datetime.now(), round_history[0][0]])
+                                        else:
+                                            if status == 'absent':
+                                                absent(student_id, student_name[0][0],
+                                                       round_id,
+                                                       driver_name[0][0], student_id, school_name, parent_id)
+                                            elif status == 'no-show':
+                                                no_show(student_id, student_name[0][0],
+                                                        round_id,
+                                                        driver_name[0][0], student_id, school_name, parent_id)
+                                            else:
+                                                near(round_info[0][3], bus_num[0][0], student_name[0][0],
+                                                     school_name, parent_id)
+                                            cursor.execute(
+                                                "INSERT INTO  round_student_history (round_id,student_id,history_id,driver_waiting,datetime) VALUES (%s,%s,%s,%s,%s); ",
+                                                [round_id, student_id, round_history[0][0], waiting_minutes,
+                                                 datetime.datetime.now()])
+
+                                        cursor.execute(
+                                            "INSERT INTO  student_history (round_id,student_id,bus_check_in,datetime,history_id,lat,long,activity_type) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
+                                            [round_id, student_id, datetime.datetime.now(),
+                                             datetime.datetime.now(), round_history[0][0], lat, long, status])
+
 
                             result = {'status': 'OK'}
                             return Response(result)
