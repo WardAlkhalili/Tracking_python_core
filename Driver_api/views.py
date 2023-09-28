@@ -1701,6 +1701,8 @@ def students_bus_checks(request):
                                 lat = rec['lat']
                                 long = rec['long']
                                 student_id = rec['student_id']
+                                print(school_name)
+
                                 if "waiting_minutes" in rec:
                                     waiting_minutes = rec['waiting_minutes']
                                 else:
@@ -1831,6 +1833,7 @@ def students_bus_checks(request):
                                                 "INSERT INTO  student_history (round_id,student_id,bus_check_in,datetime,history_id,lat,long,activity_type) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
                                                 [round_id, student_id, datetime.datetime.now(),
                                                  datetime.datetime.now(), round_history[0][0], lat, long, status])
+                                            print(rec)
 
 
 
