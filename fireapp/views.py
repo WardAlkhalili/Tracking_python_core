@@ -55,7 +55,6 @@ def Get_last_bus_location(request, bus_id, school_name):
     if request.method == 'GET':
         # fullRound = school_name + "-stg-round-" + str(bus_id)
         fullRound = school_name + "-round-" + str(bus_id)
-        print(fullRound)
         curr_date = date.today()
         #     # here we are doing firebase authentication
         # print("name sssssssssss11", request.build_absolute_uri())
@@ -94,8 +93,7 @@ def Get_last_bus_location(request, bus_id, school_name):
             now = datetime.today()
             # print(database.child(fullRound).child('2022-08-14').child('1660461821').get().val())
             location = database.child(fullRound).child(str(now.date())).get().val()
-            print(str(now.date()))
-            print(location)
+
 
             # for key, value in database.child(fullRound).child('2022-08-14').child('1660461821').get().val():
             #     route.append(value)
@@ -123,7 +121,6 @@ def Get_round_locations(request):
         round_id = request.data.get('round_id')
         start_unix_time = request.data.get('start_unix_time')
         fullRound = school_name + "-round-" + str(round_id)
-        print(fullRound)
         date = request.data.get('date').split('-')
         # print()
         currentDate = datetime.strptime(date[0] + "/" + date[1] + "/" + date[2], '%d/%m/%Y').date()
@@ -432,6 +429,7 @@ def push_notification(request):
 
                             # for rec in parent_id:
 
+
                             with connections[str(school_name)].cursor() as cursor:
                                     if  user_id != 0:
                                         cursor.execute("select  father_id,mother_id,responsible_id_value from student_student WHERE id= %s",
@@ -445,7 +443,8 @@ def push_notification(request):
                                                 settings = cursor.fetchall()
                                                 mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec), Q(db_name=school_name),Q(is_active=True)).values_list('mobile_token').order_by('-pk')
                                                 if settings:
-                                                    if settings[0] == 'None':
+                                                    if settings[0] != 'None':
+
                                                         data = json.loads(settings[0][0])
                                                         for e in mobile_token1:
                                                             if data['notifications']['nearby'] and (action == 'near' or action == 'driver'):
@@ -472,6 +471,7 @@ def push_notification(request):
                                                     result = push_service.notify_single_device(registration_id=registration_id,
                                                                                                message_title=message_title,
                                                                                                message_body=message_body,sound='new_beeb.mp3')
+                                                    print(result)
 
                                                     result1 = {
                                                         "route": 'Ok'
@@ -519,6 +519,7 @@ def push_notification(request):
                                     message_body = message
                                     result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
                                                                                message_body=message_body)
+                                    print(result)
                                     result1 = {
                                         "route": 'Ok'
                                     }
