@@ -1066,7 +1066,7 @@ def set_round_status(request):
                                 status = request.data.get('status')
                                 assistant_id = request.data.get('assistant_id')
                                 cursor.execute(
-                                    "select  name,vehicle_id,driver_id ,type from transport_round WHERE id = %s  ",
+                                    "select  name,vehicle_id,driver_id ,type,attendant_id from transport_round WHERE id = %s  ",
                                     [round_id])
                                 round_info = cursor.fetchall()
                                 curr_date = date.today()
@@ -1284,12 +1284,12 @@ def set_round_status(request):
                                             cursor.execute(
                                                 "INSERT INTO  round_history (round_name,round_id,distance,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
                                                 [round_id, round_id, distance, round_info[0][1], round_info[0][2],
-                                                 datetime.datetime.now(), assistant_id])
+                                                 datetime.datetime.now(),  round_info[0][4] if round_info[0][4] else ''])
                                     else:
                                         cursor.execute(
                                             "INSERT INTO  round_history (round_name,round_id,distance,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
                                             [round_id, round_id, distance, round_info[0][1], round_info[0][2],
-                                             datetime.datetime.now(), assistant_id])
+                                             datetime.datetime.now(), round_info[0][4] if round_info[0][4] else ''])
                                 elif status == 'end' or status == 'force_end':
                                     st_id = []
 
@@ -1399,27 +1399,34 @@ def checked(student_id,round_type,bus_num,student_name,round_id,driver_name,rec,
                 'mobile_token').order_by('-pk')
 
             if settings:
-                data = json.loads(settings[0][0])
-                locale = "en"
+                if(settings[0][0]):
+                    data = json.loads(settings[0][0])
+                    locale = "en"
 
-                check_in = True
+                    check_in = True
 
-                if type(data['notifications']) is str:
-                    li = list(data['notifications'].split(","))
-                    locale="ar" if "ar" in li[3] else 'en'
+                    if type(data['notifications']) is str:
+                        li = list(data['notifications'].split(","))
+                        locale="ar" if "ar" in li[3] else 'en'
 
-                    check_in=True if "true" in li[1] else False
+                        check_in=True if "true" in li[1] else False
 
 
-                elif type(data['notifications']) is dict:
-                    locale= data['notifications']['locale']
-                    check_in=data['notifications']['check_in']
+                    elif type(data['notifications']) is dict:
+                        locale= data['notifications']['locale']
+                        check_in=data['notifications']['check_in']
 
-                if check_in:
+                    if check_in:
+                        for res in mobile_token1:
+                            mobile_token.append(res[0])
+                        if mobile_token:
+                            send_notification_student(mobile_token,title if locale =='en' else title_ar,message if locale =='en' else message_ar)
+                else:
                     for res in mobile_token1:
                         mobile_token.append(res[0])
                     if mobile_token:
-                        send_notification_student(mobile_token,title if locale =='en' else title_ar,message if locale =='en' else message_ar)
+                        send_notification_student(mobile_token, title if locale == 'en' else title_ar,
+                                                  message if locale == 'en' else message_ar)
             else:
                 for res in mobile_token1:
                     mobile_token.append(res[0])
@@ -1501,26 +1508,33 @@ def check_out(student_id,bus_num,student_name,round_id,driver_name,rec,school_na
                 'mobile_token').order_by('-pk')
 
             if settings:
-                data = json.loads(settings[0][0])
-                locale = "en"
+                if settings[0][0]:
+                    data = json.loads(settings[0][0])
+                    locale = "en"
 
-                check_out = True
-                if type(data['notifications']) is str:
-                    li = list(data['notifications'].split(","))
-                    locale = "ar" if "ar" in li[3] else 'en'
+                    check_out = True
+                    if type(data['notifications']) is str:
+                        li = list(data['notifications'].split(","))
+                        locale = "ar" if "ar" in li[3] else 'en'
 
-                    check_out = True if "true" in li[2] else False
+                        check_out = True if "true" in li[2] else False
 
-                elif type(data['notifications']) is dict:
-                    locale = data['notifications']['locale']
+                    elif type(data['notifications']) is dict:
+                        locale = data['notifications']['locale']
 
-                    check_out = data['notifications']['check_out']
-                if check_out:
+                        check_out = data['notifications']['check_out']
+                    if check_out:
+                        for res in mobile_token1:
+                            mobile_token.append(res[0])
+
+                        send_notification_student(mobile_token, title if locale == 'en' else title_ar,
+                                                  message if locale == 'en' else message_ar)
+                else:
                     for res in mobile_token1:
                         mobile_token.append(res[0])
+                    if mobile_token:
+                        send_notification_student(mobile_token, title, message)
 
-                    send_notification_student(mobile_token, title if locale == 'en' else title_ar,
-                                              message if locale == 'en' else message_ar)
             else:
                 for res in mobile_token1:
                     mobile_token.append(res[0])
@@ -1560,25 +1574,31 @@ def near(round_type,bus_num,student_name,school_name,parent_id):
                 'mobile_token').order_by('-pk')
 
             if settings:
-                data = json.loads(settings[0][0])
-                locale = "en"
-                nearby = True
+                if settings[0][0]:
+                    data = json.loads(settings[0][0])
+                    locale = "en"
+                    nearby = True
 
-                if type(data['notifications']) is str:
-                    li = list(data['notifications'].split(","))
-                    locale = "ar" if "ar" in li[3] else 'en'
-                    nearby = True if "true" in li[0] else False
+                    if type(data['notifications']) is str:
+                        li = list(data['notifications'].split(","))
+                        locale = "ar" if "ar" in li[3] else 'en'
+                        nearby = True if "true" in li[0] else False
 
-                elif type(data['notifications']) is dict:
-                    locale = data['notifications']['locale']
-                    nearby = data['notifications']['nearby']
+                    elif type(data['notifications']) is dict:
+                        locale = data['notifications']['locale']
+                        nearby = data['notifications']['nearby']
 
-                if nearby:
+                    if nearby:
+                        for res in mobile_token1:
+                            mobile_token.append(res[0])
+
+                        send_notification_student(mobile_token, title if locale == 'en' else title_ar,
+                                                  message if locale == 'en' else message_ar)
+                else:
                     for res in mobile_token1:
                         mobile_token.append(res[0])
-
-                    send_notification_student(mobile_token, title if locale == 'en' else title_ar,
-                                              message if locale == 'en' else message_ar)
+                    if mobile_token:
+                        send_notification_student(mobile_token, title, message)
             else:
                 for res in mobile_token1:
                     mobile_token.append(res[0])
@@ -1688,7 +1708,7 @@ def students_bus_checks(request):
                                         waiting_minutes = ""
                                     curr_date = date.today()
                                     cursor.execute(
-                                        "select  name,vehicle_id,driver_id,type,total_checkedout_students,total_checkedin_students from transport_round WHERE id = %s  ",
+                                        "select  name,vehicle_id,driver_id,type,total_checkedout_students,total_checkedin_students,attendant_id from transport_round WHERE id = %s  ",
                                         [round_id])
                                     round_info = cursor.fetchall()
                                     cursor.execute(
@@ -1708,9 +1728,6 @@ def students_bus_checks(request):
                                         if student_name[0][4]:
                                             parent_id.append(student_name[0][4])
                                         parent_id = list(dict.fromkeys(parent_id))
-                                    # print("line 1711",student_name)
-
-
 
                                     if type(driver_id) is not int:
                                         for e in driver_id:
@@ -1723,8 +1740,6 @@ def students_bus_checks(request):
                                         "select name from res_partner WHERE id = %s  ",
                                         [driver_id])
                                     driver_name = cursor.fetchall()
-                                    # print("line 1726", status)
-                                    # print("round_history line 1727", round_history)
                                     if round_history:
                                         now = datetime.date.today()
                                         if round_history[0][1].strftime('%Y-%m-%d') == str(now):
@@ -1830,6 +1845,111 @@ def students_bus_checks(request):
                                                     "INSERT INTO  student_history (round_id,student_id,bus_check_in,datetime,history_id,lat,long,activity_type) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
                                                     [round_id, student_id, datetime.datetime.now(),
                                                      datetime.datetime.now(), round_history[0][0], lat, long, status])
+                                        else:
+                                            cursor.execute(
+                                                "INSERT INTO  round_history (round_name,round_id,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s); ",
+                                                [round_id, round_id, round_info[0][1], round_info[0][2],
+                                                 datetime.datetime.now(), round_info[0][6] if round_info[0][6] else ''])
+
+                                            if round_info[0][3] == 'pick_up':
+                                                ch_in = round_info[0][5] + 1
+                                                ch_out = round_info[0][4] - 1
+                                            else:
+                                                ch_in = round_info[0][5] - 1
+                                                ch_out = round_info[0][4] + 1
+
+                                            cursor.execute(
+                                                "UPDATE public.transport_round SET total_checkedout_students= %s , total_checkedin_students= %s WHERE id=%s",
+                                                [ch_out, ch_in, round_id])
+
+                                            if status == 'out' or status == 'in':
+                                                if status == 'in':
+                                                    checked(student_id, round_info[0][3], bus_num[0][0],
+                                                            student_name[0][0],
+                                                            round_id,
+                                                            driver_name[0][0], student_id, school_name, parent_id)
+                                                elif status == 'out':
+                                                    check_out(student_id, bus_num[0][0], student_name[0][0],
+                                                              round_id,
+                                                              driver_name[0][0], student_id, school_name, parent_id)
+
+                                                cursor.execute(
+                                                    "INSERT INTO  round_student_history (round_id,student_id,driver_waiting,bus_check_in,datetime,history_id) VALUES (%s,%s,%s,%s,%s,%s); ",
+                                                    [round_id, student_id, waiting_minutes, datetime.datetime.now(),
+                                                     datetime.datetime.now(), round_history[0][0]])
+                                            else:
+                                                if status == 'absent':
+                                                    absent(student_id, student_name[0][0],
+                                                           round_id,
+                                                           driver_name[0][0], student_id, school_name, parent_id)
+                                                elif status == 'no-show':
+                                                    no_show(student_id, student_name[0][0],
+                                                            round_id,
+                                                            driver_name[0][0], student_id, school_name, parent_id)
+                                                else:
+                                                    near(round_info[0][3], bus_num[0][0], student_name[0][0],
+                                                         school_name, parent_id)
+                                                cursor.execute(
+                                                    "INSERT INTO  round_student_history (round_id,student_id,history_id,driver_waiting,datetime) VALUES (%s,%s,%s,%s,%s); ",
+                                                    [round_id, student_id, round_history[0][0], waiting_minutes,
+                                                     datetime.datetime.now()])
+
+                                            cursor.execute(
+                                                "INSERT INTO  student_history (round_id,student_id,bus_check_in,datetime,history_id,lat,long,activity_type) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
+                                                [round_id, student_id, datetime.datetime.now(),
+                                                 datetime.datetime.now(), round_history[0][0], lat, long, status])
+                                    else:
+                                        cursor.execute(
+                                            "INSERT INTO  round_history (round_name,round_id,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s); ",
+                                            [round_id, round_id, round_info[0][1], round_info[0][2],
+                                             datetime.datetime.now(), round_info[0][6] if round_info[0][6] else ''])
+
+                                        if round_info[0][3] == 'pick_up':
+                                            ch_in = round_info[0][5] + 1
+                                            ch_out = round_info[0][4] - 1
+                                        else:
+                                            ch_in = round_info[0][5] - 1
+                                            ch_out = round_info[0][4] + 1
+
+                                        cursor.execute(
+                                            "UPDATE public.transport_round SET total_checkedout_students= %s , total_checkedin_students= %s WHERE id=%s",
+                                            [ch_out, ch_in, round_id])
+
+                                        if status == 'out' or status == 'in':
+                                            if status == 'in':
+                                                checked(student_id, round_info[0][3], bus_num[0][0], student_name[0][0],
+                                                        round_id,
+                                                        driver_name[0][0], student_id, school_name, parent_id)
+                                            elif status == 'out':
+                                                check_out(student_id, bus_num[0][0], student_name[0][0],
+                                                          round_id,
+                                                          driver_name[0][0], student_id, school_name, parent_id)
+
+                                            cursor.execute(
+                                                "INSERT INTO  round_student_history (round_id,student_id,driver_waiting,bus_check_in,datetime,history_id) VALUES (%s,%s,%s,%s,%s,%s); ",
+                                                [round_id, student_id, waiting_minutes, datetime.datetime.now(),
+                                                 datetime.datetime.now(), round_history[0][0]])
+                                        else:
+                                            if status == 'absent':
+                                                absent(student_id, student_name[0][0],
+                                                       round_id,
+                                                       driver_name[0][0], student_id, school_name, parent_id)
+                                            elif status == 'no-show':
+                                                no_show(student_id, student_name[0][0],
+                                                        round_id,
+                                                        driver_name[0][0], student_id, school_name, parent_id)
+                                            else:
+                                                near(round_info[0][3], bus_num[0][0], student_name[0][0],
+                                                     school_name, parent_id)
+                                            cursor.execute(
+                                                "INSERT INTO  round_student_history (round_id,student_id,history_id,driver_waiting,datetime) VALUES (%s,%s,%s,%s,%s); ",
+                                                [round_id, student_id, round_history[0][0], waiting_minutes,
+                                                 datetime.datetime.now()])
+
+                                        cursor.execute(
+                                            "INSERT INTO  student_history (round_id,student_id,bus_check_in,datetime,history_id,lat,long,activity_type) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
+                                            [round_id, student_id, datetime.datetime.now(),
+                                             datetime.datetime.now(), round_history[0][0], lat, long, status])
 
                                     cursor.execute(
                                         "select  id from round_schedule WHERE round_id = %s AND day_id =(select  id  from school_day where name = %s)",
