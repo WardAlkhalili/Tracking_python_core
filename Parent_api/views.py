@@ -453,13 +453,10 @@ def student_pick_up(request):
 
 @api_view(['POST', 'GET'])
 def kids_list(request):
-
-
     if request.method == 'POST':
         if request.headers:
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
-
                     l = []
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
 
@@ -473,7 +470,7 @@ def kids_list(request):
                     for e in mobile_token:
                         mobile_token = e[0]
                     database_yousef_test = ManagerParent.objects.filter(mobile_token=mobile_token).values_list('db_name')
-                    for d in database_yousef_test:
+                    for d in db_name:
                         db_name_test.append(d[0])
                     for e in parent_id:
                         parent_id = e[0]
