@@ -4885,11 +4885,13 @@ def get_info_canteen_student(request):
                             "select name from product_attribute_value WHERE id = %s ",
                             [allergies[0]])
                         allergies_food1 = cursor.fetchall()
-                        date_allergies.append({"name":allergies_food1[0][0],
-                        })
+                        # print(allergies_food1)
+                        if allergies_food1:
+                            date_allergies.append({"name":allergies_food1[0][0],
+                            })
 
                 result = {'food_allegies': date_allergies,"banned_food":str(len(banned_food)),"schdule_meals":date_schdule,"spending":date_spending}
-
+                # print(result)
                 return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
