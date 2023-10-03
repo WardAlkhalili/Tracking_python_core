@@ -4675,7 +4675,7 @@ def get_time_table(request, student_id):
                         return Response(result)
 
 @api_view(['GET','POST'])
-def get_Allergies(request):
+def get_Allergies(request,student_id):
     if request.method == 'GET':
         if request.headers:
             if request.headers.get('Authorization'):
@@ -4698,14 +4698,30 @@ def get_Allergies(request):
                     cursor.execute("select id,name from product_attribute_value WHERE attribute_id = (select id from product_attribute WHERE name = 'allergies' or name = 'Allergies')",
                                    [])
                     product_attribute_value = cursor.fetchall()
+                    cursor.execute(
+                        "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
+                        [student_id])
+                    student_info = cursor.fetchall()
 
+                    cursor.execute(
+                        "select branch_id,company_id from res_users WHERE id=%s",
+                        [student_info[0][1]])
+                    student_info_users = cursor.fetchall()
 
                     for allergies in product_attribute_value:
                         if allergies[1]:
+                            sta=False
+                            cursor.execute(
+                                "select attribute_value_id from allergies_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and attribute_value_id=%s",
+                                [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0],allergies[0]])
+                            allergies_food_student = cursor.fetchall()
+                            if allergies_food_student:
+                                sta=True
                             date.append({"id":allergies[0],
                                          "name": allergies[1],
                                          "icon":"https://trackware-schools.s3.eu-central-1.amazonaws.com/allergic.svg",
-                                        "des":""
+                                        "des":"",
+                                         "st":sta
 
                             })
 
@@ -4747,23 +4763,23 @@ def get_Allergies(request):
                         [student_info[0][1]])
                     student_info_users = cursor.fetchall()
 
-                    cursor.execute(
-                        "select attribute_value_id from allergies_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
-                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
-                    allergies_food = cursor.fetchall()
-
-                    allergies_food = list(set(allergies_food))
+                    # cursor.execute(
+                    #     "select attribute_value_id from allergies_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
+                    #     [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
+                    # allergies_food = cursor.fetchall()
+                    #
+                    # allergies_food = list(set(allergies_food))
                     cursor.execute(
                         "delete from allergies_food where student_id=%s",
                         [student_id])
 
-                    for allergies in allergies_food:
-
-                        if allergies not  in list_al:
-                            cursor.execute(
-                                "INSERT INTO allergies_food(year_id, student_id, branch_id,company_id,attribute_value_id)VALUES (%s,%s,%s,%s,%s);",
-                                [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
-                                 allergies])
+                    # for allergies in allergies_food:
+                    #
+                    #     if allergies not  in list_al:
+                    #         cursor.execute(
+                    #             "INSERT INTO allergies_food(year_id, student_id, branch_id,company_id,attribute_value_id)VALUES (%s,%s,%s,%s,%s);",
+                    #             [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                    #              allergies])
                     for allergies in list_al:
 
                         cursor.execute(
@@ -5474,6 +5490,82 @@ def get_food_s(request):
                             })
 
                 result = {'date_item': date_ite}
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
+
+
+@api_view(['POST'])
+def get_food_all_s(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                        parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+                student_id = request.data.get('student_id')
+                day_id = request.data.get('day_id')
+                stat=request.data.get('all_ch')
+                with connections[school_name].cursor() as cursor:
+
+                    cursor.execute(
+                        "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
+                        [student_id])
+                    student_info = cursor.fetchall()
+
+                    cursor.execute(
+                        "select branch_id,company_id from res_users WHERE id=%s",
+                        [student_info[0][1]])
+                    student_info_users = cursor.fetchall()
+                    cursor.execute(
+                        "SELECT id,product_id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
+                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0], day_id])
+                    student_food_day = cursor.fetchall()
+                    cursor.execute(
+                        "select  id from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
+                        [parent_id, parent_id, parent_id])
+                    student = cursor.fetchall()
+                    student_id1=[]
+                    for std in student:
+                        student_id1.append(std[0])
+                    student_id1.remove(int(student_id))
+                    for std in student_id1:
+
+                        cursor.execute(
+                            "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
+                            [std])
+                        student_info1 = cursor.fetchall()
+
+                        cursor.execute(
+                            "select branch_id,company_id from res_users WHERE id=%s",
+                            [student_info1[0][1]])
+                        student_info_users1 = cursor.fetchall()
+                        cursor.execute(
+                            "delete from allergies_food_day where student_id=%s and year_id=%s and day_id=%s and company_id=%s ",
+                            [std,student_info1[0][0],day_id, student_info_users1[0][0]])
+                        if stat:
+
+                            for allergies in student_food_day:
+                                cursor.execute(
+                                    "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_id,day_id)VALUES (%s,%s,%s,%s,%s,%s);",
+                                    [student_info1[0][0], std, student_info_users1[0][0], student_info_users1[0][0],
+                                     allergies[1], day_id])
+
+                    result = {'result': 'ok'}
+                    return Response(result)
+                result = {'result': 'Not found school name' }
                 return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
