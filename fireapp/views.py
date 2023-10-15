@@ -441,7 +441,7 @@ def push_notification(request):
                                                 settings = cursor.fetchall()
                                                 mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec), Q(db_name=school_name),Q(is_active=True)).values_list('mobile_token').order_by('-pk')
                                                 if settings:
-                                                    if settings[0] == 'None':
+                                                    if settings[0] != 'None':
                                                         data = json.loads(settings[0][0])
                                                         for e in mobile_token1:
                                                             if data['notifications']['nearby'] and (action == 'near' or action == 'driver'):
@@ -544,4 +544,14 @@ def push_notification(request):
                                 "route": 'Ok'
                             }
                             return Response(result1)
+@api_view(['POST'])
+def test_lis(request):
+    if request.method == 'POST':
+        # school_name = request.data.get('school_name')
+        print(request.data)
 
+        result1 = {
+            "route": 'successful'
+        }
+
+        return Response(result1)
