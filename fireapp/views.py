@@ -13,6 +13,9 @@ from datetime import datetime
 import calendar
 import json
 from threading import Timer
+
+from fireapp.models import ManagerTracker
+
 # Remember the code we copied from Firebase.
 # This can be copied by clicking on the settings icon > project settings, then scroll down in your firebase dashboard
 
@@ -544,12 +547,21 @@ def push_notification(request):
                                 "route": 'Ok'
                             }
                             return Response(result1)
-@api_view(['POST'])
+@api_view(['POST','GET'])
 def test_lis(request):
     if request.method == 'POST':
         # school_name = request.data.get('school_name')
         print(request.data)
 
+        manager = ManagerTracker(data_api=request.data)
+        manager.save()
+        result1 = {
+            "route": 'successful'
+        }
+        return Response(result1)
+    elif request.method=='GET':
+        manager = ManagerTracker(data_api='unique_id')
+        manager.save()
         result1 = {
             "route": 'successful'
         }
