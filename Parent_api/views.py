@@ -80,12 +80,15 @@ def student_login_uni(request):
                     "name": student_id[0][1],
                     "mobile": student_id[0][3],
                     "notif": 1 if notify else 0,
+                    "distance":500,
                     "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" + student_id[0][7],
                     "Authorization": "Bearer " + token
 
                 }
 
         return Response(result)
+
+
 
 
 @api_view(['POST'])
@@ -398,6 +401,9 @@ def Routs_uni(request):
             }
 
         return Response(result)
+
+
+
 
 
 @api_view(['POST'])
@@ -5199,7 +5205,7 @@ def get_Allergies(request):
         return Response(result)
 
 
-@api_view(['GET'])
+@api_view(['GET', 'POST'])
 def get_Allergies_student(request, student_id):
     if request.method == 'GET':
         if request.headers:
@@ -5235,6 +5241,66 @@ def get_Allergies_student(request, student_id):
                                          })
 
                 result = {'result': date}
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                        parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+
+                with connections[school_name].cursor() as cursor:
+                    student_id = request.data.get('student_id')
+                    list_al = request.data.get('list_al')
+                    # allergies.food
+                    cursor.execute(
+                        "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
+                        [student_id])
+                    student_info = cursor.fetchall()
+
+                    cursor.execute(
+                        "select branch_id,company_id from res_users WHERE id=%s",
+                        [student_info[0][1]])
+                    student_info_users = cursor.fetchall()
+
+                    # cursor.execute(
+                    #     "select attribute_value_id from allergies_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
+                    #     [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
+                    # allergies_food = cursor.fetchall()
+                    #
+                    # allergies_food = list(set(allergies_food))
+                    cursor.execute(
+                        "delete from allergies_food where student_id=%s",
+                        [student_id])
+
+                    # for allergies in allergies_food:
+                    #
+                    #     if allergies not  in list_al:
+                    #         cursor.execute(
+                    #             "INSERT INTO allergies_food(year_id, student_id, branch_id,company_id,attribute_value_id)VALUES (%s,%s,%s,%s,%s);",
+                    #             [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                    #              allergies])
+                    for allergies in list_al:
+                        cursor.execute(
+                            "INSERT INTO allergies_food(year_id, student_id, branch_id,company_id,attribute_value_id)VALUES (%s,%s,%s,%s,%s);",
+                            [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                             allergies])
+
+                result = {'result': 'ok'}
                 return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
