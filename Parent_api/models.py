@@ -28,3 +28,24 @@ class ManagerParent(models.Model):
 def create_auth_token(sender, instance=None, created=False, **kwargs):
     if created:
         auth_token = Token.objects.create(user=instance)
+
+
+
+
+
+class ManagerStudentUni(models.Model):
+    token = models.CharField(max_length=5000)
+    db_name = models.CharField(max_length=5000)
+    user_id = models.CharField(max_length=5000)
+    student_id = models.CharField(max_length=5000)
+    school_id = models.CharField(max_length=5000)
+    mobile_token = models.CharField(max_length=5000, default="sadf")
+    is_active = models.BooleanField(default=True)
+
+    def pincode(pin):
+        p = re.sub(r'\d+', '', pin)
+        database_name = re.sub('[QWERTYUIOPASDFGHJKLZXCVBNM]', '', p)
+        return database_name
+
+    def __str__(self):
+        return self.token

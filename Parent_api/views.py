@@ -18,9 +18,388 @@ import requests
 import pytz
 import datetime
 
-
 import urllib.request
 import math
+import jwt
+
+
+@api_view(['POST'])
+def student_login_uni(request):
+    if request.method == 'POST':
+        password = request.data.get('password')
+        user_name = request.data.get('user_name')
+        school_name = request.data.get('school_name')
+        mobile_token = request.data.get('mobile_token')
+        platform = request.data.get('platform')
+        with connections[school_name].cursor() as cursor:
+            cursor.execute(
+                "select id,name,email,mobile,company_id,lang_app,notif,image_url from res_partner WHERE university_id_number = %s",
+                [password])
+            student_id = cursor.fetchall()
+            result = {
+
+                "status": "user not found",
+            }
+            if student_id:
+                notify = student_id[0][6] if student_id[0][6] else True
+                lang_app = student_id[0][5] if student_id[0][5] else 'en'
+                result = {
+
+                    "token": mobile_token,
+                    "db_name": school_name,
+                    "company_id": student_id[0][4] if student_id[0][4] else '',
+                    "mobile": student_id[0][3],
+                    "uid": student_id[0][0],
+                    "lang_app": lang_app,
+                    "name": student_id[0][1],
+                    "notif": 1 if notify else 0,
+                    "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" + student_id[0][7],
+                }
+                token = jwt.encode(
+                    payload=result,
+                    key='my_secret'
+                )
+                decoded_data = jwt.decode(jwt=token,
+                                          key='my_secret',
+                                          algorithms=["HS256"])
+                print(decoded_data)
+                manager_parent = ManagerStudentUni(token=token, db_name=school_name, user_id=student_id[0][0],
+                                                   student_id=student_id[0][0],
+                                                   school_id=student_id[0][4], mobile_token=mobile_token)
+                manager_parent.save()
+                cursor.execute(
+                    "UPDATE public.res_partner SET mobile_token=%s,platform=%s,secret_token=%s  WHERE id=%s;",
+                    [mobile_token, platform, token, student_id[0][0]])
+                result = {
+                    "status": "ok",
+                    "company_id": student_id[0][4] if student_id[0][4] else '',
+                    "uid": student_id[0][0],
+                    "token": mobile_token,
+                    "db_name": school_name,
+                    "lang_app": lang_app,
+                    "name": student_id[0][1],
+                    "mobile": student_id[0][3],
+                    "notif": 1 if notify else 0,
+                    "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" + student_id[0][7],
+                    "Authorization": "Bearer " + token
+
+                }
+
+        return Response(result)
+
+
+@api_view(['POST'])
+def student_profile_uni(request):
+    if request.method == 'POST':
+        result = {
+
+            "status": "user not found",
+        }
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    password = request.data.get('pass')
+                    notify = request.data.get('notify')
+
+                    lang = request.data.get('lang')
+
+                    decoded_data = jwt.decode(jwt=au,
+                                              key='my_secret',
+                                              algorithms=["HS256"])
+                    school_name = decoded_data['db_name']
+                    student_id = decoded_data['uid']
+                    with connections[school_name].cursor() as cursor:
+                        if student_id:
+                            cursor.execute(
+                                "UPDATE public.res_partner SET lang_app=%s,notif=%s  WHERE id=%s;",
+                                [lang, notify, student_id])
+                            result = {
+                                "status": "ok",
+
+                            }
+
+        return Response(result)
+
+
+@api_view(['POST'])
+def Routs_uni(request):
+    if request.method == 'POST':
+        # result = {
+        #
+        #     "status": "user not found",
+        # }
+        # if request.headers:
+        # if request.headers.get('Authorization'):
+        #     if 'Bearer' in request.headers.get('Authorization'):
+        #         au = request.headers.get('Authorization').replace('Bearer', '').strip()
+        #
+        #         decoded_data = jwt.decode(jwt=au,
+        #                                   key='my_secret',
+        #                                   algorithms=["HS256"])
+        #         school_name = decoded_data['db_name']
+        # student_id = decoded_data['uid']
+        # transport.route
+        lo = [
+
+            [
+                {'name': 'ddddd',
+                 "id": 1,
+                 "time": "7:30",
+                 "lat": 32.0039233,
+                 "long": 35.834021,
+                 "round": [{"name": "111122", "time": "111122", }]
+
+                 },
+                {'name': '11111',
+                 "id": 2,
+                 "time": "7:30",
+                 "lat": 32.0080538,
+                 "long": 35.8395464,
+                 # 32.0080538,35.8395464
+                 "round": [{"name": "1222222223", "time": "111122", }]
+
+                 },
+                {'name': '222',
+                 "id": 3,
+                 "time": "7:30",
+                 "lat": 32.0077638,
+                 "long": 35.8399085,
+                 # 32.0077638,35.8399085
+                 "round": [{"name": "985555555", "time": "111122", }]
+
+                 },
+                {'name': '333',
+                 "id": 4,
+                 "time": "7:30",
+                 "lat": 32.0077496,
+                 "long": 35.8397858,
+                 # 32.0077496,35.8397858
+                 "round": [{"name": "weee", "time": "111122", }]
+
+                 },
+                {'name': '444',
+                 "id": 5,
+                 "time": "7:30",
+                 "lat": 32.008176,
+                 "long": 35.8397722,
+                 # 32.008176,35.8397722
+                 "round": [{"name": "weee", "time": "111122", }]
+                 },
+                {'name': '5555',
+                 "id": 6,
+
+                 "time": "7:30",
+                 "lat": 32.0051623,
+                 "long": 35.8468374,
+                 # 32.0051623,35.8468374
+                 "round": [{"name": "weee", "time": "111122", }]
+                 }
+            ],
+
+            [
+                {'name': 'ddddd',
+                 "id": 1,
+                 "time": "7:30",
+                 "lat": 32.0316656,
+                 "long": 35.7723242,
+                 # 32.0316656,35.7723242
+                 "round": [{"name": "111122", "time": "111122", }]
+
+                 },
+                {'name': '11111',
+                 "id": 2,
+                 "time": "7:30",
+                 "lat": 32.0493359,
+                 "long": 35.7536113,
+                 # 32.0493359,35.7536113
+                 "round": [{"name": "1222222223", "time": "111122", }]
+
+                 },
+                {'name': '222',
+                 "id": 3,
+                 "time": "7:30",
+                 "lat": 32.0556425,
+                 "long": 35.7505148,
+                 # 32.0556425,35.7505148
+                 "round": [{"name": "985555555", "time": "111122", }]
+
+                 },
+                {'name': '333',
+                 "id": 4,
+                 "time": "7:30",
+                 "lat": 32.0615472,
+                 "long": 35.7391802,
+                 # 32.0615472,35.7391802
+                 "round": [{"name": "weee", "time": "111122", }]
+
+                 },
+                {'name': '444',
+                 "id": 5,
+                 "time": "7:30",
+                 "lat": 32.0618116,
+                 "long": 35.7300177,
+                 # 32.0618116,35.7300177
+                 "round": [{"name": "weee", "time": "111122", }]
+                 },
+                {'name': '5555',
+                 "id": 6,
+
+                 "time": "7:30",
+                 "lat": 32.0634174,
+                 "long": 35.7214676,
+                 # 32.0634174,35.7214676
+                 "round": [{"name": "weee", "time": "111122", }]
+                 }
+            ],
+
+            [{'name': 'ddddd',
+              "id": 1,
+              "time": "7:30",
+              "lat": 32.0039233,
+              "long": 35.834021,
+              "round": [{"name": "111122", "time": "111122", }]
+
+              },
+             {'name': '11111',
+              "id": 2,
+              "time": "7:30",
+              "lat": 32.0080538,
+              "long": 35.8395464,
+
+              "round": [{"name": "1222222223", "time": "111122", }]
+
+              },
+             {'name': '222',
+              "id": 3,
+              "time": "7:30",
+              "lat": 32.0077638,
+              "long": 35.8399085,
+              # 32.0077638,35.8399085
+              "round": [{"name": "985555555", "time": "111122", }]
+
+              },
+             {'name': '333',
+              "id": 4,
+              "time": "7:30",
+              "lat": 32.0077496,
+              "long": 35.8397858,
+              # 32.0077496,35.8397858
+              "round": [{"name": "weee", "time": "111122", }]
+
+              },
+             {'name': '444',
+              "id": 5,
+              "time": "7:30",
+              "lat": 32.008176,
+              "long": 35.8397722,
+              # 32.008176,35.8397722
+              "round": [{"name": "weee", "time": "111122", }]
+              },
+             {'name': '5555',
+              "id": 6,
+
+              "time": "7:30",
+              "lat": 32.0051623,
+              "long": 35.8468374,
+              # 32.0051623,35.8468374
+              "round": [{"name": "weee", "time": "111122", }]
+              }
+             ],
+
+            [{'name': 'ddddd',
+              "id": 1,
+              "time": "7:30",
+              "lat": 32.0039233,
+              "long": 35.834021,
+              "round": [{"name": "111122", "time": "111122", }]
+
+              },
+             {'name': '11111',
+              "id": 2,
+              "time": "7:30",
+              "lat": 32.0080538,
+              "long": 35.8395464,
+              # 32.0080538,35.8395464
+              "round": [{"name": "1222222223", "time": "111122", }]
+
+              },
+             {'name': '222',
+              "id": 3,
+              "time": "7:30",
+              "lat": 32.0077638,
+              "long": 35.8399085,
+              # 32.0077638,35.8399085
+              "round": [{"name": "985555555", "time": "111122", }]
+
+              },
+             {'name': '333',
+              "id": 4,
+              "time": "7:30",
+              "lat": 32.0077496,
+              "long": 35.8397858,
+              # 32.0077496,35.8397858
+              "round": [{"name": "weee", "time": "111122", }]
+
+              },
+             {'name': '444',
+              "id": 5,
+              "time": "7:30",
+              "lat": 32.008176,
+              "long": 35.8397722,
+              # 32.008176,35.8397722
+              "round": [{"name": "weee", "time": "111122", }]
+              },
+             {'name': '5555',
+              "id": 6,
+
+              "time": "7:30",
+              "lat": 32.0051623,
+              "long": 35.8468374,
+              # 32.0051623,35.8468374
+              "round": [{"name": "weee", "time": "111122", }]
+              }
+             ]
+
+        ]
+        with connections['tst'].cursor() as cursor:
+            from_stations = []
+            from_university = []
+            cursor.execute(
+                "select id,name from transport_route",
+                [])
+            all_route = cursor.fetchall()
+            for rec in range(len(all_route)):
+                from_university.append({
+                    "name": all_route[rec][1],
+                    "id": all_route[rec][0],
+                    "station_rout": lo[rec],
+                })
+
+                # cursor.execute(
+                #     "select name from round_station WHERE id = %s",
+                #     [st[0]])
+                # station = cursor.fetchall()
+                # cursor.execute(
+                #     "select id,name,start_time,type from transport_round WHERE route_id = %s",
+                #     [rec[0]])
+                # all_round = cursor.fetchall()
+                # for res in all_round:
+                #     cursor.execute(
+                #         "select station_id from round_schedule WHERE round_id = %s",
+                #         [res[0]])
+                #     all_st = cursor.fetchall()
+
+            station = []
+            station.append({"result": lo})
+            result = {
+                "from_stations": from_university,
+                # "station": station,
+            }
+
+        return Response(result)
+
+
 @api_view(['POST'])
 def parent_login(request):
     if request.method == 'POST':
@@ -111,9 +490,6 @@ def parent_login(request):
         return Response(result)
 
 
-
-
-
 @api_view(['POST', 'GET'])
 def feed_back(request):
     if request.method == 'POST':
@@ -194,7 +570,6 @@ def settings(request):
                             cursor.execute(
                                 "UPDATE public.school_parent SET settings=%s WHERE id=%s;",
                                 [settings, parent_id])
-
 
                             result = {
                                 'status': 'ok', }
@@ -453,8 +828,6 @@ def student_pick_up(request):
 
 @api_view(['POST', 'GET'])
 def kids_list(request):
-
-
     if request.method == 'POST':
         if request.headers:
             if request.headers.get('Authorization'):
@@ -468,11 +841,12 @@ def kids_list(request):
                     db_name = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('db_name')
                     parent_id = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('parent_id')
                     school_id = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('school_id')
-                    mobile_token =ManagerParent.objects.filter(token=au.split(",")[0]).values_list('mobile_token')
-                    db_name_test=[]
+                    mobile_token = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('mobile_token')
+                    db_name_test = []
                     for e in mobile_token:
                         mobile_token = e[0]
-                    database_yousef_test = ManagerParent.objects.filter(mobile_token=mobile_token).values_list('db_name')
+                    database_yousef_test = ManagerParent.objects.filter(mobile_token=mobile_token).values_list(
+                        'db_name')
                     for d in database_yousef_test:
                         db_name_test.append(d[0])
                     for e in parent_id:
@@ -693,8 +1067,9 @@ def kids_list(request):
 
                                     }
                                     url_m = {}
-                                    model_list = ( "Badges", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
-                                        "Weekly Plans", 'Online Exams','Library','Timetable')
+                                    model_list = (
+                                    "Badges", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
+                                    "Weekly Plans", 'Online Exams', 'Library', 'Timetable')
                                     cursor.execute("select name from ir_ui_menu where name in %s", [model_list])
                                     list = cursor.fetchall()
                                     res = []
@@ -731,7 +1106,8 @@ def kids_list(request):
                                         if 'Homework' == rec1:
                                             x['Homeworks']['arabic_url'] = x['Homeworks']['arabic_url'] + str(
                                                 student1[rec]['user_id'])
-                                            x['Homeworks']['url'] = x['Homeworks']['url'] + str(student1[rec]['user_id'])
+                                            x['Homeworks']['url'] = x['Homeworks']['url'] + str(
+                                                student1[rec]['user_id'])
                                             model.append(x['Homeworks'])
 
                                         if 'Badges' == rec1:
@@ -751,7 +1127,7 @@ def kids_list(request):
                                                 student1[rec]['user_id'])
                                             x['Clinic']['url'] = x['Clinic']['url'] + str(student1[rec]['user_id'])
                                             model.append(x['Clinic'])
-                                        if 'Library'==rec1:
+                                        if 'Library' == rec1:
                                             x['Library']['arabic_url'] = x['Library']['arabic_url'] + str(
                                                 student1[rec]['user_id'])
                                             x['Library']['url'] = x['Library']['url'] + str(student1[rec]['user_id'])
@@ -759,13 +1135,13 @@ def kids_list(request):
                                         if 'Timetable' == rec1:
                                             x['Timetable']['arabic_url'] = x['Timetable']['arabic_url'] + str(
                                                 student1[rec]['user_id'])
-                                            x['Timetable']['url'] = x['Timetable']['url'] + str(student1[rec]['user_id'])
+                                            x['Timetable']['url'] = x['Timetable']['url'] + str(
+                                                student1[rec]['user_id'])
                                             model.append(x['Timetable'])
                                     cursor.execute(
                                         "select name from ir_ui_menu where name ='Live Tracking'  LIMIT 1")
                                     tracking = cursor.fetchall()
                                     if len(tracking) > 0:
-
                                         model.append({
                                             # "url": "https://" + school_name + ".staging.trackware.com/my/Absence/" + str(
                                             #     student1[rec]['user_id']),
@@ -838,9 +1214,10 @@ def kids_list(request):
                                         student_history = cursor.fetchall()
                                         # print(student_history,"doasdklasodsadlssks")
                                         if student_history:
-                                            student_st =  student_history[0][0] if student_history else ""
+                                            student_st = student_history[0][0] if student_history else ""
                                         else:
-                                            student_st =  'in' if rounds_count_student[0][1] == "Onboard" else rounds_count_student[0][1]  if rounds_count_student else ""
+                                            student_st = 'in' if rounds_count_student[0][1] == "Onboard" else \
+                                            rounds_count_student[0][1] if rounds_count_student else ""
 
                                         cursor.execute(
                                             "select name,type,attendant_id,vehicle_id,driver_id from transport_round WHERE id = %s",
@@ -875,11 +1252,11 @@ def kids_list(request):
                                         [student1[rec]['id']])
                                     student_distribution_line = cursor.fetchall()
                                     if student_distribution_line:
-                                            cursor.execute(
-                                                "SELECT name FROM public.academic_grade WHERE id = %s",
-                                                [student_distribution_line[0][0]])
-                                            academic_grade = cursor.fetchall()
-                                            student_grade = academic_grade[0][0] if academic_grade else ''
+                                        cursor.execute(
+                                            "SELECT name FROM public.academic_grade WHERE id = %s",
+                                            [student_distribution_line[0][0]])
+                                        academic_grade = cursor.fetchall()
+                                        student_grade = academic_grade[0][0] if academic_grade else ''
 
                                     if student_grade == None:
                                         cursor.execute(
@@ -892,14 +1269,13 @@ def kids_list(request):
 
                                         # ---------------------
                                     fname = student1[rec]['display_name_search']
-                                    defaultImage=''
-                                    if student1[rec]['gender']=='male':
-                                        defaultImage='https://trackware-schools.s3.eu-central-1.amazonaws.com/male.png'
+                                    defaultImage = ''
+                                    if student1[rec]['gender'] == 'male':
+                                        defaultImage = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/male.png'
                                     else:
                                         defaultImage = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/fma.png'
 
-
-                                    if any('English' in x[0]  for x in lang):
+                                    if any('English' in x[0] for x in lang):
 
                                         fname = student1[rec]['name']
 
@@ -907,10 +1283,10 @@ def kids_list(request):
 
                                         fname = student1[rec]['name_ar']
                                     # password,national_id
-                                    user_name=student1[rec]['national_id']
+                                    user_name = student1[rec]['national_id']
                                     password = student1[rec]['national_id']
                                     if student1[rec]['password']:
-                                         password=student1[rec]['password']
+                                        password = student1[rec]['password']
                                     url = 'https://tst.tracking.trackware.com/web/session/authenticate'
                                     # url = 'http://192.168.1.82:9098/web/session/authenticate'
                                     try:
@@ -942,7 +1318,8 @@ def kids_list(request):
                                     # session = response1.cookies
 
                                     studen_list.append({
-                                        "schoolImage": school_logo[0][0] if school_logo[0][0] else'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
+                                        "schoolImage": school_logo[0][0] if school_logo[0][
+                                            0] else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
                                         "name": student1[rec]['display_name_search'],
                                         "fname": fname,
                                         "id": student1[rec]['id'],
@@ -1066,12 +1443,11 @@ def read_survey(request):
                             if read_message[0][0]:
                                 cursor.execute(
                                     "UPDATE public.survey_user_input SET read_message=not(read_message) WHERE id=%s;",
-                                    [ message_id])
+                                    [message_id])
                             else:
                                 cursor.execute(
                                     "UPDATE public.survey_user_input SET read_message=true WHERE id=%s;",
                                     [message_id])
-
 
                             result = {
                                 'status': 'ok', }
@@ -1089,6 +1465,7 @@ def read_survey(request):
         else:
             result = {'result': 'error4'}
             return Response(result)
+
 
 @api_view(['POST'])
 def hide_survey(request):
@@ -1111,7 +1488,7 @@ def hide_survey(request):
                         with connections[school_name].cursor() as cursor:
                             cursor.execute(
                                 "UPDATE public.survey_user_input SET show_message=not(show_message) WHERE id=%s;",
-                                [ message_id])
+                                [message_id])
                             result = {'status': 'ok', }
                             return Response(result)
                     else:
@@ -1126,6 +1503,8 @@ def hide_survey(request):
         else:
             result = {'result': 'error4'}
             return Response(result)
+
+
 @api_view(['POST'])
 def read_message(request):
     if request.method == 'POST':
@@ -1153,7 +1532,9 @@ def read_message(request):
                             # print(read_message[0][0])
                             if read_message[0][0]:
                                 # print("ddddddddddddddddddddddddd")
-                                cursor.execute("UPDATE public.message_student SET read_message=not(read_message) WHERE id=%s;", [message_id])
+                                cursor.execute(
+                                    "UPDATE public.message_student SET read_message=not(read_message) WHERE id=%s;",
+                                    [message_id])
                             else:
                                 # print("ddddddddddddddddddddddddqqd")
                                 cursor.execute(
@@ -1163,7 +1544,7 @@ def read_message(request):
                                     "UPDATE public.message_student SET read_message=true WHERE id=%s;",
                                     [message_id])
 
-                            result = {'status': 'ok',}
+                            result = {'status': 'ok', }
 
                             return Response(result)
                     else:
@@ -1178,6 +1559,7 @@ def read_message(request):
         else:
             result = {'result': 'error4'}
             return Response(result)
+
 
 @api_view(['POST'])
 def hide_message(request):
@@ -1201,12 +1583,12 @@ def hide_message(request):
 
                             cursor.execute(
                                 "select show_message from message_student WHERE id =%s",
-                                [ message_id])
+                                [message_id])
                             message_student = cursor.fetchall()
                             if message_student[0][0]:
                                 cursor.execute(
                                     "UPDATE public.message_student SET show_message=not(show_message) WHERE id=%s;",
-                                    [ message_id])
+                                    [message_id])
                             else:
                                 cursor.execute(
                                     "UPDATE public.message_student SET show_message=false WHERE id=%s;",
@@ -1225,41 +1607,48 @@ def hide_message(request):
         else:
             result = {'result': 'error4'}
             return Response(result)
-def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0',notifications_title_ar='',notifications_text_ar='',student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',image_link='',plan_name=''):
-    show=show_notif
+
+
+def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name,
+                         student_id, id=0, stutes_notif=None, show_notif=None, action_id='0', notifications_title_ar='',
+                         notifications_text_ar='',
+                         student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
+                         image_link='', plan_name=''):
+    show = show_notif
     # if student_image:
     #     print(student_image)
-    stutes=stutes_notif
+    stutes = stutes_notif
     # print(stutes)
-    if stutes=='Read' or stutes:
-        stutes="Mark As UnRead"
-    elif  stutes=='UnRead' or not stutes :
+    if stutes == 'Read' or stutes:
+        stutes = "Mark As UnRead"
+    elif stutes == 'UnRead' or not stutes:
         stutes = "Mark As Read"
     else:
         stutes = "Mark As Read"
 
-    if show==None:
-        show="show"
+    if show == None:
+        show = "show"
 
     notificationsType = ''
-    icon_tracking=''
-    if 'Weekly Plan' in notifications_title  or 'Assignment' in notifications_title or  'Homework' in notifications_title or  'Exam' in notifications_title or 'educational' in notifications_title:
+    icon_tracking = ''
+    if 'Weekly Plan' in notifications_title or 'Assignment' in notifications_title or 'Homework' in notifications_title or 'Exam' in notifications_title or 'educational' in notifications_title:
         notificationsType = 'educational'
-        if ( 'Weekly Plan' in notifications_title or 'educational' in notifications_title):
+        if ('Weekly Plan' in notifications_title or 'educational' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg'
-        elif ( 'Assignment' in notifications_title):
+        elif ('Assignment' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg'
-        elif ( 'Exam' in notifications_title):
+        elif ('Exam' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg'
         elif ('Homework' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg'
 
-    elif 'Pick Up By Parent' in notifications_title or ('Absence' in notifications_title and  notifications_title  != "Absence notification" ) or  'clinic' in notifications_title or 'library' in notifications_title :
+    elif 'Pick Up By Parent' in notifications_title or (
+            'Absence' in notifications_title and notifications_title != "Absence notification") or 'clinic' in notifications_title or 'library' in notifications_title:
 
         notificationsType = 'Absence'
-        if ( 'clinic' in notifications_title):
+        if ('clinic' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg'
-        elif ( 'library' in notifications_title):
+        elif ('library' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg'
         else:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
@@ -1279,21 +1668,20 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         elif "has just been checked into the bus." in notifications_text:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-get-on-bus.svg'
         elif notifications_title == "Absence notification":
-            notifications_title="bsence notification"
+            notifications_title = "bsence notification"
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
         else:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-shuttle-bus.svg'
     else:
         notificationsType = 'announcement'
         if (notifications_title == 'survey'):
-            icon_tracking=show_notif
-        elif('Event' in notifications_title)  :
+            icon_tracking = show_notif
+        elif ('Event' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg'
-        elif ( 'Meeting' in notifications_title):
+        elif ('Meeting' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg'
         else:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
-
 
     if student_name:
         return {
@@ -1305,17 +1693,17 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             "student_name": student_name,
             "student_id": str(student_id),
             "notificationsType": notificationsType,
-            "icon_tracking":icon_tracking,
+            "icon_tracking": icon_tracking,
             "id": str(id),
             "stutes": stutes,
             "show": show,
             "student_image": student_image,
             "action_id": str(action_id),
-            "notifications_text_ar": notifications_text_ar if notifications_text_ar else  notifications_text,
+            "notifications_text_ar": notifications_text_ar if notifications_text_ar else notifications_text,
             "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
-            "imageLink":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(image_link)if image_link else '',
+            "imageLink": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
+                image_link) if image_link else '',
             "plan_name": plan_name if plan_name else ''
-
 
         }
     else:
@@ -1327,15 +1715,16 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             "notifications_title": notifications_title,
             "student_id": str(student_id),
             "notificationsType": notificationsType,
-            "icon_tracking":icon_tracking,
-            "id":id,
-            "stutes":stutes,
-            "show":show,
+            "icon_tracking": icon_tracking,
+            "id": id,
+            "stutes": stutes,
+            "show": show,
             "student_image": student_image,
             "action_id": str(action_id),
             "notifications_text_ar": notifications_text_ar if notifications_text_ar else notifications_text,
             "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
-            "imageLink": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(image_link)if image_link else '',
+            "imageLink": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
+                image_link) if image_link else '',
             "plan_name": plan_name if plan_name else ''
 
         }
@@ -1346,7 +1735,7 @@ def get_school_message_new(student_id, school_name, school_message, student_name
     notifications = []
     with connections[school_name].cursor() as cursor:
         message_ids = []
-        seen=set()
+        seen = set()
         for rec in school_message:
             message_ids.append(rec[0])
         message_ids = list(dict.fromkeys(message_ids))
@@ -1377,7 +1766,8 @@ def get_school_message_new(student_id, school_name, school_message, student_name
                     avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_msg_admin.png"
                     create_date = school_message1[rec][4].replace(second=0) if school_message1[rec][4] else ''
                     notifications_title = school_message1[rec][2] if school_message1[rec][2] else ''
-                    d = {'notifications_title': notifications_title,'notifications_text': notifications_text,'student_id':student_id}
+                    d = {'notifications_title': notifications_title, 'notifications_text': notifications_text,
+                         'student_id': student_id}
                     t = tuple(d.items())
                     if t not in seen:
                         seen.add(t)
@@ -1386,17 +1776,22 @@ def get_school_message_new(student_id, school_name, school_message, student_name
                             if ('Event' in notifications_title):
                                 cursor.execute(
                                     " select id,event_id,state,new_added from school_event_registration where  student_id =%s and  event_id =%s  ORDER BY create_date DESC",
-                                    [student_id,res[4]])
+                                    [student_id, res[4]])
                                 events = cursor.fetchall()
 
                                 if events:
-                                    action_id=events[0][0]
+                                    action_id = events[0][0]
                         notifications.append(
                             get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title,
-                                                 student_name, student_id,res[1],"Read" if res[2] else 'UnRead',"show" if res[3] else 'not show' ,action_id,'','','https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
-                                                student_image[0][0]) if student_image[0][0]else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',))
+                                                 student_name, student_id, res[1], "Read" if res[2] else 'UnRead',
+                                                 "show" if res[3] else 'not show', action_id, '', '',
+                                                 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
+                                                     student_image[0][0]) if student_image[0][
+                                                     0] else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png', ))
 
     return notifications
+
+
 def get_survey(student_id, school_name):
     notifications = []
     with connections[school_name].cursor() as cursor:
@@ -1444,13 +1839,15 @@ def get_survey(student_id, school_name):
                             state = assingment[4]
                             start = False
                         if not state == "done":
-                            school_base="https://"+school_name+".tracking.trackware.com/"+"/survey/start/"+survey[0][4]+"?answer_token="+assingment[2]
+                            school_base = "https://" + school_name + ".tracking.trackware.com/" + "/survey/start/" + \
+                                          survey[0][4] + "?answer_token=" + assingment[2]
                             read = "Read" if assingment[5] else 'UnRead'
                             notifications.append(
                                 get_info_message_new(survey[0][10], survey[0][3], avatar, survey[0][10], "survey",
-                                                     user_id_q[0][1], student_id, assingment[0],read,school_base))
+                                                     user_id_q[0][1], student_id, assingment[0], read, school_base))
 
     return notifications
+
 
 def get_student_history_new(student_id, school_name, student_name):
     notifications = []
@@ -1484,15 +1881,19 @@ def get_student_history_new(student_id, school_name, student_name):
                 avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                 create_date = deadline.replace(second=0) if deadline else ''
                 notifications_title = "Message from bus no. " + str(bus_num[0][0]) + "   " + str(student_name)
-                notifications_title_ar =  str(student_name)+ " "+str(bus_num[0][0]) + "   "+"رسالة من الحافلة رقم . "
+                notifications_title_ar = str(student_name) + " " + str(
+                    bus_num[0][0]) + "   " + "رسالة من الحافلة رقم . "
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title,
-                                     student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
+                                         student_name, student_id, 0, None, None, '0', notifications_title_ar,
+                                         notifications_text_ar))
     return notifications
 
 
-def get_bus_notifition_student_new(school_name, student_name, notifications_text, notifications_title, deadline, round_id,
-                               attendance_round, student_id,notifications_title_ar,notifications_text_ar,fname_ar):
+def get_bus_notifition_student_new(school_name, student_name, notifications_text, notifications_title, deadline,
+                                   round_id,
+                                   attendance_round, student_id, notifications_title_ar, notifications_text_ar,
+                                   fname_ar):
     notifications = []
     avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
     with connections[school_name].cursor() as cursor:
@@ -1517,29 +1918,34 @@ def get_bus_notifition_student_new(school_name, student_name, notifications_text
                     notifications_title = 'Bus notification'
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title,
-                                     student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
+                                         student_name, student_id, 0, None, None, '0', notifications_title_ar,
+                                         notifications_text_ar))
         elif "did not check into the bus today" in notifications_text:
             if str(student_name) in notifications_text or str(fname_ar) in notifications_text:
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "No Show Notification",
-                                     student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
+                                         student_name, student_id, 0, None, None, '0', notifications_title_ar,
+                                         notifications_text_ar))
         elif "has not checked into the bus" in notifications_text:
             if str(student_name) in notifications_text or str(fname_ar) in notifications_text:
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "Absence notification",
-                                     student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
+                                         student_name, student_id, 0, None, None, '0', notifications_title_ar,
+                                         notifications_text_ar))
         elif "has arrived at your home and" in notifications_text:
 
             if str(student_name) in notifications_text or str(fname_ar) in notifications_text:
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "Checkout Notification",
-                                     student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
+                                         student_name, student_id, 0, None, None, '0', notifications_title_ar,
+                                         notifications_text_ar))
 
         elif "just reached" in notifications_text:
             if str(student_name) in notifications_text or str(fname_ar) in notifications_text:
                 notifications.append(
                     get_info_message_new(deadline, notifications_text, avatar, create_date, "Bus notification",
-                                     student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
+                                         student_name, student_id, 0, None, None, '0', notifications_title_ar,
+                                         notifications_text_ar))
         elif "The pickup round is started" in notifications_text:
             if str(student_name) in notifications_text or str(fname_ar) in notifications_text:
                 notifications.append(
@@ -1560,19 +1966,23 @@ def get_bus_notifition_student_new(school_name, student_name, notifications_text
                 else:
                     time = attendance_round[0][3]
             notifications_title_ar = str(student_name) + " " + str(bus_num) + "   " + "رسالة من الحافلة رقم . "
-            if 'emergency_student'+str(student_id) != notifications_title:
+            if 'emergency_student' + str(student_id) != notifications_title:
                 if time:
                     if time > deadline:
                         notifications.append(
                             get_info_message_new(deadline, notifications_text, avatar, create_date,
-                                             "Message from bus no. " + str(
-                                                 bus_num[0][0]) + "  " + str(student_name), student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
+                                                 "Message from bus no. " + str(
+                                                     bus_num[0][0]) + "  " + str(student_name), student_name,
+                                                 student_id, 0, None, None, '0', notifications_title_ar,
+                                                 notifications_text_ar))
 
 
             else:
                 notifications.append(
-                    get_info_message_new(deadline, notifications_text, avatar, create_date, "Message from bus no. " + str(
-                        bus_num[0][0]) + "  " + str(student_name), student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text_ar))
+                    get_info_message_new(deadline, notifications_text, avatar, create_date,
+                                         "Message from bus no. " + str(
+                                             bus_num[0][0]) + "  " + str(student_name), student_name, student_id, 0,
+                                         None, None, '0', notifications_title_ar, notifications_text_ar))
     return notifications
 
 
@@ -1627,7 +2037,7 @@ def kids_hstory_new(request):
                                 [])
                             information_schema_survey = cursor.fetchall()
                             if information_schema_survey:
-                                notifications +=get_survey(parent_id,school_name)
+                                notifications += get_survey(parent_id, school_name)
                             cursor.execute(
                                 "select  id,display_name_search,image_url,name,name_ar,year_id,user_id from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
@@ -1643,7 +2053,7 @@ def kids_hstory_new(request):
                             fname_ar = ''
                             for student in student_info:
                                 # print("safkdsfkdkkfsdfkd")
-                        
+
                                 cursor.execute(
                                     " select branch_id from res_users where id=%s",
                                     [student[6]])
@@ -1673,9 +2083,9 @@ def kids_hstory_new(request):
                                 #         "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
                                 #         [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
                                 #         year_id = fields.Many2one('academic.year', 'Academic Year', ondelete='cascade')
-                                avatar="https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                 for mes in student_mes:
-                                    action_id=mes[5]
+                                    action_id = mes[5]
                                     if ('Event' in mes[3]):
                                         cursor.execute(
                                             " select id,event_id,state,new_added from school_event_registration where  student_id =%s and  event_id =%s  ORDER BY create_date DESC",
@@ -1691,8 +2101,13 @@ def kids_hstory_new(request):
                                                              mes[0].replace(
                                                                  second=0) if mes[0] else '',
                                                              mes[3],
-                                                             student[1], student[0], mes[6], mes[8] if information_schema else mes[7], None, action_id if mes[5] else '0', mes[4],
-                                                             mes[2],'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',mes[7]if information_schema else '',plan_name=mes[9]if information_schema else ''))
+                                                             student[1], student[0], mes[6],
+                                                             mes[8] if information_schema else mes[7], None,
+                                                             action_id if mes[5] else '0', mes[4],
+                                                             mes[2],
+                                                             'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
+                                                             mes[7] if information_schema else '',
+                                                             plan_name=mes[9] if information_schema else ''))
                             #
                             #     student_round = []
                             #     if  any('English'  in x[0]  for x in lang):
@@ -1889,7 +2304,6 @@ def kids_hstory_new(request):
                                     #     "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
                                     #     [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
 
-
                             result = {"notifications": notifications_not_d}
                             return Response(result)
                     else:
@@ -1906,10 +2320,9 @@ def kids_hstory_new(request):
             return Response(result)
 
 
-
 def get_info_message(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id):
     notificationsType = ''
-    icon_tracking=''
+    icon_tracking = ''
     if notifications_title == 'Weekly plan' or notifications_title == 'Assignment' or notifications_title == 'Homework' or notifications_title == 'Exam' or notifications_title == 'educational':
         notificationsType = 'educational'
     elif notifications_title == 'Pick Up By Parent' or notifications_title == 'Absence':
@@ -1946,7 +2359,7 @@ def get_info_message(deadline, notifications_text, avatar, create_date, notifica
             "student_name": student_name,
             "student_id": str(student_id),
             "notificationsType": notificationsType,
-            "icon_tracking":icon_tracking
+            "icon_tracking": icon_tracking
 
         }
     else:
@@ -1958,7 +2371,7 @@ def get_info_message(deadline, notifications_text, avatar, create_date, notifica
             "notifications_title": notifications_title,
             "student_id": str(student_id),
             "notificationsType": notificationsType,
-        "icon_tracking":icon_tracking
+            "icon_tracking": icon_tracking
         }
 
 
@@ -2038,10 +2451,12 @@ def get_student_history(student_id, school_name, student_name):
                 avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                 create_date = deadline.replace(second=0) if deadline else ''
                 notifications_title = "Message from bus no. " + str(bus_num[0][0]) + "   " + str(student_name)
-                notifications_title_ar = str(student_name) + " " + str(bus_num[0][0]) + "   " + "رسالة من الحافلة رقم . "
+                notifications_title_ar = str(student_name) + " " + str(
+                    bus_num[0][0]) + "   " + "رسالة من الحافلة رقم . "
                 notifications.append(
                     get_info_message(deadline, notifications_text, avatar, create_date, notifications_title,
-                                     student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text))
+                                     student_name, student_id, 0, None, None, '0', notifications_title_ar,
+                                     notifications_text))
     return notifications
 
 
@@ -2062,9 +2477,7 @@ def get_bus_notifition_student(school_name, student_name, notifications_text, no
             [vehicle_id[0][0]])
         bus_num = cursor.fetchall()
 
-
         if "just been" in notifications_text:
-
 
             if str(student_name) in notifications_text:
 
@@ -2122,13 +2535,15 @@ def get_bus_notifition_student(school_name, student_name, notifications_text, no
                     notifications.append(
                         get_info_message(deadline, notifications_text, avatar, create_date,
                                          "Message from bus no. " + str(
-                                             bus_num[0][0]) + "  " + str(student_name), student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text))
+                                             bus_num[0][0]) + "  " + str(student_name), student_name, student_id, 0,
+                                         None, None, '0', notifications_title_ar, notifications_text))
 
 
             else:
                 notifications.append(
                     get_info_message(deadline, notifications_text, avatar, create_date, "Message from bus no. " + str(
-                        bus_num[0][0]) + "  " + str(student_name), student_name, student_id,0,None,None,'0',notifications_title_ar,notifications_text))
+                        bus_num[0][0]) + "  " + str(student_name), student_name, student_id, 0, None, None, '0',
+                                     notifications_title_ar, notifications_text))
     return notifications
 
 
@@ -2426,7 +2841,6 @@ def kids_hstory(request):
                                                                 student_history[0][0] == 'no-show') and (
                                                                     sh_message_wizard[message_wizard][1] >
                                                                     student_history[0][3]):
-
                                                                 continue
 
                                                             deadline = sh_message_wizard[message_wizard][1]
@@ -2449,8 +2863,7 @@ def kids_hstory(request):
                                                             deadline = sh_message_wizard[message_wizard][1]
                                                             notifications_text = str(
                                                                 sh_message_wizard[message_wizard][0]) if \
-                                                            sh_message_wizard[message_wizard][0] else ''
-
+                                                                sh_message_wizard[message_wizard][0] else ''
 
                                                             if (sh_message_wizard[message_wizard][1] <
                                                                     student_history[0][3]):
@@ -2555,7 +2968,6 @@ def kids_hstory(request):
 
 
 def get_year(element):
-    
     return element['date_time']
 
 
@@ -2694,8 +3106,9 @@ def notify(request):
                             with connections[school_name].cursor() as cursor:
                                 type = "absent-all" if target_rounds == 'both' else "absent"
 
-                                cursor.execute("select  display_name_search,year_id,user_id from student_student WHERE id = %s",
-                                               [student_id])
+                                cursor.execute(
+                                    "select  display_name_search,year_id,user_id from student_student WHERE id = %s",
+                                    [student_id])
 
                                 student_name = cursor.fetchall()
                                 cursor.execute("select  display_name_search from school_parent WHERE id = %s",
@@ -2747,11 +3160,12 @@ def notify(request):
                                         "select id,round_id from round_schedule WHERE id in %s and day_id =%s",
                                         [tuple(r_id), day_id[0][0]])
                                     rounds_details = cursor.fetchall()
-                                    cursor.execute("select activity_type from student_history WHERE student_id = %s and datetime >= %s  ",
-                                                   [student_id,when])
+                                    cursor.execute(
+                                        "select activity_type from student_history WHERE student_id = %s and datetime >= %s  ",
+                                        [student_id, when])
                                     student_history = cursor.fetchall()
                                     result = {'result': "attendance"}
-                                    student_history1=[]
+                                    student_history1 = []
                                     for res in student_history:
                                         student_history1.append(res[0])
 
@@ -2760,8 +3174,8 @@ def notify(request):
                                             result = {'result': "checked"}
                                         pass
                                     else:
-                                        student_history=[]
-                                    if not student_history :
+                                        student_history = []
+                                    if not student_history:
                                         if target_rounds == 'both':
                                             for res in rounds_details:
                                                 cursor.execute(
@@ -2773,7 +3187,8 @@ def notify(request):
                                                 driver_name = cursor.fetchall()
                                                 # print(driver_name[0][0])
                                                 if driver_name[0][0]:
-                                                    send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[1],'both',when)
+                                                    send_driver_notif(driver_name[0][0], student_id, student_name[0][0],
+                                                                      res[1], 'both', when)
 
                                                 cursor.execute(
                                                     "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
@@ -2804,7 +3219,8 @@ def notify(request):
                                                 cursor.execute("select signup_token from res_partner WHERE id = %s",
                                                                [round_info[0][0]])
                                                 driver_name = cursor.fetchall()
-                                                send_driver_notif(driver_name[0][0], student_id, student_name[0][0], res[0],"morning",when)
+                                                send_driver_notif(driver_name[0][0], student_id, student_name[0][0],
+                                                                  res[0], "morning", when)
                                                 cursor.execute(
                                                     "INSERT INTO student_history(lat,long, student_id, round_id,datetime,activity_type,notification_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                                     [lat, long, student_id, res[0], when,
@@ -2865,8 +3281,7 @@ def notify(request):
                                     return Response(result)
 
 
-def send_driver_notif(mobile_token,student_id,student_name,round_id,type,when):
-
+def send_driver_notif(mobile_token, student_id, student_name, round_id, type, when):
     # AAAAXj2DTK0:APA91bFSxi4txQ8WffLYLBrxFVd3JMCSP5n9WfZafPnLpxC2i9cXHi2SofNoNSBgFWt2tgqjEstSeVkre-1FklyKn4NIy0AuYSwafkQt-RhXcVCth3RJdt8GUbTw9aZI70XFmYBshjuy
     # push_service = FCMNotification(
     #         api_key="AAAAXj2DTK0:APA91bFSxi4txQ8WffLYLBrxFVd3JMCSP5n9WfZafPnLpxC2i9cXHi2SofNoNSBgFWt2tgqjEstSeVkre-1FklyKn4NIy0AuYSwafkQt-RhXcVCth3RJdt8GUbTw9aZI70XFmYBshjuy")
@@ -2874,14 +3289,14 @@ def send_driver_notif(mobile_token,student_id,student_name,round_id,type,when):
         api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
     registration_id = mobile_token
     message_title = ""
-    message_body = "Today, the student  "+student_name+" is absent, So please do not pass by for pickup."
+    message_body = "Today, the student  " + student_name + " is absent, So please do not pass by for pickup."
     # message_body = "The student " + student_name + "will be absent on" + str(
     #     when) + ". So please do not pass by my home for pickup."
     # if(type=="morning"):
     #     message_title = "Absent Only Morning"
     # else:
     #     message_title = "Absent All Day "
-    message_title='Round\'s Absence'
+    message_title = 'Round\'s Absence'
     result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
                                                message_body=message_body, message_icon="",
                                                data_message={"json_data": json.dumps(
@@ -2911,7 +3326,7 @@ def get_badge(request, student_id):
                         academic_year = cursor.fetchall()
                         academic_year_ids = []
                         data = []
-                        new_add=False
+                        new_add = False
                         for rec in academic_year:
                             academic_year_ids.append(rec[0])
                         cursor.execute(
@@ -2925,13 +3340,11 @@ def get_badge(request, student_id):
                                 [student_id, b[5]])
                             student_seen = cursor.fetchall()
 
-
                             new_add = len(student_seen) == 0 or new_add
                             if new_add:
-
                                 cursor.execute(
                                     "INSERT INTO student_seen(model_name,student_id,rec_id)VALUES (%s,%s,%s);",
-                                    ['badge.badge',student_id,b[5]])
+                                    ['badge.badge', student_id, b[5]])
                             cursor.execute(
                                 "select  name,description,image_url  from school_badge WHERE id = %s ",
                                 [b[0]])
@@ -2973,8 +3386,10 @@ def get_badge(request, student_id):
                                          'description': school_badge[0][1],
                                          'new_badge': b[4],
                                          'disable': delta.days < badge_duration[0][0] if delta else True,
-                                         'job_name':job_name[0][0] if  job_name else '',
-                                         'image_teacher':'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(teacher_name[0][1]) if teacher_name[0][1] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png",
+                                         'job_name': job_name[0][0] if job_name else '',
+                                         'image_teacher': 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
+                                             teacher_name[0][1]) if teacher_name[0][
+                                             1] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png",
 
                                          })
 
@@ -3159,7 +3574,7 @@ def get_attendance(request, student_id):
                                                              'reason': 'Death of A Relative' if s[3] == 'death' else s[
                                                                  3],
                                                              'type': s[4],
-                                                             'arrival_time': str(s[5] )if s[5] else "0"
+                                                             'arrival_time': str(s[5]) if s[5] else "0"
                                                              })
                                 else:
                                     daily_attendance.append({'leave_id': s[1],
@@ -3185,7 +3600,6 @@ def get_attendance(request, student_id):
                                                         'arrival_time': arrival_time})
                     result = {'absence_request': absence_request,
                               'daily_attendance': daily_attendance}
-
 
                     return Response(result)
 
@@ -3215,8 +3629,6 @@ def post_attendance(request):
                         arrival_time = request.data.get('arrival_time')
                         base_url = request.data.get('base_url')
                         with connections[school_name].cursor() as cursor:
-
-
 
                             attached_files = request.data.get("file")
                             body = json.dumps({"jsonrpc": "2.0",
@@ -3422,14 +3834,12 @@ def get_exam(request, student_id):
                                     [partner_id_q[0][0], user_id_q[0][1], partner_id_q[0][1]])
                                 assignments = cursor.fetchall()
 
-
                             for assingment in assignments:
                                 # print(assingment)
                                 cursor.execute(
                                     " select id,state,deadline,title,access_token,subject_id,allowed_time_to_start,time_limit,mark,exam_names from survey_survey where id=%s and certificate=%s",
                                     [assingment[1], True])
                                 survey = cursor.fetchall()
-
 
                                 if survey:
                                     # print("lllllllll", survey)
@@ -3542,19 +3952,21 @@ def get_exam(request, student_id):
                                             "id": assingment[0],
                                             "assignment_id": assingment[1],
                                             "name": survey[0][3] if survey[0][3] else '',
-                                            "subject": subject_name[0][0] if subject_name[0][0]  else '',
-                                            "token": survey[0][4]if survey[0][4]  else '',
-                                            'answer_token': assingment[2] if assingment[2]  else '',
+                                            "subject": subject_name[0][0] if subject_name[0][0] else '',
+                                            "token": survey[0][4] if survey[0][4] else '',
+                                            'answer_token': assingment[2] if assingment[2] else '',
                                             'questions_count': len(survey_question),
-                                            "state": state ,
+                                            "state": state,
                                             'last_displayed_page': "None",
                                             'answered_questions': len(survey_user_input_line),
-                                            "ass_state": survey[0][1] if survey[0][1]  else '',
+                                            "ass_state": survey[0][1] if survey[0][1] else '',
                                             "start": start,
                                             'start_time': str(start_time) if start_time else 'None',
-                                            'allowed_time_to_start_exams': str(allowed_time_to_start_exams) if allowed_time_to_start_exams else 'None',
-                                            'allowed_enter_exam_student_ids': str(allowed_to_enter_exam_after_time_limit[0][
-                                                0]) if allowed_to_enter_exam_after_time_limit else "None",
+                                            'allowed_time_to_start_exams': str(
+                                                allowed_time_to_start_exams) if allowed_time_to_start_exams else 'None',
+                                            'allowed_enter_exam_student_ids': str(
+                                                allowed_to_enter_exam_after_time_limit[0][
+                                                    0]) if allowed_to_enter_exam_after_time_limit else "None",
                                             "exam_name_english": exam_name[0][0] if exam_name else 'None',
                                             "exam_name_arabic": exam_name[0][1] if exam_name else 'None',
                                             'mark': int(survey[0][8]),
@@ -3616,7 +4028,7 @@ def get_student_assignment(request, student_id):
                                 assignments = cursor.fetchall()
 
                             for assingment in assignments:
-                                
+
                                 cursor.execute(
                                     " select id,state,deadline,title,access_token,subject_id from survey_survey where id=%s and is_assignment=%s",
                                     [assingment[1], True])
@@ -3638,7 +4050,7 @@ def get_student_assignment(request, student_id):
                                     survey_user_input_line = cursor.fetchall()
 
                                     if survey[0][1] == 'open':
-                                        dead=''
+                                        dead = ''
                                         if survey[0][2]:
                                             deadline = survey[0][2]
 
@@ -3651,12 +4063,16 @@ def get_student_assignment(request, student_id):
                                             # deadline = deadline.replace(date_tz)
                                             deadline = deadline.astimezone(pytz.timezone(date_tz))
 
-                                            dead=str(deadline.day)+"/"+str(deadline.month)+"/"+str(deadline.year)+" "+str(deadline.hour)+":"+str(deadline.minute)+":"+str(deadline.second)
+                                            dead = str(deadline.day) + "/" + str(deadline.month) + "/" + str(
+                                                deadline.year) + " " + str(deadline.hour) + ":" + str(
+                                                deadline.minute) + ":" + str(deadline.second)
                                             deadline = datetime.datetime.strptime(str(dead), "%d/%m/%Y %H:%M:%S")
 
                                             x = datetime.datetime.now().astimezone(pytz.timezone(date_tz))
-                                            cur_data=str(x.day)+"/"+str(x.month)+"/"+str(x.year)+" "+str(x.hour)+":"+str(x.minute)+":"+str(x.second)
-                                            if deadline <= datetime.datetime.strptime(str(cur_data), "%d/%m/%Y %H:%M:%S"):
+                                            cur_data = str(x.day) + "/" + str(x.month) + "/" + str(x.year) + " " + str(
+                                                x.hour) + ":" + str(x.minute) + ":" + str(x.second)
+                                            if deadline <= datetime.datetime.strptime(str(cur_data),
+                                                                                      "%d/%m/%Y %H:%M:%S"):
                                                 start = True
                                                 state = 'done'
                                             else:
@@ -3674,15 +4090,15 @@ def get_student_assignment(request, student_id):
                                             "id": assingment[0],
                                             "assignment_id": assingment[1],
                                             "name": survey[0][3] if survey[0][3] else '',
-                                            "subject": subject_name[0][0] if subject_name[0][0]  else '',
+                                            "subject": subject_name[0][0] if subject_name[0][0] else '',
                                             "token": survey[0][4] if survey[0][4] else '',
-                                            'answer_token': assingment[2]if assingment[2] else '' ,
+                                            'answer_token': assingment[2] if assingment[2] else '',
                                             'questions_count': len(survey_question),
                                             "state": state,
                                             # 'last_displayed_page': assingment[3] if assingment[3] else ' gg' ,
                                             'answered_questions': len(survey_user_input_line),
                                             "ass_state": survey[0][1] if survey[0][1] else '',
-                                            "deadline": dead ,
+                                            "deadline": dead,
                                             "start": start
                                         })
 
@@ -4086,8 +4502,8 @@ def get_worksheet_form_view_data(request, wsheet, std):
                                 file = urllib.request.urlopen(worksheet[0][6])
                                 size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
 
-                                i=0
-                                s=0
+                                i = 0
+                                s = 0
                                 if file.length:
                                     i = int(math.floor(math.log(file.length, 1024)))
                                     p = math.pow(1024, i)
@@ -4121,11 +4537,12 @@ def get_worksheet_form_view_data(request, wsheet, std):
 
                             data.append({'worksheet_id': worksheet[0][0],
                                          'name': worksheet[0][1],
-                                         'date': str(worksheet[0][3].strftime("%d %b %Y"))if worksheet[0][3] else '',
+                                         'date': str(worksheet[0][3].strftime("%d %b %Y")) if worksheet[0][3] else '',
                                          'teacher_name': hr_employee[0][1],
                                          'link': worksheet[0][6] if worksheet[0][6] else '',
                                          'teacher_id': hr_employee[0][0],
-                                         'teacher_image': 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(hr_employee[0][2]) if hr_employee[0][
+                                         'teacher_image': 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
+                                             hr_employee[0][2]) if hr_employee[0][
                                              2] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png",
                                          'teacher_position': job_name[0][0] if job_name else 'Teacher',
                                          'subject': subject_name[0][0],
@@ -4251,9 +4668,11 @@ def get_event_form_view_data(request, event, std):
                                              'name': school_event[0][0],
                                              'start_date': str(school_event[0][11].strftime("%d %b %Y")),
                                              'end_date': str(school_event[0][12].strftime("%d %b %Y")),
-                                             'registration_start_date': str(school_event[0][13].strftime("%d %b %Y")) if school_event[0][
+                                             'registration_start_date': str(school_event[0][13].strftime("%d %b %Y")) if
+                                             school_event[0][
                                                  13] else '',
-                                             'registration_last_date': str(school_event[0][14].strftime("%d %b %Y")) if school_event[0][
+                                             'registration_last_date': str(school_event[0][14].strftime("%d %b %Y")) if
+                                             school_event[0][
                                                  14] else '',
                                              'maximum_participants': school_event[0][3],
                                              'available_seats': available_seats,
@@ -4272,17 +4691,15 @@ def get_event_form_view_data(request, event, std):
                                              'period': str(school_event[0][12] - school_event[0][11]),
                                              'student_solution': student_solution,
 
-                                             'new_added':str(events[0][3]) if events[0][3] else ''})
+                                             'new_added': str(events[0][3]) if events[0][3] else ''})
 
                                 result = {'result': data}
 
                                 return Response(result)
 
 
-
 @api_view(['GET'])
 def get_library(request, student_id):
-
     if request.method == 'GET':
         if request.headers:
             if request.headers.get('Authorization'):
@@ -4296,7 +4713,7 @@ def get_library(request, student_id):
                     with connections[school_name].cursor() as cursor:
                         book_borrowed = []
                         book_all_r = []
-                        book_req=[]
+                        book_req = []
                         cursor.execute(
                             " SELECT ID,NAME,borrow_period_days FROM product_template WHERE is_library_book=TRUE",
                             [])
@@ -4308,13 +4725,13 @@ def get_library(request, student_id):
                             #     [book1[0]])
                             # report_stock_quantity = cursor.fetchall()
                             # if report_stock_quantity:
-                                # if report_stock_quantity[0][0]>0:
+                            # if report_stock_quantity[0][0]>0:
 
                             book_all_r.append({'id': book1[0],
-                                                  'name': book1[1],
+                                               'name': book1[1],
                                                'borrow_period_days': str(book1[2])
 
-                                                  })
+                                               })
                         cursor.execute(
                             "select display_name_search,year_id,user_id from student_student where id=%s",
                             [student_id])
@@ -4329,7 +4746,7 @@ def get_library(request, student_id):
                                 [student_id, branch_id[0][0]])
                             book_request = cursor.fetchall()
                             for book in book_request:
-                                book_author=''
+                                book_author = ''
                                 cursor.execute(
                                     "SELECT name,id FROM product_template WHERE id = %s",
                                     [book[1]])
@@ -4344,98 +4761,100 @@ def get_library(request, student_id):
                                         "SELECT name FROM product_author WHERE id=%s",
                                         [author[0]])
                                     product_author = cursor.fetchall()
-                                    book_author+=product_author[0][0] +' & '
+                                    book_author += product_author[0][0] + ' & '
                                 if book_author:
-                                    book_author=book_author[:len(book_author)-2] + book_author[len(book_author):]
-                                if  book[2]== 'delivered' or  book[2]== 'done':
+                                    book_author = book_author[:len(book_author) - 2] + book_author[len(book_author):]
+                                if book[2] == 'delivered' or book[2] == 'done':
 
                                     book_borrowed.append({'id': book[1],
-                                                     'name': book_name[0][0],
-                                                     'date_delivered': book[4].strftime("%d %b %Y"),
-                                                     'date_returned': book[6].strftime("%d %b %Y"),
-                                                        'date_returned_on': book[5].strftime("%d %b %Y")if book[5] else '' ,
-                                                     'status': book[2],
-                                                     'book_author': book_author
-                                                     })
+                                                          'name': book_name[0][0],
+                                                          'date_delivered': book[4].strftime("%d %b %Y"),
+                                                          'date_returned': book[6].strftime("%d %b %Y"),
+                                                          'date_returned_on': book[5].strftime("%d %b %Y") if book[
+                                                              5] else '',
+                                                          'status': book[2],
+                                                          'book_author': book_author
+                                                          })
 
                                 else:
                                     book_req.append({'id': book[1],
-                                                             'name': book_name[0][0],
-                                                             'requested_date': book[3].strftime("%d %b %Y"),
-                                                             'status': book[2]
-                                                             })
+                                                     'name': book_name[0][0],
+                                                     'requested_date': book[3].strftime("%d %b %Y"),
+                                                     'status': book[2]
+                                                     })
 
                     result = {'book_request': book_req,
                               'book_borrowed': book_borrowed,
-                              'book':book_all_r}
+                              'book': book_all_r}
 
                     return Response(result)
+
 
 @api_view(['POST'])
 def post_library(request):
-        if request.method == 'POST':
-            if request.headers:
-                if request.headers.get('Authorization'):
-                    if 'Bearer' in request.headers.get('Authorization'):
-                        au = request.headers.get('Authorization').replace('Bearer', '').strip()
-                        db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
-                        if db_name:
-                            for e in db_name:
-                                school_name = e[0]
-                            school_name = ManagerParent.pincode(school_name)
-                            student_id = request.data.get('student_id')
-                            book_id= request.data.get('book_id')
-                            countDay=request.data.get('countDay')
-                            request_soft_copy = request.data.get('copy')
-                            with connections[school_name].cursor() as cursor:
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                        school_name = ManagerParent.pincode(school_name)
+                        student_id = request.data.get('student_id')
+                        book_id = request.data.get('book_id')
+                        countDay = request.data.get('countDay')
+                        request_soft_copy = request.data.get('copy')
+                        with connections[school_name].cursor() as cursor:
 
-                                cursor.execute(
-                                    "select id from stock_warehouse WHERE is_library =true ORDER BY ID DESC LIMIT 1",
-                                    [])
-                                stock_warehouse = cursor.fetchall()
-                                cursor.execute(
-                                    "select id from book_request  ORDER BY ID DESC LIMIT 1",
-                                    [])
-                                book_request = cursor.fetchall()
-                                cursor.execute(
-                                    "select id from res_partner  WHERE student_id =%s",
-                                    [student_id])
-                                borrower_id = cursor.fetchall()
-                                cursor.execute(
-                                    "select year_id,user_id from student_student where id=%s",
-                                    [student_id])
-                                user_id_q = cursor.fetchall()
-                                cursor.execute(
-                                    " select branch_id from res_users where id=%s",
-                                    [user_id_q[0][1]])
-                                branch_id = cursor.fetchall()
-                                # cursor.execute(
-                                #     "select year_id,branch_id from student_student  WHERE id =%s",
-                                #     [student_id])
-                                # branch_id = cursor.fetchall()
-                                # res.partner expected_return_date
-                                # print(book_request)
-                                if book_request:
-                                    name='R00'+str(book_request[0][0]+1)
-                                else:
-                                    name = 'R00' + str( 1)
-                                # select id from stock_warehouse WHERE is_library =true ORDER BY ID DESC LIMIT 1
-                                cursor.execute(
-                                    "INSERT INTO book_request(borrower_id,book_id,name,request_soft_copy,library_id,state,create_date,student_id,branch_id,academic_year,requested_borrow_days)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
-                                    [borrower_id[0][0],book_id,name,request_soft_copy,stock_warehouse[0][0] if stock_warehouse else 1,'under_approval',datetime.datetime.now(),student_id,branch_id[0][0],user_id_q[0][0],countDay ])
-                                result = {'result': 'ok'}
-                                return Response(result)
-                    result = {'result': 'Error Authorization'}
-                    return Response(result)
-                result = {'result': 'Not Authorization'}
+                            cursor.execute(
+                                "select id from stock_warehouse WHERE is_library =true ORDER BY ID DESC LIMIT 1",
+                                [])
+                            stock_warehouse = cursor.fetchall()
+                            cursor.execute(
+                                "select id from book_request  ORDER BY ID DESC LIMIT 1",
+                                [])
+                            book_request = cursor.fetchall()
+                            cursor.execute(
+                                "select id from res_partner  WHERE student_id =%s",
+                                [student_id])
+                            borrower_id = cursor.fetchall()
+                            cursor.execute(
+                                "select year_id,user_id from student_student where id=%s",
+                                [student_id])
+                            user_id_q = cursor.fetchall()
+                            cursor.execute(
+                                " select branch_id from res_users where id=%s",
+                                [user_id_q[0][1]])
+                            branch_id = cursor.fetchall()
+                            # cursor.execute(
+                            #     "select year_id,branch_id from student_student  WHERE id =%s",
+                            #     [student_id])
+                            # branch_id = cursor.fetchall()
+                            # res.partner expected_return_date
+                            # print(book_request)
+                            if book_request:
+                                name = 'R00' + str(book_request[0][0] + 1)
+                            else:
+                                name = 'R00' + str(1)
+                            # select id from stock_warehouse WHERE is_library =true ORDER BY ID DESC LIMIT 1
+                            cursor.execute(
+                                "INSERT INTO book_request(borrower_id,book_id,name,request_soft_copy,library_id,state,create_date,student_id,branch_id,academic_year,requested_borrow_days)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
+                                [borrower_id[0][0], book_id, name, request_soft_copy,
+                                 stock_warehouse[0][0] if stock_warehouse else 1, 'under_approval',
+                                 datetime.datetime.now(), student_id, branch_id[0][0], user_id_q[0][0], countDay])
+                            result = {'result': 'ok'}
+                            return Response(result)
+                result = {'result': 'Error Authorization'}
                 return Response(result)
-            # Marks
-
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        # Marks
 
 
 @api_view(['GET'])
 def get_marks(request, student_id):
-
     if request.method == 'GET':
         # if request.headers:
         #     if request.headers.get('Authorization'):
@@ -4446,48 +4865,47 @@ def get_marks(request, student_id):
         #             if db_name:
         #                 for e in db_name:
         #                     school_name = e[0]
-                    with connections['tst'].cursor() as cursor:
-                        book_borrowed = []
-                        book_all_r = []
-                        book_req=[]
-                        cursor.execute(
-                            "SELECT id,name FROM academic_semester WHERE year_id=(SELECT year_id FROM student_student WHERE id=%s)",
-                            [student_id])
-                        academic_semester = cursor.fetchall()
+        with connections['tst'].cursor() as cursor:
+            book_borrowed = []
+            book_all_r = []
+            book_req = []
+            cursor.execute(
+                "SELECT id,name FROM academic_semester WHERE year_id=(SELECT year_id FROM student_student WHERE id=%s)",
+                [student_id])
+            academic_semester = cursor.fetchall()
 
-                        class_id = None
-                        # ----------------------
-                        cursor.execute(
-                            "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = (SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s ORDER BY student_distribution_line_id DESC LIMIT 1)",
-                            [student_id])
-                        student_distribution_line = cursor.fetchall()
-                        if student_distribution_line:
+            class_id = None
+            # ----------------------
+            cursor.execute(
+                "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = (SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s ORDER BY student_distribution_line_id DESC LIMIT 1)",
+                [student_id])
+            student_distribution_line = cursor.fetchall()
+            if student_distribution_line:
+                cursor.execute(
+                    "SELECT id FROM public.academic_grade WHERE id = %s",
+                    [student_distribution_line[0][0]])
+                academic_grade = cursor.fetchall()
+                cursor.execute(
+                    "select id from school_class WHERE academic_grade_id = %s",
+                    [academic_grade[0][0]])
+                cl = cursor.fetchall()
+                class_id = cl[0][0] if cl else ''
+            if class_id == None:
+                cursor.execute(
+                    "select class_id from res_partner where id=(select partner_id from res_users where id=(select user_id from student_student where id=%s))",
+                    [student_id])
+                academic_grade_q = cursor.fetchall()
+                class_id = academic_grade_q[0][0] if academic_grade_q else ''
+            cursor.execute(
+                " SELECT name,subject_id FROM mark_mark WHERE state='approved' and  class_id=%s",
+                [class_id])
+            mark = cursor.fetchall()
 
-                            cursor.execute(
-                                "SELECT id FROM public.academic_grade WHERE id = %s",
-                                [student_distribution_line[0][0]])
-                            academic_grade = cursor.fetchall()
-                            cursor.execute(
-                                "select id from school_class WHERE academic_grade_id = %s",
-                                [academic_grade[0][0]])
-                            cl = cursor.fetchall()
-                            class_id = cl[0][0] if cl else ''
-                        if class_id == None:
-                            cursor.execute(
-                                "select class_id from res_partner where id=(select partner_id from res_users where id=(select user_id from student_student where id=%s))",
-                                [student_id])
-                            academic_grade_q = cursor.fetchall()
-                            class_id = academic_grade_q[0][0] if academic_grade_q else ''
-                        cursor.execute(
-                            " SELECT name,subject_id FROM mark_mark WHERE state='approved' and  class_id=%s",
-                            [class_id])
-                        mark = cursor.fetchall()
+        result = {'book_request': book_req,
+                  'book_borrowed': book_borrowed,
+                  'book': book_all_r}
 
-                    result = {'book_request': book_req,
-                              'book_borrowed': book_borrowed,
-                              'book':book_all_r}
-
-                    return Response(result)
+        return Response(result)
 
 
 @api_view(['POST'])
@@ -4509,7 +4927,7 @@ def logout(request):
                 # print("sdasadsafff", parent_id,)
                 if parent_id:
                     for e in parent_id:
-                            parent_id = e[0]
+                        parent_id = e[0]
                 ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
                     mobile_token='')
                 # ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
@@ -4566,13 +4984,13 @@ def get_time_table(request, student_id):
                                 school_day = cursor.fetchall()
                                 subject_lines = []
                                 for line in school_day:
-                                    day_id=0
+                                    day_id = 0
                                     if 'Saturday' in line and 'Saturday' not in days:
                                         days.append('Saturday')
-                                        day_id=5
+                                        day_id = 5
                                     elif 'Sunday' in line and 'Sunday' not in days:
                                         days.append('Sunday')
-                                        day_id =6
+                                        day_id = 6
                                     elif 'Monday' in line and 'Monday' not in days:
                                         days.append('Monday')
                                         day_id = 0
@@ -4590,53 +5008,51 @@ def get_time_table(request, student_id):
                                         day_id = 4
                                     cursor.execute(
                                         "SELECT lecture_id,subject_id,  from_time, to_time ,sequence FROM public.add_day_subject WHERE class_id=%s and week_day=%s ORDER by sequence ASC; ",
-                                        [class_id[0][0],str(day_id)])
+                                        [class_id[0][0], str(day_id)])
                                     add_day_subject = cursor.fetchall()
 
                                     for subject in add_day_subject:
 
-                                        subject_name='break'
+                                        subject_name = 'break'
                                         if subject[1]:
                                             cursor.execute(
                                                 "select  name  from school_subject WHERE id = %s ",
                                                 [subject[1]])
                                             s_name = cursor.fetchall()
-                                            subject_name=s_name[0][0]
-
-
+                                            subject_name = s_name[0][0]
 
                                         line = {'subject_id': subject[1], 'subject_name': subject_name,
                                                 }
 
-                                        from_time='{0:02.0f}:{1:02.0f}'.format(*divmod(float(subject[2]) * 60, 60))
+                                        from_time = '{0:02.0f}:{1:02.0f}'.format(*divmod(float(subject[2]) * 60, 60))
                                         to_time = '{0:02.0f}:{1:02.0f}'.format(*divmod(float(subject[3]) * 60, 60))
 
-                                        if  day_id==5:
-                                            line['Saturday'] = str(from_time)+" - "+str(to_time)
+                                        if day_id == 5:
+                                            line['Saturday'] = str(from_time) + " - " + str(to_time)
                                         else:
                                             line['Saturday'] = ''
-                                        if day_id==6:
-                                            line['Sunday'] = str(from_time)+" - "+str(to_time)
+                                        if day_id == 6:
+                                            line['Sunday'] = str(from_time) + " - " + str(to_time)
                                         else:
                                             line['Sunday'] = ''
-                                        if day_id==0:
-                                            line['Monday'] =str(from_time)+" - "+str(to_time)
+                                        if day_id == 0:
+                                            line['Monday'] = str(from_time) + " - " + str(to_time)
                                         else:
                                             line['Monday'] = ''
-                                        if day_id==1:
-                                            line['Tuesday'] = str(from_time)+" - "+str(to_time)
+                                        if day_id == 1:
+                                            line['Tuesday'] = str(from_time) + " - " + str(to_time)
                                         else:
                                             line['Tuesday'] = ''
-                                        if day_id==2:
-                                            line['Wednesday'] =str(from_time)+" - "+str(to_time)
+                                        if day_id == 2:
+                                            line['Wednesday'] = str(from_time) + " - " + str(to_time)
                                         else:
                                             line['Wednesday'] = ''
-                                        if day_id==3:
-                                            line['Thursday'] = str(from_time)+" - "+str(to_time)
+                                        if day_id == 3:
+                                            line['Thursday'] = str(from_time) + " - " + str(to_time)
                                         else:
                                             line['Thursday'] = ''
-                                        if day_id==4:
-                                            line['Friday'] = str(from_time)+" - "+str(to_time)
+                                        if day_id == 4:
+                                            line['Friday'] = str(from_time) + " - " + str(to_time)
                                         else:
                                             line['Friday'] = ''
 
@@ -4679,7 +5095,8 @@ def get_time_table(request, student_id):
                         # print(result)
                         return Response(result)
 
-@api_view(['GET','POST'])
+
+@api_view(['GET', 'POST'])
 def get_Allergies(request):
     if request.method == 'GET':
         if request.headers:
@@ -4694,26 +5111,25 @@ def get_Allergies(request):
 
                 if parent_id:
                     for e in parent_id:
-                            parent_id = e[0]
+                        parent_id = e[0]
                 ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
                     mobile_token='')
-                date=[]
+                date = []
                 with connections[school_name].cursor() as cursor:
 
-                    cursor.execute("select id,name from product_attribute_value WHERE attribute_id = (select id from product_attribute WHERE name = 'allergies' or name = 'Allergies')",
-                                   [])
+                    cursor.execute(
+                        "select id,name from product_attribute_value WHERE attribute_id = (select id from product_attribute WHERE name = 'allergies' or name = 'Allergies')",
+                        [])
                     product_attribute_value = cursor.fetchall()
-
 
                     for allergies in product_attribute_value:
                         if allergies[1]:
-                            date.append({"id":allergies[0],
+                            date.append({"id": allergies[0],
                                          "name": allergies[1],
-                                         "icon":"https://trackware-schools.s3.eu-central-1.amazonaws.com/allergic.svg",
-                                        "des":""
+                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/allergic.svg",
+                                         "des": ""
 
-                            })
-
+                                         })
 
                 result = {'result': date}
                 return Response(result)
@@ -4762,18 +5178,18 @@ def get_Allergies(request):
                         "delete from allergies_food where student_id=%s",
                         [student_id])
 
-                    for allergies in allergies_food:
-
-                        if allergies not  in list_al:
-                            cursor.execute(
-                                "INSERT INTO allergies_food(year_id, student_id, branch_id,company_id,attribute_value_id)VALUES (%s,%s,%s,%s,%s);",
-                                [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
-                                 allergies])
+                    # for allergies in allergies_food:
+                    #
+                    #     if allergies not  in list_al:
+                    #         cursor.execute(
+                    #             "INSERT INTO allergies_food(year_id, student_id, branch_id,company_id,attribute_value_id)VALUES (%s,%s,%s,%s,%s);",
+                    #             [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                    #              allergies])
                     for allergies in list_al:
-
                         cursor.execute(
                             "INSERT INTO allergies_food(year_id, student_id, branch_id,company_id,attribute_value_id)VALUES (%s,%s,%s,%s,%s);",
-                            [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],allergies])
+                            [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                             allergies])
 
                 result = {'result': 'ok'}
                 return Response(result)
@@ -4781,6 +5197,50 @@ def get_Allergies(request):
             return Response(result)
         result = {'result': 'Not headers'}
         return Response(result)
+
+
+@api_view(['GET'])
+def get_Allergies_student(request, student_id):
+    if request.method == 'GET':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                        parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+                date = []
+                with connections[school_name].cursor() as cursor:
+
+                    cursor.execute(
+                        "select id,name from product_attribute_value WHERE attribute_id = (select id from product_attribute WHERE name = 'allergies' or name = 'Allergies')",
+                        [])
+                    product_attribute_value = cursor.fetchall()
+
+                    for allergies in product_attribute_value:
+                        if allergies[1]:
+                            date.append({"id": allergies[0],
+                                         "name": allergies[1],
+                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/allergic.svg",
+                                         "des": ""
+
+                                         })
+
+                result = {'result': date}
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
+
 
 @api_view(['POST'])
 def post_spending(request):
@@ -4797,23 +5257,21 @@ def post_spending(request):
 
                 if parent_id:
                     for e in parent_id:
-                            parent_id = e[0]
+                        parent_id = e[0]
                 ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
                     mobile_token='')
                 student_id = request.data.get('student_id')
                 canteen_spending = request.data.get('canteen_spending')
                 result = {'result': 'erorr'}
                 with connections[school_name].cursor() as cursor:
-                   try:
+                    try:
                         cursor.execute(
                             "UPDATE public.student_student SET canteen_spending=%s WHERE id=%s;",
-                            [canteen_spending,student_id])
+                            [canteen_spending, student_id])
                         print(student_id)
                         result = {'result': 'ok'}
-                   except:
-                       result = {'result': ' does not exist canteen_spending'}
-
-
+                    except:
+                        result = {'result': ' does not exist canteen_spending'}
 
                 print(result)
 
@@ -4839,12 +5297,12 @@ def get_info_canteen_student(request):
 
                 if parent_id:
                     for e in parent_id:
-                            parent_id = e[0]
+                        parent_id = e[0]
                 ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
                     mobile_token='')
-                date_allergies=[]
+                date_allergies = []
                 date_schdule = []
-                date_spending=[]
+                date_spending = []
                 with connections[school_name].cursor() as cursor:
                     student_id = request.data.get('student_id')
 
@@ -4858,8 +5316,9 @@ def get_info_canteen_student(request):
                         [student_info[0][1]])
                     student_info_users = cursor.fetchall()
 
-                    cursor.execute("select attribute_value_id from allergies_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
-                                   [student_id,student_info[0][0],student_info_users[0][0],student_info_users[0][0]])
+                    cursor.execute(
+                        "select attribute_value_id from allergies_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
+                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
                     allergies_food = cursor.fetchall()
 
                     allergies_food = list(set(allergies_food))
@@ -4872,28 +5331,32 @@ def get_info_canteen_student(request):
                         "SELECT id, name FROM school_day WHERE id in (SELECT school_day_id FROM public.res_company_school_day_rel where res_company_id=%s)",
                         [student_info_users[0][0]])
                     school_day = cursor.fetchall()
-                    student_spending=1
+                    student_spending = 1
                     date_spending.append({
-                        "canteen_spending":str(student_info[0][2]) if student_info[0][2] else "0",
+                        "canteen_spending": str(student_info[0][2]) if student_info[0][2] else "0",
                         "student_spending": str(student_spending),
-                        "per_spending": float(student_spending/student_info[0][2]) if student_info[0][2] and student_info[0][2] !=0 else 0.0,
+                        "per_spending": float(student_spending / student_info[0][2]) if student_info[0][2] and
+                                                                                        student_info[0][
+                                                                                            2] != 0 else 0.0,
                     })
                     for day in school_day:
                         cursor.execute(
                             "SELECT id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
-                            [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0],day[0]])
+                            [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0],
+                             day[0]])
                         student_food_day = cursor.fetchall()
-                        date_schdule.append({'name':day[1],"len_item":str(len(student_food_day)),"day_id":day[0]})
+                        date_schdule.append({'name': day[1], "len_item": str(len(student_food_day)), "day_id": day[0]})
                     # allergies.food.day
                     for allergies in allergies_food:
                         cursor.execute(
                             "select name from product_attribute_value WHERE id = %s ",
                             [allergies[0]])
                         allergies_food1 = cursor.fetchall()
-                        date_allergies.append({"name":allergies_food1[0][0],
-                        })
+                        date_allergies.append({"name": allergies_food1[0][0],
+                                               })
 
-                result = {'food_allegies': date_allergies,"banned_food":str(len(banned_food)),"schdule_meals":date_schdule,"spending":date_spending}
+                result = {'food_allegies': date_allergies, "banned_food": str(len(banned_food)),
+                          "schdule_meals": date_schdule, "spending": date_spending}
 
                 return Response(result)
             result = {'result': 'Not Authorization'}
@@ -4917,10 +5380,10 @@ def get_category(request):
 
                 if parent_id:
                     for e in parent_id:
-                            parent_id = e[0]
+                        parent_id = e[0]
                 ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
                     mobile_token='')
-                date=[]
+                date = []
                 with connections[school_name].cursor() as cursor:
                     # canteen_spending
                     # student_id = request.data.get('student_id')
@@ -4938,22 +5401,22 @@ def get_category(request):
                                    [])
                     pos_category = cursor.fetchall()
 
-
                     for category in pos_category:
                         cursor.execute("select id,name from pos_category WHERE parent_id=%s",
                                        [category[0]])
                         pos_category_sub = cursor.fetchall()
                         subMenu = []
                         for category_sub in pos_category_sub:
-                            subMenu.append({"name":category_sub[1], "icon":"https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg",
-                                            "id":category_sub[0],"stutes":False,"sub":True
+                            subMenu.append({"name": category_sub[1],
+                                            "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg",
+                                            "id": category_sub[0], "stutes": False, "sub": True
 
-                        })
+                                            })
                         if not category[2]:
-                            date.append({"name":category[1], "id":category[0],"stutes":False, "icon":"https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg",
-                                         "subMenu":subMenu,"sub":False
-                            })
-
+                            date.append({"name": category[1], "id": category[0], "stutes": False,
+                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg",
+                                         "subMenu": subMenu, "sub": False
+                                         })
 
                 result = {'result': date}
                 return Response(result)
@@ -4961,7 +5424,6 @@ def get_category(request):
             return Response(result)
         result = {'result': 'Not headers'}
         return Response(result)
-
 
 
 @api_view(['POST'])
@@ -4979,7 +5441,7 @@ def post_banned(request):
 
                 if parent_id:
                     for e in parent_id:
-                            parent_id = e[0]
+                        parent_id = e[0]
                 ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
                     mobile_token='')
                 student_id = request.data.get('student_id')
@@ -5027,9 +5489,7 @@ def post_banned(request):
                                          student_info_users[0][0],
                                          allergies_food1[allergies][1]])
 
-
                     for allergies in canteen_banned:
-
                         cursor.execute(
                             "INSERT INTO banned_food(year_id, student_id, branch_id,company_id,pos_category)VALUES (%s,%s,%s,%s,%s);",
                             [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
@@ -5057,11 +5517,11 @@ def get_category_Item(request):
 
                 if parent_id:
                     for e in parent_id:
-                            parent_id = e[0]
+                        parent_id = e[0]
                 ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
                     mobile_token='')
-                date=[]
-                category=[]
+                date = []
+                category = []
                 with connections[school_name].cursor() as cursor:
                     # canteen_spending
                     # student_id = request.data.get('student_id')
@@ -5088,44 +5548,50 @@ def get_category_Item(request):
 
                                      })
 
-                    cursor.execute("select id,name,parent_id from pos_category",
+                    cursor.execute("select id,name,parent_id from pos_category WHERE parent_id isNull",
                                    [])
                     pos_category1 = cursor.fetchall()
+                    # print(pos_category1)
 
-                    cursor.execute("select id,name,pos_categ_id,list_price,image_url from product_template WHERE is_canteen=%s",
-                                   [True])
+                    cursor.execute(
+                        "select id,name,pos_categ_id,list_price,image_url from product_template WHERE is_canteen=%s",
+                        [True])
                     product_template = cursor.fetchall()
                     for category1 in product_template:
-                        type='all'
+                        type = 'all'
                         if category1[2]:
-                            cursor.execute("select id,name from pos_category WHERE id=%s",
+                            cursor.execute("select id,name,parent_id from pos_category WHERE id=%s",
                                            [category1[2]])
                             pos_category = cursor.fetchall()
-                            type=pos_category[0][1]
+                            if pos_category[0][2]:
+                                cursor.execute("select id,name,parent_id from pos_category WHERE id=%s",
+                                               [pos_category[0][2]])
+                                pos_category = cursor.fetchall()
+
+                            type = pos_category[0][1]
                         date.append({
-                            "name":str(category1[1]),
+                            "name": str(category1[1]),
                             "id": category1[0],
                             "type": str(type),
-                            "price": str(category1[3])+" "+str('JOD'),
-                            "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" +category1[4] if category1[4] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png',
-
+                            "price": str(category1[3]) + " " + str('JOD'),
+                            "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" + category1[4] if
+                            category1[4] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png',
 
                         })
 
                     for category1 in pos_category1:
-                    #
-                            category.append({"name": category1[1],
-"id": category1[0], "icon":"https://trackware-schools.s3.eu-central-1.amazonaws.com/allergic.svg","sta":False
+                        category.append({"name": category1[1],
+                                         "id": category1[0],
+                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/allergic.svg",
+                                         "sta": False
 
                                          })
-
-                result = {'category': category,"product":date}
+                result = {'category': category, "product": date}
                 return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
         result = {'result': 'Not headers'}
         return Response(result)
-
 
 
 @api_view(['POST'])
@@ -5143,7 +5609,7 @@ def post_banned_item(request):
 
                 if parent_id:
                     for e in parent_id:
-                            parent_id = e[0]
+                        parent_id = e[0]
                 ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
                     mobile_token='')
                 student_id = request.data.get('student_id')
@@ -5166,7 +5632,7 @@ def post_banned_item(request):
                     allergies_food = cursor.fetchall()
 
                     allergies_food = list(set(allergies_food))
-                    canteen_banned=list(set(canteen_banned))
+                    canteen_banned = list(set(canteen_banned))
                     if allergies_food:
                         cursor.execute(
                             "select id,product_id,pos_category from banned_food WHERE id in %s",
@@ -5177,21 +5643,22 @@ def post_banned_item(request):
                             [student_id])
 
                         for allergies in range(len(allergies_food)):
-                            if allergies_food[ allergies] not in canteen_banned:
+                            if allergies_food[allergies] not in canteen_banned:
 
                                 if allergies_food1[allergies][2]:
 
                                     cursor.execute(
                                         "INSERT INTO banned_food(year_id, student_id, branch_id,company_id,pos_category)VALUES (%s,%s,%s,%s,%s);",
-                                        [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                                        [student_info[0][0], student_id, student_info_users[0][0],
+                                         student_info_users[0][0],
                                          allergies_food1[allergies][2]])
                                 else:
                                     cursor.execute(
                                         "INSERT INTO banned_food(year_id, student_id, branch_id,company_id,product_id)VALUES (%s,%s,%s,%s,%s);",
-                                        [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                                        [student_info[0][0], student_id, student_info_users[0][0],
+                                         student_info_users[0][0],
                                          allergies_food1[allergies][1]])
                     for allergies in canteen_banned:
-
                         cursor.execute(
                             "INSERT INTO banned_food(year_id, student_id, branch_id,company_id,product_id)VALUES (%s,%s,%s,%s,%s);",
                             [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
@@ -5202,7 +5669,6 @@ def post_banned_item(request):
             return Response(result)
         result = {'result': 'Not headers'}
         return Response(result)
-
 
 
 @api_view(['POST'])
@@ -5220,12 +5686,12 @@ def post_sec_item(request):
 
                 if parent_id:
                     for e in parent_id:
-                            parent_id = e[0]
+                        parent_id = e[0]
                 ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
                     mobile_token='')
                 student_id = request.data.get('student_id')
                 canteen_banned = request.data.get('canteen_banned')
-                day_id= request.data.get('day_id')
+                day_id = request.data.get('day_id')
                 with connections[school_name].cursor() as cursor:
                     cursor.execute(
                         "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
@@ -5238,25 +5704,25 @@ def post_sec_item(request):
                     student_info_users = cursor.fetchall()
                     cursor.execute(
                         "SELECT id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
-                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0],day_id])
+                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0], day_id])
                     student_food_day = cursor.fetchall()
                     student_food_day = list(set(student_food_day))
-                    canteen_banned=list(set(canteen_banned))
+                    canteen_banned = list(set(canteen_banned))
                     cursor.execute(
-                        "delete from allergies_food_day where student_id=%s",
-                        [student_id])
+                        "delete from allergies_food_day where student_id=%s and  year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
+                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0], day_id])
 
                     for allergies in student_food_day:
                         if allergies[0] not in canteen_banned:
                             cursor.execute(
                                 "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_id,day_id)VALUES (%s,%s,%s,%s,%s,%s);",
                                 [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
-                                 allergies,day_id])
+                                 allergies, day_id])
                     for allergies in canteen_banned:
                         cursor.execute(
                             "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_id,day_id)VALUES (%s,%s,%s,%s,%s,%s);",
                             [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
-                             allergies,day_id])
+                             allergies, day_id])
 
                 result = {'result': 'ok'}
                 return Response(result)
@@ -5264,6 +5730,7 @@ def post_sec_item(request):
             return Response(result)
         result = {'result': 'Not headers'}
         return Response(result)
+
 
 @api_view(['POST'])
 def get_banned_food_s(request):
@@ -5280,12 +5747,12 @@ def get_banned_food_s(request):
 
                 if parent_id:
                     for e in parent_id:
-                            parent_id = e[0]
+                        parent_id = e[0]
                 ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
                     mobile_token='')
                 student_id = request.data.get('student_id')
-                data_cat=[]
-                date_ite=[]
+                data_cat = []
+                date_ite = []
                 with connections[school_name].cursor() as cursor:
                     cursor.execute(
                         "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
@@ -5303,8 +5770,8 @@ def get_banned_food_s(request):
                     banned_food = cursor.fetchall()
                     for allergies in banned_food:
 
-                        if allergies[1] :
-                            category_sup=''
+                        if allergies[1]:
+                            category_sup = ''
                             cursor.execute("select id,name from pos_category WHERE id=%s",
                                            [allergies[1]])
                             pos_category = cursor.fetchall()
@@ -5314,12 +5781,12 @@ def get_banned_food_s(request):
                                 pos_category_sup = cursor.fetchall()
                                 if pos_category_sup:
                                     for category in pos_category_sup:
-                                        category_sup +=category[1]+''
+                                        category_sup += category[1] + ''
 
                             data_cat.append({
-                                "name":pos_category[0][1],
-                                "id":allergies[0],
-                                "category_sup":category_sup
+                                "name": pos_category[0][1],
+                                "id": allergies[0],
+                                "category_sup": category_sup
 
                             })
                         else:
@@ -5327,7 +5794,7 @@ def get_banned_food_s(request):
                                 "select id,name,pos_categ_id,list_price,is_canteen,image_url from product_template WHERE id=%s ",
                                 [allergies[2]])
                             product_template = cursor.fetchall()
-                            type=''
+                            type = ''
                             if product_template[0][2]:
                                 cursor.execute("select id,name from pos_category WHERE id=%s",
                                                [product_template[0][2]])
@@ -5337,13 +5804,15 @@ def get_banned_food_s(request):
                                 "name": str(product_template[0][1]),
                                 "id": allergies[0],
                                 "price": str(product_template[0][3]) + " " + str('JOD'),
-                                "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" +product_template[0][5] if product_template[0][5] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png',
+                                "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" +
+                                         product_template[0][5] if product_template[0][
+                                    5] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png',
 
-                                "type":type
+                                "type": type
 
                             })
 
-                result = {'date_ite': date_ite,"data_cat":data_cat}
+                result = {'date_ite': date_ite, "data_cat": data_cat}
                 return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
@@ -5371,7 +5840,6 @@ def delete_banned(request):
                     mobile_token='')
 
                 banned_id = request.data.get('banned_id')
-
 
                 with connections[school_name].cursor() as cursor:
                     cursor.execute(
@@ -5406,7 +5874,6 @@ def delete_food(request):
 
                 id = request.data.get('id')
 
-
                 with connections[school_name].cursor() as cursor:
                     cursor.execute(
                         "delete from allergies_food_day where id=%s",
@@ -5417,6 +5884,7 @@ def delete_food(request):
             return Response(result)
         result = {'result': 'Not headers'}
         return Response(result)
+
 
 @api_view(['POST'])
 def get_food_s(request):
@@ -5433,13 +5901,13 @@ def get_food_s(request):
 
                 if parent_id:
                     for e in parent_id:
-                            parent_id = e[0]
+                        parent_id = e[0]
                 ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
                     mobile_token='')
                 student_id = request.data.get('student_id')
                 day_id = request.data.get('day_id')
 
-                date_ite=[]
+                date_ite = []
                 with connections[school_name].cursor() as cursor:
                     cursor.execute(
                         "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
@@ -5454,27 +5922,29 @@ def get_food_s(request):
                         "SELECT id,product_id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
                         [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0], day_id])
                     student_food_day = cursor.fetchall()
-                    
+
                     for allergies in student_food_day:
 
-                            cursor.execute(
-                                "select id,name,pos_categ_id,list_price,is_canteen,image_url from product_template WHERE id=%s ",
-                                [allergies[1]])
-                            product_template = cursor.fetchall()
-                            type=''
-                            if product_template[0][2]:
-                                cursor.execute("select id,name from pos_category WHERE id=%s",
-                                               [product_template[0][2]])
-                                pos_category = cursor.fetchall()
-                                type = pos_category[0][1] if pos_category[0][1] else ''
-                            date_ite.append({
-                                "name": str(product_template[0][1]),
-                                "id": allergies[0],
-                                "price": str(product_template[0][3]) + " " + str('JOD'),
-                                "image":"https://trackware-schools.s3.eu-central-1.amazonaws.com/" +product_template[0][5] if product_template[0][5] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png',
-                                "type":type
+                        cursor.execute(
+                            "select id,name,pos_categ_id,list_price,is_canteen,image_url from product_template WHERE id=%s ",
+                            [allergies[1]])
+                        product_template = cursor.fetchall()
+                        type = ''
+                        if product_template[0][2]:
+                            cursor.execute("select id,name from pos_category WHERE id=%s",
+                                           [product_template[0][2]])
+                            pos_category = cursor.fetchall()
+                            type = pos_category[0][1] if pos_category[0][1] else ''
+                        date_ite.append({
+                            "name": str(product_template[0][1]),
+                            "id": allergies[0],
+                            "price": str(product_template[0][3]) + " " + str('JOD'),
+                            "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" + product_template[0][
+                                5] if product_template[0][
+                                5] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png',
+                            "type": type
 
-                            })
+                        })
 
                 result = {'date_item': date_ite}
                 return Response(result)

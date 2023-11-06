@@ -39,6 +39,7 @@ urlpatterns = [
     path('api/get_library/<int:student_id>', views.get_library),
     path('parents/post_library', views.post_library),
     path('api/get_Allergies', views.get_Allergies),
+    path('api/get_Allergies/<int:student_id>', views.get_Allergies_student),
     path('api/post_spending', views.post_spending),
     path('api/canteen', views.get_info_canteen_student),
     path('api/get_marks/<int:student_id>', views.get_marks),
@@ -54,6 +55,14 @@ urlpatterns = [
     path('api/delete_food', views.delete_food),
 #   get_banned_food_s  get_category_Item post_banned_item post_sec_item delete_banned get_food_s delete_food
 # post_banned
+#     student_login_uni
+
+
+
+    path('unv/student_login_uni', views.student_login_uni),
+    path('unv/profile', views.student_profile_uni),
+    path('unv/routs_uni_map', views.Routs_uni),
+#     Routs_uni
 
 
 ]
