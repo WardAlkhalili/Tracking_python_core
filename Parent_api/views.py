@@ -80,7 +80,7 @@ def student_login_uni(request):
                     "name": student_id[0][1],
                     "mobile": student_id[0][3],
                     "notif": 1 if notify else 0,
-                    "distance":500,
+                    "distance":'500',
                     "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" + student_id[0][7],
                     "Authorization": "Bearer " + token
 
@@ -5133,7 +5133,8 @@ def get_Allergies(request):
                             date.append({"id": allergies[0],
                                          "name": allergies[1],
                                          "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/allergic.svg",
-                                         "des": ""
+                                         "des": "",
+
 
                                          })
 
@@ -5225,19 +5226,33 @@ def get_Allergies_student(request, student_id):
                     mobile_token='')
                 date = []
                 with connections[school_name].cursor() as cursor:
-
                     cursor.execute(
                         "select id,name from product_attribute_value WHERE attribute_id = (select id from product_attribute WHERE name = 'allergies' or name = 'Allergies')",
                         [])
                     product_attribute_value = cursor.fetchall()
-
+                    cursor.execute(
+                        "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
+                        [student_id])
+                    student_info = cursor.fetchall()
+                    cursor.execute(
+                        "select branch_id,company_id from res_users WHERE id=%s",
+                        [student_info[0][1]])
+                    student_info_users = cursor.fetchall()
+                    cursor.execute(
+                        "select attribute_value_id from allergies_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
+                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
+                    allergies_food = cursor.fetchall()
+                    allergies_food = list(set(allergies_food))
+                    allergies_food_student=[]
+                    for res in allergies_food:
+                        allergies_food_student.append(res[0])
                     for allergies in product_attribute_value:
                         if allergies[1]:
                             date.append({"id": allergies[0],
                                          "name": allergies[1],
                                          "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/allergic.svg",
-                                         "des": ""
-
+                                         "des": "",
+                                          "st": True if allergies[0] in allergies_food_student else False
                                          })
 
                 result = {'result': date}
