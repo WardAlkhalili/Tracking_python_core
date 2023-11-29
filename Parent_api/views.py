@@ -2096,31 +2096,31 @@ def kids_hstory_new(request):
                                 #         year_id = fields.Many2one('academic.year', 'Academic Year', ondelete='cascade')
                                 avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                 print(student_mes)
-                                for mes in student_mes:
-                                    action_id = mes[5]
-
-                                    if ('Event' in mes[3]):
-                                        cursor.execute(
-                                            " select id,event_id,state,new_added from school_event_registration where  student_id =%s and  event_id =%s  ORDER BY create_date DESC",
-                                            [student[0], mes[5]])
-                                        events = cursor.fetchall()
-
-                                        if events:
-                                            action_id = events[0][0]
-                                    notifications.append(
-                                        get_info_message_new(mes[0],
-                                                             mes[1],
-                                                             avatar,
-                                                             mes[0].replace(
-                                                                 second=0) if mes[0] else '',
-                                                             mes[3],
-                                                             student[1], student[0], mes[6],
-                                                             mes[8] if information_schema else mes[7], None,
-                                                             action_id if mes[5] else '0', mes[4],
-                                                             mes[2],
-                                                             'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
-                                                             mes[7] if information_schema else '',
-                                                             plan_name=mes[9] if information_schema else ''))
+                                # for mes in student_mes:
+                                #     action_id = mes[5]
+                                #
+                                #     if ('Event' in mes[3]):
+                                #         cursor.execute(
+                                #             " select id,event_id,state,new_added from school_event_registration where  student_id =%s and  event_id =%s  ORDER BY create_date DESC",
+                                #             [student[0], mes[5]])
+                                #         events = cursor.fetchall()
+                                #
+                                #         if events:
+                                #             action_id = events[0][0]
+                                #     notifications.append(
+                                #         get_info_message_new(mes[0],
+                                #                              mes[1],
+                                #                              avatar,
+                                #                              mes[0].replace(
+                                #                                  second=0) if mes[0] else '',
+                                #                              mes[3],
+                                #                              student[1], student[0], mes[6],
+                                #                              mes[8] if information_schema else mes[7], None,
+                                #                              action_id if mes[5] else '0', mes[4],
+                                #                              mes[2],
+                                #                              'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
+                                #                              mes[7] if information_schema else '',
+                                #                              plan_name=mes[9] if information_schema else ''))
                             #
                             #     student_round = []
                             #     if  any('English'  in x[0]  for x in lang):
