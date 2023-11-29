@@ -416,7 +416,6 @@ def parent_login(request):
         # http://192.168.1.82/
         url = 'https://tst.tracking.trackware.com/web/session/authenticate'
         # url = 'http://192.168.1.82:9098/web/session/authenticate'
-        print(user_name)
         try:
 
             body = json.dumps(
@@ -426,11 +425,10 @@ def parent_login(request):
                 'Content-Type': 'application/json',
             }
 
-            response1 = requests.request("POST", url, headers=headers, data=body, verify=False)
-            print(response1, "response--------------------------------------")
+            response1 = requests.request("POST", url, headers=headers, data=body)
+
             response = response1.json()
             # print(response)
-
             if "error" in response:
                 result = {
                     "status": "erorrq"}
@@ -440,8 +438,8 @@ def parent_login(request):
             company_id = response['result']['company_id']
 
         except Exception  as error:
-            print("--------------------------------------")
-            print(error)
+            # print("--------------------------------------")
+            # print(Exception)
             result = {
                 "status": "erorr2"
                           ""}
@@ -1310,7 +1308,7 @@ def kids_list(request):
                                             'Content-Type': 'application/json',
                                         }
 
-                                        response1 = requests.request("POST", url, headers=headers, data=body, verify=False)
+                                        response1 = requests.request("POST", url, headers=headers, data=body)
 
                                         response = response1.json()
                                         if "error" in response:
@@ -2095,32 +2093,30 @@ def kids_hstory_new(request):
                                 #         [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
                                 #         year_id = fields.Many2one('academic.year', 'Academic Year', ondelete='cascade')
                                 avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                print(student_mes)
-                                # for mes in student_mes:
-                                #     action_id = mes[5]
-                                #
-                                #     if ('Event' in mes[3]):
-                                #         cursor.execute(
-                                #             " select id,event_id,state,new_added from school_event_registration where  student_id =%s and  event_id =%s  ORDER BY create_date DESC",
-                                #             [student[0], mes[5]])
-                                #         events = cursor.fetchall()
-                                #
-                                #         if events:
-                                #             action_id = events[0][0]
-                                #     notifications.append(
-                                #         get_info_message_new(mes[0],
-                                #                              mes[1],
-                                #                              avatar,
-                                #                              mes[0].replace(
-                                #                                  second=0) if mes[0] else '',
-                                #                              mes[3],
-                                #                              student[1], student[0], mes[6],
-                                #                              mes[8] if information_schema else mes[7], None,
-                                #                              action_id if mes[5] else '0', mes[4],
-                                #                              mes[2],
-                                #                              'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
-                                #                              mes[7] if information_schema else '',
-                                #                              plan_name=mes[9] if information_schema else ''))
+                                for mes in student_mes:
+                                    action_id = mes[5]
+                                    if ('Event' in mes[3]):
+                                        cursor.execute(
+                                            " select id,event_id,state,new_added from school_event_registration where  student_id =%s and  event_id =%s  ORDER BY create_date DESC",
+                                            [student[0], mes[5]])
+                                        events = cursor.fetchall()
+
+                                        if events:
+                                            action_id = events[0][0]
+                                    notifications.append(
+                                        get_info_message_new(mes[0],
+                                                             mes[1],
+                                                             avatar,
+                                                             mes[0].replace(
+                                                                 second=0) if mes[0] else '',
+                                                             mes[3],
+                                                             student[1], student[0], mes[6],
+                                                             mes[8] if information_schema else mes[7], None,
+                                                             action_id if mes[5] else '0', mes[4],
+                                                             mes[2],
+                                                             'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
+                                                             mes[7] if information_schema else '',
+                                                             plan_name=mes[9] if information_schema else ''))
                             #
                             #     student_round = []
                             #     if  any('English'  in x[0]  for x in lang):
@@ -3658,7 +3654,7 @@ def post_attendance(request):
                             }
                             url = base_url + "check_user_type1"
                             response1 = requests.request("POST", url,
-                                                         headers=headers, data=body, verify=False)
+                                                         headers=headers, data=body)
 
                             result = {'result': 'ok'}
                             return Response(result)
@@ -3708,7 +3704,7 @@ def post_workSheet(request):
                             url = str(base_url) + "upload_worksheet"
 
                             response1 = requests.request("POST", url,
-                                                         headers=headers, data=body, verify=False)
+                                                         headers=headers, data=body)
 
                             result = {'result': 'ok'}
                             return Response(result)
@@ -3757,7 +3753,7 @@ def post_Event(request):
 
                             url = str(base_url) + "upload_events_flutter"
                             response1 = requests.request("POST", url,
-                                                         headers=headers, data=body, verify=False)
+                                                         headers=headers, data=body)
 
                             result = {'result': 'ok'}
                             return Response(result)
