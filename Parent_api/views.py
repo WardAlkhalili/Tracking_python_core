@@ -426,7 +426,7 @@ def parent_login(request):
                 'Content-Type': 'application/json',
             }
 
-            response1 = requests.request("POST", url, headers=headers, data=body)
+            response1 = requests.request("POST", url, headers=headers, data=body, verify=False)
             print(response1, "response--------------------------------------")
             response = response1.json()
             # print(response)
@@ -1310,7 +1310,7 @@ def kids_list(request):
                                             'Content-Type': 'application/json',
                                         }
 
-                                        response1 = requests.request("POST", url, headers=headers, data=body)
+                                        response1 = requests.request("POST", url, headers=headers, data=body, verify=False)
 
                                         response = response1.json()
                                         if "error" in response:
@@ -3656,7 +3656,7 @@ def post_attendance(request):
                             }
                             url = base_url + "check_user_type1"
                             response1 = requests.request("POST", url,
-                                                         headers=headers, data=body)
+                                                         headers=headers, data=body, verify=False)
 
                             result = {'result': 'ok'}
                             return Response(result)
@@ -3706,7 +3706,7 @@ def post_workSheet(request):
                             url = str(base_url) + "upload_worksheet"
 
                             response1 = requests.request("POST", url,
-                                                         headers=headers, data=body)
+                                                         headers=headers, data=body, verify=False)
 
                             result = {'result': 'ok'}
                             return Response(result)
@@ -3755,7 +3755,7 @@ def post_Event(request):
 
                             url = str(base_url) + "upload_events_flutter"
                             response1 = requests.request("POST", url,
-                                                         headers=headers, data=body)
+                                                         headers=headers, data=body, verify=False)
 
                             result = {'result': 'ok'}
                             return Response(result)
