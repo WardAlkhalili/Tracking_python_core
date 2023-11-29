@@ -416,6 +416,7 @@ def parent_login(request):
         # http://192.168.1.82/
         url = 'https://tst.tracking.trackware.com/web/session/authenticate'
         # url = 'http://192.168.1.82:9098/web/session/authenticate'
+        print(user_name)
         try:
 
             body = json.dumps(
@@ -426,10 +427,10 @@ def parent_login(request):
             }
 
             response1 = requests.request("POST", url, headers=headers, data=body)
-
+            print(response1, "response--------------------------------------")
             response = response1.json()
             # print(response)
-            print(response,"response--------------------------------------")
+
             if "error" in response:
                 result = {
                     "status": "erorrq"}
