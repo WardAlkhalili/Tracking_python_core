@@ -2097,14 +2097,15 @@ def kids_hstory_new(request):
                                 avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                 for mes in student_mes:
                                     action_id = mes[5]
-                                    if ('Event' in mes[3]):
-                                        cursor.execute(
-                                            " select id,event_id,state,new_added from school_event_registration where  student_id =%s and  event_id =%s  ORDER BY create_date DESC",
-                                            [student[0], mes[5]])
-                                        events = cursor.fetchall()
+                                    if mes[3]:
+                                        if ('Event' in mes[3]):
+                                            cursor.execute(
+                                                " select id,event_id,state,new_added from school_event_registration where  student_id =%s and  event_id =%s  ORDER BY create_date DESC",
+                                                [student[0], mes[5]])
+                                            events = cursor.fetchall()
 
-                                        if events:
-                                            action_id = events[0][0]
+                                            if events:
+                                                action_id = events[0][0]
                                     notifications.append(
                                         get_info_message_new(mes[0],
                                                              mes[1],
