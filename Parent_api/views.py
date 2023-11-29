@@ -30,6 +30,7 @@ def parent_login(request):
         mobile_token = request.data.get('mobile_token')
         # http://192.168.1.82/
         url = 'https://tst.tracking.trackware.com/web/session/authenticate'
+
         # url = 'http://192.168.1.82:9098/web/session/authenticate'
         try:
 
@@ -43,6 +44,7 @@ def parent_login(request):
             response1 = requests.request("POST", url, headers=headers, data=body)
 
             response = response1.json()
+            print(response)
             if "error" in response:
                 result = {
                     "status": "erorrq"}
@@ -51,7 +53,9 @@ def parent_login(request):
             uid = response['result']['uid']
             company_id = response['result']['company_id']
 
-        except:
+        except Exception:
+            print("-------------------------------------")
+            print(Exception)
             result = {
                 "status": "erorr2"
                           ""}
