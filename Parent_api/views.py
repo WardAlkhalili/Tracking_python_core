@@ -1618,46 +1618,44 @@ def hide_message(request):
             return Response(result)
 
 
-def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name,
-                         student_id, id=0, stutes_notif=None, show_notif=None, action_id='0', notifications_title_ar='',
-                         notifications_text_ar='',
-                         student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
-                         image_link='', plan_name=''):
-    show = show_notif
+def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0',notifications_title_ar='',notifications_text_ar='',student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',image_link='',plan_name=''):
+    show=show_notif
     # if student_image:
     #     print(student_image)
-    stutes = stutes_notif
+    if not notifications_title:
+        notifications_title=''
+
+    stutes=stutes_notif
     # print(stutes)
-    if stutes == 'Read' or stutes:
-        stutes = "Mark As UnRead"
-    elif stutes == 'UnRead' or not stutes:
+    if stutes=='Read' or stutes:
+        stutes="Mark As UnRead"
+    elif  stutes=='UnRead' or not stutes :
         stutes = "Mark As Read"
     else:
         stutes = "Mark As Read"
 
-    if show == None:
-        show = "show"
+    if show==None:
+        show="show"
 
     notificationsType = ''
-    icon_tracking = ''
-    if 'Weekly Plan' in notifications_title or 'Assignment' in notifications_title or 'Homework' in notifications_title or 'Exam' in notifications_title or 'educational' in notifications_title:
+    icon_tracking=''
+    if 'Weekly Plan' in notifications_title  or 'Assignment' in notifications_title or  'Homework' in notifications_title or  'Exam' in notifications_title or 'educational' in notifications_title:
         notificationsType = 'educational'
-        if ('Weekly Plan' in notifications_title or 'educational' in notifications_title):
+        if ( 'Weekly Plan' in notifications_title or 'educational' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg'
-        elif ('Assignment' in notifications_title):
+        elif ( 'Assignment' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg'
-        elif ('Exam' in notifications_title):
+        elif ( 'Exam' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg'
         elif ('Homework' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg'
 
-    elif 'Pick Up By Parent' in notifications_title or (
-            'Absence' in notifications_title and notifications_title != "Absence notification") or 'clinic' in notifications_title or 'library' in notifications_title:
+    elif 'Pick Up By Parent' in notifications_title or ('Absence' in notifications_title and  notifications_title  != "Absence notification" ) or  'clinic' in notifications_title or 'library' in notifications_title :
 
         notificationsType = 'Absence'
-        if ('clinic' in notifications_title):
+        if ( 'clinic' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg'
-        elif ('library' in notifications_title):
+        elif ( 'library' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg'
         else:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
@@ -1677,20 +1675,21 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         elif "has just been checked into the bus." in notifications_text:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-get-on-bus.svg'
         elif notifications_title == "Absence notification":
-            notifications_title = "bsence notification"
+            notifications_title="bsence notification"
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
         else:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-shuttle-bus.svg'
     else:
         notificationsType = 'announcement'
         if (notifications_title == 'survey'):
-            icon_tracking = show_notif
-        elif ('Event' in notifications_title):
+            icon_tracking=show_notif
+        elif('Event' in notifications_title)  :
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg'
-        elif ('Meeting' in notifications_title):
+        elif ( 'Meeting' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg'
         else:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
+
 
     if student_name:
         return {
@@ -1702,17 +1701,17 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             "student_name": student_name,
             "student_id": str(student_id),
             "notificationsType": notificationsType,
-            "icon_tracking": icon_tracking,
+            "icon_tracking":icon_tracking,
             "id": str(id),
             "stutes": stutes,
             "show": show,
             "student_image": student_image,
             "action_id": str(action_id),
-            "notifications_text_ar": notifications_text_ar if notifications_text_ar else notifications_text,
+            "notifications_text_ar": notifications_text_ar if notifications_text_ar else  notifications_text,
             "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
-            "imageLink": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
-                image_link) if image_link else '',
+            "imageLink":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(image_link)if image_link else '',
             "plan_name": plan_name if plan_name else ''
+
 
         }
     else:
@@ -1724,19 +1723,20 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             "notifications_title": notifications_title,
             "student_id": str(student_id),
             "notificationsType": notificationsType,
-            "icon_tracking": icon_tracking,
-            "id": id,
-            "stutes": stutes,
-            "show": show,
+            "icon_tracking":icon_tracking,
+            "id":id,
+            "stutes":stutes,
+            "show":show,
             "student_image": student_image,
             "action_id": str(action_id),
             "notifications_text_ar": notifications_text_ar if notifications_text_ar else notifications_text,
             "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
-            "imageLink": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
-                image_link) if image_link else '',
+            "imageLink": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(image_link)if image_link else '',
             "plan_name": plan_name if plan_name else ''
 
         }
+
+
 
 
 # get school message
@@ -2047,6 +2047,8 @@ def kids_hstory_new(request):
                             information_schema_survey = cursor.fetchall()
                             if information_schema_survey:
                                 notifications += get_survey(parent_id, school_name)
+
+                            # notifications +=get_survey(parent_id,school_name)
                             cursor.execute(
                                 "select  id,display_name_search,image_url,name,name_ar,year_id,user_id from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
@@ -2075,14 +2077,12 @@ def kids_hstory_new(request):
                                     "SELECT column_name FROM information_schema.columns WHERE table_name='message_student' and column_name='image_link'",
                                     [])
                                 information_schema = cursor.fetchall()
-                                # information_schema=[]
                                 if information_schema:
-                                    print(branch_id[0][0], student[5], student[0])
                                     cursor.execute(
                                         "select  date,message_en,message_ar,title,title_ar,action_id,id,image_link,read_message,plan_name from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
                                         [branch_id[0][0], student[5], student[0]])
                                     student_mes = cursor.fetchall()
-                                    print(student_mes)
+                                    # print("1653 line ",student_mes)
                                 else:
                                     cursor.execute(
                                         "select  date,message_en,message_ar,title,title_ar,action_id,id,read_message from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
@@ -2092,17 +2092,18 @@ def kids_hstory_new(request):
                                 #         "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
                                 #         [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
                                 #         year_id = fields.Many2one('academic.year', 'Academic Year', ondelete='cascade')
-                                avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                avatar="https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                 for mes in student_mes:
-                                    action_id = mes[5]
-                                    if ('Event' in mes[3]):
-                                        cursor.execute(
-                                            " select id,event_id,state,new_added from school_event_registration where  student_id =%s and  event_id =%s  ORDER BY create_date DESC",
-                                            [student[0], mes[5]])
-                                        events = cursor.fetchall()
+                                    action_id=mes[5]
+                                    if mes[3]:
+                                        if ('Event' in mes[3]):
+                                            cursor.execute(
+                                                " select id,event_id,state,new_added from school_event_registration where  student_id =%s and  event_id =%s  ORDER BY create_date DESC",
+                                                [student[0], mes[5]])
+                                            events = cursor.fetchall()
 
-                                        if events:
-                                            action_id = events[0][0]
+                                            if events:
+                                                action_id = events[0][0]
                                     notifications.append(
                                         get_info_message_new(mes[0],
                                                              mes[1],
@@ -2110,13 +2111,8 @@ def kids_hstory_new(request):
                                                              mes[0].replace(
                                                                  second=0) if mes[0] else '',
                                                              mes[3],
-                                                             student[1], student[0], mes[6],
-                                                             mes[8] if information_schema else mes[7], None,
-                                                             action_id if mes[5] else '0', mes[4],
-                                                             mes[2],
-                                                             'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
-                                                             mes[7] if information_schema else '',
-                                                             plan_name=mes[9] if information_schema else ''))
+                                                             student[1], student[0], mes[6], mes[8] if information_schema else mes[7], None, action_id if mes[5] else '0', mes[4],
+                                                             mes[2],'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',mes[7]if information_schema else '',plan_name=mes[9]if information_schema else ''))
                             #
                             #     student_round = []
                             #     if  any('English'  in x[0]  for x in lang):
@@ -2312,6 +2308,7 @@ def kids_hstory_new(request):
                                     # cursor.execute(
                                     #     "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
                                     #     [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
+
 
                             result = {"notifications": notifications_not_d}
                             return Response(result)
