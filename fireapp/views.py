@@ -269,7 +269,7 @@ def twoArgs(message_id,school_name):
             result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
                                                           registration_ids=registration_id,
                                                           data_message={},sound='new_beeb.mp3')
-            # print(result)
+            print(result)
 
 
 
