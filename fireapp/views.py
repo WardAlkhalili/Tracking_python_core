@@ -496,57 +496,57 @@ def push_notification(request):
                                 # print(rec,school_id, ManagerParent.objects.filter(Q(user_id=rec) , Q(db_name=school_name),Q(is_active=True)).values_list(
                                 #     'mobile_token').order_by('-pk'))
 
-                            if settings:
-                                if settings[0]=='None':
-                                    data = json.loads(settings[0][0])
-                                    for e in mobile_token1:
-                                        if data['notifications']['nearby'] and (action =='near' or action =='driver'):
+                                    if settings:
+                                        if settings[0]=='None':
+                                            data = json.loads(settings[0][0])
+                                            for e in mobile_token1:
+                                                if data['notifications']['nearby'] and (action =='near' or action =='driver'):
+                                                    mobile_token.append(e[0])
+                                                elif    data['notifications']['check_in'] and (action =='near' or action =='driver'):
+                                                    mobile_token.append(e[0])
+                                                elif data['notifications']['check_out'] and (action =='near' or action =='driver'):
+                                                    mobile_token.append(e[0])
+                                                else:
+                                                     mobile_token.append(e[0])
+                                        for e in mobile_token1:
                                             mobile_token.append(e[0])
-                                        elif    data['notifications']['check_in'] and (action =='near' or action =='driver'):
+                                        if mobile_token:
+                                            push_service = FCMNotification(
+                                                api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                            # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
+                                            registration_id = mobile_token
+                                            message_title = title
+                                            message_body = message
+                                            result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
+                                                                                       message_body=message_body)
+                                            print(result)
+                                            result1 = {
+                                                "route": 'Ok'
+                                            }
+                                            return Response(result1)
+        
+                                    else:
+                                        for e in mobile_token1:
                                             mobile_token.append(e[0])
-                                        elif data['notifications']['check_out'] and (action =='near' or action =='driver'):
-                                            mobile_token.append(e[0])
-                                        else:
-                                             mobile_token.append(e[0])
-                                for e in mobile_token1:
-                                    mobile_token.append(e[0])
-                                if mobile_token:
-                                    push_service = FCMNotification(
-                                        api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                    # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
-                                    registration_id = mobile_token
-                                    message_title = title
-                                    message_body = message
-                                    result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
-                                                                               message_body=message_body)
-                                    print(result)
+                                            # for e in mobile_token:
+                                            #     mobile_token = e[0]
+                                            # print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token)
+                                            push_service = FCMNotification(
+                                                api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                            # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
+                                            if mobile_token:
+                                                registration_id = mobile_token[0]
+                                                message_title = title
+                                                message_body = message
+                                                result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
+                                                                                           message_body=message_body,sound='new_beeb.mp3')
+                                                result1 = {
+                                                    "route": 'Ok'
+                                                }
+
+                                                return Response(result1)
                                     result1 = {
                                         "route": 'Ok'
                                     }
                                     return Response(result1)
-
-                            else:
-                                for e in mobile_token1:
-                                    mobile_token.append(e[0])
-                                    # for e in mobile_token:
-                                    #     mobile_token = e[0]
-                                    # print("mmmmmmmmmmmmmmm",len(mobile_token),mobile_token)
-                                    push_service = FCMNotification(
-                                        api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                    # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
-                                    if mobile_token:
-                                        registration_id = mobile_token[0]
-                                        message_title = title
-                                        message_body = message
-                                        result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
-                                                                                   message_body=message_body,sound='new_beeb.mp3')
-                                        result1 = {
-                                            "route": 'Ok'
-                                        }
-
-                                        return Response(result1)
-                            result1 = {
-                                "route": 'Ok'
-                            }
-                            return Response(result1)
 
