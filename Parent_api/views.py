@@ -1618,8 +1618,9 @@ def hide_message(request):
             return Response(result)
 
 
-def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0',notifications_title_ar='',notifications_text_ar='',student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',image_link='',plan_name=''):
+def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0',notifications_title_ar='',notifications_text_ar='',student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',image_link='',plan_name='',attachments=[]):
     show=show_notif
+    # print(attachments," ooooooooooooooooooooo")
     # if student_image:
     #     print(student_image)
     if not notifications_title:
@@ -1710,7 +1711,8 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             "notifications_text_ar": notifications_text_ar if notifications_text_ar else  notifications_text,
             "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
             "imageLink":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(image_link)if image_link else '',
-            "plan_name": plan_name if plan_name else ''
+            "plan_name": plan_name if plan_name else '',
+            'attachments':attachments
 
 
         }
@@ -1732,7 +1734,8 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             "notifications_text_ar": notifications_text_ar if notifications_text_ar else notifications_text,
             "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
             "imageLink": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(image_link)if image_link else '',
-            "plan_name": plan_name if plan_name else ''
+            "plan_name": plan_name if plan_name else '',
+            "attachments":attachments
 
         }
 
@@ -2079,13 +2082,13 @@ def kids_hstory_new(request):
                                 information_schema = cursor.fetchall()
                                 if information_schema:
                                     cursor.execute(
-                                        "select  date,message_en,message_ar,title,title_ar,action_id,id,image_link,read_message,plan_name from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
+                                        "select  date,message_en,message_ar,title,title_ar,action_id,id,image_link,read_message,plan_name,school_message_id from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
                                         [branch_id[0][0], student[5], student[0]])
                                     student_mes = cursor.fetchall()
                                     # print("1653 line ",student_mes)
                                 else:
                                     cursor.execute(
-                                        "select  date,message_en,message_ar,title,title_ar,action_id,id,read_message from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
+                                        "select  date,message_en,message_ar,title,title_ar,action_id,id,read_message,school_message_id from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
                                         [branch_id[0][0], student[5], student[0]])
                                     student_mes = cursor.fetchall()
                                 # cursor.execute(
@@ -2104,6 +2107,19 @@ def kids_hstory_new(request):
 
                                             if events:
                                                 action_id = events[0][0]
+                                        cursor.execute(
+                                            "select id,name,url from ir_attachment where school_message_id=%s",
+                                            [mes[10] if information_schema else mes[8]])
+
+                                        ir_attachment = cursor.fetchall()
+                                        attachments = []
+                                        if ir_attachment:
+                                            for att in ir_attachment:
+                                                if att[2]:
+                                                    attachments.append(
+                                                        {'id': att[0], 'name': att[1], 'datas': att[2]})
+                                                    print(attachments)
+
                                     notifications.append(
                                         get_info_message_new(mes[0],
                                                              mes[1],
@@ -2112,7 +2128,7 @@ def kids_hstory_new(request):
                                                                  second=0) if mes[0] else '',
                                                              mes[3],
                                                              student[1], student[0], mes[6], mes[8] if information_schema else mes[7], None, action_id if mes[5] else '0', mes[4],
-                                                             mes[2],'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',mes[7]if information_schema else '',plan_name=mes[9]if information_schema else ''))
+                                                             mes[2],'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',mes[7]if information_schema else '',plan_name=mes[9]if information_schema else '',attachments=attachments))
                             #
                             #     student_round = []
                             #     if  any('English'  in x[0]  for x in lang):
@@ -2271,8 +2287,11 @@ def kids_hstory_new(request):
 
                             notifications.sort(key=get_year, reverse=True)
 
+
                             for d in notifications:
-                                t = tuple(d.items())
+                                # t = tuple(d.items())
+                                t = (d['student_id'], d['notifications_text'],d['create_date'],d['date_time'],d['student_name'],d['notifications_title'],d['notificationsType'],d['notificationsType'])
+                                # (d['student_id'], d['notifications_text'])
                                 if t not in seen:
                                     seen.add(t)
                                     notifications_not_d.append(d)
