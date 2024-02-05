@@ -2118,7 +2118,7 @@ def kids_hstory_new(request):
                                                 if att[2]:
                                                     attachments.append(
                                                         {'id': att[0], 'name': att[1], 'datas': att[2]})
-                                                    print(attachments)
+                                                    # print(attachments)
 
                                     notifications.append(
                                         get_info_message_new(mes[0],
@@ -2330,6 +2330,7 @@ def kids_hstory_new(request):
 
 
                             result = {"notifications": notifications_not_d}
+                            # print(result)
                             return Response(result)
                     else:
                         result = {'status': 'error'}
@@ -4949,14 +4950,16 @@ def logout(request):
                     for e in db_name:
                         school_name = e[0]
                 parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
-                # print("sdasadsafff", parent_id,)
+                parent_id1 = ManagerParent.objects.filter(token=au).values_list('mobile_token')
+                print("sdasadsafff", parent_id1,)
                 if parent_id:
                     for e in parent_id:
                         parent_id = e[0]
-                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
-                    mobile_token='')
+
                 # ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
-                #     token='')
+                #     mobile_token='')
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).delete()
+
                 with connections[school_name].cursor() as cursor:
                     cursor.execute(
                         "UPDATE public.school_parent SET mobile_token=%s WHERE id=%s;",
@@ -5353,7 +5356,7 @@ def post_spending(request):
                         cursor.execute(
                             "UPDATE public.student_student SET canteen_spending=%s WHERE id=%s;",
                             [canteen_spending, student_id])
-                        print(student_id)
+                        # print(student_id)
                         result = {'result': 'ok'}
                     except:
                         result = {'result': ' does not exist canteen_spending'}
