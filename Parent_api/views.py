@@ -4961,15 +4961,15 @@ def logout(request):
                 #     for e in parent_id:
                 #         parent_id = e[0]
 
-                ManagerParent.objects.filter(parent_id=parent_id[0], db_name=school_name,is_active=True).order_by('-pk').update(mobile_token='')
+                ManagerParent.objects.filter(parent_id=parent_id, db_name=school_name,is_active=True).order_by('-pk').update(mobile_token='')
                 # ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name, is_active=True).delete()
-                mobile_toke121n = ManagerParent.objects.filter(parent_id=parent_id[0], db_name=school_name,is_active=True).values_list('mobile_token')
-                print(parent_id[0])
+                mobile_toke121n = ManagerParent.objects.filter(parent_id=parent_id, db_name=school_name,is_active=True).values_list('mobile_token')
+                print(parent_id)
 
                 with connections[school_name].cursor() as cursor:
                     cursor.execute(
                         "UPDATE public.school_parent SET mobile_token=%s WHERE id=%s;",
-                        ['', parent_id[0]])
+                        ['', parent_id])
                 result = {'result': 'ok'}
                 return Response(result)
             result = {'result': 'Not Authorization'}
