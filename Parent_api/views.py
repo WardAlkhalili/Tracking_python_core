@@ -4964,6 +4964,7 @@ def logout(request):
                 ManagerParent.objects.filter(parent_id=parent_id[0], db_name=school_name,is_active=True).order_by('-pk').update(mobile_token='')
                 # ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name, is_active=True).delete()
                 mobile_toke121n = ManagerParent.objects.filter(parent_id=parent_id[0], db_name=school_name,is_active=True).values_list('mobile_token')
+                print(parent_id[0])
 
                 with connections[school_name].cursor() as cursor:
                     cursor.execute(
