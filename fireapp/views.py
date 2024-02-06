@@ -425,14 +425,11 @@ def push_notification(request):
                             parent_id = request.data.get('parent_id')
                             mobile_token = []
                             # school_name = ManagerParent.objects.filter(school_id=school_id).values_list('db_name').order_by('-pk')
-                            print(school_name)
                             # school_name=school_name[0][0]
 
                             # for rec in parent_id:
 
                             with connections[str(school_name)].cursor() as cursor:
-                                    print(user_id)
-                                    print(parent_id)
                                     if  user_id != 0:
                                         cursor.execute("select  father_id,mother_id,responsible_id_value from student_student WHERE id= %s",
                                                        [user_id])
@@ -445,12 +442,9 @@ def push_notification(request):
                                                 settings = cursor.fetchall()
                                                 mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec), Q(db_name=school_name),Q(is_active=True)).values_list('mobile_token').order_by('-pk')
                                                 if settings:
-                                                    print(settings)
                                                     if settings[0] != 'None' and  str(settings[0][0]) != 'None':
                                                         data = json.loads(settings[0][0])
                                                         for e in mobile_token1:
-                                                            print(data['notifications']['nearby'])
-                                                            print(action)
                                                             if data['notifications']['nearby'] and (action == 'near' or action == 'driver'):
                                                                 mobile_token.append(e[0])
                                                             elif data['notifications']['check_in'] and (
