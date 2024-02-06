@@ -449,6 +449,8 @@ def push_notification(request):
                                                     if settings[0] != 'None' and  str(settings[0][0]) != 'None':
                                                         data = json.loads(settings[0][0])
                                                         for e in mobile_token1:
+                                                            print(data['notifications']['nearby'])
+                                                            print(action)
                                                             if data['notifications']['nearby'] and (action == 'near' or action == 'driver'):
                                                                 mobile_token.append(e[0])
                                                             elif data['notifications']['check_in'] and (
