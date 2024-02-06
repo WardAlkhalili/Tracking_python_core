@@ -203,7 +203,6 @@ def twoArgs(message_id,school_name):
                 [std])
             columns = (x.name for x in cursor.description)
             student = cursor.fetchall()
-            print(student)
             student_name=''
             id = []
             for rec in student:
@@ -231,8 +230,7 @@ def twoArgs(message_id,school_name):
 
             mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id), Q(db_name=school_name),
                                                         Q(is_active=True)).values_list('mobile_token').order_by('-pk')
-            print(id,school_name)
-            
+
 
             token = []
 
@@ -272,8 +270,6 @@ def twoArgs(message_id,school_name):
             result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
                                                           registration_ids=registration_id,
                                                           data_message={},sound='new_beeb.mp3')
-            print(result)
-
 
 
 

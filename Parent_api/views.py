@@ -4952,23 +4952,23 @@ def logout(request):
                 # parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
 
                 parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
-                print(parent_id[0])
+
                 for e in parent_id:
                     parent_id = e[0]
-                print(parent_id)
+
                 # parent_id1 = ManagerParent.objects.filter(token=au).values_list('mobile_token')
                 # if parent_id:
                 #     for e in parent_id:
                 #         parent_id = e[0]
 
-                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name,is_active=True).order_by('-pk').update(mobile_token='')
+                ManagerParent.objects.filter(parent_id=parent_id[0], db_name=school_name,is_active=True).order_by('-pk').update(mobile_token='')
                 # ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name, is_active=True).delete()
-                mobile_toke121n = ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name,is_active=True).values_list('mobile_token')
-                print("ssssssssssssss",mobile_toke121n,parent_id[0][0],school_name)
+                mobile_toke121n = ManagerParent.objects.filter(parent_id=parent_id[0], db_name=school_name,is_active=True).values_list('mobile_token')
+
                 with connections[school_name].cursor() as cursor:
                     cursor.execute(
                         "UPDATE public.school_parent SET mobile_token=%s WHERE id=%s;",
-                        ['', parent_id[0][0]])
+                        ['', parent_id[0]])
                 result = {'result': 'ok'}
                 return Response(result)
             result = {'result': 'Not Authorization'}
