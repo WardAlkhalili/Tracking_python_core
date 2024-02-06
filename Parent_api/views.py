@@ -4951,6 +4951,7 @@ def logout(request):
                     for e in db_name:
                         school_name = e[0]
                 parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+                print(parent_id)
                 # parent_id1 = ManagerParent.objects.filter(token=au).values_list('mobile_token')
                 if parent_id:
                     for e in parent_id:
