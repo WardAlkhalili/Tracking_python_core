@@ -464,7 +464,6 @@ def parent_login(request):
             manager_parent = ManagerParent(token=unique_id, db_name=school_name, user_id=uid,
                                            parent_id=parent_id[0][0],
                                            school_id=company_id, mobile_token=mobile_token)
-            print(parent_id[0][0])
             manager_parent.save()
             result = {
                 "status": "ok",
@@ -4951,16 +4950,16 @@ def logout(request):
                     for e in db_name:
                         school_name = e[0]
                 parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
-                print(parent_id)
+                # print(parent_id)
                 # parent_id1 = ManagerParent.objects.filter(token=au).values_list('mobile_token')
                 if parent_id:
-                    for e in parent_id:
+                    # for e in parent_id:
                         parent_id = e[0]
 
                 ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name,is_active=True).order_by('-pk').update(mobile_token='')
                 # ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name, is_active=True).delete()
                 mobile_toke121n = ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name,is_active=True).values_list('mobile_token')
-                print("ssssssssssssss",mobile_toke121n,parent_id[0][0],school_name)
+                # print("ssssssssssssss",mobile_toke121n,parent_id[0][0],school_name)
                 with connections[school_name].cursor() as cursor:
                     cursor.execute(
                         "UPDATE public.school_parent SET mobile_token=%s WHERE id=%s;",
