@@ -425,7 +425,7 @@ def push_notification(request):
                             parent_id = request.data.get('parent_id')
                             mobile_token = []
                             school_name = ManagerParent.objects.filter(school_id=school_id).values_list('db_name').order_by('-pk')
-                            # print(school_name[0][0])
+                            print(school_name)
                             school_name=school_name[0][0]
 
                             # for rec in parent_id:
