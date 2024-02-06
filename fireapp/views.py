@@ -203,6 +203,7 @@ def twoArgs(message_id,school_name):
                 [std])
             columns = (x.name for x in cursor.description)
             student = cursor.fetchall()
+            print(student)
             student_name=''
             id = []
             for rec in student:

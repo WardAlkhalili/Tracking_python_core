@@ -464,6 +464,7 @@ def parent_login(request):
             manager_parent = ManagerParent(token=unique_id, db_name=school_name, user_id=uid,
                                            parent_id=parent_id[0][0],
                                            school_id=company_id, mobile_token=mobile_token)
+            print(parent_id[0][0])
             manager_parent.save()
             result = {
                 "status": "ok",
