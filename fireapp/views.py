@@ -431,6 +431,8 @@ def push_notification(request):
                             # for rec in parent_id:
 
                             with connections[str(school_name)].cursor() as cursor:
+                                    print(user_id)
+                                    print(parent_id)
                                     if  user_id != 0:
                                         cursor.execute("select  father_id,mother_id,responsible_id_value from student_student WHERE id= %s",
                                                        [user_id])
@@ -443,6 +445,7 @@ def push_notification(request):
                                                 settings = cursor.fetchall()
                                                 mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec), Q(db_name=school_name),Q(is_active=True)).values_list('mobile_token').order_by('-pk')
                                                 if settings:
+                                                    print(settings)
                                                     if settings[0] != 'None':
                                                         data = json.loads(settings[0][0])
                                                         for e in mobile_token1:
