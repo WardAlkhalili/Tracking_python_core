@@ -4952,6 +4952,7 @@ def logout(request):
                 # parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
 
                 parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+                print(parent_id[0])
                 for e in parent_id:
                     parent_id = e[0]
                 print(parent_id)
