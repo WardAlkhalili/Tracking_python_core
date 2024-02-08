@@ -1623,9 +1623,11 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
     # print(attachments," ooooooooooooooooooooo")
     # if student_image:
     #     print(student_image)
+
     if not notifications_title:
         notifications_title=''
-
+    if not notifications_text:
+        notifications_text = ''
     stutes=stutes_notif
     # print(stutes)
     if stutes=='Read' or stutes:
