@@ -1212,13 +1212,14 @@ def hide_message(request):
         else:
             result = {'result': 'error4'}
             return Response(result)
-def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0',notifications_title_ar='',notifications_text_ar='',student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',image_link='',plan_name=''):
+def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0',notifications_title_ar='',notifications_text_ar='',student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',image_link='',plan_name='',attachments=[]):
     show=show_notif
     # if student_image:
     #     print(student_image)
     if not notifications_title:
         notifications_title=''
-
+    if not notifications_text:
+        notifications_text = ''
     stutes=stutes_notif
     # print(stutes)
     if stutes=='Read' or stutes:
@@ -1304,7 +1305,8 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             "notifications_text_ar": notifications_text_ar if notifications_text_ar else  notifications_text,
             "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
             "imageLink":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(image_link)if image_link else '',
-            "plan_name": plan_name if plan_name else ''
+            "plan_name": plan_name if plan_name else '',
+            'attachments':attachments
 
 
         }
@@ -1326,7 +1328,8 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             "notifications_text_ar": notifications_text_ar if notifications_text_ar else notifications_text,
             "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
             "imageLink": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(image_link)if image_link else '',
-            "plan_name": plan_name if plan_name else ''
+            "plan_name": plan_name if plan_name else '',
+            "attachments":attachments
 
         }
 
@@ -1572,14 +1575,11 @@ def kids_hstory_new(request):
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
-
                     db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
                     parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
-
                     notifications = []
                     notifications_not_d = []
                     seen = set()
-
                     for e in parent_id:
                         parent_id = e[0]
                     if db_name:
@@ -1606,7 +1606,6 @@ def kids_hstory_new(request):
                                 cursor.execute(
                                     "select  id  from school_message WHERE  create_date <= %s",
                                     [end_date])
-
                                 school_message = cursor.fetchall()
                             elif not start_date and not end_date:
                                 cursor.execute("select  id  from school_message ")
@@ -1617,24 +1616,19 @@ def kids_hstory_new(request):
                             information_schema_survey = cursor.fetchall()
                             if information_schema_survey:
                                 notifications += get_survey(parent_id, school_name)
-
                             # notifications +=get_survey(parent_id,school_name)
                             cursor.execute(
                                 "select  id,display_name_search,image_url,name,name_ar,year_id,user_id from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
                             student_info = cursor.fetchall()
                             student_round_id = []
-
                             cursor.execute(
                                 "select name from res_lang WHERE id = (select first_lang  from res_company  ORDER BY ID DESC LIMIT 1) ",
                                 [])
-                            #
                             lang = cursor.fetchall()
                             fname = ''
                             fname_ar = ''
                             for student in student_info:
-                                # print("safkdsfkdkkfsdfkd")
-
                                 cursor.execute(
                                     " select branch_id from res_users where id=%s",
                                     [student[6]])
@@ -1649,13 +1643,12 @@ def kids_hstory_new(request):
                                 information_schema = cursor.fetchall()
                                 if information_schema:
                                     cursor.execute(
-                                        "select  date,message_en,message_ar,title,title_ar,action_id,id,image_link,read_message,plan_name from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
+                                        "select  date,message_en,message_ar,title,title_ar,action_id,id,image_link,read_message,plan_name,school_message_id from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
                                         [branch_id[0][0], student[5], student[0]])
                                     student_mes = cursor.fetchall()
-                                    # print("1653 line ",student_mes)
                                 else:
                                     cursor.execute(
-                                        "select  date,message_en,message_ar,title,title_ar,action_id,id,read_message from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
+                                        "select  date,message_en,message_ar,title,title_ar,action_id,id,read_message,school_message_id from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
                                         [branch_id[0][0], student[5], student[0]])
                                     student_mes = cursor.fetchall()
                                 # cursor.execute(
@@ -1674,6 +1667,18 @@ def kids_hstory_new(request):
 
                                             if events:
                                                 action_id = events[0][0]
+                                        cursor.execute(
+                                            "select id,name,url from ir_attachment where school_message_id=%s",
+                                            [mes[10] if information_schema else mes[8]])
+
+                                        ir_attachment = cursor.fetchall()
+                                        attachments = []
+                                        if ir_attachment:
+                                            for att in ir_attachment:
+                                                if att[2]:
+                                                    attachments.append(
+                                                        {'id': att[0], 'name': att[1], 'datas': att[2]})
+
                                     notifications.append(
                                         get_info_message_new(mes[0],
                                                              mes[1],
@@ -1682,7 +1687,7 @@ def kids_hstory_new(request):
                                                                  second=0) if mes[0] else '',
                                                              mes[3],
                                                              student[1], student[0], mes[6], mes[8] if information_schema else mes[7], None, action_id if mes[5] else '0', mes[4],
-                                                             mes[2],'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',mes[7]if information_schema else '',plan_name=mes[9]if information_schema else ''))
+                                                             mes[2],'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',mes[7]if information_schema else '',plan_name=mes[9]if information_schema else '',attachments=attachments))
                             #
                             #     student_round = []
                             #     if  any('English'  in x[0]  for x in lang):
@@ -1838,11 +1843,12 @@ def kids_hstory_new(request):
                             #                                                                          second=0) if deadline else '',
                             #                                                                      "Bus notification",
                             #                                                                      fname, time_out[0][1],0,None,None,'0',"اشعار من الحافلة"," وصل إلى المدرسة."+ fname))
-
                             notifications.sort(key=get_year, reverse=True)
-
                             for d in notifications:
-                                t = tuple(d.items())
+                                # t = tuple(d.items())
+                                t = (d['student_id'], d['notifications_text'], d['create_date'], d['date_time'],
+                                     d['student_name'], d['notifications_title'], d['notificationsType'],
+                                     d['notificationsType'])
                                 if t not in seen:
                                     seen.add(t)
                                     notifications_not_d.append(d)
@@ -1878,8 +1884,6 @@ def kids_hstory_new(request):
                                     # cursor.execute(
                                     #     "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
                                     #     [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
-
-
                             result = {"notifications": notifications_not_d}
                             return Response(result)
                     else:
@@ -4503,15 +4507,14 @@ def logout(request):
                         school_name = e[0]
                 parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
                 # print("sdasadsafff", parent_id,)
-                if parent_id:
-                    for e in parent_id:
-                            parent_id = e[0]
-                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
-                    mobile_token='')
+                for e in parent_id:
+                    parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id, db_name=school_name, is_active=True).order_by(
+                    '-pk').update(mobile_token='')
                 with connections[school_name].cursor() as cursor:
                     cursor.execute(
                         "UPDATE public.school_parent SET mobile_token=%s WHERE id=%s;",
-                        ['', parent_id[0][0]])
+                        ['', parent_id])
                 result = {'result': 'ok'}
                 return Response(result)
             result = {'result': 'Not Authorization'}
