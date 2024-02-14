@@ -2084,13 +2084,13 @@ def kids_hstory_new(request):
                                 information_schema = cursor.fetchall()
                                 if information_schema:
                                     cursor.execute(
-                                        "select  date,message_en,message_ar,title,title_ar,action_id,id,image_link,read_message,plan_name,school_message_id from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
+                                        "select  date,message_en,message_ar,title,title_ar,action_id,id,image_link,read_message,plan_name,school_message_id,model_school_messsage from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
                                         [branch_id[0][0], student[5], student[0]])
                                     student_mes = cursor.fetchall()
                                     # print("1653 line ",student_mes)
                                 else:
                                     cursor.execute(
-                                        "select  date,message_en,message_ar,title,title_ar,action_id,id,read_message,school_message_id from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
+                                        "select  date,message_en,message_ar,title,title_ar,action_id,id,read_message,school_message_id,model_school_messsage from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
                                         [branch_id[0][0], student[5], student[0]])
                                     student_mes = cursor.fetchall()
                                 # cursor.execute(
@@ -2121,15 +2121,20 @@ def kids_hstory_new(request):
                                                     attachments.append(
                                                         {'id': att[0], 'name': att[1], 'datas': att[2]})
                                                     # print(attachments)
-
+                                    title=mes[3]
+                                    title_ar = mes[4]
+                                    model_school_messsage=mes[11] if information_schema else mes[9]
+                                    if  model_school_messsage :
+                                        title=''
+                                        title_ar=''
                                     notifications.append(
                                         get_info_message_new(mes[0],
                                                              mes[1],
                                                              avatar,
                                                              mes[0].replace(
                                                                  second=0) if mes[0] else '',
-                                                             mes[3],
-                                                             student[1], student[0], mes[6], mes[8] if information_schema else mes[7], None, action_id if mes[5] else '0', mes[4],
+                                                             title,
+                                                             student[1], student[0], mes[6], mes[8] if information_schema else mes[7], None, action_id if mes[5] else '0', title_ar,
                                                              mes[2],'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',mes[7]if information_schema else '',plan_name=mes[9]if information_schema else '',attachments=attachments))
                             #
                             #     student_round = []
