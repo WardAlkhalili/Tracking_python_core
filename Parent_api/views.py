@@ -2071,7 +2071,7 @@ def kids_hstory_new(request):
                                 # print("safkdsfkdkkfsdfkd")
 
                                 cursor.execute(
-                                    " select branch_id from res_users where id=%s",
+                                    " select branch_id,year_id from res_users where id=%s",
                                     [student[6]])
                                 branch_id = cursor.fetchall()
                                 # SELECT column_name
@@ -2085,7 +2085,7 @@ def kids_hstory_new(request):
                                 if information_schema:
                                     cursor.execute(
                                         "select  date,message_en,message_ar,title,title_ar,action_id,id,image_link,read_message,plan_name,school_message_id,model_school_messsage from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
-                                        [branch_id[0][0], student[5], student[0]])
+                                        [branch_id[0][0], branch_id[0][1], student[0]])
                                     student_mes = cursor.fetchall()
                                     # print("1653 line ",student_mes)
                                 else:
@@ -2100,6 +2100,7 @@ def kids_hstory_new(request):
                                 avatar="https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                 for mes in student_mes:
                                     action_id=mes[5]
+                                    attachments = []
                                     if mes[3]:
                                         if ('Event' in mes[3]):
                                             cursor.execute(
@@ -2109,17 +2110,17 @@ def kids_hstory_new(request):
 
                                             if events:
                                                 action_id = events[0][0]
-                                        cursor.execute(
-                                            "select id,name,url from ir_attachment where school_message_id=%s",
-                                            [mes[10] if information_schema else mes[8]])
+                                    cursor.execute(
+                                        "select id,name,url from ir_attachment where school_message_id=%s",
+                                        [mes[10] if information_schema else mes[8]])
 
-                                        ir_attachment = cursor.fetchall()
-                                        attachments = []
-                                        if ir_attachment:
-                                            for att in ir_attachment:
-                                                if att[2]:
-                                                    attachments.append(
-                                                        {'id': att[0], 'name': att[1], 'datas': att[2]})
+                                    ir_attachment = cursor.fetchall()
+
+                                    if ir_attachment:
+                                        for att in ir_attachment:
+                                            if att[2]:
+                                                attachments.append(
+                                                    {'id': att[0], 'name': att[1], 'datas': att[2]})
                                                     # print(attachments)
                                     title=mes[3]
                                     title_ar = mes[4]
@@ -2127,6 +2128,7 @@ def kids_hstory_new(request):
                                     if  model_school_messsage :
                                         title=''
                                         title_ar=''
+
                                     notifications.append(
                                         get_info_message_new(mes[0],
                                                              mes[1],
@@ -3030,7 +3032,7 @@ def pre_arrive(request):
                                 [student_id])
                             student_name = cursor.fetchall()
                             cursor.execute(
-                                " select branch_id from res_users where id=%s",
+                                " select branch_id,year_id from res_users where id=%s",
                                 [student_name[0][2]])
                             branch_id = cursor.fetchall()
 
@@ -3046,7 +3048,7 @@ def pre_arrive(request):
                                     cursor.execute(
                                         "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,write_date,year_id,branch_id,create_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s); ",
                                         [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r,
-                                         student_name[0][1], branch_id[0][0], r])
+                                         branch_id[0][1], branch_id[0][0], r])
                                     cursor.execute(
                                         "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                         [student_name[0][0], parent_id])
@@ -3079,7 +3081,7 @@ def pre_arrive(request):
                                 cursor.execute(
                                     "INSERT INTO  pickup_request (date,name,pick_up_by,source,state,parent_id,write_date,year_id,branch_id,create_date) VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s); ",
                                     [r, student_name[0][0], 'family_member', 'app', 'draft', parent_id, r,
-                                     student_name[0][1], branch_id[0][0], r])
+                                     branch_id[0][1], branch_id[0][0], r])
                                 cursor.execute(
                                     "select  id from pickup_request WHERE name = %s AND parent_id = %s ORDER BY ID DESC LIMIT 1",
                                     [student_name[0][0], parent_id])
@@ -3154,13 +3156,13 @@ def notify(request):
                                 r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
 
                                 cursor.execute(
-                                    " select branch_id from res_users where id=%s",
+                                    " select branch_id,year_id from res_users where id=%s",
                                     [student_name[0][2]])
                                 branch_id = cursor.fetchall()
                                 cursor.execute(
                                     "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
                                     [r, 'App\Model\Parents', message_en, message_en, 'Absence notification',
-                                     'Absence notification', r, student_name[0][1], branch_id[0][0], student_id])
+                                     'Absence notification', r, branch_id[0][1], branch_id[0][0], student_id])
                                 cursor.execute(
                                     "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
                                     [r, 'App\Model\Parents', type, message_en, sender_name[0][0]])
@@ -3518,12 +3520,12 @@ def get_clinic(request, student_id):
                                 academic_year_ids.append(rec[0])
                             if user_id_q:
                                 cursor.execute(
-                                    " select partner_id from res_users where id=%s",
+                                    " select partner_id,year_id from res_users where id=%s",
                                     [user_id_q[0][0]])
                                 partner_id_q = cursor.fetchall()
                                 cursor.execute(
                                     " select id,name,date,note,temperature,blood_pressure,prescription from school_clinic where patient_id=%s and year_id = %s and state='done' ORDER BY ID DESC",
-                                    [partner_id_q[0][0], user_id_q[0][1]])
+                                    [partner_id_q[0][0], partner_id_q[0][2]])
                                 vists = cursor.fetchall()
 
                             for v in vists:
@@ -3576,13 +3578,13 @@ def get_attendance(request, student_id):
                             [student_id])
                         user_id_q = cursor.fetchall()
                         cursor.execute(
-                            " select branch_id from res_users where id=%s",
+                            " select branch_id,year_id from res_users where id=%s",
                             [user_id_q[0][2]])
                         branch_id = cursor.fetchall()
                         if user_id_q:
                             cursor.execute(
                                 " select id,name,start_date,end_date,reason,type,state,arrival_time from student_absence_request where student_id=%s and year_id=%s and branch_id=%s ORDER BY id DESC",
-                                [student_id, user_id_q[0][1], branch_id[0][0]])
+                                [student_id, branch_id[0][1], branch_id[0][0]])
                             studentleaves = cursor.fetchall()
                             cursor.execute(
                                 "SELECT daily_attendance_id,id,note,reason,attendance_status,arrival_time FROM daily_attendance_line WHERE student_id=%s ORDER BY id DESC",
@@ -3854,7 +3856,7 @@ def get_exam(request, student_id):
                                 academic_year_ids.append(rec[0])
                             if user_id_q:
                                 cursor.execute(
-                                    " select partner_id,branch_id from res_users where id=%s",
+                                    " select partner_id,branch_id,year_id from res_users where id=%s",
                                     [user_id_q[0][0]])
                                 partner_id_q = cursor.fetchall()
                                 # print(partner_id_q,user_id_q)
@@ -3864,7 +3866,7 @@ def get_exam(request, student_id):
                                 start = False
                                 cursor.execute(
                                     " select id,survey_id,token,last_displayed_page_id,state from survey_user_input where partner_id=%s and year_id = %s and branch_id =%s   ORDER BY create_date DESC, state DESC",
-                                    [partner_id_q[0][0], user_id_q[0][1], partner_id_q[0][1]])
+                                    [partner_id_q[0][0], partner_id_q[0][2], partner_id_q[0][1]])
                                 assignments = cursor.fetchall()
 
                             for assingment in assignments:
@@ -4048,7 +4050,7 @@ def get_student_assignment(request, student_id):
                                 academic_year_ids.append(rec[0])
                             if user_id_q:
                                 cursor.execute(
-                                    " select partner_id,branch_id from res_users where id=%s",
+                                    " select partner_id,branch_id,year_id from res_users where id=%s",
                                     [user_id_q[0][0]])
                                 partner_id_q = cursor.fetchall()
 
@@ -4057,7 +4059,7 @@ def get_student_assignment(request, student_id):
                                 start = False
                                 cursor.execute(
                                     " select id,survey_id,token,last_displayed_page_id,state from survey_user_input where partner_id=%s and year_id = %s and branch_id =%s   ORDER BY create_date DESC, state DESC",
-                                    [partner_id_q[0][0], user_id_q[0][1], partner_id_q[0][1]])
+                                    [partner_id_q[0][0], partner_id_q[0][2], partner_id_q[0][1]])
                                 assignments = cursor.fetchall()
 
                             for assingment in assignments:
@@ -4170,13 +4172,13 @@ def get_all_weekly_plans(request, student_id):
                                 academic_year_ids.append(rec[0])
                             if user_id_q:
                                 cursor.execute(
-                                    " select partner_id,branch_id from res_users where id=%s",
+                                    " select partner_id,branch_id,year_id from res_users where id=%s",
                                     [user_id_q[0][0]])
                                 partner_id_q = cursor.fetchall()
 
                                 cursor.execute(
                                     " select id,name,date_from,date_to from week_plan where state='puplished' and year_id = %s and branch_id =%s   ORDER BY id DESC",
-                                    [user_id_q[0][1], partner_id_q[0][1]])
+                                    [partner_id_q[0][2], partner_id_q[0][1]])
                                 week_plan = cursor.fetchall()
                                 for p in week_plan:
                                     data.append({'id': p[0],
@@ -4353,7 +4355,7 @@ def get_data_worksheets(request, student_id):
                             user_id_q = cursor.fetchall()
                             if user_id_q:
                                 cursor.execute(
-                                    " select partner_id,branch_id from res_users where id=%s",
+                                    " select partner_id,branch_id,year_id from res_users where id=%s",
                                     [user_id_q[0][0]])
                                 partner_id_q = cursor.fetchall()
                                 cursor.execute(
@@ -4367,7 +4369,7 @@ def get_data_worksheets(request, student_id):
                                 if worksheet_id:
                                     cursor.execute(
                                         " select id,name,priority,create_date,subject_id,deadline from class_worksheet where state='published' and year_id = %s and branch_id =%s and id in %s  ORDER BY create_date DESC",
-                                        [user_id_q[0][1], partner_id_q[0][1], tuple(worksheet_id)])
+                                        [partner_id_q[0][2], partner_id_q[0][1], tuple(worksheet_id)])
                                     class_worksheet = cursor.fetchall()
 
                                     for w in class_worksheet:
@@ -4432,10 +4434,10 @@ def get_event_data(request, student_id):
                                     [student_id])
                                 user_id_q = cursor.fetchall()
                                 if user_id_q:
-                                    # cursor.execute(
-                                    #     " select partner_id,branch_id from res_users where id=%s",
-                                    #     [user_id_q[0][0]])
-                                    # partner_id_q = cursor.fetchall()
+                                    cursor.execute(
+                                        " select year_id from res_users where id=%s",
+                                        [user_id_q[0][0]])
+                                    partner_id_q = cursor.fetchall()
                                     #     cursor.execute(
                                     #         "select  worksheet_id  from student_details WHERE student_id = %s  ",
                                     #         [student_id])
@@ -4453,7 +4455,7 @@ def get_event_data(request, student_id):
                                     for ev in events:
                                         cursor.execute(
                                             " select name,state,start_date from school_event where id=%s and  year_id = %s",
-                                            [ev[1], user_id_q[0][1]])
+                                            [ev[1], partner_id_q[0][0]])
                                         school_event = cursor.fetchall()
                                         # school.event
                                         if school_event:
@@ -4858,15 +4860,9 @@ def post_library(request):
                                 [student_id])
                             user_id_q = cursor.fetchall()
                             cursor.execute(
-                                " select branch_id from res_users where id=%s",
+                                " select branch_id,year_id from res_users where id=%s",
                                 [user_id_q[0][1]])
                             branch_id = cursor.fetchall()
-                            # cursor.execute(
-                            #     "select year_id,branch_id from student_student  WHERE id =%s",
-                            #     [student_id])
-                            # branch_id = cursor.fetchall()
-                            # res.partner expected_return_date
-                            # print(book_request)
                             if book_request:
                                 name = 'R00' + str(book_request[0][0] + 1)
                             else:
@@ -4876,14 +4872,13 @@ def post_library(request):
                                 "INSERT INTO book_request(borrower_id,book_id,name,request_soft_copy,library_id,state,create_date,student_id,branch_id,academic_year,requested_borrow_days)VALUES(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)",
                                 [borrower_id[0][0], book_id, name, request_soft_copy,
                                  stock_warehouse[0][0] if stock_warehouse else 1, 'under_approval',
-                                 datetime.datetime.now(), student_id, branch_id[0][0], user_id_q[0][0], countDay])
+                                 datetime.datetime.now(), student_id, branch_id[0][0], branch_id[0][1], countDay])
                             result = {'result': 'ok'}
                             return Response(result)
                 result = {'result': 'Error Authorization'}
                 return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
-        # Marks
 
 
 @api_view(['GET'])
@@ -5009,7 +5004,7 @@ def get_time_table(request, student_id):
                         if student:
 
                             cursor.execute(
-                                " select partner_id from res_users where id=%s",
+                                " select partner_id,year_id from res_users where id=%s",
                                 [student[0][0]])
                             partner_id = cursor.fetchall()
                             if partner_id:
@@ -5205,13 +5200,13 @@ def get_Allergies(request):
                     student_info = cursor.fetchall()
 
                     cursor.execute(
-                        "select branch_id,company_id from res_users WHERE id=%s",
+                        "select branch_id,company_id,year_id from res_users WHERE id=%s",
                         [student_info[0][1]])
                     student_info_users = cursor.fetchall()
 
                     cursor.execute(
                         "select attribute_value_id from allergies_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
-                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
+                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0]])
                     allergies_food = cursor.fetchall()
 
                     allergies_food = list(set(allergies_food))
@@ -5224,12 +5219,12 @@ def get_Allergies(request):
                     #     if allergies not  in list_al:
                     #         cursor.execute(
                     #             "INSERT INTO allergies_food(year_id, student_id, branch_id,company_id,attribute_value_id)VALUES (%s,%s,%s,%s,%s);",
-                    #             [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                    #             [student_info_users[0][2], student_id, student_info_users[0][0], student_info_users[0][0],
                     #              allergies])
                     for allergies in list_al:
                         cursor.execute(
                             "INSERT INTO allergies_food(year_id, student_id, branch_id,company_id,attribute_value_id)VALUES (%s,%s,%s,%s,%s);",
-                            [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                            [student_info_users[0][2], student_id, student_info_users[0][0], student_info_users[0][0],
                              allergies])
 
                 result = {'result': 'ok'}
@@ -5308,13 +5303,13 @@ def get_Allergies_student(request, student_id):
                     student_info = cursor.fetchall()
 
                     cursor.execute(
-                        "select branch_id,company_id from res_users WHERE id=%s",
+                        "select branch_id,company_id,year_id from res_users WHERE id=%s",
                         [student_info[0][1]])
                     student_info_users = cursor.fetchall()
 
                     # cursor.execute(
                     #     "select attribute_value_id from allergies_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
-                    #     [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
+                    #     [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0]])
                     # allergies_food = cursor.fetchall()
                     #
                     # allergies_food = list(set(allergies_food))
@@ -5327,12 +5322,12 @@ def get_Allergies_student(request, student_id):
                     #     if allergies not  in list_al:
                     #         cursor.execute(
                     #             "INSERT INTO allergies_food(year_id, student_id, branch_id,company_id,attribute_value_id)VALUES (%s,%s,%s,%s,%s);",
-                    #             [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                    #             [student_info_users[0][02], student_id, student_info_users[0][0], student_info_users[0][0],
                     #              allergies])
                     for allergies in list_al:
                         cursor.execute(
                             "INSERT INTO allergies_food(year_id, student_id, branch_id,company_id,attribute_value_id)VALUES (%s,%s,%s,%s,%s);",
-                            [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                            [student_info_users[0][2], student_id, student_info_users[0][0], student_info_users[0][0],
                              allergies])
 
                 result = {'result': 'ok'}
@@ -5413,20 +5408,20 @@ def get_info_canteen_student(request):
                     student_info = cursor.fetchall()
 
                     cursor.execute(
-                        "select branch_id,company_id from res_users WHERE id=%s",
+                        "select branch_id,company_id,year_id from res_users WHERE id=%s",
                         [student_info[0][1]])
                     student_info_users = cursor.fetchall()
 
                     cursor.execute(
                         "select attribute_value_id from allergies_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
-                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
+                        [student_id, student_info_users[0][1], student_info_users[0][0], student_info_users[0][0]])
                     allergies_food = cursor.fetchall()
 
                     allergies_food = list(set(allergies_food))
 
                     cursor.execute(
                         "select id from banned_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
-                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
+                        [student_id, student_info_users[0][1], student_info_users[0][0], student_info_users[0][0]])
                     banned_food = cursor.fetchall()
                     cursor.execute(
                         "SELECT id, name FROM school_day WHERE id in (SELECT school_day_id FROM public.res_company_school_day_rel where res_company_id=%s)",
@@ -5443,7 +5438,7 @@ def get_info_canteen_student(request):
                     for day in school_day:
                         cursor.execute(
                             "SELECT id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
-                            [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0],
+                            [student_id, student_info_users[0][1], student_info_users[0][0], student_info_users[0][0],
                              day[0]])
                         student_food_day = cursor.fetchall()
                         date_schdule.append({'name': day[1], "len_item": str(len(student_food_day)), "day_id": day[0]})
@@ -5555,13 +5550,13 @@ def post_banned(request):
                     student_info = cursor.fetchall()
 
                     cursor.execute(
-                        "select branch_id,company_id from res_users WHERE id=%s",
+                        "select branch_id,company_id,year_id from res_users WHERE id=%s",
                         [student_info[0][1]])
                     student_info_users = cursor.fetchall()
 
                     cursor.execute(
                         "select id from banned_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
-                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
+                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0]])
                     allergies_food = cursor.fetchall()
 
                     allergies_food = list(set(allergies_food))
@@ -5580,20 +5575,20 @@ def post_banned(request):
 
                                     cursor.execute(
                                         "INSERT INTO banned_food(year_id, student_id, branch_id,company_id,pos_category)VALUES (%s,%s,%s,%s,%s);",
-                                        [student_info[0][0], student_id, student_info_users[0][0],
+                                        [student_info_users[0][2], student_id, student_info_users[0][0],
                                          student_info_users[0][0],
                                          allergies_food1[allergies][2]])
                                 else:
                                     cursor.execute(
                                         "INSERT INTO banned_food(year_id, student_id, branch_id,company_id,product_id)VALUES (%s,%s,%s,%s,%s);",
-                                        [student_info[0][0], student_id, student_info_users[0][0],
+                                        [student_info_users[0][2], student_id, student_info_users[0][0],
                                          student_info_users[0][0],
                                          allergies_food1[allergies][1]])
 
                     for allergies in canteen_banned:
                         cursor.execute(
                             "INSERT INTO banned_food(year_id, student_id, branch_id,company_id,pos_category)VALUES (%s,%s,%s,%s,%s);",
-                            [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                            [student_info_users[0][2], student_id, student_info_users[0][0], student_info_users[0][0],
                              allergies])
             result = {'result': 'ok'}
             return Response(result)
@@ -5723,13 +5718,13 @@ def post_banned_item(request):
                     student_info = cursor.fetchall()
 
                     cursor.execute(
-                        "select branch_id,company_id from res_users WHERE id=%s",
+                        "select branch_id,company_id,year_id from res_users WHERE id=%s",
                         [student_info[0][1]])
                     student_info_users = cursor.fetchall()
 
                     cursor.execute(
                         "select id from banned_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
-                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
+                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0]])
                     allergies_food = cursor.fetchall()
 
                     allergies_food = list(set(allergies_food))
@@ -5750,19 +5745,19 @@ def post_banned_item(request):
 
                                     cursor.execute(
                                         "INSERT INTO banned_food(year_id, student_id, branch_id,company_id,pos_category)VALUES (%s,%s,%s,%s,%s);",
-                                        [student_info[0][0], student_id, student_info_users[0][0],
+                                        [student_info_users[0][2], student_id, student_info_users[0][0],
                                          student_info_users[0][0],
                                          allergies_food1[allergies][2]])
                                 else:
                                     cursor.execute(
                                         "INSERT INTO banned_food(year_id, student_id, branch_id,company_id,product_id)VALUES (%s,%s,%s,%s,%s);",
-                                        [student_info[0][0], student_id, student_info_users[0][0],
+                                        [student_info_users[0][2], student_id, student_info_users[0][0],
                                          student_info_users[0][0],
                                          allergies_food1[allergies][1]])
                     for allergies in canteen_banned:
                         cursor.execute(
                             "INSERT INTO banned_food(year_id, student_id, branch_id,company_id,product_id)VALUES (%s,%s,%s,%s,%s);",
-                            [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                            [student_info_users[0][2], student_id, student_info_users[0][0], student_info_users[0][0],
                              allergies])
             result = {'result': 'ok'}
             return Response(result)
@@ -5800,29 +5795,29 @@ def post_sec_item(request):
                     student_info = cursor.fetchall()
 
                     cursor.execute(
-                        "select branch_id,company_id from res_users WHERE id=%s",
+                        "select branch_id,company_id,year_id from res_users WHERE id=%s",
                         [student_info[0][1]])
                     student_info_users = cursor.fetchall()
                     cursor.execute(
                         "SELECT id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
-                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0], day_id])
+                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0], day_id])
                     student_food_day = cursor.fetchall()
                     student_food_day = list(set(student_food_day))
                     canteen_banned = list(set(canteen_banned))
                     cursor.execute(
                         "delete from allergies_food_day where student_id=%s and  year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
-                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0], day_id])
+                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0], day_id])
 
                     for allergies in student_food_day:
                         if allergies[0] not in canteen_banned:
                             cursor.execute(
                                 "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_id,day_id)VALUES (%s,%s,%s,%s,%s,%s);",
-                                [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                                [student_info_users[0][2], student_id, student_info_users[0][0], student_info_users[0][0],
                                  allergies, day_id])
                     for allergies in canteen_banned:
                         cursor.execute(
                             "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_id,day_id)VALUES (%s,%s,%s,%s,%s,%s);",
-                            [student_info[0][0], student_id, student_info_users[0][0], student_info_users[0][0],
+                            [student_info_users[0][2], student_id, student_info_users[0][0], student_info_users[0][0],
                              allergies, day_id])
 
                 result = {'result': 'ok'}
@@ -5861,13 +5856,13 @@ def get_banned_food_s(request):
                     student_info = cursor.fetchall()
 
                     cursor.execute(
-                        "select branch_id,company_id from res_users WHERE id=%s",
+                        "select branch_id,company_id,year_id from res_users WHERE id=%s",
                         [student_info[0][1]])
                     student_info_users = cursor.fetchall()
 
                     cursor.execute(
                         "select id,pos_category,product_id from banned_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s ",
-                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0]])
+                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0]])
                     banned_food = cursor.fetchall()
                     for allergies in banned_food:
 
@@ -6021,7 +6016,7 @@ def get_food_s(request):
                     student_info_users = cursor.fetchall()
                     cursor.execute(
                         "SELECT id,product_id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
-                        [student_id, student_info[0][0], student_info_users[0][0], student_info_users[0][0], day_id])
+                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0], day_id])
                     student_food_day = cursor.fetchall()
 
                     for allergies in student_food_day:

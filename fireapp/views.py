@@ -243,9 +243,9 @@ def twoArgs(message_id,school_name):
                 api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
             registration_id = token
 
-            message_title = school_message[0][1]
+            message_title = school_message[0][1] if school_message[0][1] else ''
             # print(registration_id)
-            message_body = school_message[0][0]
+            message_body = school_message[0][0]if school_message[0][0] else ''
             if message_title == 'Badge':
                 message_title='Trackware- Badge'
                 message_body='Badge Awarded to '+ student_name
