@@ -1647,8 +1647,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
     notificationsType = ''
     icon_tracking=''
     if 'weekly plan' in notifications_title.lower()  or 'assignment' in notifications_title.lower() or  'homework' in notifications_title.lower() or  'exam' in notifications_title.lower() or 'educational' in notifications_title:
-        print(school_mo)
-        print(notifications_title)
+
         if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
             notificationsType = 'announcement'
             notifications_title=''
@@ -1665,12 +1664,11 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             elif ('Homework' in notifications_title):
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg'
 
-    elif 'Pick Up By Parent' in notifications_title or ('Absence' in notifications_title and  notifications_title  != "Absence notification" ) or  'clinic' in notifications_title or 'library' in notifications_title :
+    elif 'Pick Up By Parent' in notifications_title or ('Absence' in notifications_title and  notifications_title  != "Absence notification" ) or  'clinic' in notifications_title.lower() or 'library' in notifications_title .lower() :
 
         notificationsType = 'Absence'
         if ( 'clinic' in notifications_title.lower()):
-            print(school_mo)
-            print(create_date)
+
             if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
                 notificationsType = 'announcement'
                 notifications_title = ''
