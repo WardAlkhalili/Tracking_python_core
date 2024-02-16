@@ -1212,7 +1212,7 @@ def hide_message(request):
         else:
             result = {'result': 'error4'}
             return Response(result)
-def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0',notifications_title_ar='',notifications_text_ar='',student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',image_link='',plan_name='',attachments=[]):
+def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0',notifications_title_ar='',notifications_text_ar='',student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',image_link='',plan_name='',attachments=[],school_mo=False):
     show=show_notif
     # if student_image:
     #     print(student_image)
@@ -1234,24 +1234,42 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
 
     notificationsType = ''
     icon_tracking=''
-    if 'Weekly Plan' in notifications_title  or 'Assignment' in notifications_title or  'Homework' in notifications_title or  'Exam' in notifications_title or 'educational' in notifications_title:
-        notificationsType = 'educational'
-        if ( 'Weekly Plan' in notifications_title or 'educational' in notifications_title):
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg'
-        elif ( 'Assignment' in notifications_title):
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg'
-        elif ( 'Exam' in notifications_title):
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg'
-        elif ('Homework' in notifications_title):
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg'
+    if 'weekly plan' in notifications_title.lower()  or 'assignment' in notifications_title.lower() or  'homework' in notifications_title.lower() or  'exam' in notifications_title.lower() or 'educational' in notifications_title:
 
-    elif 'Pick Up By Parent' in notifications_title or ('Absence' in notifications_title and  notifications_title  != "Absence notification" ) or  'clinic' in notifications_title or 'library' in notifications_title :
+        if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
+            notificationsType = 'announcement'
+            notifications_title=''
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
+        else:
+            notificationsType = 'educational'
+            if ( 'Weekly Plan' in notifications_title or 'educational' in notifications_title):
+
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg'
+            elif ( 'Assignment' in notifications_title):
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg'
+            elif ( 'Exam' in notifications_title):
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg'
+            elif ('Homework' in notifications_title):
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg'
+
+    elif 'Pick Up By Parent' in notifications_title or ('Absence' in notifications_title and  notifications_title  != "Absence notification" ) or  'clinic' in notifications_title.lower() or 'library' in notifications_title .lower() :
 
         notificationsType = 'Absence'
-        if ( 'clinic' in notifications_title):
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg'
-        elif ( 'library' in notifications_title):
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg'
+        if ( 'clinic' in notifications_title.lower()):
+
+            if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
+                notificationsType = 'announcement'
+                notifications_title = ''
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
+            else:
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg'
+        elif ( 'library' in notifications_title.lower()):
+            if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
+                notificationsType = 'announcement'
+                notifications_title = ''
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
+            else:
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg'
         else:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
     elif notifications_title == 'Pick-up round' or notifications_title == 'School Departure' or notifications_title == 'Checkout Notification' or notifications_title == 'No Show Notification' or "has arrived at your home" in notifications_text or "has just reached the school" in notifications_text or "has just been checked into the bus" in notifications_text or notifications_title == "Absence notification" or 'Message from bus no' in notifications_title:
@@ -1278,8 +1296,12 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         notificationsType = 'announcement'
         if (notifications_title == 'survey'):
             icon_tracking=show_notif
-        elif('Event' in notifications_title)  :
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg'
+        elif('event' in notifications_title.lower())  :
+            if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
+                notifications_title = ''
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
+            else:
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg'
         elif ( 'Meeting' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg'
         else:
@@ -1658,6 +1680,7 @@ def kids_hstory_new(request):
                                 avatar="https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                 for mes in student_mes:
                                     action_id=mes[5]
+                                    attachments = []
                                     if mes[3]:
                                         if ('Event' in mes[3]):
                                             cursor.execute(
@@ -1667,24 +1690,24 @@ def kids_hstory_new(request):
 
                                             if events:
                                                 action_id = events[0][0]
-                                        cursor.execute(
-                                            "select id,name,url from ir_attachment where school_message_id=%s",
-                                            [mes[10] if information_schema else mes[8]])
+                                    cursor.execute(
+                                        "select id,name,url from ir_attachment where school_message_id=%s",
+                                        [mes[10] if information_schema else mes[8]])
 
-                                        ir_attachment = cursor.fetchall()
-                                        attachments = []
-                                        if ir_attachment:
-                                            for att in ir_attachment:
-                                                if att[2]:
-                                                    attachments.append(
-                                                        {'id': att[0], 'name': att[1], 'datas': att[2]})
+                                    ir_attachment = cursor.fetchall()
 
+                                    if ir_attachment:
+                                        for att in ir_attachment:
+                                            if att[2]:
+                                                attachments.append(
+                                                    {'id': att[0], 'name': att[1], 'datas': att[2]})
+                                                    # print(attachments)
                                     title=mes[3]
                                     title_ar = mes[4]
                                     model_school_messsage=mes[11] if information_schema else mes[9]
-                                    if  model_school_messsage :
-                                        title=''
-                                        title_ar=''
+                                    # if  model_school_messsage :
+                                    #     title=''
+                                    #     title_ar=''
                                     notifications.append(
                                         get_info_message_new(mes[0],
                                                              mes[1],
@@ -1693,7 +1716,7 @@ def kids_hstory_new(request):
                                                                  second=0) if mes[0] else '',
                                                              title,
                                                              student[1], student[0], mes[6], mes[8] if information_schema else mes[7], None, action_id if mes[5] else '0', title_ar,
-                                                             mes[2],'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',mes[7]if information_schema else '',plan_name=mes[9]if information_schema else '',attachments=attachments))
+                                                             mes[2],'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',mes[7]if information_schema else '',plan_name=mes[9]if information_schema else '',attachments=attachments,school_mo=model_school_messsage))
                             #
                             #     student_round = []
                             #     if  any('English'  in x[0]  for x in lang):
