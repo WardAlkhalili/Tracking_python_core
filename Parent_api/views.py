@@ -3440,7 +3440,7 @@ def get_badge(request, student_id):
                                          'subject': subject_name[0][0] if subject_name else '',
                                          'description': school_badge[0][1],
                                          'new_badge': b[4],
-                                         'disable': delta.days < badge_duration[0][0] if delta else True,
+                                         'disable': delta.days < badge_duration[0][0] if delta and badge_duration[0][0] else True,
                                          'job_name': job_name[0][0] if job_name else '',
                                          'image_teacher': 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
                                              teacher_name[0][1]) if teacher_name[0][
