@@ -1646,7 +1646,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
 
     notificationsType = ''
     icon_tracking=''
-    if 'Weekly Plan' in notifications_title  or 'Assignment' in notifications_title or  'Homework' in notifications_title or  'Exam' in notifications_title or 'educational' in notifications_title:
+    if 'weekly plan' in notifications_title.lower()  or 'assignment' in notifications_title.lower() or  'homework' in notifications_title.lower() or  'exam' in notifications_title.lower() or 'educational' in notifications_title:
         print(school_mo)
         print(notifications_title)
         if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
@@ -1668,7 +1668,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
     elif 'Pick Up By Parent' in notifications_title or ('Absence' in notifications_title and  notifications_title  != "Absence notification" ) or  'clinic' in notifications_title or 'library' in notifications_title :
 
         notificationsType = 'Absence'
-        if ( 'clinic' in notifications_title):
+        if ( 'clinic' in notifications_title.lower()):
             print(school_mo)
             print(create_date)
             if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
@@ -1677,7 +1677,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
             else:
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg'
-        elif ( 'library' in notifications_title):
+        elif ( 'library' in notifications_title.lower()):
             if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
                 notificationsType = 'announcement'
                 notifications_title = ''
@@ -1710,7 +1710,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         notificationsType = 'announcement'
         if (notifications_title == 'survey'):
             icon_tracking=show_notif
-        elif('Event' in notifications_title)  :
+        elif('event' in notifications_title.lower())  :
             if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
                 notifications_title = ''
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
