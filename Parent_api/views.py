@@ -1666,6 +1666,8 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
 
         notificationsType = 'Absence'
         if ( 'clinic' in notifications_title):
+            print(school_mo)
+            print(create_date)
             if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
                 notificationsType = 'announcement'
                 notifications_title = ''
@@ -1713,7 +1715,9 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg'
         elif ( 'Meeting' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg'
+
         else:
+
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
 
 
