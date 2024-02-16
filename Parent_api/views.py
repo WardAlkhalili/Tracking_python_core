@@ -3543,10 +3543,9 @@ def get_clinic(request, student_id):
                                     " select partner_id,year_id from res_users where id=%s",
                                     [user_id_q[0][0]])
                                 partner_id_q = cursor.fetchall()
-                                print(partner_id_q)
                                 cursor.execute(
                                     " select id,name,date,note,temperature,blood_pressure,prescription from school_clinic where patient_id=%s and year_id = %s and state='done' ORDER BY ID DESC",
-                                    [partner_id_q[0][0], partner_id_q[0][2]])
+                                    [partner_id_q[0][0], partner_id_q[0][1]])
                                 vists = cursor.fetchall()
 
                             for v in vists:
