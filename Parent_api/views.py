@@ -948,16 +948,20 @@ def kids_list(request):
                                                 "select is_active from transport_round WHERE  id = %s",
                                                 [rounds[0][0]])
                                             is_active = cursor.fetchall()
+                                            if is_active:
 
-                                            if is_active[0][0]:
+                                                if is_active[0][0]:
 
-                                                student_round_id = rounds[0][0]
-                                                is_active_round = is_active[0][0]
-                                                break
+                                                    student_round_id = rounds[0][0]
+                                                    is_active_round = is_active[0][0]
+                                                    break
+                                                else:
+
+                                                    student_round_id = rounds[0][0]
+                                                    is_active_round = is_active[0][0]
                                             else:
-
                                                 student_round_id = rounds[0][0]
-                                                is_active_round = is_active[0][0]
+                                                is_active_round = False
 
                                     x = {
                                         "Exams": {
@@ -1706,12 +1710,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         elif ( 'Meeting' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg'
         else:
-            if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
-                notificationsType = 'announcement'
-                notifications_title = ''
-                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
-            else:
-                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
 
 
     if student_name:
@@ -3544,6 +3543,7 @@ def get_clinic(request, student_id):
                                     " select partner_id,year_id from res_users where id=%s",
                                     [user_id_q[0][0]])
                                 partner_id_q = cursor.fetchall()
+                                print(partner_id_q)
                                 cursor.execute(
                                     " select id,name,date,note,temperature,blood_pressure,prescription from school_clinic where patient_id=%s and year_id = %s and state='done' ORDER BY ID DESC",
                                     [partner_id_q[0][0], partner_id_q[0][2]])
@@ -3571,6 +3571,7 @@ def get_clinic(request, student_id):
                                                  'temperature': v[4],
                                                  'blood_pressure': v[5],
                                                  'prescription': v[6] if v[6] else ""})
+                            print(data)
                             result = {'result': data}
                         else:
                             result = {'result': data}
