@@ -1706,7 +1706,11 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         if (notifications_title == 'survey'):
             icon_tracking=show_notif
         elif('Event' in notifications_title)  :
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg'
+            if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
+                notifications_title = ''
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
+            else:
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg'
         elif ( 'Meeting' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg'
         else:
