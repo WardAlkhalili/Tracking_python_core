@@ -877,15 +877,15 @@ def kids_list(request):
                                 all_db_name_test.append(d)
                         all_db_name_test=[]
                         all_db_name_test.append(db_name[0])
-                        print(all_db_name_test)
+                        # print(all_db_name_test)
                         for e in all_db_name_test:
-                            print(e[0])
-                            print("-----------------------------")
+                            # print(e[0])
+                            # print("-----------------------------")
                             # for e in db_name:
                             #     school_name = e[0]
                             # school_name = e
 
-                            school_name = e[0]
+                            # school_name = e[0]
                             # parent_id = ManagerParent.objects.filter(Q(mobile_token=mobile_token),
                             #                                          Q(db_name=school_name)).values_list('parent_id')
                             # for e in parent_id:
