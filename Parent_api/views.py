@@ -852,6 +852,10 @@ def kids_list(request):
                     school_id = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('school_id')
                     mobile_token = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('mobile_token')
                     db_name_test = []
+                    school_name=''
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
                     for e in mobile_token:
                         mobile_token = e[0]
                     database_yousef_test = ManagerParent.objects.filter(mobile_token=mobile_token).values_list(
@@ -873,13 +877,15 @@ def kids_list(request):
                                 all_db_name_test.append(d)
                         all_db_name_test=[]
                         all_db_name_test.append(db_name)
+                        print(all_db_name_test)
                         for e in all_db_name_test:
                             print(e)
+                            print("-----------------------------")
                             # for e in db_name:
                             #     school_name = e[0]
                             # school_name = e
 
-                            school_name = e[0]
+                            # school_name = e[0]
                             # parent_id = ManagerParent.objects.filter(Q(mobile_token=mobile_token),
                             #                                          Q(db_name=school_name)).values_list('parent_id')
                             # for e in parent_id:
