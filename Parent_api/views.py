@@ -874,6 +874,7 @@ def kids_list(request):
                         all_db_name_test=[]
                         all_db_name_test.append(db_name)
                         for e in all_db_name_test:
+                            print(e)
                             # for e in db_name:
                             #     school_name = e[0]
                             # school_name = e
