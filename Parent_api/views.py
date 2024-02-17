@@ -874,10 +874,11 @@ def kids_list(request):
                         all_db_name_test=[]
                         all_db_name_test.append(db_name)
                         for e in all_db_name_test:
+                            # for e in db_name:
+                            #     school_name = e[0]
+                            # school_name = e
 
-                            school_name = e
-
-                            school_name = ManagerParent.pincode(school_name)
+                            school_name = e[0]
                             # parent_id = ManagerParent.objects.filter(Q(mobile_token=mobile_token),
                             #                                          Q(db_name=school_name)).values_list('parent_id')
                             # for e in parent_id:
