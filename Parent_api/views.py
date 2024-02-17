@@ -864,7 +864,6 @@ def kids_list(request):
                         school_id = e[0]
                     if db_name_test:
                         studen_list = []
-
                         seen = []
                         all_db_name_test = []
                         for d in db_name_test:
@@ -872,15 +871,17 @@ def kids_list(request):
                             if d not in seen:
                                 seen.append(t)
                                 all_db_name_test.append(d)
+                        all_db_name_test=[]
+                        all_db_name_test.append(db_name)
                         for e in all_db_name_test:
 
                             school_name = e
 
                             school_name = ManagerParent.pincode(school_name)
-                            parent_id = ManagerParent.objects.filter(Q(mobile_token=mobile_token),
-                                                                     Q(db_name=school_name)).values_list('parent_id')
-                            for e in parent_id:
-                                parent_id = e[0]
+                            # parent_id = ManagerParent.objects.filter(Q(mobile_token=mobile_token),
+                            #                                          Q(db_name=school_name)).values_list('parent_id')
+                            # for e in parent_id:
+                            #     parent_id = e[0]
                             with connections[school_name].cursor() as cursor:
 
                                 cursor.execute(
@@ -3711,8 +3712,6 @@ def post_attendance(request):
                             url = base_url + "check_user_type1"
                             response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
-                            print("-------------------")
-                            print(response1)
 
                             result = {'result': 'ok'}
                             return Response(result)
