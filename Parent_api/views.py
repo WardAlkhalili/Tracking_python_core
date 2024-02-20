@@ -4537,7 +4537,7 @@ def get_worksheet_form_view_data(request, wsheet, std):
                     with connections[school_name].cursor() as cursor:
 
                         cursor.execute(
-                            " select id,name,priority,create_date,subject_id,deadline,link,attached_homework,attach_files,description,teacher_id from class_worksheet where  id = %s  ORDER BY create_date DESC",
+                            " select id,name,priority,publishing_date,subject_id,deadline,link,attached_homework,attach_files,description,teacher_id from class_worksheet where  id = %s  ORDER BY create_date DESC",
                             [wsheet])
                         worksheet = cursor.fetchall()
                         # cursor.execute(
