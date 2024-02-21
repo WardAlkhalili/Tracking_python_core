@@ -4407,7 +4407,7 @@ def get_data_worksheets(request, student_id):
                                         worksheet_id.append(rec[0])
                                 if worksheet_id:
                                     cursor.execute(
-                                        " select id,name,priority,create_date,subject_id,deadline from class_worksheet where state='published' and year_id = %s and branch_id =%s and id in %s  ORDER BY create_date DESC",
+                                        " select id,name,priority,publishing_date,subject_id,deadline from class_worksheet where state='published' and year_id = %s and branch_id =%s and id in %s  ORDER BY publishing_date DESC",
                                         [partner_id_q[0][2], partner_id_q[0][1], tuple(worksheet_id)])
                                     class_worksheet = cursor.fetchall()
 
