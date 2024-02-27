@@ -471,7 +471,7 @@ def push_notification(request):
                                                     result = push_service.notify_single_device(registration_id=registration_id,
                                                                                                message_title=message_title,
                                                                                                message_body=message_body,sound='new_beeb.mp3')
-                                                    print(result)
+                                                    # print(result)
 
                                                     result1 = {
                                                         "route": 'Ok'
@@ -519,7 +519,7 @@ def push_notification(request):
                                             message_body = message
                                             result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
                                                                                        message_body=message_body)
-                                            print(result)
+                                            # print(result)
                                             result1 = {
                                                 "route": 'Ok'
                                             }
