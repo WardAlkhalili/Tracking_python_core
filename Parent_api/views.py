@@ -898,7 +898,7 @@ def kids_list(request):
                                 parent_show_map = cursor.fetchall()
 
                                 cursor.execute(
-                                    "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type,name,name_ar,gender,password,national_id from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
+                                    "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type,name,name_ar,gender,password,national_id,passport_number from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                     [parent_id, parent_id, parent_id])
                                 student = cursor.fetchall()
 
@@ -1305,14 +1305,13 @@ def kids_list(request):
 
                                         fname = student1[rec]['name_ar']
                                     # password,national_id
-                                    user_name = student1[rec]['national_id']
+                                    user_name = student1[rec]['national_id'] if student1[rec]['national_id']  else student1[rec]['passport_number']
                                     password = student1[rec]['national_id']
                                     if student1[rec]['password']:
                                         password = student1[rec]['password']
                                     url = 'https://tst.tracking.trackware.com/web/session/authenticate'
                                     # url = 'http://192.168.1.82:9098/web/session/authenticate'
                                     try:
-
                                         body = json.dumps(
                                             {"jsonrpc": "2.0",
                                              "params": {"db": school_name, "login": user_name, "password": password}})
@@ -4156,6 +4155,7 @@ def get_student_assignment(request, student_id):
                                                 else:
                                                     state = assingment[4]
                                                     start = True
+                                            dead=deadline.strftime("%d %b %Y")
                                         else:
                                             deadline = ""
                                             state = assingment[4]
