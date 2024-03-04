@@ -3702,6 +3702,7 @@ def get_student_assignment(request, student_id):
                                                 else:
                                                     state = assingment[4]
                                                     start = True
+                                            dead=deadline.strftime("%d %b %Y")
                                         else:
                                             deadline = ""
                                             state = assingment[4]
