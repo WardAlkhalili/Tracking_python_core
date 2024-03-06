@@ -445,17 +445,51 @@ def push_notification(request):
                                                     if settings[0] != 'None' and  str(settings[0][0]) != 'None':
                                                         data = json.loads(settings[0][0])
                                                         for e in mobile_token1:
-                                                            if data['notifications']['nearby'] and (action == 'near' or action == 'driver'):
+                                                            notifications ={  "locale":  'en',
+                                                                        "nearby": True ,
+                                                                        "check_in": True ,
+                                                                        "check_out": True }
+                                                            if type(data['notifications']) is str:
+                                                                li = list(data['notifications'].split(","))
+                                                                notifications = {
+
+                                                                        "locale": "ar" if "ar" in li[3] else 'en',
+                                                                        "nearby": True if "true" in li[0] else False,
+                                                                        "check_in": True if "true" in li[1] else False,
+                                                                        "check_out": True if "true" in li[2] else False
+
+                                                                }
+                                                            elif type(data['notifications']) is dict:
+                                                                try:
+                                                                    notifications = {
+
+                                                                        "locale": data['notifications']['locale'],
+                                                                        "nearby": data['notifications']['nearby'],
+                                                                        "check_in": data['notifications']['check_in'],
+                                                                        "check_out": data['notifications']['check_out']
+
+                                                                }
+                                                                except:
+
+                                                                    notifications = {"locale": 'en',
+                                                                                     "nearby": True,
+                                                                                     "check_in": True,
+                                                                                     "check_out": True}
+                                                            # notifications = json.loads(str(data['notifications']))
+
+                                                            # print(type(notifications))
+                                                            if notifications['nearby'] and (action == 'near' or action == 'driver'):
                                                                 mobile_token.append(e[0])
-                                                            elif data['notifications']['check_in'] and (
+                                                            elif notifications['check_in'] and (
                                                                     action == 'near' or action == 'driver'):
                                                                 mobile_token.append(e[0])
-                                                            elif data['notifications']['check_out'] and (
+                                                            elif notifications['check_out'] and (
                                                                     action == 'near' or action == 'driver'):
                                                                 mobile_token.append(e[0])
                                                             else:
                                                                 mobile_token.append(e[0])
                                                 else:
+
                                                     for e in mobile_token1:
                                                         mobile_token.append(e[0])
                                                 if mobile_token1:
