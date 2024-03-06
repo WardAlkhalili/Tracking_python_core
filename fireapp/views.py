@@ -423,12 +423,10 @@ def push_notification(request):
                             user_ids = request.data.get('user_ids')
                             parent_id = request.data.get('parent_id')
                             mobile_token = []
-                            school_name = ManagerParent.objects.filter(school_id=school_id).values_list('db_name').order_by('-pk')
-                            # print(school_name[0][0])
-                            school_name=school_name[0][0]
+                            # school_name = ManagerParent.objects.filter(school_id=school_id).values_list('db_name').order_by('-pk')
+                            # school_name=school_name[0][0]
 
                             # for rec in parent_id:
-
 
                             with connections[str(school_name)].cursor() as cursor:
                                     if  user_id != 0:
@@ -443,16 +441,47 @@ def push_notification(request):
                                                 settings = cursor.fetchall()
                                                 mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec), Q(db_name=school_name),Q(is_active=True)).values_list('mobile_token').order_by('-pk')
                                                 if settings:
-                                                    if settings[0] != 'None':
-
+                                                    if settings[0] != 'None' and  str(settings[0][0]) != 'None':
                                                         data = json.loads(settings[0][0])
                                                         for e in mobile_token1:
-                                                            if data['notifications']['nearby'] and (action == 'near' or action == 'driver'):
+                                                            notifications ={  "locale":  'en',
+                                                                        "nearby": True ,
+                                                                        "check_in": True ,
+                                                                        "check_out": True }
+                                                            if type(data['notifications']) is str:
+                                                                li = list(data['notifications'].split(","))
+                                                                notifications = {
+                                                                        "locale": "ar" if "ar" in li[3] else 'en',
+                                                                        "nearby": True if "true" in li[0] else False,
+                                                                        "check_in": True if "true" in li[1] else False,
+                                                                        "check_out": True if "true" in li[2] else False
+
+                                                                }
+                                                            elif type(data['notifications']) is dict:
+                                                                try:
+                                                                    notifications = {
+
+                                                                        "locale": data['notifications']['locale'],
+                                                                        "nearby": data['notifications']['nearby'],
+                                                                        "check_in": data['notifications']['check_in'],
+                                                                        "check_out": data['notifications']['check_out']
+
+                                                                }
+                                                                except:
+
+                                                                    notifications = {"locale": 'en',
+                                                                                     "nearby": True,
+                                                                                     "check_in": True,
+                                                                                     "check_out": True}
+                                                            # notifications = json.loads(str(data['notifications']))
+
+                                                            # print(type(notifications))
+                                                            if notifications['nearby'] and (action == 'near' or action == 'driver'):
                                                                 mobile_token.append(e[0])
-                                                            elif data['notifications']['check_in'] and (
+                                                            elif notifications['check_in'] and (
                                                                     action == 'near' or action == 'driver'):
                                                                 mobile_token.append(e[0])
-                                                            elif data['notifications']['check_out'] and (
+                                                            elif notifications['check_out'] and (
                                                                     action == 'near' or action == 'driver'):
                                                                 mobile_token.append(e[0])
                                                             else:
