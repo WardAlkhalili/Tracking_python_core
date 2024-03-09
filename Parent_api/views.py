@@ -1618,6 +1618,7 @@ def kids_hstory_new(request):
                         end_date = request.data.get('end_date')
                         print(start_date)
                         print(end_date)
+                        print(school_name)
                         student_round = []
                         student_history_id = []
                         with connections[school_name].cursor() as cursor:
