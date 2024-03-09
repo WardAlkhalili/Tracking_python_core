@@ -1616,10 +1616,10 @@ def kids_hstory_new(request):
                         school_name = ManagerParent.pincode(school_name)
                         start_date = request.data.get('start_date')
                         end_date = request.data.get('end_date')
-                        print(start_date)
-                        print(end_date)
-                        print(school_name)
-                        print("user_id ",parent_id)
+                        # print(start_date)
+                        # print(end_date)
+                        # print(school_name)
+                        # print("user_id ",parent_id)
                         student_round = []
                         student_history_id = []
                         with connections[school_name].cursor() as cursor:
@@ -1923,7 +1923,7 @@ def kids_hstory_new(request):
                                     # cursor.execute(
                                     #     "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
                                     #     [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
-                            print("-------------------------------------------------",len(notifications_not_d))
+                            # print("-------------------------------------------------",len(notifications_not_d))
                             result = {"notifications": notifications_not_d}
                             return Response(result)
                     else:
