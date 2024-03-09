@@ -1616,6 +1616,8 @@ def kids_hstory_new(request):
                         school_name = ManagerParent.pincode(school_name)
                         start_date = request.data.get('start_date')
                         end_date = request.data.get('end_date')
+                        print(start_date)
+                        print(end_date)
                         student_round = []
                         student_history_id = []
                         with connections[school_name].cursor() as cursor:
