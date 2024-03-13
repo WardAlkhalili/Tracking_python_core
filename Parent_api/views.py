@@ -4966,8 +4966,8 @@ def get_marks(request, student_id):
                                 branch_id = cursor.fetchall()
                                 print(branch_id,user_id_q)
                                 cursor.execute(
-                                    "SELECT id,name FROM academic_semester WHERE year_id=%s and branch_id= %s",
-                                    [user_id_q[0][0],branch_id[0][0]])
+                                    "SELECT id,name FROM academic_semester WHERE year_id=%s ",
+                                    [user_id_q[0][0]])
                                 academic_semester = cursor.fetchall()
                             else:
                                 cursor.execute(
