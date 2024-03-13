@@ -5016,7 +5016,7 @@ def get_marks(request, student_id):
                             if mark_eva :
 
                                 for semester in academic_semester:
-
+                                    exam_det = []
                                     for mark in mark_eva:
                                         # mark.exam
                                         cursor.execute(
