@@ -1293,7 +1293,7 @@ def kids_list(request):
                                         "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = (SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s ORDER BY student_distribution_line_id DESC LIMIT 1)",
                                         [student1[rec]['id']])
                                     student_distribution_line = cursor.fetchall()
-                                 
+
                                     if student_distribution_line:
                                         cursor.execute(
                                             "SELECT name FROM public.academic_grade WHERE id = %s",
@@ -4981,7 +4981,7 @@ def get_marks(request, student_id):
                                 [student_id])
                             student_distribution_line = cursor.fetchall()
                             student_grade=None
-                            print(student_distribution_line)
+                            # print(student_distribution_line)
                             if student_distribution_line:
                                 cursor.execute(
                                     "SELECT id,name FROM public.academic_grade WHERE id = %s",
@@ -4997,7 +4997,7 @@ def get_marks(request, student_id):
                                     [student_id])
                                 academic_grade_q = cursor.fetchall()
                                 student_grade = academic_grade_q[0][0] if academic_grade_q else ''
-                            print(student_grade)
+                            # print(student_grade)
                             cursor.execute(
                                 " SELECT id FROM public.school_class WHERE academic_grade_id=%s",
                                 [student_grade])
@@ -5011,7 +5011,7 @@ def get_marks(request, student_id):
                                 [tuple(student_class)])
                             mark_eva = cursor.fetchall()
                             # print(academic_semester)
-                            print(mark_eva)
+                            # print(mark_eva)
                             if mark_eva :
 
                                 for semester in academic_semester:
@@ -5028,6 +5028,7 @@ def get_marks(request, student_id):
                                                 [mark[0]])
                                             exam_name = cursor.fetchall()
                                             exam_det=[]
+
                                             for exam in exam_name:
 
                                                 cursor.execute(
@@ -5053,6 +5054,7 @@ def get_marks(request, student_id):
                                                     subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark[0][0]) if student_mark else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
                                                 exam_det.append({"exam_name_ar": exam[1], "exam_name_en": exam[2],"subject_det":subject_det})
                                     all_exam.append({"semester": semester[1], "exam": exam_det})
+                                    print(all_exam)
 
 
 
