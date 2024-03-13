@@ -4964,6 +4964,7 @@ def get_marks(request, student_id):
                                     " select branch_id from res_users where id=%s",
                                     [user_id_q[0][1]])
                                 branch_id = cursor.fetchall()
+                                print(branch_id,user_id_q)
                                 cursor.execute(
                                     "SELECT id,name FROM academic_semester WHERE year_id=%s and branch_id= %s",
                                     [user_id_q[0][0],branch_id[0][0]])
