@@ -4964,7 +4964,6 @@ def get_marks(request, student_id):
                                     " select branch_id from res_users where id=%s",
                                     [user_id_q[0][1]])
                                 branch_id = cursor.fetchall()
-                                print(branch_id,user_id_q)
                                 cursor.execute(
                                     "SELECT id,name FROM academic_semester WHERE year_id=%s ",
                                     [user_id_q[0][0]])
@@ -5012,7 +5011,6 @@ def get_marks(request, student_id):
                                 [tuple(student_class)])
                             mark_eva = cursor.fetchall()
                             # print(academic_semester)
-                            print(academic_semester)
                             if mark_eva :
 
                                 for semester in academic_semester:
@@ -5053,10 +5051,9 @@ def get_marks(request, student_id):
                                                             [mark_mark_x[0][0],exam[0],student_id])
                                                         student_mark = cursor.fetchall()
                                                     subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark[0][0]) if student_mark else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
+
                                                 exam_det.append({"exam_name_ar": exam[1], "exam_name_en": exam[2],"subject_det":subject_det})
                                     all_exam.append({"semester": semester[1], "exam": exam_det})
-
-                            print(all_exam)
                             result = {'all_exam': all_exam}
 
         return Response(result)
