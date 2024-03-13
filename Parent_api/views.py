@@ -5054,12 +5054,9 @@ def get_marks(request, student_id):
                                                     subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark[0][0]) if student_mark else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
                                                 exam_det.append({"exam_name_ar": exam[1], "exam_name_en": exam[2],"subject_det":subject_det})
                                     all_exam.append({"semester": semester[1], "exam": exam_det})
-                                    print(all_exam)
 
-
-
-
-        result = {'all_exam': all_exam}
+                            print(all_exam)
+                            result = {'all_exam': all_exam}
 
         return Response(result)
 
