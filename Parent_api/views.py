@@ -4994,7 +4994,7 @@ def get_marks(request, student_id):
                                     [student_id])
                                 academic_grade_q = cursor.fetchall()
                                 student_grade = academic_grade_q[0][0] if academic_grade_q else ''
-                            # print(academic_grade)
+                            print(student_grade)
                             cursor.execute(
                                 " SELECT id FROM public.school_class WHERE academic_grade_id=%s",
                                 [student_grade])
@@ -5008,7 +5008,7 @@ def get_marks(request, student_id):
                                 [tuple(student_class)])
                             mark_eva = cursor.fetchall()
                             # print(academic_semester)
-                            # print(mark_eva)
+                            print(mark_eva)
                             if mark_eva :
 
                                 for semester in academic_semester:
