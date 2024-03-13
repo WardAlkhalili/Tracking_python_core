@@ -267,6 +267,19 @@ def twoArgs(message_id,school_name):
             elif message_title == 'Absence':
                 message_title = 'Trackware- Absence'
                 message_body = ' Absence has been '+'Approved'if 'Approval' in message_body else 'Rejected for ' +student_name
+            elif message_title == 'Mark' :
+                message_title = 'Marks'
+                if "First Exam" in message_body:
+                    message_body = message_body.replace("First Exam", "التقويم الأول")
+                elif "Second Exam" in message_body:
+                    message_body = message_body.replace("Second Exam", "التقويم الثاني")
+                elif "Third Exam" in message_body:
+                    message_body = result.message.replace("Third Exam", "التقويم الثالث")
+                elif "Midterm Exam" in message_body:
+                    message_body = message_body.replace("Midterm Exam", "امتحان منتصف الفصل")
+                elif "Final Exam" in message_body:
+                    message_body = message_body.replace("Final Exam", "الامتحان النهائي")
+
             result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
                                                           registration_ids=registration_id,
                                                           data_message={},sound='new_beeb.mp3')
