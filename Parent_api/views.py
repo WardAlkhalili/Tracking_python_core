@@ -1293,7 +1293,7 @@ def kids_list(request):
                                         "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = (SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s ORDER BY student_distribution_line_id DESC LIMIT 1)",
                                         [student1[rec]['id']])
                                     student_distribution_line = cursor.fetchall()
-                                    print(student1[rec]['id'])
+                                 
                                     if student_distribution_line:
                                         cursor.execute(
                                             "SELECT name FROM public.academic_grade WHERE id = %s",
@@ -4980,7 +4980,7 @@ def get_marks(request, student_id):
                                 "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = (SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s ORDER BY student_distribution_line_id DESC LIMIT 1)",
                                 [student_id])
                             student_distribution_line = cursor.fetchall()
-                            student_grade=0
+                            student_grade=None
                             print(student_distribution_line)
                             if student_distribution_line:
                                 cursor.execute(
