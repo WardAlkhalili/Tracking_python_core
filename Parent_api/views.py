@@ -5011,7 +5011,7 @@ def get_marks(request, student_id):
                                 [tuple(student_class)])
                             mark_eva = cursor.fetchall()
                             # print(academic_semester)
-                            # print(mark_eva)
+                            print(academic_semester)
                             if mark_eva :
 
                                 for semester in academic_semester:
