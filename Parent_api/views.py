@@ -4981,7 +4981,6 @@ def get_marks(request, student_id):
                                 [student_id])
                             student_distribution_line = cursor.fetchall()
                             student_grade=None
-                            # print(student_distribution_line)
                             if student_distribution_line:
                                 cursor.execute(
                                     "SELECT id,name FROM public.academic_grade WHERE id = %s",
@@ -4997,7 +4996,6 @@ def get_marks(request, student_id):
                                     [student_id])
                                 academic_grade_q = cursor.fetchall()
                                 student_grade = academic_grade_q[0][0] if academic_grade_q else ''
-                            # print(student_grade)
                             cursor.execute(
                                 " SELECT id FROM public.school_class WHERE academic_grade_id=%s",
                                 [student_grade])
@@ -5005,35 +5003,31 @@ def get_marks(request, student_id):
                             student_class=[]
                             for res in school_class:
                                 student_class.append(res[0])
-
                             cursor.execute(
                                 " SELECT mark_exam_id,school_class_id FROM mark_exam_school_class_rel WHERE school_class_id in %s ",
                                 [tuple(student_class)])
                             mark_eva = cursor.fetchall()
-                            # print(academic_semester)
                             if mark_eva :
-
                                 for semester in academic_semester:
                                     exam_det = []
                                     for mark in mark_eva:
-                                        # mark.exam
                                         cursor.execute(
                                             " SELECT semester_id FROM mark_exam WHERE id=%s",
                                             [mark[0]])
                                         mark_exam = cursor.fetchall()
                                         if semester[0]==mark_exam[0][0]:
+                                            # print(mark_exam)
                                             cursor.execute(
                                                 " SELECT id,exam_name_arabic,exam_name_english,related_exam FROM exam_group WHERE mark_exam_id=%s",
                                                 [mark[0]])
                                             exam_name = cursor.fetchall()
                                             exam_det=[]
-
                                             for exam in exam_name:
-
                                                 cursor.execute(
                                                     " SELECT subject_id,max FROM public.subject_mark_line WHERE mark_subject_line_id=%s",
                                                     [exam[0]])
                                                 subject_mark_line = cursor.fetchall()
+
                                                 subject_det = []
                                                 for subject_id in subject_mark_line:
                                                     cursor.execute(
@@ -5046,12 +5040,13 @@ def get_marks(request, student_id):
                                                     mark_mark_x = cursor.fetchall()
                                                     student_mark =None
                                                     if mark_mark_x:
+
                                                         cursor.execute(
                                                             "SELECT mark FROM public.mark_line WHERE mark_line_id=%s and   exams= %s and student_id=%s ORDER BY mark_line_id DESC LIMIT 1  ",
-                                                            [mark_mark_x[0][0],exam[0],student_id])
+                                                            [mark_mark_x[0][0],exam[3],student_id])
                                                         student_mark = cursor.fetchall()
                                                     subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark[0][0]) if student_mark else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
-
+                                #
                                                 exam_det.append({"exam_name_ar": exam[1], "exam_name_en": exam[2],"subject_det":subject_det})
                                     all_exam.append({"semester": semester[1], "exam": exam_det})
                             result = {'all_exam': all_exam}
