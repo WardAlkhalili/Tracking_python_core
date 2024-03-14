@@ -5018,7 +5018,7 @@ def get_marks(request, student_id):
                                         if semester[0]==mark_exam[0][0]:
                                             # print(mark_exam)
                                             cursor.execute(
-                                                " SELECT id,exam_name_arabic,exam_name_english,related_exam FROM exam_group WHERE mark_exam_id=%s",
+                                                " SELECT id,exam_name_arabic,exam_name_english,related_exam FROM exam_group WHERE mark_exam_id=%s ORDER BY id ASC ",
                                                 [mark[0]])
                                             exam_name = cursor.fetchall()
                                             exam_det=[]
