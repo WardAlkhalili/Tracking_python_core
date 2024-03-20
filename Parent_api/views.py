@@ -1746,11 +1746,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
 
     if "test yousef Homework"==notifications_text:
-        print(datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"))
-        print(create_date)
-        print(create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"))
-        print(school_mo,"    " ,notifications_text)
-        print(notifications_title)
+        print(notifications_title,"--------------------------")
     if student_name:
         return {
             "avatar": avatar,
