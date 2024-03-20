@@ -3531,7 +3531,8 @@ def get_calendar(request, student_id):
                                 data.append({'id': event[0][0],
                                              'name': event[0][1],
                                              'start_date': event[0][2].strftime(
-                                                 "%Y") if event[0][2] else event[0][3] if event[0][3] else '',
+                                                 "%Y") if event[0][2] else event[0][3].strftime(
+                                                 "%Y") if event[0][3] else '',
                                              'year': event[0][2].strftime("%Y") if event[0][2] else event[0][3].strftime("%Y") if event[0][3] else ''
                                              })
                             else:
