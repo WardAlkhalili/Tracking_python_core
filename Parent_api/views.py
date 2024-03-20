@@ -1653,10 +1653,8 @@ def hide_message(request):
 
 def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0',notifications_title_ar='',notifications_text_ar='',student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',image_link='',plan_name='',attachments=[],school_mo=False):
     show=show_notif
-    # print(attachments," ooooooooooooooooooooo")
     # if student_image:
     #     print(student_image)
-
     if not notifications_title:
         notifications_title=''
     if not notifications_text:
@@ -1714,7 +1712,6 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         else:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
     elif notifications_title == 'Pick-up round' or notifications_title == 'School Departure' or notifications_title == 'Checkout Notification' or notifications_title == 'No Show Notification' or "has arrived at your home" in notifications_text or "has just reached the school" in notifications_text or "has just been checked into the bus" in notifications_text or notifications_title == "Absence notification" or 'Message from bus no' in notifications_title:
-
         notificationsType = 'tracking'
         if (notifications_title == 'Pick-up round' or notifications_title == 'School Departure'):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-get-on-bus.svg'
@@ -1745,9 +1742,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg'
         elif ( 'Meeting' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg'
-
         else:
-
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
 
 
