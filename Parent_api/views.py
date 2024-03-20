@@ -1674,7 +1674,10 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
     notificationsType = ''
     icon_tracking=''
     if 'weekly plan' in notifications_title.lower()  or 'assignment' in notifications_title.lower() or  'homework' in notifications_title.lower() or  'exam' in notifications_title.lower() or 'educational' in notifications_title:
-
+        print(datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"))
+        print(create_date)
+        print(create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"))
+        print(school_mo,"    " ,notifications_text)
         if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
             notificationsType = 'announcement'
             notifications_title=''
