@@ -3522,7 +3522,7 @@ def get_calendar(request, student_id):
                         for f_data in calendar_event_id:
 
                             cursor.execute(
-                                " select id,name,start_datetime from calendar_event where id = %s ",
+                                " select id,name,start_datetime,start from calendar_event where id = %s ",
                                 [f_data[0]])
                             event = cursor.fetchall()
 
@@ -3531,8 +3531,8 @@ def get_calendar(request, student_id):
                                 data.append({'id': event[0][0],
                                              'name': event[0][1],
                                              'start_date': event[0][2].strftime(
-                                                 "%Y") if event[0][2] else '',
-                                             'year': event[0][2].strftime("%Y") if event[0][2] else ''
+                                                 "%Y") if event[0][2] else event[0][3] if event[0][3] else '',
+                                             'year': event[0][2].strftime("%Y") if event[0][2] else event[0][3].strftime("%Y") if event[0][3] else ''
                                              })
                             else:
 
