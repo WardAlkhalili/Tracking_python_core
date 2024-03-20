@@ -1678,6 +1678,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
             notificationsType = 'announcement'
             notifications_title=''
+            notifications_title_ar = ''
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
         else:
             notificationsType = 'educational'
@@ -1699,6 +1700,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
                 notificationsType = 'announcement'
                 notifications_title = ''
+                notifications_title_ar = ''
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
             else:
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg'
@@ -1706,6 +1708,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
                 notificationsType = 'announcement'
                 notifications_title = ''
+                notifications_title_ar=''
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
             else:
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg'
@@ -1737,6 +1740,7 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         elif('event' in notifications_title.lower())  :
             if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
                 notifications_title = ''
+                notifications_title_ar = ''
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
             else:
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg'
@@ -1745,8 +1749,6 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         else:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
 
-    if "test yousef Homework"==notifications_text:
-        print(notifications_title,"--------------------------")
     if student_name:
         return {
             "avatar": avatar,
