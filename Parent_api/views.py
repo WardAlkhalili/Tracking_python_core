@@ -685,16 +685,27 @@ def kids_list(request):
                                              "arabic_name": "العيادة",
                                              "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
                                              "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg"
+                                             },
+                                        "Mark":
+                                            {"name": "Mark",
+                                             "name_ar": "العلامات",
+                                             # "url": "https://" + school_name + ".staging.trackware.com/my/Clinic/",
+                                             # "arabic_url": "https://" + school_name + ".staging.trackware.com/ar_SY/my/Clinic/",
+                                             "url": "https://tst.tracking.trackware.com/my/Marks/",
+                                             "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Marks/",
+                                             "arabic_name": "العلامات",
+                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/icons8-curriculum-48.png",
+                                             "icon_svg": "mark_yousef"
                                              }
 
                                     }
                                     url_m = {}
                                     model_list = ( "Achievements", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
-                                        "Plans", 'Online Exams','Library')
+                                        "Plans", 'Online Exams','Library','Grades')
                                     model_list_icon=("school_registration,static/src/img/icons/Achievements.svg",
                                                      "school_clinic,static/src/img/icons/Clinic.svg","school_library,static/src/img/icons/Library.svg",
                                                      "school_base,static/src/img/icons/calendar@2x.svg","school_registration,static/src/img/icons/Plans.svg","website_slides_assignment,static/src/img/icons/Exams.svg"
-                                                     ,"school_event,static/src/img/icons/Events.svg","school_worksheet,static/src/img/icons/Homework.svg","school_assignment,static/src/img/icons/Online-Assignments.svg")
+                                                     ,"school_event,static/src/img/icons/Events.svg","school_worksheet,static/src/img/icons/Homework.svg","school_assignment,static/src/img/icons/Online-Assignments.svg","school_certificates,static/src/img/icons/marks_svg.svg")
                                     cursor.execute("select name from ir_ui_menu where name in %s and active=true and web_icon in %s  ", [model_list,model_list_icon])
                                     list = cursor.fetchall()
                                     res = []
@@ -756,6 +767,12 @@ def kids_list(request):
                                                 student1[rec]['user_id'])
                                             x['Library']['url'] = x['Library']['url'] + str(student1[rec]['user_id'])
                                             model.append(x['Library'])
+                                        if 'Grades' == rec1:
+                                            x['Mark']['arabic_url'] = x['Mark']['arabic_url'] + str(
+                                                student1[rec]['user_id'])
+                                            x['Mark']['url'] = x['Mark']['url'] + str(
+                                                student1[rec]['user_id'])
+                                            model.append(x['Mark'])
                                     cursor.execute(
                                         "select name from ir_ui_menu where name ='Attendance'  and active=true and web_icon ='school_attendance,static/src/img/icons/Attendance.svg' LIMIT 1")
                                     tracking = cursor.fetchall()
@@ -906,6 +923,7 @@ def kids_list(request):
                                          password=student1[rec]['password']
                                     url = 'https://'+school_name+'.trackware.com/web/session/authenticate'
                                     # url = 'http://192.168.1.82:9098/web/session/authenticate'
+                                    session=''
                                     try:
 
                                         body = json.dumps(
@@ -928,6 +946,7 @@ def kids_list(request):
                                         company_id = response['result']['company_id']
 
                                     except:
+                                        session = ''
                                         result = {
                                             "status": "erorr2"
                                                       ""}
@@ -3957,7 +3976,7 @@ def get_data_worksheets(request, student_id):
                                         worksheet_id.append(rec[0])
                                 if worksheet_id:
                                     cursor.execute(
-                                        " select id,name,priority,create_date,subject_id,deadline from class_worksheet where state='published' and year_id = %s and branch_id =%s and id in %s  ORDER BY create_date DESC",
+                                        " select id,name,priority,publishing_date,subject_id,deadline from class_worksheet where state='published' and year_id = %s and branch_id =%s and id in %s  ORDER BY publishing_date DESC",
                                         [user_id_q[0][1], partner_id_q[0][1], tuple(worksheet_id)])
                                     class_worksheet = cursor.fetchall()
 
@@ -4476,59 +4495,116 @@ def post_library(request):
 
 @api_view(['GET'])
 def get_marks(request, student_id):
-
     if request.method == 'GET':
-        # if request.headers:
-        #     if request.headers.get('Authorization'):
-        #         if 'Bearer' in request.headers.get('Authorization'):
-        #             au = request.headers.get('Authorization').replace('Bearer', '').strip()
-        #             db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
-        #
-        #             if db_name:
-        #                 for e in db_name:
-        #                     school_name = e[0]
-                    with connections['tst'].cursor() as cursor:
-                        book_borrowed = []
-                        book_all_r = []
-                        book_req=[]
-                        cursor.execute(
-                            "SELECT id,name FROM academic_semester WHERE year_id=(SELECT year_id FROM student_student WHERE id=%s)",
-                            [student_id])
-                        academic_semester = cursor.fetchall()
+        if request.headers:
+            if request.headers.get('Authorization'):
+                if 'Bearer' in request.headers.get('Authorization'):
+                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
 
-                        class_id = None
-                        # ----------------------
-                        cursor.execute(
-                            "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = (SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s ORDER BY student_distribution_line_id DESC LIMIT 1)",
-                            [student_id])
-                        student_distribution_line = cursor.fetchall()
-                        if student_distribution_line:
-
+                    if db_name:
+                        for e in db_name:
+                            school_name = e[0]
+                        with connections[school_name].cursor() as cursor:
+                            all_exam = []
                             cursor.execute(
-                                "SELECT id FROM public.academic_grade WHERE id = %s",
-                                [student_distribution_line[0][0]])
-                            academic_grade = cursor.fetchall()
-                            cursor.execute(
-                                "select id from school_class WHERE academic_grade_id = %s",
-                                [academic_grade[0][0]])
-                            cl = cursor.fetchall()
-                            class_id = cl[0][0] if cl else ''
-                        if class_id == None:
-                            cursor.execute(
-                                "select class_id from res_partner where id=(select partner_id from res_users where id=(select user_id from student_student where id=%s))",
+                                "select year_id,user_id from student_student where id=%s",
                                 [student_id])
-                            academic_grade_q = cursor.fetchall()
-                            class_id = academic_grade_q[0][0] if academic_grade_q else ''
-                        cursor.execute(
-                            " SELECT name,subject_id FROM mark_mark WHERE state='approved' and  class_id=%s",
-                            [class_id])
-                        mark = cursor.fetchall()
+                            user_id_q = cursor.fetchall()
+                            if user_id_q:
+                                cursor.execute(
+                                    " select branch_id from res_users where id=%s",
+                                    [user_id_q[0][1]])
+                                branch_id = cursor.fetchall()
+                                cursor.execute(
+                                    "SELECT id,name FROM academic_semester WHERE year_id=%s ",
+                                    [user_id_q[0][0]])
+                                academic_semester = cursor.fetchall()
+                            else:
+                                cursor.execute(
+                                    "SELECT id,name FROM academic_semester WHERE year_id=(SELECT year_id FROM student_student WHERE id=%s)",
+                                    [student_id])
+                                academic_semester = cursor.fetchall()
 
-                    result = {'book_request': book_req,
-                              'book_borrowed': book_borrowed,
-                              'book':book_all_r}
+                            class_id = None
+                            # ----------------------
+                            cursor.execute(
+                                "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = (SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s ORDER BY student_distribution_line_id DESC LIMIT 1)",
+                                [student_id])
+                            student_distribution_line = cursor.fetchall()
+                            student_grade=None
+                            if student_distribution_line:
+                                cursor.execute(
+                                    "SELECT id,name FROM public.academic_grade WHERE id = %s",
+                                    [student_distribution_line[0][0]])
+                                academic_grade = cursor.fetchall()
+                                student_grade = academic_grade[0][0] if academic_grade else ''
 
-                    return Response(result)
+                            if student_grade == None:
+                                cursor.execute(
+                                    "select academic_grade_id from school_class where id="
+                                    "(select class_id from res_partner where id=(select partner_id from res_users where id="
+                                    "(select user_id from student_student where id=%s)))",
+                                    [student_id])
+                                academic_grade_q = cursor.fetchall()
+                                student_grade = academic_grade_q[0][0] if academic_grade_q else ''
+                            cursor.execute(
+                                " SELECT id FROM public.school_class WHERE academic_grade_id=%s",
+                                [student_grade])
+                            school_class = cursor.fetchall()
+                            student_class=[]
+                            for res in school_class:
+                                student_class.append(res[0])
+                            cursor.execute(
+                                " SELECT mark_exam_id,school_class_id FROM mark_exam_school_class_rel WHERE school_class_id in %s ",
+                                [tuple(student_class)])
+                            mark_eva = cursor.fetchall()
+                            if mark_eva :
+                                for semester in academic_semester:
+                                    exam_det = []
+                                    for mark in mark_eva:
+                                        cursor.execute(
+                                            " SELECT semester_id FROM mark_exam WHERE id=%s",
+                                            [mark[0]])
+                                        mark_exam = cursor.fetchall()
+                                        if semester[0]==mark_exam[0][0]:
+                                            # print(mark_exam)
+                                            cursor.execute(
+                                                " SELECT id,exam_name_arabic,exam_name_english,related_exam FROM exam_group WHERE mark_exam_id=%s ORDER BY id ASC ",
+                                                [mark[0]])
+                                            exam_name = cursor.fetchall()
+                                            exam_det=[]
+                                            for exam in exam_name:
+                                                cursor.execute(
+                                                    " SELECT subject_id,max FROM public.subject_mark_line WHERE mark_subject_line_id=%s",
+                                                    [exam[0]])
+                                                subject_mark_line = cursor.fetchall()
+
+                                                subject_det = []
+                                                for subject_id in subject_mark_line:
+                                                    cursor.execute(
+                                                        " SELECT name FROM public.school_subject WHERE id=%s",
+                                                        [subject_id[0]])
+                                                    subject_name = cursor.fetchall()
+                                                    cursor.execute(
+                                                        " SELECT id FROM public.mark_mark WHERE subject_id= %s and class_id= %s and exams= %s and semester_id= %s and year_id= %s and branch_id= %s and show_mark=%s ",
+                                                        [subject_id[0],mark[1],exam[3],semester[0],user_id_q[0][0],branch_id[0][0],True])
+                                                    mark_mark_x = cursor.fetchall()
+                                                    student_mark =None
+                                                    if mark_mark_x:
+
+                                                        cursor.execute(
+                                                            "SELECT mark FROM public.mark_line WHERE mark_line_id=%s and   exams= %s and student_id=%s ORDER BY mark_line_id DESC LIMIT 1  ",
+                                                            [mark_mark_x[0][0],exam[3],student_id])
+                                                        student_mark = cursor.fetchall()
+                                                    subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark[0][0]) if student_mark else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
+                                #
+                                                exam_det.append({"exam_name_ar": exam[1], "exam_name_en": exam[2],"subject_det":subject_det})
+                                    all_exam.append({"semester": semester[1], "exam": exam_det})
+                            result = {'all_exam': all_exam}
+
+        return Response(result)
+
 
 
 @api_view(['POST'])
