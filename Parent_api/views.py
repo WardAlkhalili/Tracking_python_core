@@ -921,6 +921,8 @@ def kids_list(request):
                                     password = student1[rec]['national_id']
                                     if student1[rec]['password']:
                                          password=student1[rec]['password']
+                                    if not user_name:
+                                        user_name = student1[rec]['passport_number']
                                     url = 'https://'+school_name+'.trackware.com/web/session/authenticate'
                                     # url = 'http://192.168.1.82:9098/web/session/authenticate'
                                     session=''
