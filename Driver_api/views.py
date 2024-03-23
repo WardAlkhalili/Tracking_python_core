@@ -72,7 +72,7 @@ def driver_login(request):
                 "school_id": company_login_info[0][2],
                 "utc_offset": login_details1[0]['utc_offset'],
                 "timezone": login_details1[0]['timezone'],
-                 "tracklink": login_details1[0]['enable_track_link'],
+                 "enable_track_link": login_details1[0]['enable_track_link'],
                 "bus_id": data_id_bus[0][2],
                 "bus_number": data_id_bus[0][1],
                 "driver_id": data_id_bus[0][0],
