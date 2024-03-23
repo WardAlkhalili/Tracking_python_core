@@ -941,7 +941,9 @@ def kids_list(request):
                                             result = {
                                                 "status": "erorrq"}
                                             # return Response(result)
+                                        print(response)
                                         session = response1.cookies
+                                        session = session.get_dict()['session_id']
                                         uid = response['result']['uid']
                                         company_id = response['result']['company_id']
 
@@ -1001,7 +1003,7 @@ def kids_list(request):
                                         "change_location": bool(setting[0][3]),
                                         "pickup_request_distance": int(setting[0][2]),
                                         "db": school_name,
-                                        "session_id": session.get_dict()['session_id'],
+                                        "session_id": session,
                                         "show_absence": show_absence,
                                         "student_status": {
                                             "activity_type": str(student_st),
