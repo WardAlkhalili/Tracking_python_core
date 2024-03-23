@@ -939,10 +939,6 @@ def kids_list(request):
                                         response1 = requests.request("POST", url, headers=headers, data=body)
 
                                         response = response1.json()
-                                        print(url)
-                                        print(user_name)
-                                        print(password)
-                                        print("----------------------------------")
                                         if "error" in response:
                                             result = {
                                                 "status": "erorrq"}
