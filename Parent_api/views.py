@@ -30,7 +30,7 @@ def parent_login(request):
         mobile_token = request.data.get('mobile_token')
         # http://192.168.1.82/
         url = 'https://'+school_name+'.trackware.com/web/session/authenticate'
-        # url = 'http://192.168.1.82:9098/web/session/authenticate'
+        # url = 'http://192.168.1.28:9098/web/session/authenticate'
         try:
 
             body = json.dumps(
@@ -56,6 +56,7 @@ def parent_login(request):
                 "status": "erorr2"
                           ""}
             return Response(result)
+        # school_name ='tst'
         with connections[school_name].cursor() as cursor:
             cursor.execute("select id from school_parent WHERE user_id = %s", [response['result']['uid']])
             parent_id = cursor.fetchall()
@@ -512,10 +513,11 @@ def kids_list(request):
                                 parent_show_map = cursor.fetchall()
 
                                 cursor.execute(
-                                    "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type,name,name_ar,gender,password,national_id,passport_number from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
+                                    "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type,name,name_ar,gender,password,national_id,passport_number,pick_up_lat,pick_up_lng,drop_off_lat,drop_off_lng from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                     [parent_id, parent_id, parent_id])
                                 student = cursor.fetchall()
-
+                                #   'drop_off_lat': user_id,
+                                #                     'drop_off_lng': user1_id,
                                 # cursor.execute(
                                 #     "select  id,display_name_search from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 #     [parent_id, parent_id, parent_id])
@@ -924,13 +926,14 @@ def kids_list(request):
                                     if not user_name:
                                         user_name = student1[rec]['passport_number']
                                     url = 'https://'+school_name+'.trackware.com/web/session/authenticate'
-                                    # url = 'http://192.168.1.82:9098/web/session/authenticate'
+                                    # url = 'http://192.168.1.28:9098/web/session/authenticate'
                                     session=''
                                     try:
 
                                         body = json.dumps(
                                             {"jsonrpc": "2.0",
                                              "params": {"db": school_name, "login": user_name, "password": password}})
+
 
                                         headers = {
                                             'Content-Type': 'application/json',
@@ -956,8 +959,17 @@ def kids_list(request):
                                                       ""}
                                         # return Response(result)
                                     # session = response1.cookies
-
+                                    # ,pick_up_lat,pick_up_lng,drop_off_lat,drop_off_lng
+                                    pick_up_lat =str(student1[rec]['pick_up_lat']) if student1[rec]['pick_up_lat'] else '0'
+                                    pick_up_lng = str(student1[rec]['pick_up_lng']) if student1[rec][
+                                        'pick_up_lng'] else '0'
+                                    drop_off_lng = str(student1[rec]['drop_off_lng']) if student1[rec][
+                                        'drop_off_lng'] else '0'
+                                    drop_off_lat = str(student1[rec]['drop_off_lat']) if student1[rec][
+                                        'drop_off_lat'] else '0'
                                     studen_list.append({
+                                        "lat":pick_up_lat if round_type == "pick_up" else drop_off_lat,
+                                        "long":pick_up_lng if round_type == "pick_up" else drop_off_lng,
                                         "schoolImage": school_logo[0][0] if school_logo[0][0] else'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
                                         "name": student1[rec]['display_name_search'],
                                         "fname": fname,
@@ -2613,7 +2625,7 @@ def kids_hstory(request):
 
 
 def get_year(element):
-    
+
     return element['date_time']
 
 
@@ -3679,7 +3691,7 @@ def get_student_assignment(request, student_id):
                                 assignments = cursor.fetchall()
 
                             for assingment in assignments:
-                                
+
                                 cursor.execute(
                                     " select id,state,deadline,title,access_token,subject_id from survey_survey where id=%s and is_assignment=%s",
                                     [assingment[1], True])
