@@ -413,10 +413,14 @@ def parent_login(request):
         user_name = request.data.get('user_name')
         school_name = request.data.get('school_name')
         mobile_token = request.data.get('mobile_token')
+        sms_system=True
+        tracking_system=True
+        full_system = True
         # http://192.168.1.82/
         url = 'https://tst.tracking.trackware.com/web/session/authenticate'
         # url = 'http://192.168.1.28:9098/web/session/authenticate'
         # print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+
         try:
 
             body = json.dumps(
@@ -455,7 +459,19 @@ def parent_login(request):
             token_auth, created = Token.objects.get_or_create(user=user)
             from django.utils.crypto import get_random_string
             unique_id = get_random_string(length=32)
+            try:
+                cursor.execute("select tracking_system,sms_system from res_config_settings ORDER BY ID DESC LIMIT 1", [])
+                res_config_settings = cursor.fetchall()
+                print(res_config_settings)
+                if res_config_settings[0][0] and not res_config_settings[0][1]:
+                    full_system =False
+                    sms_system =False
+                elif  not res_config_settings[0][0] and  res_config_settings[0][1]:
+                    full_system =False
+                    tracking_system =False
 
+            except:
+                print("not found tracking_system and  sms_system")
             ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name, user_id=uid).update(
                 is_active=False)
 
@@ -493,6 +509,9 @@ def parent_login(request):
                         ]
                     }
                 ],
+                "sms_system": sms_system,
+                "tracking_system": tracking_system,
+                "full_system": full_system,
                 "uid": uid,
                 "session_id": session.get_dict()['session_id'],
                 "web_base_url": response['result']['web_base_url'],
@@ -5161,7 +5180,7 @@ def get_time_table(request, student_id):
                                         "SELECT lecture_id,subject_id,  from_time, to_time ,sequence FROM public.add_day_subject WHERE class_id=%s and week_day=%s ORDER by sequence ASC; ",
                                         [class_id[0][0], str(day_id)])
                                     add_day_subject = cursor.fetchall()
-
+                                    sequence=0
                                     for subject in add_day_subject:
 
                                         subject_name = 'break'
@@ -5172,7 +5191,9 @@ def get_time_table(request, student_id):
                                             s_name = cursor.fetchall()
                                             subject_name = s_name[0][0]
 
-                                        line = {'subject_id': subject[1], 'subject_name': subject_name,
+                                        if subject[1]:
+                                            sequence+=1
+                                        line = {'subject_id': subject[1], 'subject_name': subject_name,"sequence":str(sequence)
                                                 }
 
                                         from_time = '{0:02.0f}:{1:02.0f}'.format(*divmod(float(subject[2]) * 60, 60))
@@ -5243,6 +5264,7 @@ def get_time_table(request, student_id):
                                 # data['notes'] = notes
 
                         result = {'result': data}
+                        # print(result)
                         # print(result)
                         return Response(result)
 

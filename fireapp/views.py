@@ -262,8 +262,8 @@ def twoArgs(message_id,school_name):
                 message_title = 'Trackware- School Event'
                 message_body = student_name + ' - ' + message_body
             elif message_title == 'Meeting':
-                message_title = 'Trackware- '+message_body
-                message_body = student_name
+                message_title = 'Trackware- Calendar'
+                message_body = student_name +" "+message_body
             elif message_title == 'Absence':
                 message_title = 'Trackware- Absence'
                 message_body = ' Absence has been '+'Approved'if 'Approval' in message_body else 'Rejected for ' +student_name
