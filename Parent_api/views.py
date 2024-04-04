@@ -958,6 +958,7 @@ def kids_list(request):
                                 for rec in range(len(student)):
                                     is_active_round = False
                                     student_round_id = 0
+                                    student_bus_num = 0
                                     curr_date = date.today()
                                     cursor.execute(
                                         "select id from round_schedule WHERE  day_id = (select  id  from school_day where name = %s)",
@@ -974,8 +975,9 @@ def kids_list(request):
                                                 "select round_id from round_schedule WHERE  id = %s",
                                                 [rounds_count_student[0][0]])
                                             rounds = cursor.fetchall()
+                                            # bus_no
                                             cursor.execute(
-                                                "select is_active from transport_round WHERE  id = %s",
+                                                "select is_active,vehicle_id from transport_round WHERE  id = %s",
                                                 [rounds[0][0]])
                                             is_active = cursor.fetchall()
                                             if is_active:
@@ -984,6 +986,11 @@ def kids_list(request):
 
                                                     student_round_id = rounds[0][0]
                                                     is_active_round = is_active[0][0]
+                                                    cursor.execute(
+                                                        "select  driver_id,bus_no,id  from fleet_vehicle WHERE id = %s",
+                                                        [is_active[0][1]])
+                                                    data_id_bus = cursor.fetchall()
+                                                    student_bus_num= data_id_bus[0][1]
                                                     break
                                                 else:
 
@@ -1432,7 +1439,8 @@ def kids_list(request):
                                         "student_status": {
                                             "activity_type": str(student_st),
                                             "round_id": int(student_round_id),
-                                            "datetime": ""
+                                            "datetime": "",
+                                            "busNumber": str(student_bus_num),
                                         },
                                         "features": model,
                                     })
@@ -5032,7 +5040,6 @@ def get_marks(request, student_id):
                                             [mark[0]])
                                         mark_exam = cursor.fetchall()
                                         if semester[0]==mark_exam[0][0]:
-                                            # print(mark_exam)
                                             cursor.execute(
                                                 " SELECT id,exam_name_arabic,exam_name_english,related_exam FROM exam_group WHERE mark_exam_id=%s ORDER BY id ASC ",
                                                 [mark[0]])
@@ -5043,7 +5050,6 @@ def get_marks(request, student_id):
                                                     " SELECT subject_id,max FROM public.subject_mark_line WHERE mark_subject_line_id=%s",
                                                     [exam[0]])
                                                 subject_mark_line = cursor.fetchall()
-
                                                 subject_det = []
                                                 for subject_id in subject_mark_line:
                                                     cursor.execute(
@@ -5051,15 +5057,14 @@ def get_marks(request, student_id):
                                                         [subject_id[0]])
                                                     subject_name = cursor.fetchall()
                                                     cursor.execute(
-                                                        " SELECT id FROM public.mark_mark WHERE subject_id= %s and class_id= %s and exams= %s and semester_id= %s and year_id= %s and branch_id= %s and show_mark=%s ",
-                                                        [subject_id[0],mark[1],exam[3],semester[0],user_id_q[0][0],branch_id[0][0],True])
+                                                        " SELECT id FROM public.mark_mark WHERE subject_id= %s and class_id= %s and exams= %s and semester_id= %s and year_id= %s and branch_id= %s ",
+                                                        [subject_id[0],mark[1],exam[3],semester[0],user_id_q[0][0],branch_id[0][0]])
                                                     mark_mark_x = cursor.fetchall()
                                                     student_mark =None
                                                     if mark_mark_x:
-
                                                         cursor.execute(
-                                                            "SELECT mark FROM public.mark_line WHERE mark_line_id=%s and   exams= %s and student_id=%s ORDER BY mark_line_id DESC LIMIT 1  ",
-                                                            [mark_mark_x[0][0],exam[3],student_id])
+                                                            "SELECT mark FROM public.mark_line WHERE mark_line_id=%s and   exams= %s and student_id=%s and published_students=%s ORDER BY mark_line_id DESC LIMIT 1  ",
+                                                            [mark_mark_x[0][0],exam[3],student_id,True])
                                                         student_mark = cursor.fetchall()
                                                     subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark[0][0]) if student_mark else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
                                 #
