@@ -36,10 +36,21 @@ def driver_login(request):
 
             # *------------------------------------------------------------------------------------------------*
             # Details for login setting
-            cursor.execute("""
-            select nearby_distance,lat,lng,battery_low,location_refresh_rate,timezone,utc_offset,speed_limit_watch,standstill_watch,notify_if_driver_check_in_out_geo_fence,notify_on_battery_low_of_drivers_app,notify_it_driver_turns_off_gps,user_speed_exceeded,user_no_move_time_exceeded,use_round_order,auto_round_ending,lat_end,lng_end from transport_setting ORDER BY ID DESC LIMIT 1
-            """)
-            login_details = cursor.fetchall()
+            cursor.execute(
+                "SELECT column_name FROM information_schema.columns WHERE table_name='transport_setting' and column_name='auto_round_ending'",
+                [])
+            information_schema = cursor.fetchall()
+            if information_schema:
+                cursor.execute("""
+                             select nearby_distance,lat,lng,battery_low,location_refresh_rate,timezone,utc_offset,speed_limit_watch,standstill_watch,notify_if_driver_check_in_out_geo_fence,notify_on_battery_low_of_drivers_app,notify_it_driver_turns_off_gps,user_speed_exceeded,user_no_move_time_exceeded,use_round_order,auto_round_ending,lat_end,lng_end ,name_saferoad,password_saferoad,enable_track_link,auto_round,start_round,range_end_drop,range_end_pick from transport_setting ORDER BY ID DESC LIMIT 1
+
+                             """)
+                login_details = cursor.fetchall()
+            else:
+                cursor.execute("""
+                    select nearby_distance,lat,lng,battery_low,location_refresh_rate,timezone,utc_offset,speed_limit_watch,standstill_watch,notify_if_driver_check_in_out_geo_fence,notify_on_battery_low_of_drivers_app,notify_it_driver_turns_off_gps,user_speed_exceeded,user_no_move_time_exceeded,use_round_order,name_saferoad,password_saferoad,enable_track_link,auto_round,start_round ,range_end_drop,range_end_pick from transport_setting ORDER BY ID DESC LIMIT 1
+                    """)
+                login_details = cursor.fetchall()
             login_details1 = []
             columnNames = [column[0] for column in cursor.description]
             for record in login_details:
@@ -50,6 +61,8 @@ def driver_login(request):
                 "status": "ok",
                 "school_phone": company_login_info[0][1],
                 "location_refresh_rate": 10,
+                "name": login_details1[0]['name_saferoad'],
+                "password": login_details1[0]['password_saferoad'],
                 # "location_refresh_rate": login_details1[0]['location_refresh_rate'],
                 "school_name": company_login_info[0][0],
                 "school_db": school_name,
@@ -58,15 +71,25 @@ def driver_login(request):
                 "school_id": company_login_info[0][2],
                 "utc_offset": login_details1[0]['utc_offset'],
                 "timezone": login_details1[0]['timezone'],
-                "tracklink": False,
+                 "tracklink": login_details1[0]['enable_track_link'],
                 "bus_id": data_id_bus[0][2],
                 "bus_number": data_id_bus[0][1],
                 "driver_id": data_id_bus[0][0],
                 "nearby_distance": login_details1[0]['nearby_distance'],
-                "auto_round_ending":   login_details1[0]['auto_round_ending']  if login_details1[0]['auto_round_ending']  else False,
-                "lat_end": str(login_details1[0]['lat_end']) if login_details1[0]['lat_end'] else str(login_details1[0]['lat']),
-                "lng_end": str(login_details1[0]['lng_end']) if login_details1[0]['lng_end'] else str(login_details1[0]['lng']),
                 "use_round_order":login_details1[0]['use_round_order'] if login_details1[0]['use_round_order'] else False,
+                "auto_round_ending": login_details1[0]['auto_round_ending'] if login_details1[0][
+                    'auto_round_ending'] else False if information_schema else False  ,
+                "lat_end": str(login_details1[0]['lat_end']) if login_details1[0]['lat_end'] else str(
+                    login_details1[0]['lat']) if information_schema else str(
+                    login_details1[0]['lat']),
+                "lng_end": str(login_details1[0]['lng_end']) if login_details1[0]['lng_end'] else str(
+                    login_details1[0]['lng']) if information_schema else str(
+                    login_details1[0]['lng']),
+
+                "start_round": str(login_details1[0]['start_round'])if login_details1[0]['start_round'] else '00.00',
+                "range_end_pick": str(login_details1[0]['range_end_pick'])if login_details1[0]['range_end_pick'] else '00.00',
+                "range_end_drop": str(login_details1[0]['range_end_drop']) if login_details1[0]['range_end_drop'] else '00.00' ,
+                "auto_round":login_details1[0]['auto_round'] ,
                 "notifications_text": [
                     {
                         "type": "drop-off",
