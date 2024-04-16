@@ -1464,22 +1464,23 @@ def end_round(student_name,school_name,round_id,rec,driver_name,student_id,paren
                 'mobile_token').order_by('-pk')
 
             if settings:
-                data = json.loads(settings[0][0])
-                locale = "en"
+                if settings[0] != 'None' and str(settings[0][0]) != 'None':
+                    data = json.loads(settings[0][0])
+                    locale = "en"
 
 
-                if type(data['notifications']) is str:
-                    li = list(data['notifications'].split(","))
-                    locale = "ar" if "ar" in li[3] else 'en'
+                    if type(data['notifications']) is str:
+                        li = list(data['notifications'].split(","))
+                        locale = "ar" if "ar" in li[3] else 'en'
 
 
-                elif type(data['notifications']) is dict:
-                    locale = data['notifications']['locale']
-                for res in mobile_token1:
-                    mobile_token.append(res[0])
-                if mobile_token:
-                    send_notification_student(mobile_token, message_title if locale == 'en' else message_title_ar,
-                                              message_body if locale == 'en' else message_body_ar)
+                    elif type(data['notifications']) is dict:
+                        locale = data['notifications']['locale']
+                    for res in mobile_token1:
+                        mobile_token.append(res[0])
+                    if mobile_token:
+                        send_notification_student(mobile_token, message_title if locale == 'en' else message_title_ar,
+                                                  message_body if locale == 'en' else message_body_ar)
 
 def check_out(student_id,bus_num,student_name,round_id,driver_name,rec,school_name,parent_id):
     title = 'Checkout Notification'
