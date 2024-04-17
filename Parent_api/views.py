@@ -4607,10 +4607,10 @@ def get_marks(request, student_id):
                                                     student_mark =None
                                                     if mark_mark_x:
                                                         cursor.execute(
-                                                            "SELECT mark FROM public.mark_line WHERE mark_line_id=%s and   exams= %s and student_id=%s and published_students=%s ORDER BY mark_line_id ASC LIMIT 1  ",
+                                                            "SELECT mark,max_mark FROM public.mark_line WHERE mark_line_id=%s and   exams= %s and student_id=%s and published_students=%s ORDER BY mark_line_id ASC LIMIT 1  ",
                                                             [mark_mark_x[0][0],exam[3],student_id,True])
                                                         student_mark = cursor.fetchall()
-                                                    subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark[0][0]) if student_mark else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
+                                                    subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark[0][0]) if student_mark else "0.0","max_mark":str(student_mark[0][1])if student_mark else "0.0" })
                                 #
                                                 exam_det.append({"exam_name_ar": exam[1], "exam_name_en": exam[2],"subject_det":subject_det})
                                                 print(exam_det)
