@@ -4604,17 +4604,18 @@ def get_marks(request, student_id):
                                                         " SELECT id FROM public.mark_mark WHERE subject_id= %s and class_id= %s and exams= %s and semester_id= %s and year_id= %s and branch_id= %s ",
                                                         [subject_id[0],mark[1],exam[3],semester[0],user_id_q[0][0],branch_id[0][0]])
                                                     mark_mark_x = cursor.fetchall()
-                                                    student_mark =None
+                                                    student_mark ="0.0"
                                                     if mark_mark_x:
                                                         cursor.execute(
                                                             "SELECT mark FROM public.mark_line WHERE mark_line_id=%s and   exams= %s and student_id=%s and published_students=%s ORDER BY mark_line_id ASC LIMIT 1  ",
                                                             [mark_mark_x[0][0],exam[3],student_id,True])
                                                         student_mark = cursor.fetchall()
+                                                        student_mark=str(student_mark[0][0]) if student_mark else "0.0"
                                                         print(student_mark)
                                                         print("----------------------------")
                                                     print(student_mark)
                                                     print("-------------1122------------")
-                                                    subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark[0][0]) if student_mark else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
+                                                    subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":student_mark,"max_mark":str(subject_id[1])if subject_id else "0.0" })
                                                 exam_det.append({"exam_name_ar": exam[1], "exam_name_en": exam[2],"subject_det":subject_det})
                                     all_exam.append({"semester": semester[1], "exam": exam_det})
                             result = {'all_exam': all_exam}
