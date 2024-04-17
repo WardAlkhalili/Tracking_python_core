@@ -4613,13 +4613,11 @@ def get_marks(request, student_id):
                                                         student_mark1 = cursor.fetchall()
 
                                                     try:
-                                                        print("--------------------11-------------------")
-                                                        print(student_mark1)
-                                                        subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark[0][0]) if student_mark else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
-                                                    except:
-                                                        print("--------------------000-------------------")
-                                                        print(student_mark)
+  
                                                         subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark1[0][0]) if student_mark1 else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
+                                                    except:
+
+                                                        subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark[0][0]) if student_mark else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
 
                                 #
                                                 exam_det.append({"exam_name_ar": exam[1], "exam_name_en": exam[2],"subject_det":subject_det})
