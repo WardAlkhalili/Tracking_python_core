@@ -4613,8 +4613,8 @@ def get_marks(request, student_id):
                                                         student_mark1 = cursor.fetchall()
 
                                                     try:
-  
-                                                        subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark1[0][0]) if student_mark1 else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
+
+                                                        subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark[0][0]) if student_mark else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
                                                     except:
 
                                                         subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark[0][0]) if student_mark else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
