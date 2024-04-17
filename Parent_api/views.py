@@ -4611,10 +4611,14 @@ def get_marks(request, student_id):
                                                             "SELECT mark FROM public.mark_line WHERE mark_line_id=%s and   exams= %s and student_id=%s and published_students=%s ORDER BY mark_line_id DESC LIMIT 1  ",
                                                             [mark_mark_x[0][0],exam[3],student_id,True])
                                                         student_mark1 = cursor.fetchall()
-                    
+
                                                     try:
+                                                        print("--------------------11-------------------")
+                                                        print(student_mark1)
                                                         subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark[0][0]) if student_mark else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
                                                     except:
+                                                        print("--------------------000-------------------")
+                                                        print(student_mark)
                                                         subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark1[0][0]) if student_mark1 else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
 
                                 #
