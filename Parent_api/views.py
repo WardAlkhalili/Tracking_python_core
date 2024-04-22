@@ -418,7 +418,7 @@ def parent_login(request):
         full_system = True
         # http://192.168.1.82/
         url = 'https://tst.tracking.trackware.com/web/session/authenticate'
-        # url = 'http://192.168.1.28:9098/web/session/authenticate'
+        # url = 'http://192.168.1.82:9098/web/session/authenticate'
         # print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
 
         try:
@@ -433,6 +433,7 @@ def parent_login(request):
             response1 = requests.request("POST", url, headers=headers, data=body)
             # print(response1)
             response = response1.json()
+            # school_name='tst'
 
             if "error" in response:
                 result = {
@@ -1319,22 +1320,30 @@ def kids_list(request):
                                         "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = (SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s ORDER BY student_distribution_line_id DESC LIMIT 1)",
                                         [student1[rec]['id']])
                                     student_distribution_line = cursor.fetchall()
-
-                                    if student_distribution_line:
-                                        cursor.execute(
-                                            "SELECT name FROM public.academic_grade WHERE id = %s",
-                                            [student_distribution_line[0][0]])
-                                        academic_grade = cursor.fetchall()
-                                        student_grade = academic_grade[0][0] if academic_grade else ''
+                                    cursor.execute(
+                                        "select name from academic_grade where id=(select academic_grade_id from school_class where id="
+                                        "(select class_id from res_partner where id=(select partner_id from res_users where id="
+                                        "(select user_id from student_student where id=%s))))",
+                                        [student1[rec]['id']])
+                                    academic_grade_q = cursor.fetchall()
+                                    student_grade = academic_grade_q[0][0] if academic_grade_q else ''
 
                                     if student_grade == None:
-                                        cursor.execute(
-                                            "select name from academic_grade where id=(select academic_grade_id from school_class where id="
-                                            "(select class_id from res_partner where id=(select partner_id from res_users where id="
-                                            "(select user_id from student_student where id=%s))))",
-                                            [student1[rec]['id']])
-                                        academic_grade_q = cursor.fetchall()
-                                        student_grade = academic_grade_q[0][0] if academic_grade_q else ''
+                                        if student_distribution_line:
+                                            cursor.execute(
+                                                "SELECT name FROM public.academic_grade WHERE id = %s",
+                                                [student_distribution_line[0][0]])
+                                            academic_grade = cursor.fetchall()
+                                            student_grade = academic_grade[0][0] if academic_grade else ''
+
+
+                                    # cursor.execute(
+                                    #     "select name from school_class where id="
+                                    #     "(select class_id from res_partner where id=(select partner_id from res_users where id="
+                                    #     "(select user_id from student_student where id=%s)))",
+                                    #     [student1[rec]['id']])
+                                    # school_class = cursor.fetchall()
+                                    # student_grade +=" "+school_class[0][0] if school_class else ''
 
                                         # ---------------------
                                     fname = student1[rec]['display_name_search']
@@ -1357,7 +1366,7 @@ def kids_list(request):
                                     if student1[rec]['password']:
                                         password = student1[rec]['password']
                                     url = 'https://tst.tracking.trackware.com/web/session/authenticate'
-                                    # url = 'http://192.168.1.28:9098/web/session/authenticate'
+                                    # url = 'http://192.168.1.82:9098/web/session/authenticate'
                                     try:
                                         body = json.dumps(
                                             {"jsonrpc": "2.0",
@@ -1370,6 +1379,7 @@ def kids_list(request):
                                         response1 = requests.request("POST", url, headers=headers, data=body)
 
                                         response = response1.json()
+
                                         if "error" in response:
                                             result = {
                                                 "status": "erorrq"}
@@ -1379,6 +1389,7 @@ def kids_list(request):
                                         company_id = response['result']['company_id']
 
                                     except:
+
                                         result = {
                                             "status": "erorr2"
                                                       ""}
@@ -4985,12 +4996,12 @@ def get_marks(request, student_id):
                             user_id_q = cursor.fetchall()
                             if user_id_q:
                                 cursor.execute(
-                                    " select branch_id from res_users where id=%s",
+                                    " select branch_id,year_id from res_users where id=%s",
                                     [user_id_q[0][1]])
                                 branch_id = cursor.fetchall()
                                 cursor.execute(
                                     "SELECT id,name FROM academic_semester WHERE year_id=%s ",
-                                    [user_id_q[0][0]])
+                                    [branch_id[0][1]])
                                 academic_semester = cursor.fetchall()
                             else:
                                 cursor.execute(
@@ -5005,21 +5016,22 @@ def get_marks(request, student_id):
                                 [student_id])
                             student_distribution_line = cursor.fetchall()
                             student_grade=None
-                            if student_distribution_line:
-                                cursor.execute(
-                                    "SELECT id,name FROM public.academic_grade WHERE id = %s",
-                                    [student_distribution_line[0][0]])
-                                academic_grade = cursor.fetchall()
-                                student_grade = academic_grade[0][0] if academic_grade else ''
+                            cursor.execute(
+                                "select academic_grade_id from school_class where id="
+                                "(select class_id from res_partner where id=(select partner_id from res_users where id="
+                                "(select user_id from student_student where id=%s)))",
+                                [student_id])
+                            academic_grade_q = cursor.fetchall()
+                            student_grade = academic_grade_q[0][0] if academic_grade_q else ''
 
-                            if student_grade == None:
-                                cursor.execute(
-                                    "select academic_grade_id from school_class where id="
-                                    "(select class_id from res_partner where id=(select partner_id from res_users where id="
-                                    "(select user_id from student_student where id=%s)))",
-                                    [student_id])
-                                academic_grade_q = cursor.fetchall()
-                                student_grade = academic_grade_q[0][0] if academic_grade_q else ''
+
+                            if student_grade == None  or not student_grade:
+                                if student_distribution_line:
+                                    cursor.execute(
+                                        "SELECT id,name FROM public.academic_grade WHERE id = %s",
+                                        [student_distribution_line[0][0]])
+                                    academic_grade = cursor.fetchall()
+                                    student_grade = academic_grade[0][0] if academic_grade else ''
                             cursor.execute(
                                 " SELECT id FROM public.school_class WHERE academic_grade_id=%s",
                                 [student_grade])
@@ -5058,7 +5070,7 @@ def get_marks(request, student_id):
                                                     subject_name = cursor.fetchall()
                                                     cursor.execute(
                                                         " SELECT id,class_id FROM public.mark_mark WHERE subject_id= %s and class_id= %s and exams= %s and semester_id= %s and year_id= %s and branch_id= %s ",
-                                                        [subject_id[0],mark[1],exam[3],semester[0],user_id_q[0][0],branch_id[0][0]])
+                                                        [subject_id[0],mark[1],exam[3],semester[0],branch_id[0][1],branch_id[0][0]])
                                                     mark_mark_x = cursor.fetchall()
                                                     student_mark =None
 
@@ -5111,7 +5123,7 @@ def get_marks(request, student_id):
                                                         cursor.execute(
                                                             " SELECT id,class_id FROM public.mark_mark WHERE subject_id= %s and class_id= %s and exams= %s and semester_id= %s and year_id= %s and branch_id= %s ",
                                                             [subject_id[0], mark[1], exam[3], semester[0],
-                                                             user_id_q[0][0], branch_id[0][0]])
+                                                             branch_id[0][1], branch_id[0][0]])
                                                         mark_mark_x = cursor.fetchall()
                                                         student_mark = None
                                                         if mark_mark_x:
