@@ -888,21 +888,22 @@ def kids_list(request):
                                         "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = (SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s ORDER BY student_distribution_line_id DESC LIMIT 1)",
                                         [student1[rec]['id']])
                                     student_distribution_line = cursor.fetchall()
-                                    if student_distribution_line:
+                                    cursor.execute(
+                                        "select name from academic_grade where id=(select academic_grade_id from school_class where id="
+                                        "(select class_id from res_partner where id=(select partner_id from res_users where id="
+                                        "(select user_id from student_student where id=%s))))",
+                                        [student1[rec]['id']])
+                                    academic_grade_q = cursor.fetchall()
+                                    student_grade = academic_grade_q[0][0] if academic_grade_q else ''
+
+
+                                    if student_grade == None:
+                                        if student_distribution_line:
                                             cursor.execute(
                                                 "SELECT name FROM public.academic_grade WHERE id = %s",
                                                 [student_distribution_line[0][0]])
                                             academic_grade = cursor.fetchall()
                                             student_grade = academic_grade[0][0] if academic_grade else ''
-
-                                    if student_grade == None:
-                                        cursor.execute(
-                                            "select name from academic_grade where id=(select academic_grade_id from school_class where id="
-                                            "(select class_id from res_partner where id=(select partner_id from res_users where id="
-                                            "(select user_id from student_student where id=%s))))",
-                                            [student1[rec]['id']])
-                                        academic_grade_q = cursor.fetchall()
-                                        student_grade = academic_grade_q[0][0] if academic_grade_q else ''
 
                                         # ---------------------
                                     fname = student1[rec]['display_name_search']
@@ -4549,21 +4550,22 @@ def get_marks(request, student_id):
                                 [student_id])
                             student_distribution_line = cursor.fetchall()
                             student_grade=None
-                            if student_distribution_line:
-                                cursor.execute(
-                                    "SELECT id,name FROM public.academic_grade WHERE id = %s",
-                                    [student_distribution_line[0][0]])
-                                academic_grade = cursor.fetchall()
-                                student_grade = academic_grade[0][0] if academic_grade else ''
 
+                            cursor.execute(
+                                "select academic_grade_id from school_class where id="
+                                "(select class_id from res_partner where id=(select partner_id from res_users where id="
+                                "(select user_id from student_student where id=%s)))",
+                                [student_id])
+                            academic_grade_q = cursor.fetchall()
+                            student_grade = academic_grade_q[0][0] if academic_grade_q else ''
                             if student_grade == None:
-                                cursor.execute(
-                                    "select academic_grade_id from school_class where id="
-                                    "(select class_id from res_partner where id=(select partner_id from res_users where id="
-                                    "(select user_id from student_student where id=%s)))",
-                                    [student_id])
-                                academic_grade_q = cursor.fetchall()
-                                student_grade = academic_grade_q[0][0] if academic_grade_q else ''
+                                if student_distribution_line:
+                                    cursor.execute(
+                                        "SELECT id,name FROM public.academic_grade WHERE id = %s",
+                                        [student_distribution_line[0][0]])
+                                    academic_grade = cursor.fetchall()
+                                    student_grade = academic_grade[0][0] if academic_grade else ''
+
                             cursor.execute(
                                 " SELECT id FROM public.school_class WHERE academic_grade_id=%s",
                                 [student_grade])
