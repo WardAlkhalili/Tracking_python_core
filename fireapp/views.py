@@ -625,20 +625,21 @@ def send_chat_parent(request):
         m_id = request.data.get('m_id')
         student_id = request.data.get('student_id')
         student_name = ''
-        print(message_id)
-        with connections[school_name].cursor() as cursor:
-            cursor.execute(
-                "select  display_name_search from student_student WHERE  id = %s  And state = 'done'",
-                [student_id])
-            student = cursor.fetchall()
-            student_name=student[0][0]
-            cursor.execute(
-                "select  body from mail_message WHERE  id = %s ",
-                [message_id])
-            message = cursor.fetchall()
-            print(message)
-            message_body =message[0][0]
-            print(message_body)
+        # print(school_name)
+
+        # with connections[school_name].cursor() as cursor:
+        #     cursor.execute(
+        #         "select  display_name_search from student_student WHERE  id = %s  And state = 'done'",
+        #         [student_id])
+        #     student = cursor.fetchall()
+        #     student_name=student[0][0]
+        #     cursor.execute(
+        #         "select  body from mail_message WHERE  id = %s ",
+        #         [message_id])
+        #     message = cursor.fetchall()
+        #     print(message)
+        #     message_body =message[0][0]
+        #     print(message_body)
 
         mobile_token_g = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
                                                     Q(is_active=True)).values_list(
@@ -649,41 +650,72 @@ def send_chat_parent(request):
         mobile_token_m = ManagerParent.objects.filter(Q(parent_id=m_id), Q(db_name=school_name),
                                                     Q(is_active=True)).values_list(
             'mobile_token').order_by('-pk')
+        mobile_token=[]
         for e in mobile_token_g:
             mobile_token_g = e[0]
+            mobile_token.append(e[0])
         for e in mobile_token_m:
             mobile_token_m = e[0]
+            mobile_token.append(e[0])
         for e in mobile_token_f:
             mobile_token_f = e[0]
-        push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-        if mobile_token_g:
-            registration_id = mobile_token_g
-            message_title = student_name
-            message_body = message_body
-
-            result = push_service.notify_single_device(registration_id=registration_id,sound='new_beeb.mp3', message_title=message_title,
-                                                       message_body=message_body,
-                                                       )
-        if mobile_token_m:
-            registration_id = mobile_token_m
-            message_title =  student_name
-            message_body = message_body
-
-            result = push_service.notify_single_device(registration_id=registration_id, sound='new_beeb.mp3',
-                                                       message_title=message_title,
-                                                       message_body=message_body,
-                                                       )
-        if mobile_token_f:
-            registration_id = mobile_token_f
-            message_title = student_name
-            message_body = message_body
-
-            result = push_service.notify_single_device(registration_id=registration_id, sound='new_beeb.mp3',
-                                                       message_title=message_title,
-                                                       message_body=message_body,
-                                                       )
+            mobile_token.append(e[0])
+        r = Timer(3.0, twoArgsChat, (message_id, school_name,mobile_token, student_id))
+        r.start()
+        # push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+        # if mobile_token_g:
+        #     registration_id = mobile_token_g
+        #     message_title = student_name
+        #     message_body = message_body
+        #
+        #     result = push_service.notify_single_device(registration_id=registration_id,sound='new_beeb.mp3', message_title=message_title,
+        #                                                message_body=message_body,
+        #                                                )
+        # if mobile_token_m:
+        #     registration_id = mobile_token_m
+        #     message_title =  student_name
+        #     message_body = message_body
+        #
+        #     result = push_service.notify_single_device(registration_id=registration_id, sound='new_beeb.mp3',
+        #                                                message_title=message_title,
+        #                                                message_body=message_body,
+        #                                                )
+        # if mobile_token_f:
+        #     registration_id = mobile_token_f
+        #     message_title = student_name
+        #     message_body = message_body
+        #
+        #     result = push_service.notify_single_device(registration_id=registration_id, sound='new_beeb.mp3',
+        #                                                message_title=message_title,
+        #                                                message_body=message_body,
+        #                                                )
         result1 = {
             "route": 'Ok'
         }
         #
         return Response(result1)
+
+def twoArgsChat(message_id,school_name, mobile_token,student_id):
+    with connections[school_name].cursor() as cursor:
+        cursor.execute(
+            "select  display_name_search from student_student WHERE  id = %s  And state = 'done'",
+            [student_id])
+        student = cursor.fetchall()
+        student_name = student[0][0]
+        cursor.execute(
+            "select  body from mail_message WHERE  id = %s ",
+            [message_id])
+        message = cursor.fetchall()
+        print(message)
+        message_body = message[0][0]
+        push_service = FCMNotification(
+            api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+        for mobile in mobile_token:
+            registration_id = mobile
+            message_title = student_name
+            message_body = message_body
+
+            result = push_service.notify_single_device(registration_id=registration_id, sound='new_beeb.mp3',
+                                                       message_title=message_title,
+                                                       message_body=message_body,
+                                                       )
