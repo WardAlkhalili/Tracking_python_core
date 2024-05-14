@@ -618,7 +618,8 @@ def test_lis(request):
 def send_chat_parent(request):
     if request.method == 'POST':
         school_name = request.data.get('school_name')
-        message_body = request.data.get('message')
+        message_body = ''
+        message_id = request.data.get('message_id')
         parent_id = request.data.get('parent_id')
         f_id=request.data.get('f_id')
         m_id = request.data.get('m_id')
@@ -629,7 +630,12 @@ def send_chat_parent(request):
                 "select  display_name_search from student_student WHERE  id = %s  And state = 'done'",
                 [student_id])
             student = cursor.fetchall()
-            student_name =student[0][0]
+            cursor.execute(
+                "select  body from mail_message WHERE  id = %s ",
+                [message_id])
+            message = cursor.fetchall()
+            message_body =message[0][0]
+            print(message_body)
 
         mobile_token_g = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
                                                     Q(is_active=True)).values_list(
