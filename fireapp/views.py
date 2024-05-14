@@ -612,3 +612,69 @@ def test_lis(request):
         }
 
         return Response(result1)
+
+
+@api_view(['POST','GET'])
+def send_chat_parent(request):
+    if request.method == 'POST':
+        school_name = request.data.get('school_name')
+        message_body = request.data.get('message')
+        parent_id = request.data.get('parent_id')
+        f_id=request.data.get('f_id')
+        m_id = request.data.get('m_id')
+        student_id = request.data.get('student_id')
+        student_name = ''
+        with connections[school_name].cursor() as cursor:
+            cursor.execute(
+                "select  display_name_search from student_student WHERE  id = %s  And state = 'done'",
+                [student_id])
+            student = cursor.fetchall()
+            student_name =student[0][0]
+
+        mobile_token_g = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
+                                                    Q(is_active=True)).values_list(
+            'mobile_token').order_by('-pk')
+        mobile_token_f = ManagerParent.objects.filter(Q(parent_id=f_id), Q(db_name=school_name),
+                                                    Q(is_active=True)).values_list(
+            'mobile_token').order_by('-pk')
+        mobile_token_m = ManagerParent.objects.filter(Q(parent_id=m_id), Q(db_name=school_name),
+                                                    Q(is_active=True)).values_list(
+            'mobile_token').order_by('-pk')
+        for e in mobile_token_g:
+            mobile_token_g = e[0]
+        for e in mobile_token_m:
+            mobile_token_m = e[0]
+        for e in mobile_token_f:
+            mobile_token_f = e[0]
+        push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+        if mobile_token_g:
+            registration_id = mobile_token_g
+            message_title = student_name
+            message_body = message_body
+
+            result = push_service.notify_single_device(registration_id=registration_id,sound='new_beeb.mp3', message_title=message_title,
+                                                       message_body=message_body,
+                                                       )
+        if mobile_token_m:
+            registration_id = mobile_token_m
+            message_title =  student_name
+            message_body = message_body
+
+            result = push_service.notify_single_device(registration_id=registration_id, sound='new_beeb.mp3',
+                                                       message_title=message_title,
+                                                       message_body=message_body,
+                                                       )
+        if mobile_token_f:
+            registration_id = mobile_token_f
+            message_title = student_name
+            message_body = message_body
+
+            result = push_service.notify_single_device(registration_id=registration_id, sound='new_beeb.mp3',
+                                                       message_title=message_title,
+                                                       message_body=message_body,
+                                                       )
+        result1 = {
+            "route": 'Ok'
+        }
+        #
+        return Response(result1)
