@@ -719,3 +719,9 @@ def twoArgsChat(message_id,school_name, mobile_token,student_id):
                                                        message_title=message_title,
                                                        message_body=message_body,
                                                        )
+        result1 = {
+            "route": 'Ok'
+
+        }
+
+        return Response(result1)
