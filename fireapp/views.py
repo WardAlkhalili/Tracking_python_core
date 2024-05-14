@@ -630,10 +630,12 @@ def send_chat_parent(request):
                 "select  display_name_search from student_student WHERE  id = %s  And state = 'done'",
                 [student_id])
             student = cursor.fetchall()
+            student_name=student[0][0]
             cursor.execute(
                 "select  body from mail_message WHERE  id = %s ",
                 [message_id])
             message = cursor.fetchall()
+            print(message)
             message_body =message[0][0]
             print(message_body)
 
