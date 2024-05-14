@@ -13,7 +13,7 @@ from datetime import datetime
 import calendar
 import json
 from threading import Timer
-
+import  re
 from fireapp.models import ManagerTracker
 
 # Remember the code we copied from Firebase.
@@ -707,7 +707,9 @@ def twoArgsChat(message_id,school_name, mobile_token,student_id):
             [message_id])
         message = cursor.fetchall()
         print(message)
+        patterns = re.compile('<.*?>')
         message_body = message[0][0]
+        message_body= re.sub(patterns, '', message_body)
         push_service = FCMNotification(
             api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
         for mobile in mobile_token:
