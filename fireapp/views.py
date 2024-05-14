@@ -625,6 +625,7 @@ def send_chat_parent(request):
         m_id = request.data.get('m_id')
         student_id = request.data.get('student_id')
         student_name = ''
+        print(message_id)
         with connections[school_name].cursor() as cursor:
             cursor.execute(
                 "select  display_name_search from student_student WHERE  id = %s  And state = 'done'",
