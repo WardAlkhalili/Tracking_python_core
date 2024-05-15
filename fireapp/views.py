@@ -710,6 +710,7 @@ def twoArgsChat(message_id,school_name, mobile_token,student_id):
         patterns = re.compile('<.*?>')
         message_body = message[0][0]
         message_body= re.sub(patterns, '', message_body)
+        mobile_token = list(dict.fromkeys(mobile_token))
         push_service = FCMNotification(
             api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
         for mobile in mobile_token:
