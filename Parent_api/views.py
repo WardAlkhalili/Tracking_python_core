@@ -3703,9 +3703,9 @@ def post_workSheet(request):
 
                             attached_files = request.data.get("file")
                             body = json.dumps({"jsonrpc": "2.0",
-                                               "params": {"student_id": int(user_id_q[0][0]),"attachments": attached_files,"wk_ids": wk_id,}})
+                                               "params": {"student_id": int(user_id_q[0][0]),"attachments": attached_files,"wk_id": wk_id,}})
                             headers = {
-                                'X-Openerp-Session-Id': Session,
+                                'X-Openerp-Session-Id': 'Session',
                                 'Content-Type': 'application/json',
                             }
 
