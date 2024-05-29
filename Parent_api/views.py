@@ -3703,13 +3703,13 @@ def post_workSheet(request):
 
                             attached_files = request.data.get("file")
                             body = json.dumps({"jsonrpc": "2.0",
-                                               "params": {"student_id": int(user_id_q[0][0]),"attachments": attached_files,"wk_id": 'wk_id',}})
+                                               "params": {"student_id": int(user_id_q[0][0]),"attachments": attached_files,"wk_id": wk_id,}})
                             headers = {
                                 'X-Openerp-Session-Id': Session,
                                 'Content-Type': 'application/json',
                             }
 
-                            url = str(base_url) + "upload_worksheet_flutter"
+                            url = str(base_url) + "upload_worksheet"
                             print(url)
                             response1 = requests.request("POST", url,headers=headers, data=body)
                             print(response1)
