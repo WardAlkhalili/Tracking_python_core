@@ -3708,8 +3708,9 @@ def post_workSheet(request):
                                 'X-Openerp-Session-Id': Session,
                                 'Content-Type': 'application/json',
                             }
-                            print(base_url)
-                            url = str(base_url) + "upload_worksheet"
+
+                            url = str(base_url) + "upload_worksheet_flutter"
+                            print(url)
                             response1 = requests.request("POST", url,headers=headers, data=body)
                             print(response1)
                             print(response1.json())
