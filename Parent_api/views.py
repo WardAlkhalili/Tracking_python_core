@@ -3712,8 +3712,8 @@ def post_workSheet(request):
                             url = str(base_url) + "upload_worksheet"
 
                             response1 = requests.request("POST", url,headers=headers, data=body)
-                            print(response1)
-                            print(response1.json())
+                            print(Session)
+                            print(body)
 
                             result = {'result': 'ok'}
                             return Response(result)
