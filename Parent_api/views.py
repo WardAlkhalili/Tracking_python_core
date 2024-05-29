@@ -3354,13 +3354,12 @@ def post_workSheet(request):
                                 'X-Openerp-Session-Id': Session,
                                 'Content-Type': 'application/json',
                             }
-
+                            base_url= str(base_url).replace("http", "https")
                             url = str(base_url) + "upload_worksheet"
                             response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
-                            print(url)
-                            print(Session)
-                            print(body)
+                            print(response1)
+
 
 
 
