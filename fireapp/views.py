@@ -281,6 +281,10 @@ def twoArgs(message_id,school_name):
                     message_body = message_body.replace("Final Exam", "الامتحان النهائي")
             elif message_title == 'certification':
                 message_title = 'الشهادة المدرسية'
+            elif message_title == 'daily_attendance':
+                message_title = 'Absence Notification'
+                if 'is late on ' in message_body:
+                    message_title='Late Notification'
             result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
                                                           registration_ids=registration_id,
                                                           data_message={},sound='new_beeb.mp3')
