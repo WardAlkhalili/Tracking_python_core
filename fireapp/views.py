@@ -264,6 +264,18 @@ def twoArgs(message_id,school_name):
             elif message_title == 'Absence':
                 message_title = 'Trackware- Absence'
                 message_body = ' Absence has been '+'Approved'if 'Approval' in message_body else 'Rejected for ' +student_name
+
+            elif message_title == 'certification':
+                message_title = 'الشهادة المدرسية'
+            elif message_title == 'daily_attendance':
+                st = 'Your Child ' + student_name
+                message_body = message_body.replace("Your Child", st)
+                if 'is late on' in message_body:
+                    message_title = 'Late Notification'
+                elif 'is absent on' in message_body:
+                    message_title = 'Absence Notification'
+                    # st = 'Your Child ' + student_name
+                    # message_body = message_body.replace("Your Child", st)
             result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
                                                           registration_ids=registration_id,
                                                           data_message={},sound='new_beeb.mp3')
