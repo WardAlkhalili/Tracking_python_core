@@ -4872,6 +4872,7 @@ def get_marks(request, student_id):
                 if 'Bearer' in request.headers.get('Authorization'):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
                     db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+                    year_code=''
 
                     if db_name:
                         for e in db_name:
@@ -4887,6 +4888,12 @@ def get_marks(request, student_id):
                                     " select branch_id,year_id from res_users where id=%s",
                                     [user_id_q[0][1]])
                                 branch_id = cursor.fetchall()
+                                cursor.execute(
+                                    " select code from academic_year where id=%s",
+                                    [branch_id[0][1]])
+                                year_id_code = cursor.fetchall()
+                                if year_id_code:
+                                    year_code=year_id_code[0][0]
                                 cursor.execute(
                                     "SELECT id,name FROM academic_semester WHERE year_id=%s ",
                                     [branch_id[0][1]])
@@ -4979,7 +4986,7 @@ def get_marks(request, student_id):
 
                                                 exam_det.append({"exam_name_ar": exam[1], "exam_name_en": exam[2],"subject_det":subject_det})
                                     all_exam.append({"semester": semester[1], "exam": exam_det})
-                            result = {'all_exam': all_exam}
+                            result = {'all_exam': all_exam,"code":year_code}
 
         return Response(result)
 

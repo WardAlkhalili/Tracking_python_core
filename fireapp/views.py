@@ -214,10 +214,6 @@ def twoArgs(message_id,school_name):
                 if rec[2]:
                     id.append(rec[2])
             id = list(dict.fromkeys(id))
-
-
-
-
             # cursor.execute(
             #     "select  user_id from school_parent WHERE id in %s ",
             #     [tuple(id)])
@@ -227,7 +223,6 @@ def twoArgs(message_id,school_name):
             # for rec in parent:
             #     parent_id.append(rec[0])
             #
-
             mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id), Q(db_name=school_name),
                                                         Q(is_active=True)).values_list('mobile_token').order_by('-pk')
 
@@ -288,8 +283,8 @@ def twoArgs(message_id,school_name):
                     message_title = 'Late Notification'
                 elif 'is absent on' in message_body:
                     message_title = 'Absence Notification'
-                    st = 'Your Child ' + student_name
-                    message_body = message_body.replace("Your Child", st)
+                    # st = 'Your Child ' + student_name
+                    # message_body = message_body.replace("Your Child", st)
             result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
                                                           registration_ids=registration_id,
                                                           data_message={},sound='new_beeb.mp3')
