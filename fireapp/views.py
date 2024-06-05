@@ -241,8 +241,8 @@ def twoArgs(message_id,school_name):
             # print(registration_id)
             message_body = school_message[0][0]if school_message[0][0] else ''
             if message_title == 'Badge':
-                message_title='Trackware- Badge'
-                message_body='Badge Awarded to '+ student_name
+                message_title='Badge'
+                message_body='A badge has been awarded to '+ student_name
                 for parent_id in id :
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
@@ -253,15 +253,15 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if 'ar' in parent[0][0]:
-                            message_title = 'Trackware- Badge'
-                            message_body = 'Badge Awarded to ' + student_name
+                            message_title = 'أوسمة'
+                            message_body = student_name+' تم منح وسام للطالب '
                     if registration_id:
                         result = push_service.notify_single_device(registration_id=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
                                                                    message_body=message_body,)
             elif  message_title == 'Weekly Plan':
-                message_title='Trackware- Weekly Plan'
-                message_body= student_name+ ' - Weekly plans for the upcoming week have been added.'
+                message_title='Weekly Plan'
+                message_body= student_name+ '  - A new weekly plan for the next week has been published'
                 for parent_id in id :
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
@@ -272,14 +272,14 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if 'ar' in parent[0][0]:
-                            message_title = 'Trackware- Weekly Plan'
-                            message_body = student_name + ' - Weekly plans for the upcoming week have been added.'
+                            message_title = 'الخطة الأسبوعية'
+                            message_body ='  - تم نشر خطة أسبوعية جديدة للأسبوع القادم '+student_name
                     if registration_id:
                         result = push_service.notify_single_device(registration_id=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
                                                                    message_body=message_body,)
             elif message_title == 'Assignment':
-                message_title = 'Trackware- Online Assignment'
+                message_title = 'Online Assignment '
                 message_body = student_name + ' - '+message_body
                 for parent_id in id :
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
@@ -291,14 +291,14 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if 'ar' in parent[0][0]:
-                            message_title = 'Trackware- Online Assignment'
+                            message_title = ' الواجبات الإلكترونية'
                             message_body = student_name + ' - ' + message_body
                     if registration_id:
                         result = push_service.notify_single_device(registration_id=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
                                                                    message_body=message_body,)
-            elif message_title == 'Homework':
-                message_title = ' Trackware- Homework'
+            elif message_title == 'Exam':
+                message_title = 'Online Exam '
                 message_body = student_name + ' - ' + message_body
                 for parent_id in id:
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
@@ -311,14 +311,34 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if 'ar' in parent[0][0]:
-                            message_title = ' Trackware- Homework'
+                        message_title = '  الامتحانات الالكترونية'
+                        message_body = student_name + ' - ' + message_body
+                    if registration_id:
+                        result = push_service.notify_single_device(registration_id=registration_id,
+                                                                   sound='new_beeb.mp3', message_title=message_title,
+                                                                   message_body=message_body, )
+            elif message_title == 'Homework':
+                message_title = ' Homework'
+                message_body = student_name + ' - ' + message_body
+                for parent_id in id:
+                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                    parent = cursor.fetchall()
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                       Q(is_active=True)).values_list(
+                        'mobile_token').order_by('-pk')
+                    token_parent = []
+                    for tok in mobile_token_parent:
+                        token_parent.append(tok[0])
+                        registration_id = token_parent
+                    if 'ar' in parent[0][0]:
+                            message_title = ' الواجبات المنزلية '
                             message_body = student_name + ' - ' + message_body
                     if registration_id:
                         result = push_service.notify_single_device(registration_id=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
                                                                    message_body=message_body, )
             elif message_title == 'Event':
-                message_title = 'Trackware- School Event'
+                message_title = 'School Event'
                 message_body = student_name + ' - ' + message_body
                 for parent_id in id:
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
@@ -331,12 +351,12 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if 'ar' in parent[0][0]:
-                            message_title = 'Trackware- School Event'
+                            message_title = ' الأنشطة المدرسية'
                             message_body = student_name + ' - ' + message_body
                     if registration_id:
                         result = push_service.notify_single_device(registration_id=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,)
             elif message_title == 'Meeting':
-                message_title = 'Trackware- Calendar'
+                message_title = 'Events'
                 message_body = student_name +" "+message_body
                 for parent_id in id:
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
@@ -349,7 +369,7 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if 'ar' in parent[0][0]:
-                            message_title = 'Trackware- Calendar'
+                            message_title = 'المناسبات'
                             message_body = student_name + " " + message_body
                     if registration_id:
                         result = push_service.notify_single_device(registration_id=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,)
@@ -399,9 +419,6 @@ def twoArgs(message_id,school_name):
 
                     if registration_id:
                         result = push_service.notify_single_device(registration_id=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,)
-
-
-
             elif message_title == 'certification':
                 message_title = 'الشهادة المدرسية'
                 for parent_id in id:
@@ -422,7 +439,6 @@ def twoArgs(message_id,school_name):
                                                                    message_title=message_title,
                                                                    message_body=message_body,
                                                                    )
-
             elif message_title == 'daily_attendance':
                 st = 'Your Child ' + student_name
                 message_body = message_body.replace("Your Child", st)
