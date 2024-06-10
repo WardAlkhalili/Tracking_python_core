@@ -453,6 +453,7 @@ def twoArgs(message_id,school_name):
                     # st = 'Your Child ' + student_name
                     # message_body = message_body.replace("Your Child", st)
                 for parent_id in id:
+                    print("------------111111112222222----",id)
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
                     mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
@@ -463,18 +464,19 @@ def twoArgs(message_id,school_name):
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
                         registration_id = token_parent
-                    if 'ar' in parent[0][0]:
-                            message_title = 'إشعار غياب'
-                            if 'is late on' in message_body:
-
-                                message_body=f"   حضر الطالب  {student_name}   متأخرا   "
-                                message_title = ' إشعار تأخير'
-                            elif 'is absent on' in message_body:
-                                message_body = ""
-                                message_body = f" الطالب   {student_name}  غائب  "
+                    if parent[0]:
+                        if 'ar' in parent[0][0]:
                                 message_title = 'إشعار غياب'
-                                # st = 'Your Child ' + student_name
-                                # message_body = message_body.replace("Your Child", st)
+                                if 'is late on' in message_body:
+
+                                    message_body=f"   حضر الطالب  {student_name}   متأخرا   "
+                                    message_title = ' إشعار تأخير'
+                                elif 'is absent on' in message_body:
+                                    message_body = ""
+                                    message_body = f" الطالب   {student_name}  غائب  "
+                                    message_title = 'إشعار غياب'
+                                    # st = 'Your Child ' + student_name
+                                    # message_body = message_body.replace("Your Child", st)
                     if registration_id:
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3',
