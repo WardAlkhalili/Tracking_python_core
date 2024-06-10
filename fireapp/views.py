@@ -224,9 +224,6 @@ def twoArgs(message_id,school_name):
             #
             mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id), Q(db_name=school_name),
                                                         Q(is_active=True)).values_list('mobile_token').order_by('-pk')
-            print(mobile_token,"--1---1----")
-            print(id,"----ooooaaaa--1---1----")
-
 
             token = []
 
@@ -445,7 +442,6 @@ def twoArgs(message_id,school_name):
             elif message_title == 'daily_attendance':
                 st = 'Your Child ' + student_name
                 message_body = message_body.replace("Your Child", st)
-                print(id,"-----------yousef---------------------------------")
                 if 'is late on' in message_body:
                     message_title = 'Late Notification'
                 elif 'is absent on' in message_body:
@@ -453,14 +449,12 @@ def twoArgs(message_id,school_name):
                     # st = 'Your Child ' + student_name
                     # message_body = message_body.replace("Your Child", st)
                 for parent_id in id:
-                    print("------------111111112222222----",id)
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
                     mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
                                                                        Q(is_active=True)).values_list(
                         'mobile_token').order_by('-pk')
                     token_parent = []
-                    print(mobile_token_parent)
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
                         registration_id = token_parent
