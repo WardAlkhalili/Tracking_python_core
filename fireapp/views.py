@@ -227,7 +227,7 @@ def twoArgs(message_id,school_name):
 
 
             token = []
-            print(mobile_token)
+
 
             for tok in mobile_token:
 
@@ -252,12 +252,12 @@ def twoArgs(message_id,school_name):
                     token_parent=[]
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = tok[0]
+                        registration_id = token_parent
                     if 'ar' in parent[0][0]:
                             message_title = 'أوسمة'
                             message_body = student_name+' تم منح وسام للطالب '
                     if registration_id:
-                        result = push_service.notify_single_device(registration_id=registration_id,
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
                                                                    message_body=message_body,)
             elif  message_title == 'Weekly Plan':
@@ -271,12 +271,12 @@ def twoArgs(message_id,school_name):
                     token_parent=[]
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = tok[0]
+                        registration_id = token_parent
                     if 'ar' in parent[0][0]:
                             message_title = 'الخطة الأسبوعية'
                             message_body ='  - تم نشر خطة أسبوعية جديدة للأسبوع القادم '+student_name
                     if registration_id:
-                        result = push_service.notify_single_device(registration_id=registration_id,
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
                                                                    message_body=message_body,)
             elif message_title == 'Assignment':
@@ -290,12 +290,12 @@ def twoArgs(message_id,school_name):
                     token_parent=[]
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = tok[0]
+                        registration_id = token_parent
                     if 'ar' in parent[0][0]:
                             message_title = ' الواجبات الإلكترونية'
                             message_body = student_name + ' - ' + message_body
                     if registration_id:
-                        result = push_service.notify_single_device(registration_id=registration_id,
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
                                                                    message_body=message_body,)
             elif message_title == 'Exam':
@@ -310,12 +310,12 @@ def twoArgs(message_id,school_name):
                     token_parent = []
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = tok[0]
+                        registration_id = token_parent
                     if 'ar' in parent[0][0]:
                         message_title = '  الامتحانات الالكترونية'
                         message_body = student_name + ' - ' + message_body
                     if registration_id:
-                        result = push_service.notify_single_device(registration_id=registration_id,
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
                                                                    message_body=message_body, )
             elif message_title == 'Homework':
@@ -330,12 +330,12 @@ def twoArgs(message_id,school_name):
                     token_parent = []
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = tok[0]
+                        registration_id = token_parent
                     if 'ar' in parent[0][0]:
                             message_title = ' الواجبات المنزلية '
                             message_body = student_name + ' - ' + message_body
                     if registration_id:
-                        result = push_service.notify_single_device(registration_id=registration_id,
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
                                                                    message_body=message_body, )
             elif message_title == 'Event':
@@ -350,12 +350,12 @@ def twoArgs(message_id,school_name):
                     token_parent = []
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = tok[0]
+                        registration_id = token_parent
                     if 'ar' in parent[0][0]:
                             message_title = ' الأنشطة المدرسية'
                             message_body = student_name + ' - ' + message_body
                     if registration_id:
-                        result = push_service.notify_single_device(registration_id=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,)
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,)
             elif message_title == 'Meeting':
                 message_title = 'Events'
                 message_body = student_name +" "+message_body
@@ -368,12 +368,12 @@ def twoArgs(message_id,school_name):
                     token_parent = []
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = tok[0]
+                        registration_id = token_parent
                     if 'ar' in parent[0][0]:
                             message_title = 'المناسبات'
                             message_body = student_name + " " + message_body
                     if registration_id:
-                        result = push_service.notify_single_device(registration_id=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,)
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,)
             elif message_title == 'Absence':
                 message_title = 'Trackware- Absence'
                 message_body = ' Absence has been '+'Approved'if 'Approval' in message_body else 'Rejected for ' +student_name
@@ -386,12 +386,12 @@ def twoArgs(message_id,school_name):
                     token_parent = []
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = tok[0]
+                        registration_id = token_parent
                     if 'ar' in parent[0][0]:
                             message_title = 'Trackware- Absence'
                             message_body = ' Absence has been ' + 'Approved' if 'Approval' in message_body else 'Rejected for ' + student_name
                     if registration_id:
-                        result = push_service.notify_single_device(registration_id=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,)
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,)
             elif message_title == 'Mark' :
                 for parent_id in id:
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
@@ -402,7 +402,7 @@ def twoArgs(message_id,school_name):
                     token_parent = []
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = tok[0]
+                        registration_id = token_parent
                     if 'ar' in parent[0][0]:
                             message_title = 'Marks'
                             if "First Exam" in message_body:
@@ -419,7 +419,7 @@ def twoArgs(message_id,school_name):
                         message_title = 'Marks'
 
                     if registration_id:
-                        result = push_service.notify_single_device(registration_id=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,)
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,)
             elif message_title == 'certification':
                 message_title = 'الشهادة المدرسية'
                 for parent_id in id:
@@ -431,11 +431,11 @@ def twoArgs(message_id,school_name):
                     token_parent = []
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = tok[0]
+                        registration_id = token_parent
                     if 'ar' in parent[0][0]:
                             message_title = 'الشهادة المدرسية'
                     if registration_id:
-                        result = push_service.notify_single_device(registration_id=registration_id,
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3',
                                                                    message_title=message_title,
                                                                    message_body=message_body,
@@ -443,6 +443,7 @@ def twoArgs(message_id,school_name):
             elif message_title == 'daily_attendance':
                 st = 'Your Child ' + student_name
                 message_body = message_body.replace("Your Child", st)
+                print(id,"-----------yousef---------------------------------")
                 if 'is late on' in message_body:
                     message_title = 'Late Notification'
                 elif 'is absent on' in message_body:
@@ -459,7 +460,7 @@ def twoArgs(message_id,school_name):
                     print(mobile_token_parent)
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = tok[0]
+                        registration_id = token_parent
                     if 'ar' in parent[0][0]:
                             message_title = 'إشعار غياب'
                             if 'is late on' in message_body:
@@ -473,7 +474,7 @@ def twoArgs(message_id,school_name):
                                 # st = 'Your Child ' + student_name
                                 # message_body = message_body.replace("Your Child", st)
                     if registration_id:
-                        result = push_service.notify_single_device(registration_id=registration_id,
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3',
                                                                    message_title=message_title,
                                                                    message_body=message_body,
