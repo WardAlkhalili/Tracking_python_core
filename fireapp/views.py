@@ -227,6 +227,7 @@ def twoArgs(message_id,school_name):
 
 
             token = []
+            print(mobile_token)
 
             for tok in mobile_token:
 
@@ -251,7 +252,7 @@ def twoArgs(message_id,school_name):
                     token_parent=[]
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = token_parent
+                        registration_id = tok[0]
                     if 'ar' in parent[0][0]:
                             message_title = 'أوسمة'
                             message_body = student_name+' تم منح وسام للطالب '
@@ -270,7 +271,7 @@ def twoArgs(message_id,school_name):
                     token_parent=[]
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = token_parent
+                        registration_id = tok[0]
                     if 'ar' in parent[0][0]:
                             message_title = 'الخطة الأسبوعية'
                             message_body ='  - تم نشر خطة أسبوعية جديدة للأسبوع القادم '+student_name
@@ -289,7 +290,7 @@ def twoArgs(message_id,school_name):
                     token_parent=[]
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = token_parent
+                        registration_id = tok[0]
                     if 'ar' in parent[0][0]:
                             message_title = ' الواجبات الإلكترونية'
                             message_body = student_name + ' - ' + message_body
@@ -309,7 +310,7 @@ def twoArgs(message_id,school_name):
                     token_parent = []
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = token_parent
+                        registration_id = tok[0]
                     if 'ar' in parent[0][0]:
                         message_title = '  الامتحانات الالكترونية'
                         message_body = student_name + ' - ' + message_body
@@ -329,7 +330,7 @@ def twoArgs(message_id,school_name):
                     token_parent = []
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = token_parent
+                        registration_id = tok[0]
                     if 'ar' in parent[0][0]:
                             message_title = ' الواجبات المنزلية '
                             message_body = student_name + ' - ' + message_body
@@ -349,7 +350,7 @@ def twoArgs(message_id,school_name):
                     token_parent = []
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = token_parent
+                        registration_id = tok[0]
                     if 'ar' in parent[0][0]:
                             message_title = ' الأنشطة المدرسية'
                             message_body = student_name + ' - ' + message_body
@@ -367,7 +368,7 @@ def twoArgs(message_id,school_name):
                     token_parent = []
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = token_parent
+                        registration_id = tok[0]
                     if 'ar' in parent[0][0]:
                             message_title = 'المناسبات'
                             message_body = student_name + " " + message_body
@@ -385,7 +386,7 @@ def twoArgs(message_id,school_name):
                     token_parent = []
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = token_parent
+                        registration_id = tok[0]
                     if 'ar' in parent[0][0]:
                             message_title = 'Trackware- Absence'
                             message_body = ' Absence has been ' + 'Approved' if 'Approval' in message_body else 'Rejected for ' + student_name
@@ -401,7 +402,7 @@ def twoArgs(message_id,school_name):
                     token_parent = []
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = token_parent
+                        registration_id = tok[0]
                     if 'ar' in parent[0][0]:
                             message_title = 'Marks'
                             if "First Exam" in message_body:
@@ -430,7 +431,7 @@ def twoArgs(message_id,school_name):
                     token_parent = []
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = token_parent
+                        registration_id = tok[0]
                     if 'ar' in parent[0][0]:
                             message_title = 'الشهادة المدرسية'
                     if registration_id:
@@ -455,9 +456,10 @@ def twoArgs(message_id,school_name):
                                                                        Q(is_active=True)).values_list(
                         'mobile_token').order_by('-pk')
                     token_parent = []
+                    print(mobile_token_parent)
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
-                        registration_id = token_parent
+                        registration_id = tok[0]
                     if 'ar' in parent[0][0]:
                             message_title = 'إشعار غياب'
                             if 'is late on' in message_body:
