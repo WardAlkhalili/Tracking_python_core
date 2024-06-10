@@ -464,7 +464,7 @@ def twoArgs(message_id,school_name):
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
                         registration_id = token_parent
-                    if parent[0]:
+                    if parent[0][0]:
                         if 'ar' in parent[0][0]:
                                 message_title = 'إشعار غياب'
                                 if 'is late on' in message_body:
