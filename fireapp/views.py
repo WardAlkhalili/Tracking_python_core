@@ -224,6 +224,8 @@ def twoArgs(message_id,school_name):
             #
             mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id), Q(db_name=school_name),
                                                         Q(is_active=True)).values_list('mobile_token').order_by('-pk')
+            print(mobile_token,"--1---1----")
+            print(id,"----ooooaaaa--1---1----")
 
 
             token = []
