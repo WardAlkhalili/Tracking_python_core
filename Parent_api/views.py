@@ -62,7 +62,6 @@ def student_login_uni(request):
                 decoded_data = jwt.decode(jwt=token,
                                           key='my_secret',
                                           algorithms=["HS256"])
-                print(decoded_data)
                 manager_parent = ManagerStudentUni(token=token, db_name=school_name, user_id=student_id[0][0],
                                                    student_id=student_id[0][0],
                                                    school_id=student_id[0][4], mobile_token=mobile_token)
@@ -80,15 +79,13 @@ def student_login_uni(request):
                     "name": student_id[0][1],
                     "mobile": student_id[0][3],
                     "notif": 1 if notify else 0,
-                    "distance":500,
+                    "distance": 500,
                     "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" + student_id[0][7],
                     "Authorization": "Bearer " + token
 
                 }
 
         return Response(result)
-
-
 
 
 @api_view(['POST'])
@@ -403,9 +400,6 @@ def Routs_uni(request):
         return Response(result)
 
 
-
-
-
 @api_view(['POST'])
 def parent_login(request):
     if request.method == 'POST':
@@ -413,8 +407,8 @@ def parent_login(request):
         user_name = request.data.get('user_name')
         school_name = request.data.get('school_name')
         mobile_token = request.data.get('mobile_token')
-        sms_system=True
-        tracking_system=True
+        sms_system = True
+        tracking_system = True
         full_system = True
         # http://192.168.1.82/
         url = 'https://tst.tracking.trackware.com/web/session/authenticate'
@@ -444,7 +438,7 @@ def parent_login(request):
             uid = response['result']['uid']
             company_id = response['result']['company_id']
 
-        except Exception  as error:
+        except Exception as error:
             # print("--------------------------------------")
             # print(Exception)
             result = {
@@ -461,15 +455,16 @@ def parent_login(request):
             from django.utils.crypto import get_random_string
             unique_id = get_random_string(length=32)
             try:
-                cursor.execute("select tracking_system,sms_system from res_config_settings ORDER BY ID DESC LIMIT 1", [])
+                cursor.execute("select tracking_system,sms_system from res_config_settings ORDER BY ID DESC LIMIT 1",
+                               [])
                 res_config_settings = cursor.fetchall()
                 print(res_config_settings)
                 if res_config_settings[0][0] and not res_config_settings[0][1]:
-                    full_system =False
-                    sms_system =False
-                elif  not res_config_settings[0][0] and  res_config_settings[0][1]:
-                    full_system =False
-                    tracking_system =False
+                    full_system = False
+                    sms_system = False
+                elif not res_config_settings[0][0] and res_config_settings[0][1]:
+                    full_system = False
+                    tracking_system = False
 
             except:
                 print("not found tracking_system and  sms_system")
@@ -866,9 +861,10 @@ def kids_list(request):
                     l = []
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
                     l.append(au.split(","))
-                    db_name=ManagerParent.objects.filter(token=au.split(",")[0]).values_list('school_id','parent_id','db_name')
+                    db_name = ManagerParent.objects.filter(token=au.split(",")[0]).values_list('school_id', 'parent_id',
+                                                                                               'db_name')
                     db_name_test = []
-                    school_name=''
+                    school_name = ''
                     if db_name:
                         for e in db_name:
                             school_name = e[2]
@@ -882,7 +878,7 @@ def kids_list(request):
                                 "select activate_app_map from school_parent WHERE id = %s",
                                 [parent_id])
                             parent_show_map = cursor.fetchall()
-                            show_map = True if parent_show_map[0][0]  else False
+                            show_map = True if parent_show_map[0][0] else False
                             cursor.execute(
                                 "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type,name,name_ar,gender,password,national_id,passport_number from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
@@ -941,7 +937,7 @@ def kids_list(request):
                                                     "select  driver_id,bus_no,id  from fleet_vehicle WHERE id = %s",
                                                     [is_active[0][1]])
                                                 data_id_bus = cursor.fetchall()
-                                                student_bus_num= data_id_bus[0][1]
+                                                student_bus_num = data_id_bus[0][1]
                                                 break
                                             else:
 
@@ -958,7 +954,8 @@ def kids_list(request):
                                         "name": "Exams",
                                         "name_ar": "امتحانات",
                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png",
-                                        "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg"
+                                        "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg",
+                                        "new_add": False
                                     },
                                     "Badges": {
                                         "url": "https://tst.tracking.trackware.com/my/Badges/",
@@ -966,7 +963,8 @@ def kids_list(request):
                                         "name": "Badges",
                                         "name_ar": "الشارات",
                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Badge.png",
-                                        "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Badge.svg"
+                                        "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Badge.svg",
+                                        "new_add": False
                                     },
                                     "Weeklyplans":
                                         {
@@ -975,7 +973,8 @@ def kids_list(request):
                                             "name": "Weekly plans",
                                             "name_ar": "الخطط الأسبوعية",
                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Weekly+Plans.png",
-                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg"
+                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg",
+                                            "new_add": False
                                         },
                                     "Assignments": {
                                         "url": "https://tst.tracking.trackware.com/my/Assignments/",
@@ -983,16 +982,18 @@ def kids_list(request):
                                         "name": "Assignments",
                                         "name_ar": "الواجبات الالكترونية",
                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png",
-                                        "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg"
+                                        "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg",
+                                        "new_add": False
                                     },
                                     "Events":
-                                        {"name": "Events",
+                                        {"name": "Events and Activities",
                                          "name_ar": "الفعاليات و الانشطة",
                                          "url": "https://tst.tracking.trackware.com/my/Events/",
                                          "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Events/",
                                          "arabic_name": "الفعاليات و الانشطة",
                                          "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Events.png",
-                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg"
+                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg",
+                                         "new_add": False
                                          },
                                     "Homeworks":
                                         {"name": "Homework",
@@ -1000,7 +1001,8 @@ def kids_list(request):
                                          "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Homeworks/",
                                          "name_ar": "الواجبات المنزلية",
                                          "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/worksheets.png",
-                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg"
+                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg",
+                                         "new_add": False
                                          },
                                     "Calendar":
                                         {"name": "Calendar",
@@ -1008,7 +1010,8 @@ def kids_list(request):
                                          "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Calendar/",
                                          "name_ar": "التقويم",
                                          "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/School+Calendar.png",
-                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg"
+                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg",
+                                         "new_add": False
                                          },
 
                                     "Clinic":
@@ -1018,7 +1021,8 @@ def kids_list(request):
                                          "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Clinic/",
                                          "arabic_name": "العيادة",
                                          "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
-                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg"
+                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg",
+                                         "new_add": False
                                          },
 
                                     "Library":
@@ -1028,7 +1032,8 @@ def kids_list(request):
                                          "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Library/",
                                          "arabic_name": "العيادة",
                                          "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
-                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg"
+                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg",
+                                         "new_add": False
                                          },
                                     "Timetable":
                                         {"name": "Timetable",
@@ -1037,7 +1042,8 @@ def kids_list(request):
                                          "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Timetable/",
                                          "arabic_name": "الجدول الدراسي",
                                          "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/icons8-curriculum-48.png",
-                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/icons8-curriculum-48.svg"
+                                         "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/icons8-curriculum-48.svg",
+                                         "new_add": False
                                          },
                                     "Mark":
                                         {"name": "Mark",
@@ -1046,14 +1052,22 @@ def kids_list(request):
                                          "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Marks/",
                                          "arabic_name": "العلامات",
                                          "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/icons8-curriculum-48.png",
-                                         "icon_svg": "mark_yousef"
+                                         "icon_svg": "mark_yousef",
+                                         "new_add": False
                                          }
 
                                 }
+                                cursor.execute(
+                                    "select class_id from res_partner where id=(select partner_id from res_users where id="
+                                    "(select user_id from student_student where id=%s))",
+                                    [student1[rec]['id']])
+                                academic_classe = cursor.fetchall()
+                                student_class_new = academic_classe[0][0]
+
                                 url_m = {}
                                 model_list = (
-                                "Badges", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
-                                "Weekly Plans", 'Online Exams', 'Library', 'Timetable','Grades')
+                                    "Badges", "Clinic", "Calendar", "Homework", "Events", "Online Assignments",
+                                    "Weekly Plans", 'Online Exams', 'Library', 'Timetable', 'Grades')
                                 cursor.execute("select name from ir_ui_menu where name in %s", [model_list])
                                 list = cursor.fetchall()
                                 res = []
@@ -1067,17 +1081,31 @@ def kids_list(request):
                                             student1[rec]['user_id'])
                                         x['Weeklyplans']['url'] = x['Weeklyplans']['url'] + str(
                                             student1[rec]['user_id'])
+                                        x['Weeklyplans']['new_add'] = newAddStudent_more_model(school_name,
+                                                                                               'week_plan_lines',
+                                                                                               'new_added',
+                                                                                               student1[rec]['id'],
+                                                                                               student_class_new,
+                                                                                               'week.plan.lines')
                                         model.append(x['Weeklyplans'])
 
                                     if 'Events' == rec1:
                                         x['Events']['arabic_url'] = x['Events']['arabic_url'] + str(
                                             student1[rec]['user_id'])
                                         x['Events']['url'] = x['Events']['url'] + str(student1[rec]['user_id'])
+                                        x['Events']['new_add'] = newAddStudent_more_model(school_name,
+                                                                                          'school_event_registration',
+                                                                                          'student_id',
+                                                                                          student1[rec]['id'], None,
+                                                                                          'school.event.registration')
                                         model.append(x['Events'])
                                     if 'Online Exams' == rec1:
                                         x['Exams']['arabic_url'] = x['Exams']['arabic_url'] + str(
                                             student1[rec]['user_id'])
                                         x['Exams']['url'] = x['Exams']['url'] + str(student1[rec]['user_id'])
+                                        x['Exams']['new_add'] = newaddStudentSer(school_name, student1[rec]['id'],
+                                                                                 student1[rec]['user_id'],
+                                                                                 'certificate')
                                         model.append(x['Exams'])
 
                                     if 'Online Assignments' == rec1:
@@ -1085,6 +1113,9 @@ def kids_list(request):
                                             student1[rec]['user_id'])
                                         x['Assignments']['url'] = x['Assignments']['url'] + str(
                                             student1[rec]['user_id'])
+                                        x['Assignments']['new_add'] = newaddStudentSer(school_name, student1[rec]['id'],
+                                                                                       student1[rec]['user_id'],
+                                                                                       'is_assignment')
                                         model.append(x['Assignments'])
 
                                     if 'Homework' == rec1:
@@ -1092,24 +1123,35 @@ def kids_list(request):
                                             student1[rec]['user_id'])
                                         x['Homeworks']['url'] = x['Homeworks']['url'] + str(
                                             student1[rec]['user_id'])
+                                        x['Homeworks']['new_add'] = newAddHom(school_name, student1[rec]['id'],
+                                                                              student1[rec]['user_id'])
                                         model.append(x['Homeworks'])
 
                                     if 'Badges' == rec1:
                                         x['Badges']['arabic_url'] = x['Badges']['arabic_url'] + str(
                                             student1[rec]['user_id'])
                                         x['Badges']['url'] = x['Badges']['url'] + str(student1[rec]['user_id'])
+                                        x['Badges']['new_add'] = newAddStudent(school_name, 'badge_badge', 'new_added',
+                                                                               student1[rec]['id'], 'student_id')
                                         model.append(x['Badges'])
 
                                     if 'Calendar' == rec1:
                                         x['Calendar']['url'] = x['Calendar']['url'] + str(student1[rec]['user_id'])
                                         x['Calendar']['arabic_url'] = x['Calendar']['arabic_url'] + str(
                                             student1[rec]['user_id'])
+                                        x['Calendar']['new_add'] = newaddStudentCalendar(school_name,
+                                                                                         student1[rec]['id'],
+                                                                                         student1[rec]['user_id'])
                                         model.append(x['Calendar'])
 
                                     if 'Clinic' == rec1:
                                         x['Clinic']['arabic_url'] = x['Clinic']['arabic_url'] + str(
                                             student1[rec]['user_id'])
                                         x['Clinic']['url'] = x['Clinic']['url'] + str(student1[rec]['user_id'])
+                                        x['Clinic']['new_add'] = newAddStudent(school_name, 'school_clinic',
+                                                                               'new_added',
+                                                                               student1[rec]['id'], 'patient_id')
+
                                         model.append(x['Clinic'])
                                     if 'Library' == rec1:
                                         x['Library']['arabic_url'] = x['Library']['arabic_url'] + str(
@@ -1141,7 +1183,10 @@ def kids_list(request):
                                         "name": "Absence",
                                         "name_ar": "الغياب",
                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png",
-                                        "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg"
+                                        "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg",
+                                        "new_add": newAddStudent(school_name, 'daily_attendance_line',
+                                                                 'new_added',
+                                                                 student1[rec]['id'], 'student_id')
                                     }
                                     )
                                     show_absence = True
@@ -1162,7 +1207,11 @@ def kids_list(request):
                                                 "name": "Absence",
                                                 "name_ar": "الغياب",
                                                 "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png",
-                                                "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg"
+                                                "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg",
+                                                "new_add": newAddStudent(school_name, 'daily_attendance_line',
+                                                                         'new_added',
+                                                                         student1[rec]['id'], 'student_id')
+
                                             }
 
                                     }
@@ -1197,7 +1246,7 @@ def kids_list(request):
                                         student_st = student_history[0][0] if student_history else ""
                                     else:
                                         student_st = 'in' if rounds_count_student[0][1] == "Onboard" else \
-                                        rounds_count_student[0][1] if rounds_count_student else ""
+                                            rounds_count_student[0][1] if rounds_count_student else ""
 
                                     cursor.execute(
                                         "select name,type,attendant_id,vehicle_id,driver_id from transport_round WHERE id = %s",
@@ -1261,7 +1310,8 @@ def kids_list(request):
                                 else:
 
                                     fname = student1[rec]['name_ar']
-                                user_name = student1[rec]['national_id'] if student1[rec]['national_id']  else student1[rec]['passport_number']
+                                user_name = student1[rec]['national_id'] if student1[rec]['national_id'] else \
+                                student1[rec]['passport_number']
                                 password = student1[rec]['national_id']
                                 if student1[rec]['password']:
                                     password = student1[rec]['password']
@@ -1363,6 +1413,132 @@ def kids_list(request):
         result = {'status': 'error'}
         return Response(result)
 
+
+def newAddStudent(school_name, model_name, name_f, student_id, name_f2):
+    with connections[school_name].cursor() as cursor:
+        sql = f"select  id  from {model_name} WHERE {name_f} = true and {name_f2} ={student_id}"
+        cursor.execute(
+            sql,
+            [])
+        new_added = cursor.fetchall()
+
+        return len(new_added) > 0
+
+
+def newAddStudent_more_model(school_name, model_name, name_f, student_id, class_id, model_seen):
+    with connections[school_name].cursor() as cursor:
+        if class_id:
+            sql = f"select  id  from {model_name} WHERE {name_f} = true and class_id ={class_id}  and state ='approved'"
+            cursor.execute(
+                sql,
+                [])
+            new_added = cursor.fetchall()
+            new = 0
+            for rec in new_added:
+                sql1 = f"select  id  from student_seen WHERE model_name = '{model_name}' and student_id ={student_id}  and rec_id ={rec[0]}"
+                cursor.execute(sql1, [])
+                new_added = cursor.fetchall()
+                new += len(new_added)
+            return new > 0
+        else:
+            sql = f"select  id  from {model_name} WHERE {name_f} ={student_id}  and new_added = {True}"
+            cursor.execute(
+                sql,
+                [])
+            new_added = cursor.fetchall()
+            new = 0
+            for rec in new_added:
+                sql1 = f"select  id  from student_seen WHERE model_name = '{model_seen}' and student_id ={student_id}  and rec_id ={rec[0]}"
+                cursor.execute(sql1, [])
+                new_added = cursor.fetchall()
+                new += len(new_added)
+            return new > 0
+
+
+def newaddStudentSer(school_name, student_id, user_id, name_f):
+    with connections[school_name].cursor() as cursor:
+        if user_id:
+            cursor.execute(
+                " select partner_id,branch_id,year_id from res_users where id=%s",
+                [user_id])
+            partner_id_q = cursor.fetchall()
+            new = 0
+            if partner_id_q:
+                cursor.execute(
+                    " select id,survey_id,token,last_displayed_page_id,state from survey_user_input where partner_id=%s and year_id = %s and branch_id =%s   ORDER BY create_date DESC, state DESC",
+                    [partner_id_q[0][0], partner_id_q[0][2], partner_id_q[0][1]])
+                assignments = cursor.fetchall()
+                for assingment in assignments:
+                    sql1 = f'select id,state,deadline,title,access_token,subject_id from survey_survey where id={assingment[1]} and {name_f}=true and new_added=true'
+                    cursor.execute(
+                        sql1,
+                        [])
+                    survey = cursor.fetchall()
+
+                    for rec in survey:
+                        sql1 = f"select  id  from student_seen WHERE model_name = survey.survey and student_id ={student_id}  and rec_id ={rec[0]}"
+                        cursor.execute(sql1, [])
+                        new_added = cursor.fetchall()
+                        new += len(new_added)
+            return new > 0
+        return False
+
+
+def newAddHom(school_name, student_id, user_id):
+    with connections[school_name].cursor() as cursor:
+        if user_id:
+            cursor.execute(
+                " select partner_id,branch_id,year_id from res_users where id=%s",
+                [user_id])
+            partner_id_q = cursor.fetchall()
+            cursor.execute(
+                "select  worksheet_id  from student_details WHERE student_id = %s  ",
+                [student_id])
+            class_worksheet_id = cursor.fetchall()
+            worksheet_id = []
+            for rec in class_worksheet_id:
+                if rec[0]:
+                    worksheet_id.append(rec[0])
+            new = 0
+            if worksheet_id:
+                cursor.execute(
+                    " select id from class_worksheet where state='published' and year_id = %s and new_added=true and branch_id =%s and id in %s  ORDER BY publishing_date DESC",
+                    [partner_id_q[0][2], partner_id_q[0][1], tuple(worksheet_id)])
+                class_worksheet = cursor.fetchall()
+                for rec in class_worksheet:
+                    sql1 = f"select  id  from student_seen WHERE model_name = 'class.worksheet' and student_id ={student_id}  and rec_id ={rec[0]}"
+                    cursor.execute(sql1, [])
+                    new_added = cursor.fetchall()
+                    new += len(new_added)
+            return new > 0
+        return False
+
+
+def newaddStudentCalendar(school_name, student_id, user_id):
+    with connections[school_name].cursor() as cursor:
+        if user_id:
+            cursor.execute(
+                " select partner_id from res_users where id=%s",
+                [user_id])
+            partner_id_q = cursor.fetchall()
+            cursor.execute(
+                " select calendar_event_id from calendar_event_res_partner_rel where res_partner_id = %s ORDER BY calendar_event_id DESC",
+                [partner_id_q[0][0]])
+            calendar_event_id = cursor.fetchall()
+            new = 0
+            for rec in calendar_event_id:
+                sql1 = f"select  id  from student_seen WHERE model_name = calendar.event and student_id ={student_id}  and rec_id ={rec[0]}"
+                cursor.execute(sql1, [])
+                new_added = cursor.fetchall()
+                new += len(new_added)
+            return new > 0
+        return False
+
+
+def createStudentSeen(school_name, student_id, model_name, rec_id):
+    with connections[school_name].cursor() as cursor:
+        sql = f"INSERT INTO student_seen (model_name, student_id, rec_id)VALUES ('{model_name}', {student_id}, {rec_id})"
+        cursor.execute(sql, [])
 
 
 def date_time(deadline):
@@ -1581,51 +1757,56 @@ def hide_message(request):
             return Response(result)
 
 
-def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id,id=0,stutes_notif=None,show_notif=None,action_id='0',notifications_title_ar='',notifications_text_ar='',student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',image_link='',plan_name='',attachments=[],school_mo=False):
-    show=show_notif
+def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name,
+                         student_id, id=0, stutes_notif=None, show_notif=None, action_id='0', notifications_title_ar='',
+                         notifications_text_ar='',
+                         student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
+                         image_link='', plan_name='', attachments=[], school_mo=False):
+    show = show_notif
     # if student_image:
     #     print(student_image)
     if not notifications_title:
-        notifications_title=''
+        notifications_title = ''
     if not notifications_text:
         notifications_text = ''
-    stutes=stutes_notif
+    stutes = stutes_notif
     # print(stutes)
-    if stutes=='Read' or stutes:
-        stutes="Mark As UnRead"
-    elif  stutes=='UnRead' or not stutes :
+    if stutes == 'Read' or stutes:
+        stutes = "Mark As UnRead"
+    elif stutes == 'UnRead' or not stutes:
         stutes = "Mark As Read"
     else:
         stutes = "Mark As Read"
 
-    if show==None:
-        show="show"
+    if show == None:
+        show = "show"
 
     notificationsType = ''
-    icon_tracking=''
-    if 'weekly plan' in notifications_title.lower()  or 'assignment' in notifications_title.lower() or  'homework' in notifications_title.lower() or  'exam' in notifications_title.lower() or 'educational' in notifications_title:
+    icon_tracking = ''
+    if 'weekly plan' in notifications_title.lower() or 'assignment' in notifications_title.lower() or 'homework' in notifications_title.lower() or 'exam' in notifications_title.lower() or 'educational' in notifications_title:
 
         if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
             notificationsType = 'announcement'
-            notifications_title=''
+            notifications_title = ''
             notifications_title_ar = ''
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
         else:
             notificationsType = 'educational'
-            if ( 'Weekly Plan' in notifications_title or 'educational' in notifications_title):
+            if ('Weekly Plan' in notifications_title or 'educational' in notifications_title):
 
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg'
-            elif ( 'Assignment' in notifications_title):
+            elif ('Assignment' in notifications_title):
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg'
-            elif ( 'Exam' in notifications_title):
+            elif ('Exam' in notifications_title):
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg'
             elif ('Homework' in notifications_title):
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg'
 
-    elif 'Pick Up By Parent' in notifications_title or ('Absence' in notifications_title and  notifications_title  != "Absence notification" ) or  'clinic' in notifications_title.lower() or 'library' in notifications_title .lower() :
+    elif 'Pick Up By Parent' in notifications_title or (
+            'Absence' in notifications_title and notifications_title != "Absence notification") or 'clinic' in notifications_title.lower() or 'library' in notifications_title.lower():
 
         notificationsType = 'Absence'
-        if ( 'clinic' in notifications_title.lower()):
+        if ('clinic' in notifications_title.lower()):
 
             if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
                 notificationsType = 'announcement'
@@ -1634,11 +1815,11 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
             else:
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg'
-        elif ( 'library' in notifications_title.lower()):
+        elif ('library' in notifications_title.lower()):
             if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
                 notificationsType = 'announcement'
                 notifications_title = ''
-                notifications_title_ar=''
+                notifications_title_ar = ''
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
             else:
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg'
@@ -1659,22 +1840,22 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
         elif "has just been checked into the bus." in notifications_text:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-get-on-bus.svg'
         elif notifications_title == "Absence notification":
-            notifications_title="bsence notification"
+            notifications_title = "bsence notification"
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
         else:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-shuttle-bus.svg'
     else:
         notificationsType = 'announcement'
         if (notifications_title == 'survey'):
-            icon_tracking=show_notif
-        elif('event' in notifications_title.lower())  :
+            icon_tracking = show_notif
+        elif ('event' in notifications_title.lower()):
             if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
                 notifications_title = ''
                 notifications_title_ar = ''
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
             else:
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg'
-        elif ( 'Meeting' in notifications_title):
+        elif ('Meeting' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg'
         else:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
@@ -1689,18 +1870,18 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             "student_name": student_name,
             "student_id": str(student_id),
             "notificationsType": notificationsType,
-            "icon_tracking":icon_tracking,
+            "icon_tracking": icon_tracking,
             "id": str(id),
             "stutes": stutes,
             "show": show,
             "student_image": student_image,
             "action_id": str(action_id),
-            "notifications_text_ar": notifications_text_ar if notifications_text_ar else  notifications_text,
+            "notifications_text_ar": notifications_text_ar if notifications_text_ar else notifications_text,
             "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
-            "imageLink":'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(image_link)if image_link else '',
+            "imageLink": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
+                image_link) if image_link else '',
             "plan_name": plan_name if plan_name else '',
-            'attachments':attachments
-
+            'attachments': attachments
 
         }
     else:
@@ -1712,21 +1893,20 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
             "notifications_title": notifications_title,
             "student_id": str(student_id),
             "notificationsType": notificationsType,
-            "icon_tracking":icon_tracking,
-            "id":id,
-            "stutes":stutes,
-            "show":show,
+            "icon_tracking": icon_tracking,
+            "id": id,
+            "stutes": stutes,
+            "show": show,
             "student_image": student_image,
             "action_id": str(action_id),
             "notifications_text_ar": notifications_text_ar if notifications_text_ar else notifications_text,
             "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
-            "imageLink": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(image_link)if image_link else '',
+            "imageLink": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
+                image_link) if image_link else '',
             "plan_name": plan_name if plan_name else '',
-            "attachments":attachments
+            "attachments": attachments
 
         }
-
-
 
 
 # get school message
@@ -2082,9 +2262,9 @@ def kids_hstory_new(request):
                                 #         "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
                                 #         [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
                                 #         year_id = fields.Many2one('academic.year', 'Academic Year', ondelete='cascade')
-                                avatar="https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+                                avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                 for mes in student_mes:
-                                    action_id=mes[5]
+                                    action_id = mes[5]
                                     attachments = []
                                     if mes[3]:
                                         if ('Event' in mes[3]):
@@ -2106,11 +2286,11 @@ def kids_hstory_new(request):
                                             if att[2]:
                                                 attachments.append(
                                                     {'id': att[0], 'name': att[1], 'datas': att[2]})
-                                                    # print(attachments)
-                                    title=mes[3]
+                                                # print(attachments)
+                                    title = mes[3]
                                     title_ar = mes[4]
 
-                                    model_school_messsage=mes[11] if information_schema else mes[9]
+                                    model_school_messsage = mes[11] if information_schema else mes[9]
                                     # if  model_school_messsage :
                                     #     title=''
                                     #     title_ar=''
@@ -2122,8 +2302,14 @@ def kids_hstory_new(request):
                                                              mes[0].replace(
                                                                  second=0) if mes[0] else '',
                                                              title,
-                                                             student[1], student[0], mes[6], mes[8] if information_schema else mes[7], None, action_id if mes[5] else '0', title_ar,
-                                                             mes[2],'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',mes[7]if information_schema else '',plan_name=mes[9]if information_schema else '',attachments=attachments,school_mo=model_school_messsage))
+                                                             student[1], student[0], mes[6],
+                                                             mes[8] if information_schema else mes[7], None,
+                                                             action_id if mes[5] else '0', title_ar,
+                                                             mes[2],
+                                                             'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
+                                                             mes[7] if information_schema else '',
+                                                             plan_name=mes[9] if information_schema else '',
+                                                             attachments=attachments, school_mo=model_school_messsage))
                             #
                             #     student_round = []
                             #     if  any('English'  in x[0]  for x in lang):
@@ -2282,10 +2468,11 @@ def kids_hstory_new(request):
 
                             notifications.sort(key=get_year, reverse=True)
 
-
                             for d in notifications:
                                 # t = tuple(d.items())
-                                t = (d['student_id'], d['notifications_text'],d['create_date'],d['date_time'],d['student_name'],d['notifications_title'],d['notificationsType'],d['notificationsType'])
+                                t = (d['student_id'], d['notifications_text'], d['create_date'], d['date_time'],
+                                     d['student_name'], d['notifications_title'], d['notificationsType'],
+                                     d['notificationsType'])
                                 # (d['student_id'], d['notifications_text'])
                                 if t not in seen:
                                     seen.add(t)
@@ -2322,7 +2509,6 @@ def kids_hstory_new(request):
                                     # cursor.execute(
                                     #     "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
                                     #     [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
-
 
                             result = {"notifications": notifications_not_d}
                             # print(result)
@@ -3357,15 +3543,16 @@ def get_badge(request, student_id):
 
                         for b in badges:
                             cursor.execute(
+                                "UPDATE public.badge_badge SET new_added=%s   WHERE id=%s;",
+                                [False, b[5]])
+                            cursor.execute(
                                 "select  *  from student_seen WHERE student_id = %s AND model_name = 'badge.badge' And rec_id = %s   ORDER BY ID DESC",
                                 [student_id, b[5]])
                             student_seen = cursor.fetchall()
 
                             new_add = len(student_seen) == 0 or new_add
                             if new_add:
-                                cursor.execute(
-                                    "INSERT INTO student_seen(model_name,student_id,rec_id)VALUES (%s,%s,%s);",
-                                    ['badge.badge', student_id, b[5]])
+                                createStudentSeen(school_name, student_id, 'badge.badge', b[5])
                             cursor.execute(
                                 "select  name,description,image_url  from school_badge WHERE id = %s ",
                                 [b[0]])
@@ -3406,7 +3593,8 @@ def get_badge(request, student_id):
                                          'subject': subject_name[0][0] if subject_name else '',
                                          'description': school_badge[0][1],
                                          'new_badge': b[4],
-                                         'disable': delta.days < badge_duration[0][0] if delta and badge_duration[0][0] else True,
+                                         'disable': delta.days < badge_duration[0][0] if delta and badge_duration[0][
+                                             0] else True,
                                          'job_name': job_name[0][0] if job_name else '',
                                          'image_teacher': 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
                                              teacher_name[0][1]) if teacher_name[0][
@@ -3454,12 +3642,23 @@ def get_calendar(request, student_id):
                                 [f_data[0]])
                             event = cursor.fetchall()
 
+                            cursor.execute(
+                                "select  *  from student_seen WHERE student_id = %s AND model_name = 'calendar.event' And rec_id = %s   ORDER BY ID DESC",
+                                [student_id, f_data[0]])
+                            student_seen = cursor.fetchall()
+
+                            new_add = len(student_seen) == 0 or new_add
+                            if new_add:
+                                createStudentSeen(school_name, student_id, 'calendar.event', f_data[0])
+
                             if event[0][2] == None:
 
                                 data.append({'id': event[0][0],
                                              'name': event[0][1],
-                                             'start_date': event[0][2].strftime("%d %b %Y") if event[0][2] else event[0][3].strftime("%d %b %Y") if event[0][3] else '',
-                                             'year': event[0][2].strftime("%Y") if event[0][2] else event[0][3].strftime("%Y") if event[0][3] else ''
+                                             'start_date': event[0][2].strftime("%d %b %Y") if event[0][2] else
+                                             event[0][3].strftime("%d %b %Y") if event[0][3] else '',
+                                             'year': event[0][2].strftime("%Y") if event[0][2] else event[0][
+                                                 3].strftime("%Y") if event[0][3] else ''
                                              })
                             else:
 
@@ -3514,7 +3713,16 @@ def get_clinic(request, student_id):
                                 vists = cursor.fetchall()
 
                             for v in vists:
-
+                                cursor.execute(
+                                    "select  *  from student_seen WHERE student_id = %s AND model_name = 'school.clinic' And rec_id = %s   ORDER BY ID DESC",
+                                    [student_id, v[0]])
+                                student_seen = cursor.fetchall()
+                                new_add = len(student_seen) == 0 or new_add
+                                cursor.execute(
+                                    "UPDATE public.school_clinic SET new_added=%s   WHERE id=%s;",
+                                    [False, v[0]])
+                                if new_add:
+                                    createStudentSeen(school_name, student_id, 'school.clinic', v[0])
                                 try:
                                     date_s = datetime.datetime.strptime(str(v[2]), '%Y-%m-%d %H:%M:%S')
                                     data.append({'visit_id': v[0],
@@ -3535,7 +3743,6 @@ def get_clinic(request, student_id):
                                                  'temperature': v[4],
                                                  'blood_pressure': v[5],
                                                  'prescription': v[6] if v[6] else ""})
-                            print(data)
                             result = {'result': data}
                         else:
                             result = {'result': data}
@@ -3577,6 +3784,17 @@ def get_attendance(request, student_id):
                                 [student_id])
                             daily_attendance_line = cursor.fetchall()
                             for s in daily_attendance_line:
+
+                                cursor.execute(
+                                    "select  *  from student_seen WHERE student_id = %s AND model_name = 'daily.attendance.line' And rec_id = %s   ORDER BY ID DESC",
+                                    [student_id, s[1]])
+                                student_seen = cursor.fetchall()
+                                cursor.execute(
+                                    "UPDATE public.daily_attendance_line SET new_added=%s   WHERE id=%s;",
+                                    [False, s[1]])
+                                new_add = len(student_seen) == 0
+                                if new_add:
+                                    createStudentSeen(school_name, student_id, 'daily.attendance.line', s[1])
                                 if not s[0]:
                                     continue
                                 cursor.execute(
@@ -3703,7 +3921,8 @@ def post_workSheet(request):
 
                             attached_files = request.data.get("file")
                             body = json.dumps({"jsonrpc": "2.0",
-                                               "params": {"student_id": int(user_id_q[0][0]),"attachments": attached_files,"wk_id": wk_id,}})
+                                               "params": {"student_id": int(user_id_q[0][0]),
+                                                          "attachments": attached_files, "wk_id": wk_id, }})
                             headers = {
                                 'X-Openerp-Session-Id': Session,
                                 'Content-Type': 'application/json',
@@ -3711,8 +3930,7 @@ def post_workSheet(request):
 
                             url = str(base_url) + "upload_worksheet"
 
-                            response1 = requests.request("POST", url,headers=headers, data=body)
-                   
+                            response1 = requests.request("POST", url, headers=headers, data=body)
 
                             result = {'result': 'ok'}
                             return Response(result)
@@ -3860,7 +4078,13 @@ def get_exam(request, student_id):
 
                                 if survey:
                                     # print("lllllllll", survey)
-
+                                    cursor.execute(
+                                        "select  *  from student_seen WHERE student_id = %s AND model_name = 'survey.survey' And rec_id = %s   ORDER BY ID DESC",
+                                        [student_id, survey[0]])
+                                    student_seen = cursor.fetchall()
+                                    new_add = len(student_seen) == 0 or new_add
+                                    if new_add:
+                                        createStudentSeen(school_name, student_id, 'survey.survey', survey[0])
                                     cursor.execute(
                                         "select  name  from school_subject WHERE id = %s ",
                                         [survey[0][5]])
@@ -4052,7 +4276,13 @@ def get_student_assignment(request, student_id):
                                 survey = cursor.fetchall()
 
                                 if survey:
-
+                                    cursor.execute(
+                                        "select  *  from student_seen WHERE student_id = %s AND model_name = 'survey.survey' And rec_id = %s   ORDER BY ID DESC",
+                                        [student_id, survey[0]])
+                                    student_seen = cursor.fetchall()
+                                    new_add = len(student_seen) == 0 or new_add
+                                    if new_add:
+                                        createStudentSeen(school_name, student_id, 'survey.survey', survey[0])
                                     cursor.execute(
                                         "select  name  from school_subject WHERE id = %s ",
                                         [survey[0][5]])
@@ -4099,7 +4329,7 @@ def get_student_assignment(request, student_id):
                                                 else:
                                                     state = assingment[4]
                                                     start = True
-                                            dead=deadline.strftime("%d %b %Y")
+                                            dead = deadline.strftime("%d %b %Y")
                                         else:
                                             deadline = ""
                                             state = assingment[4]
@@ -4216,6 +4446,13 @@ def get_weekly_plan_lines(request, plan_id, student_id, week_name):
                                 # 16
                                 data['plan_name'] = week_name
                                 for line in lines:
+                                    cursor.execute(
+                                        "select  *  from student_seen WHERE student_id = %s AND model_name = 'week.plan.lines' And rec_id = %s   ORDER BY ID DESC",
+                                        [student_id, line[16]])
+                                    student_seen = cursor.fetchall()
+                                    new_add = len(student_seen) == 0 or new_add
+                                    if new_add:
+                                        createStudentSeen(school_name, student_id, 'week.plan.lines', line[16])
                                     if line[0] and 'Saturday' not in days:
                                         days.append('Saturday')
                                     if line[1] and 'Sunday' not in days:
@@ -4356,6 +4593,13 @@ def get_data_worksheets(request, student_id):
                                     class_worksheet = cursor.fetchall()
 
                                     for w in class_worksheet:
+                                        cursor.execute(
+                                            "select  *  from student_seen WHERE student_id = %s AND model_name = 'class.worksheet' And rec_id = %s   ORDER BY ID DESC",
+                                            [student_id, w[0]])
+                                        student_seen = cursor.fetchall()
+                                        new_add = len(student_seen) == 0 or new_add
+                                        if new_add:
+                                            createStudentSeen(school_name, student_id, 'class.worksheet', w[0])
                                         if w[4]:
                                             cursor.execute(
                                                 "select  name  from school_subject WHERE id = %s ",
@@ -4872,7 +5116,7 @@ def get_marks(request, student_id):
                 if 'Bearer' in request.headers.get('Authorization'):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
                     db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
-                    year_code=''
+                    year_code = ''
 
                     if db_name:
                         for e in db_name:
@@ -4893,7 +5137,7 @@ def get_marks(request, student_id):
                                     [branch_id[0][1]])
                                 year_id_code = cursor.fetchall()
                                 if year_id_code:
-                                    year_code=year_id_code[0][0]
+                                    year_code = year_id_code[0][0]
                                 cursor.execute(
                                     "SELECT id,name FROM academic_semester WHERE year_id=%s ",
                                     [branch_id[0][1]])
@@ -4910,7 +5154,7 @@ def get_marks(request, student_id):
                                 "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = (SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s ORDER BY student_distribution_line_id DESC LIMIT 1)",
                                 [student_id])
                             student_distribution_line = cursor.fetchall()
-                            student_grade=None
+                            student_grade = None
                             cursor.execute(
                                 "select academic_grade_id from school_class where id="
                                 "(select class_id from res_partner where id=(select partner_id from res_users where id="
@@ -4923,7 +5167,7 @@ def get_marks(request, student_id):
                                 "(select user_id from student_student where id=%s))",
                                 [student_id])
                             school_class_id = cursor.fetchall()
-                            if student_grade == None  or not student_grade:
+                            if student_grade == None or not student_grade:
                                 if student_distribution_line:
                                     cursor.execute(
                                         "SELECT id,name FROM public.academic_grade WHERE id = %s",
@@ -4940,14 +5184,14 @@ def get_marks(request, student_id):
                                     " SELECT id FROM public.school_class WHERE academic_grade_id=%s",
                                     [student_grade])
                                 school_class = cursor.fetchall()
-                            student_class=[]
+                            student_class = []
                             for res in school_class:
                                 student_class.append(res[0])
                             cursor.execute(
                                 " SELECT mark_exam_id,school_class_id FROM mark_exam_school_class_rel WHERE school_class_id in %s ",
                                 [tuple(student_class)])
                             mark_eva = cursor.fetchall()
-                            if mark_eva :
+                            if mark_eva:
                                 for semester in academic_semester:
                                     exam_det = []
                                     for mark in mark_eva:
@@ -4955,12 +5199,12 @@ def get_marks(request, student_id):
                                             " SELECT semester_id FROM mark_exam WHERE id=%s",
                                             [mark[0]])
                                         mark_exam = cursor.fetchall()
-                                        if semester[0]==mark_exam[0][0]:
+                                        if semester[0] == mark_exam[0][0]:
                                             cursor.execute(
                                                 " SELECT id,exam_name_arabic,exam_name_english,related_exam FROM exam_group WHERE mark_exam_id=%s ORDER BY id ASC ",
                                                 [mark[0]])
                                             exam_name = cursor.fetchall()
-                                            exam_det=[]
+                                            exam_det = []
                                             for exam in exam_name:
                                                 cursor.execute(
                                                     " SELECT subject_id,max FROM public.subject_mark_line WHERE mark_subject_line_id=%s",
@@ -4974,26 +5218,27 @@ def get_marks(request, student_id):
                                                     subject_name = cursor.fetchall()
                                                     cursor.execute(
                                                         " SELECT id,class_id FROM public.mark_mark WHERE subject_id= %s and class_id= %s and exams= %s and semester_id= %s and year_id= %s and branch_id= %s ",
-                                                        [subject_id[0],mark[1],exam[3],semester[0],branch_id[0][1],branch_id[0][0]])
+                                                        [subject_id[0], mark[1], exam[3], semester[0], branch_id[0][1],
+                                                         branch_id[0][0]])
                                                     mark_mark_x = cursor.fetchall()
-                                                    student_mark =None
+                                                    student_mark = None
                                                     if mark_mark_x:
                                                         cursor.execute(
                                                             "SELECT mark FROM public.mark_line WHERE mark_line_id=%s and   exams= %s and student_id=%s and published_students=%s ORDER BY mark_line_id DESC LIMIT 1  ",
-                                                            [mark_mark_x[0][0],exam[3],student_id,True])
+                                                            [mark_mark_x[0][0], exam[3], student_id, True])
                                                         student_mark = cursor.fetchall()
-                                                    subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark[0][0]) if student_mark else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
+                                                    subject_det.append(
+                                                        {"subject_name": subject_name[0][0] if subject_name else '',
+                                                         "student_mark": str(
+                                                             student_mark[0][0]) if student_mark else "0.0",
+                                                         "max_mark": str(subject_id[1]) if subject_id else "0.0"})
 
-                                                exam_det.append({"exam_name_ar": exam[1], "exam_name_en": exam[2],"subject_det":subject_det})
+                                                exam_det.append({"exam_name_ar": exam[1], "exam_name_en": exam[2],
+                                                                 "subject_det": subject_det})
                                     all_exam.append({"semester": semester[1], "exam": exam_det})
-                            result = {'all_exam': all_exam,"code":year_code}
+                            result = {'all_exam': all_exam, "code": year_code}
 
         return Response(result)
-
-
-
-
-
 
 
 @api_view(['POST'])
@@ -5023,9 +5268,11 @@ def logout(request):
                 #     for e in parent_id:
                 #         parent_id = e[0]
 
-                ManagerParent.objects.filter(parent_id=parent_id, db_name=school_name,is_active=True).order_by('-pk').update(mobile_token='')
+                ManagerParent.objects.filter(parent_id=parent_id, db_name=school_name, is_active=True).order_by(
+                    '-pk').update(mobile_token='')
                 # ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name, is_active=True).delete()
-                mobile_toke121n = ManagerParent.objects.filter(parent_id=parent_id, db_name=school_name,is_active=True).values_list('mobile_token')
+                mobile_toke121n = ManagerParent.objects.filter(parent_id=parent_id, db_name=school_name,
+                                                               is_active=True).values_list('mobile_token')
                 print(parent_id)
 
                 with connections[school_name].cursor() as cursor:
@@ -5106,7 +5353,7 @@ def get_time_table(request, student_id):
                                         "SELECT lecture_id,subject_id,  from_time, to_time ,sequence FROM public.add_day_subject WHERE class_id=%s and week_day=%s  and class_timetable_id IS NOT NULL ORDER by sequence ASC; ",
                                         [class_id[0][0], str(day_id)])
                                     add_day_subject = cursor.fetchall()
-                                    sequence=0
+                                    sequence = 0
                                     for subject in add_day_subject:
 
                                         subject_name = 'break'
@@ -5118,8 +5365,9 @@ def get_time_table(request, student_id):
                                             subject_name = s_name[0][0]
 
                                         if subject[1]:
-                                            sequence+=1
-                                        line = {'subject_id': subject[1], 'subject_name': subject_name,"sequence":str(sequence)
+                                            sequence += 1
+                                        line = {'subject_id': subject[1], 'subject_name': subject_name,
+                                                "sequence": str(sequence)
                                                 }
 
                                         from_time = '{0:02.0f}:{1:02.0f}'.format(*divmod(float(subject[2]) * 60, 60))
@@ -5431,8 +5679,6 @@ def post_spending(request):
                         result = {'result': 'ok'}
                     except:
                         result = {'result': ' does not exist canteen_spending'}
-
-                print(result)
 
                 return Response(result)
             result = {'result': 'Not Authorization'}
@@ -5863,19 +6109,22 @@ def post_sec_item(request):
                     student_info_users = cursor.fetchall()
                     cursor.execute(
                         "SELECT id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
-                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0], day_id])
+                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0],
+                         day_id])
                     student_food_day = cursor.fetchall()
                     student_food_day = list(set(student_food_day))
                     canteen_banned = list(set(canteen_banned))
                     cursor.execute(
                         "delete from allergies_food_day where student_id=%s and  year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
-                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0], day_id])
+                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0],
+                         day_id])
 
                     for allergies in student_food_day:
                         if allergies[0] not in canteen_banned:
                             cursor.execute(
                                 "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_id,day_id)VALUES (%s,%s,%s,%s,%s,%s);",
-                                [student_info_users[0][2], student_id, student_info_users[0][0], student_info_users[0][0],
+                                [student_info_users[0][2], student_id, student_info_users[0][0],
+                                 student_info_users[0][0],
                                  allergies, day_id])
                     for allergies in canteen_banned:
                         cursor.execute(
@@ -6079,7 +6328,8 @@ def get_food_s(request):
                     student_info_users = cursor.fetchall()
                     cursor.execute(
                         "SELECT id,product_id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
-                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0], day_id])
+                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0],
+                         day_id])
                     student_food_day = cursor.fetchall()
 
                     for allergies in student_food_day:
