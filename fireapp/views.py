@@ -295,6 +295,7 @@ def twoArgs(message_id,school_name):
                     if parent[0][0]:
                         if 'ar' in parent[0][0]:
                                 message_title = ' الواجبات الإلكترونية'
+                                message_body=message_body.replace(student_name, '')
                                 message_body = student_name + ' - ' + message_body
                     if registration_id:
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,
@@ -316,6 +317,7 @@ def twoArgs(message_id,school_name):
                     if parent[0][0]:
                         if 'ar' in parent[0][0]:
                             message_title = '  الامتحانات الالكترونية'
+                            message_body = message_body.replace(student_name, '')
                             message_body = student_name + ' - ' + message_body
                     if registration_id:
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,
@@ -336,6 +338,7 @@ def twoArgs(message_id,school_name):
                         registration_id = token_parent
                     if parent[0][0]:
                         if 'ar' in parent[0][0]:
+                                message_body = message_body.replace(student_name, '')
                                 message_title = ' الواجبات المنزلية '
                                 message_body = student_name + ' - ' + message_body
                     if registration_id:
@@ -358,11 +361,13 @@ def twoArgs(message_id,school_name):
                     if parent[0][0]:
                         if 'ar' in parent[0][0]:
                                 message_title = ' الأنشطة المدرسية'
+                                message_body = message_body.replace(student_name, '')
                                 message_body = student_name + ' - ' + message_body
                     if registration_id:
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,)
             elif message_title == 'Meeting':
                 message_title = 'Events'
+                message_body = message_body.replace(student_name, '')
                 message_body = student_name +" "+message_body
                 for parent_id in id:
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
