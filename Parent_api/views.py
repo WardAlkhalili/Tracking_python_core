@@ -1427,32 +1427,35 @@ def newAddStudent(school_name, model_name, name_f, student_id, name_f2):
 
 def newAddStudent_more_model(school_name, model_name, name_f, student_id, class_id, model_seen):
     with connections[school_name].cursor() as cursor:
-        if class_id:
-            sql = f"select  id  from {model_name} WHERE {name_f} = true and class_id ={class_id}  and state ='approved'"
-            cursor.execute(
-                sql,
-                [])
-            new_added = cursor.fetchall()
-            new = 0
-            for rec in new_added:
-                sql1 = f"select  id  from student_seen WHERE model_name = '{model_name}' and student_id ={student_id}  and rec_id ={rec[0]}"
-                cursor.execute(sql1, [])
+        try:
+            if class_id:
+                sql = f"select  id  from {model_name} WHERE {name_f} = true and class_id ={class_id}  and state ='approved'"
+                cursor.execute(
+                    sql,
+                    [])
                 new_added = cursor.fetchall()
-                new += len(new_added)
-            return new > 0
-        else:
-            sql = f"select  id  from {model_name} WHERE {name_f} ={student_id}  and new_added = {True}"
-            cursor.execute(
-                sql,
-                [])
-            new_added = cursor.fetchall()
-            new = 0
-            for rec in new_added:
-                sql1 = f"select  id  from student_seen WHERE model_name = '{model_seen}' and student_id ={student_id}  and rec_id ={rec[0]}"
-                cursor.execute(sql1, [])
+                new = 0
+                for rec in new_added:
+                    sql1 = f"select  id  from student_seen WHERE model_name = '{model_name}' and student_id ={student_id}  and rec_id ={rec[0]}"
+                    cursor.execute(sql1, [])
+                    new_added = cursor.fetchall()
+                    new += len(new_added)
+                return new > 0
+            else:
+                sql = f"select  id  from {model_name} WHERE {name_f} ={student_id}  and new_added = {True}"
+                cursor.execute(
+                    sql,
+                    [])
                 new_added = cursor.fetchall()
-                new += len(new_added)
-            return new > 0
+                new = 0
+                for rec in new_added:
+                    sql1 = f"select  id  from student_seen WHERE model_name = '{model_seen}' and student_id ={student_id}  and rec_id ={rec[0]}"
+                    cursor.execute(sql1, [])
+                    new_added = cursor.fetchall()
+                    new += len(new_added)
+                return new > 0
+        except:
+            print("-------------------------")
 
 
 def newaddStudentSer(school_name, student_id, user_id, name_f):
