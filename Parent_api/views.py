@@ -3553,7 +3553,7 @@ def get_badge(request, student_id):
                                 [student_id, b[5]])
                             student_seen = cursor.fetchall()
 
-                            new_add = len(student_seen) == 0 or new_add
+                            new_add = len(student_seen) == 0
                             if new_add:
                                 createStudentSeen(school_name, student_id, 'badge.badge', b[5])
                             cursor.execute(
@@ -3650,7 +3650,7 @@ def get_calendar(request, student_id):
                                 [student_id, f_data[0]])
                             student_seen = cursor.fetchall()
 
-                            new_add = len(student_seen) == 0 or new_add
+                            new_add = len(student_seen) == 0 
                             if new_add:
                                 createStudentSeen(school_name, student_id, 'calendar.event', f_data[0])
 
@@ -3720,7 +3720,7 @@ def get_clinic(request, student_id):
                                     "select  *  from student_seen WHERE student_id = %s AND model_name = 'school.clinic' And rec_id = %s   ORDER BY ID DESC",
                                     [student_id, v[0]])
                                 student_seen = cursor.fetchall()
-                                new_add = len(student_seen) == 0 or new_add
+                                new_add = len(student_seen) == 0
                                 cursor.execute(
                                     "UPDATE public.school_clinic SET new_added=%s   WHERE id=%s;",
                                     [False, v[0]])
@@ -4453,7 +4453,7 @@ def get_weekly_plan_lines(request, plan_id, student_id, week_name):
                                         "select  *  from student_seen WHERE student_id = %s AND model_name = 'week.plan.lines' And rec_id = %s   ORDER BY ID DESC",
                                         [student_id, line[16]])
                                     student_seen = cursor.fetchall()
-                                    new_add = len(student_seen) == 0 or new_add
+                                    new_add = len(student_seen) == 0
                                     if new_add:
                                         createStudentSeen(school_name, student_id, 'week.plan.lines', line[16])
                                     if line[0] and 'Saturday' not in days:
@@ -4600,7 +4600,7 @@ def get_data_worksheets(request, student_id):
                                             "select  *  from student_seen WHERE student_id = %s AND model_name = 'class.worksheet' And rec_id = %s   ORDER BY ID DESC",
                                             [student_id, w[0]])
                                         student_seen = cursor.fetchall()
-                                        new_add = len(student_seen) == 0 or new_add
+                                        new_add = len(student_seen) == 0
                                         if new_add:
                                             createStudentSeen(school_name, student_id, 'class.worksheet', w[0])
                                         if w[4]:
