@@ -175,21 +175,15 @@ def send_school_message(request):
 
 def twoArgs(message_id,school_name):
     with connections[school_name].cursor() as cursor:
-        # print("llllllllllllllllllllllll")
         cursor.execute(
             "select  message,title  from school_message where id = %s",
             [message_id])
         school_message = cursor.fetchall()
-        # print(school_message)
 
         cursor.execute(
             "select  student_student_id  from school_message_student_student where school_message_id = %s",
             [message_id])
         school_message_student_student = cursor.fetchall()
-        # print(school_message_student_student)
-
-
-
         r_id = []
         for id in school_message_student_student:
             r_id.append(id[0])
@@ -213,15 +207,7 @@ def twoArgs(message_id,school_name):
                 if rec[2]:
                     id.append(rec[2])
             id = list(dict.fromkeys(id))
-            # cursor.execute(
-            #     "select  user_id from school_parent WHERE id in %s ",
-            #     [tuple(id)])
-            # columns = (x.name for x in cursor.description)
-            # parent = cursor.fetchall()
-            # parent_id = []
-            # for rec in parent:
-            #     parent_id.append(rec[0])
-            #
+
             mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id), Q(db_name=school_name),
                                                         Q(is_active=True)).values_list('mobile_token').order_by('-pk')
 
@@ -238,7 +224,6 @@ def twoArgs(message_id,school_name):
             registration_id = token
 
             message_title = school_message[0][1] if school_message[0][1] else ''
-            # print(registration_id)
             message_body = school_message[0][0]if school_message[0][0] else ''
             if message_title == 'Badge':
                 message_title='Badge'
@@ -255,14 +240,19 @@ def twoArgs(message_id,school_name):
                     if parent[0][0]:
                         if 'ar' in parent[0][0]:
                                 message_title = 'أوسمة'
-                                message_body = student_name+' تم منح وسام للطالب '
+                                message_body =  ' تم منح وسام للطالب '   +student_name
+
                     if registration_id:
+
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
-                                                                   message_body=message_body,)
+                                                                   message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Badge","student_name":student_name})
             elif  message_title == 'Weekly Plan':
                 message_title='Weekly Plan'
                 message_body= student_name+ '  - A new weekly plan for the next week has been published'
+                cursor.execute("select  action_id,plan_name from message_student WHERE student_id = %s and school_message_id=%s",
+                               [std, message_id])
+                action = cursor.fetchall()
                 for parent_id in id :
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
@@ -279,7 +269,7 @@ def twoArgs(message_id,school_name):
                     if registration_id:
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
-                                                                   message_body=message_body,)
+                                                                   message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Weekly","student_name":student_name,"action":str(action[0][0]),"plan_name":str(action[0][1])} )
             elif message_title == 'Assignment':
                 message_title = 'Online Assignment '
                 message_body = student_name + ' - '+message_body
@@ -300,7 +290,7 @@ def twoArgs(message_id,school_name):
                     if registration_id:
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
-                                                                   message_body=message_body,)
+                                                                   message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Assignment","student_name":student_name})
             elif message_title == 'Exam':
                 message_title = 'Online Exam '
                 message_body = student_name + ' - ' + message_body
@@ -317,18 +307,22 @@ def twoArgs(message_id,school_name):
                     if parent[0][0]:
                         if 'ar' in parent[0][0]:
                             message_title = '  الامتحانات الالكترونية'
-                            message_body = message_body.replace(student_name, '')
+                            message_body = message_body.replace(student_name+' - ', '')
                             message_body = student_name + ' - ' + message_body
                     if registration_id:
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
-                                                                   message_body=message_body, )
+                                                                   message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Exam","student_name":student_name} )
             elif message_title == 'Homework':
                 message_title = ' Homework'
                 message_body = student_name + ' - ' + message_body
+                cursor.execute("select  action_id from message_student WHERE student_id = %s and school_message_id=%s",
+                               [std, message_id])
+                action = cursor.fetchall()
                 for parent_id in id:
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
+
                     mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
                                                                        Q(is_active=True)).values_list(
                         'mobile_token').order_by('-pk')
@@ -338,19 +332,23 @@ def twoArgs(message_id,school_name):
                         registration_id = token_parent
                     if parent[0][0]:
                         if 'ar' in parent[0][0]:
-                                message_body = message_body.replace(student_name, '')
+                                message_body = message_body.replace(student_name+' - ', '')
                                 message_title = ' الواجبات المنزلية '
                                 message_body = student_name + ' - ' + message_body
                     if registration_id:
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
-                                                                   message_body=message_body, )
+                                                                   message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Homework","student_name":student_name,"action":str(action[0][0])}  )
             elif message_title == 'Event':
                 message_title = 'School Event'
                 message_body = student_name + ' - ' + message_body
+                cursor.execute("select  action_id from message_student WHERE student_id = %s and school_message_id=%s",
+                               [std, message_id])
+                action = cursor.fetchall()
                 for parent_id in id:
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
+
                     mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
                                                                        Q(is_active=True)).values_list(
                         'mobile_token').order_by('-pk')
@@ -361,13 +359,15 @@ def twoArgs(message_id,school_name):
                     if parent[0][0]:
                         if 'ar' in parent[0][0]:
                                 message_title = ' الأنشطة المدرسية'
-                                message_body = message_body.replace(student_name, '')
+                                message_body = message_body.replace(student_name+' - ', '')
                                 message_body = student_name + ' - ' + message_body
+
                     if registration_id:
-                        result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,)
+
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Event","student_name":student_name,"action":str(action[0][0])})
             elif message_title == 'Meeting':
                 message_title = 'Events'
-                message_body = message_body.replace(student_name, '')
+                message_body = message_body.replace(student_name+' - ', '')
                 message_body = student_name +" "+message_body
                 for parent_id in id:
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
@@ -384,9 +384,9 @@ def twoArgs(message_id,school_name):
                             message_title = 'المناسبات'
                             message_body = student_name + " " + message_body
                     if registration_id:
-                        result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,)
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Meeting","student_name":student_name})
             elif message_title == 'Absence':
-                message_title = 'Trackware- Absence'
+                message_title = 'Absence Request'
                 message_body = ' Absence has been '+'Approved'if 'Approval' in message_body else 'Rejected for ' +student_name
                 for parent_id in id:
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
@@ -400,10 +400,10 @@ def twoArgs(message_id,school_name):
                         registration_id = token_parent
                     if parent[0][0]:
                         if 'ar' in parent[0][0]:
-                                message_title = 'Trackware- Absence'
+                                message_title = 'Absence Request'
                                 message_body = ' Absence has been ' + 'Approved' if 'Approval' in message_body else 'Rejected for ' + student_name
                     if registration_id:
-                        result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,)
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Absence","student_name":student_name})
             elif message_title == 'Mark' :
                 for parent_id in id:
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
@@ -413,12 +413,14 @@ def twoArgs(message_id,school_name):
                         'mobile_token').order_by('-pk')
                     token_parent = []
                     message_title = 'Marks'
+                    message_body += student_name
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if parent[0][0]:
                         if 'ar' in parent[0][0]:
-                                message_title = 'Marks'
+                                message_title = 'العلامات'
+
                                 if "First Exam" in message_body:
                                     message_body = message_body.replace("First Exam", "التقويم الأول")
                                 elif "Second Exam" in message_body:
@@ -433,7 +435,7 @@ def twoArgs(message_id,school_name):
                             message_title = 'Marks'
 
                     if registration_id:
-                        result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,)
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Mark","student_name":student_name})
             elif message_title == 'certification':
                 message_title = 'الشهادة المدرسية'
                 for parent_id in id:
@@ -491,12 +493,33 @@ def twoArgs(message_id,school_name):
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3',
                                                                    message_title=message_title,
-                                                                   message_body=message_body,
+                                                                   message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Absence","student_name":student_name}
                                                                    )
+            if message_title == 'clinic':
+                message_title='Clinic'
+                message_body += student_name
+                for parent_id in id :
+                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                    parent = cursor.fetchall()
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                Q(is_active=True)).values_list('mobile_token').order_by('-pk')
+                    token_parent=[]
+                    for tok in mobile_token_parent:
+                        token_parent.append(tok[0])
+                        registration_id = token_parent
+                    if parent[0][0]:
+                        if 'ar' in parent[0][0]:
+                                message_title = 'العيادة'
+
+                    if registration_id:
+
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,
+                                                                   sound='new_beeb.mp3', message_title=message_title,
+                                                                   message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Badge","student_name":student_name})
             else:
                 result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
                                                               registration_ids=registration_id,
-                                                              data_message={},sound='new_beeb.mp3')
+                                                              data_message={},sound='new_beeb.mp3',)
 
 
 
