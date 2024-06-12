@@ -1522,9 +1522,10 @@ def newaddStudentCalendar(school_name, student_id, user_id):
                 [user_id])
             partner_id_q = cursor.fetchall()
             cursor.execute(
-                " select calendar_event_id from calendar_event_res_partner_rel where res_partner_id = %s ORDER BY calendar_event_id DESC",
+                " select calendar_event_id from calendar_event_res_partner_rel where res_partner_id = %s ",
                 [partner_id_q[0][0]])
             calendar_event_id = cursor.fetchall()
+            print(calendar_event_id)
             new = 0
             for rec in calendar_event_id:
                 sql1 = f"select  id  from student_seen WHERE model_name = calendar.event and student_id ={student_id}  and rec_id ={rec[0]}"
@@ -4080,11 +4081,11 @@ def get_exam(request, student_id):
                                     # print("lllllllll", survey)
                                     cursor.execute(
                                         "select  *  from student_seen WHERE student_id = %s AND model_name = 'survey.survey' And rec_id = %s   ORDER BY ID DESC",
-                                        [student_id, survey[0]])
+                                        [student_id, survey[0][0]])
                                     student_seen = cursor.fetchall()
                                     new_add = len(student_seen) == 0 or new_add
                                     if new_add:
-                                        createStudentSeen(school_name, student_id, 'survey.survey', survey[0])
+                                        createStudentSeen(school_name, student_id, 'survey.survey', survey[0][0])
                                     cursor.execute(
                                         "select  name  from school_subject WHERE id = %s ",
                                         [survey[0][5]])
