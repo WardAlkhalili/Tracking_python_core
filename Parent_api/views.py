@@ -1455,7 +1455,7 @@ def newAddStudent_more_model(school_name, model_name, name_f, student_id, class_
                     new += len(new_added)
                 return new > 0
         except:
-            print("-------------------------")
+            return False
 
 
 def newaddStudentSer(school_name, student_id, user_id, name_f):
@@ -1528,9 +1528,7 @@ def newaddStudentCalendar(school_name, student_id, user_id):
                 " select calendar_event_id from calendar_event_res_partner_rel where res_partner_id = %s ",
                 [partner_id_q[0][0]])
             calendar_event_id = cursor.fetchall()
-
             new = 0
-
             for rec in calendar_event_id:
                 sql1 = f"select  id  from student_seen WHERE model_name = 'calendar.event' and student_id ={student_id}  and rec_id ={rec[0]}"
                 cursor.execute(sql1, [])
