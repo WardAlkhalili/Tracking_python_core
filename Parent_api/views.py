@@ -4085,7 +4085,7 @@ def get_exam(request, student_id):
                                         "select  *  from student_seen WHERE student_id = %s AND model_name = 'survey.survey' And rec_id = %s   ORDER BY ID DESC",
                                         [student_id, survey[0][0]])
                                     student_seen = cursor.fetchall()
-                                    new_add = len(student_seen) == 0 or new_add
+                                    new_add = len(student_seen) == 0
                                     if new_add:
                                         createStudentSeen(school_name, student_id, 'survey.survey', survey[0][0])
                                     cursor.execute(
@@ -4283,7 +4283,7 @@ def get_student_assignment(request, student_id):
                                         "select  *  from student_seen WHERE student_id = %s AND model_name = 'survey.survey' And rec_id = %s   ORDER BY ID DESC",
                                         [student_id, survey[0][0]])
                                     student_seen = cursor.fetchall()
-                                    new_add = len(student_seen) == 0 or new_add
+                                    new_add = len(student_seen) == 0
                                     if new_add:
                                         createStudentSeen(school_name, student_id, 'survey.survey', survey[0][0])
                                     cursor.execute(
