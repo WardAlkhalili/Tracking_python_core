@@ -1527,13 +1527,13 @@ def newaddStudentCalendar(school_name, student_id, user_id):
             calendar_event_id = cursor.fetchall()
 
             new = 0
-            # if calendar_event_id[0]:
-            #     for rec in calendar_event_id:
-            #         print("--------------------------------------------------1---------------------------------------------------------")
-            #         sql1 = f"select  id  from student_seen WHERE model_name = calendar.event and student_id ={student_id}  and rec_id ={rec[0]}"
-            #         cursor.execute(sql1, [])
-            #         new_added = cursor.fetchall()
-            #         new += len(new_added)
+
+            for rec in calendar_event_id:
+                sql1 = f"select  id  from student_seen WHERE model_name = calendar.event and student_id ={student_id}  and rec_id ={rec[0]}"
+                print(sql1)
+                cursor.execute(sql1, [])
+                new_added = cursor.fetchall()
+                new += len(new_added)
             return new > 0
         return False
 
