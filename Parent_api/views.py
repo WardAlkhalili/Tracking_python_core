@@ -1533,7 +1533,6 @@ def newaddStudentCalendar(school_name, student_id, user_id):
 
             for rec in calendar_event_id:
                 sql1 = f"select  id  from student_seen WHERE model_name = 'calendar.event' and student_id ={student_id}  and rec_id ={rec[0]}"
-                print(sql1)
                 cursor.execute(sql1, [])
                 new_added = cursor.fetchall()
                 new += len(new_added)
