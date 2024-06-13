@@ -235,6 +235,7 @@ def twoArgs(message_id,school_name):
                     mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
                                                                 Q(is_active=True)).values_list('mobile_token').order_by('-pk')
                     token_parent=[]
+                    print(token)
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
                         registration_id = token_parent
@@ -242,9 +243,9 @@ def twoArgs(message_id,school_name):
                         if 'ar' in parent[0][0]:
                                 message_title = 'أوسمة'
                                 message_body =  ' تم منح وسام للطالب '   +student_name
-
+                    print(registration_id)
                     if registration_id:
-
+                        registration_id = list(dict.fromkeys(registration_id))
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
                                                                    message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Badge","student_name":student_name})
