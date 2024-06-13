@@ -254,144 +254,144 @@ def twoArgs(message_id,school_name):
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
                                                                    message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Badge","student_name":student_name})
-            # elif  message_title == 'Weekly Plan':
-            #     message_title='Weekly Plan'
-            #     message_body= student_name+ '  - A new weekly plan for the next week has been published'
-            #     cursor.execute("select  action_id,plan_name from message_student WHERE student_id = %s and school_message_id=%s",
-            #                    [std, message_id])
-            #     action = cursor.fetchall()
-            #     for parent_id in id :
-            #         cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-            #         parent = cursor.fetchall()
-            #         mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-            #                                                     Q(is_active=True)).values_list('mobile_token').order_by('-pk')
-            #         token_parent=[]
-            #         for tok in mobile_token_parent:
-            #             token_parent.append(tok[0])
-            #             registration_id = token_parent
-            #         if parent[0][0]:
-            #             if 'ar' in parent[0][0]:
-            #                     message_title = 'الخطة الأسبوعية'
-            #                     message_body ='  - تم نشر خطة أسبوعية جديدة للأسبوع القادم '+student_name
-            #         if registration_id:
-            #             result = push_service.notify_multiple_devices(registration_ids=registration_id,
-            #                                                        sound='new_beeb.mp3', message_title=message_title,
-            #                                                        message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Weekly","student_name":student_name,"action":str(action[0][0]),"plan_name":str(action[0][1])} )
-            # elif message_title == 'Assignment':
-            #     message_title = 'Online Assignment '
-            #     message_body = student_name + ' - '+message_body
-            #     for parent_id in id :
-            #         cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-            #         parent = cursor.fetchall()
-            #         mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-            #                                                     Q(is_active=True)).values_list('mobile_token').order_by('-pk')
-            #         token_parent=[]
-            #         for tok in mobile_token_parent:
-            #             token_parent.append(tok[0])
-            #             registration_id = token_parent
-            #         if parent[0][0]:
-            #             if 'ar' in parent[0][0]:
-            #                     message_title = ' الواجبات الإلكترونية'
-            #                     message_body=message_body.replace(student_name, '')
-            #                     message_body = student_name + ' - ' + message_body
-            #         if registration_id:
-            #             result = push_service.notify_multiple_devices(registration_ids=registration_id,
-            #                                                        sound='new_beeb.mp3', message_title=message_title,
-            #                                                        message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Assignment","student_name":student_name})
-            # elif message_title == 'Exam':
-            #     message_title = 'Online Exam '
-            #     message_body = student_name + ' - ' + message_body
-            #     for parent_id in id:
-            #         cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-            #         parent = cursor.fetchall()
-            #         mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-            #                                                            Q(is_active=True)).values_list(
-            #             'mobile_token').order_by('-pk')
-            #         token_parent = []
-            #         for tok in mobile_token_parent:
-            #             token_parent.append(tok[0])
-            #             registration_id = token_parent
-            #         if parent[0][0]:
-            #             if 'ar' in parent[0][0]:
-            #                 message_title = '  الامتحانات الالكترونية'
-            #                 message_body = message_body.replace(student_name+' - ', '')
-            #                 message_body = student_name + ' - ' + message_body
-            #         if registration_id:
-            #             result = push_service.notify_multiple_devices(registration_ids=registration_id,
-            #                                                        sound='new_beeb.mp3', message_title=message_title,
-            #                                                        message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Exam","student_name":student_name} )
-            # elif message_title == 'Homework':
-            #     message_title = ' Homework'
-            #     message_body = student_name + ' - ' + message_body
-            #     cursor.execute("select  action_id from message_student WHERE student_id = %s and school_message_id=%s",
-            #                    [std, message_id])
-            #     action = cursor.fetchall()
-            #     for parent_id in id:
-            #         cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-            #         parent = cursor.fetchall()
-            #
-            #         mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-            #                                                            Q(is_active=True)).values_list(
-            #             'mobile_token').order_by('-pk')
-            #         token_parent = []
-            #         for tok in mobile_token_parent:
-            #             token_parent.append(tok[0])
-            #             registration_id = token_parent
-            #         if parent[0][0]:
-            #             if 'ar' in parent[0][0]:
-            #                     message_body = message_body.replace(student_name+' - ', '')
-            #                     message_title = ' الواجبات المنزلية '
-            #                     message_body = student_name + ' - ' + message_body
-            #         if registration_id:
-            #             result = push_service.notify_multiple_devices(registration_ids=registration_id,
-            #                                                        sound='new_beeb.mp3', message_title=message_title,
-            #                                                        message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Homework","student_name":student_name,"action":str(action[0][0])}  )
-            # elif message_title == 'Event':
-            #     message_title = 'School Event'
-            #     message_body = student_name + ' - ' + message_body
-            #     cursor.execute("select  action_id from message_student WHERE student_id = %s and school_message_id=%s",
-            #                    [std, message_id])
-            #     action = cursor.fetchall()
-            #     for parent_id in id:
-            #         cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-            #         parent = cursor.fetchall()
-            #
-            #         mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-            #                                                            Q(is_active=True)).values_list(
-            #             'mobile_token').order_by('-pk')
-            #         token_parent = []
-            #         for tok in mobile_token_parent:
-            #             token_parent.append(tok[0])
-            #             registration_id = token_parent
-            #         if parent[0][0]:
-            #             if 'ar' in parent[0][0]:
-            #                     message_title = ' الأنشطة المدرسية'
-            #                     message_body = message_body.replace(student_name+' - ', '')
-            #                     message_body = student_name + ' - ' + message_body
-            #
-            #         if registration_id:
-            #
-            #             result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Event","student_name":student_name,"action":str(action[0][0])})
-            # elif message_title == 'Meeting':
-            #     message_title = 'Events'
-            #     message_body = message_body.replace(student_name+' - ', '')
-            #     message_body = student_name +" "+message_body
-            #     for parent_id in id:
-            #         cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-            #         parent = cursor.fetchall()
-            #         mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-            #                                                            Q(is_active=True)).values_list(
-            #             'mobile_token').order_by('-pk')
-            #         token_parent = []
-            #         for tok in mobile_token_parent:
-            #             token_parent.append(tok[0])
-            #             registration_id = token_parent
-            #         if parent[0][0]:
-            #             if 'ar' in parent[0][0]:
-            #                 message_title = 'المناسبات'
-            #                 message_body = student_name + " " + message_body
-            #         if registration_id:
-            #             result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Meeting","student_name":student_name})
+            elif  message_title == 'Weekly Plan':
+                message_title='Weekly Plan'
+                message_body= student_name+ '  - A new weekly plan for the next week has been published'
+                cursor.execute("select  action_id,plan_name from message_student WHERE student_id = %s and school_message_id=%s",
+                               [std, message_id])
+                action = cursor.fetchall()
+                for parent_id in id :
+                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                    parent = cursor.fetchall()
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                Q(is_active=True)).values_list('mobile_token').order_by('-pk')
+                    token_parent=[]
+                    for tok in mobile_token_parent:
+                        token_parent.append(tok[0])
+                        registration_id = token_parent
+                    if parent[0][0]:
+                        if 'ar' in parent[0][0]:
+                                message_title = 'الخطة الأسبوعية'
+                                message_body ='  - تم نشر خطة أسبوعية جديدة للأسبوع القادم '+student_name
+                    if registration_id:
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,
+                                                                   sound='new_beeb.mp3', message_title=message_title,
+                                                                   message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Weekly","student_name":student_name,"action":str(action[0][0]),"plan_name":str(action[0][1])} )
+            elif message_title == 'Assignment':
+                message_title = 'Online Assignment '
+                message_body = student_name + ' - '+message_body
+                for parent_id in id :
+                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                    parent = cursor.fetchall()
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                Q(is_active=True)).values_list('mobile_token').order_by('-pk')
+                    token_parent=[]
+                    for tok in mobile_token_parent:
+                        token_parent.append(tok[0])
+                        registration_id = token_parent
+                    if parent[0][0]:
+                        if 'ar' in parent[0][0]:
+                                message_title = ' الواجبات الإلكترونية'
+                                message_body=message_body.replace(student_name, '')
+                                message_body = student_name + ' - ' + message_body
+                    if registration_id:
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,
+                                                                   sound='new_beeb.mp3', message_title=message_title,
+                                                                   message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Assignment","student_name":student_name})
+            elif message_title == 'Exam':
+                message_title = 'Online Exam '
+                message_body = student_name + ' - ' + message_body
+                for parent_id in id:
+                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                    parent = cursor.fetchall()
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                       Q(is_active=True)).values_list(
+                        'mobile_token').order_by('-pk')
+                    token_parent = []
+                    for tok in mobile_token_parent:
+                        token_parent.append(tok[0])
+                        registration_id = token_parent
+                    if parent[0][0]:
+                        if 'ar' in parent[0][0]:
+                            message_title = '  الامتحانات الالكترونية'
+                            message_body = message_body.replace(student_name+' - ', '')
+                            message_body = student_name + ' - ' + message_body
+                    if registration_id:
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,
+                                                                   sound='new_beeb.mp3', message_title=message_title,
+                                                                   message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Exam","student_name":student_name} )
+            elif message_title == 'Homework':
+                message_title = ' Homework'
+                message_body = student_name + ' - ' + message_body
+                cursor.execute("select  action_id from message_student WHERE student_id = %s and school_message_id=%s",
+                               [std, message_id])
+                action = cursor.fetchall()
+                for parent_id in id:
+                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                    parent = cursor.fetchall()
+
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                       Q(is_active=True)).values_list(
+                        'mobile_token').order_by('-pk')
+                    token_parent = []
+                    for tok in mobile_token_parent:
+                        token_parent.append(tok[0])
+                        registration_id = token_parent
+                    if parent[0][0]:
+                        if 'ar' in parent[0][0]:
+                                message_body = message_body.replace(student_name+' - ', '')
+                                message_title = ' الواجبات المنزلية '
+                                message_body = student_name + ' - ' + message_body
+                    if registration_id:
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,
+                                                                   sound='new_beeb.mp3', message_title=message_title,
+                                                                   message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Homework","student_name":student_name,"action":str(action[0][0])}  )
+            elif message_title == 'Event':
+                message_title = 'School Event'
+                message_body = student_name + ' - ' + message_body
+                cursor.execute("select  action_id from message_student WHERE student_id = %s and school_message_id=%s",
+                               [std, message_id])
+                action = cursor.fetchall()
+                for parent_id in id:
+                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                    parent = cursor.fetchall()
+
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                       Q(is_active=True)).values_list(
+                        'mobile_token').order_by('-pk')
+                    token_parent = []
+                    for tok in mobile_token_parent:
+                        token_parent.append(tok[0])
+                        registration_id = token_parent
+                    if parent[0][0]:
+                        if 'ar' in parent[0][0]:
+                                message_title = ' الأنشطة المدرسية'
+                                message_body = message_body.replace(student_name+' - ', '')
+                                message_body = student_name + ' - ' + message_body
+
+                    if registration_id:
+
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Event","student_name":student_name,"action":str(action[0][0])})
+            elif message_title == 'Meeting':
+                message_title = 'Events'
+                message_body = message_body.replace(student_name+' - ', '')
+                message_body = student_name +" "+message_body
+                for parent_id in id:
+                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                    parent = cursor.fetchall()
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                       Q(is_active=True)).values_list(
+                        'mobile_token').order_by('-pk')
+                    token_parent = []
+                    for tok in mobile_token_parent:
+                        token_parent.append(tok[0])
+                        registration_id = token_parent
+                    if parent[0][0]:
+                        if 'ar' in parent[0][0]:
+                            message_title = 'المناسبات'
+                            message_body = student_name + " " + message_body
+                    if registration_id:
+                        result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Meeting","student_name":student_name})
             # elif message_title == 'Absence':
             #     message_title = 'Absence Request'
             #     message_body = ' Absence has been '+'Approved'if 'Approval' in message_body else 'Rejected for ' +student_name
