@@ -207,6 +207,7 @@ def twoArgs(message_id,school_name):
                 if rec[2]:
                     id.append(rec[2])
             id = list(dict.fromkeys(id))
+            print(id)
 
             mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id), Q(db_name=school_name),
                                                         Q(is_active=True)).values_list('mobile_token').order_by('-pk')
