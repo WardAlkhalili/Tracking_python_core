@@ -270,7 +270,7 @@ def twoArgs(message_id,school_name):
                     if parent[0][0]:
                         if 'en' not in parent[0][0]:
                                 message_title = 'الخطة الأسبوعية'
-                                message_body ='  - تم نشر خطة أسبوعية جديدة للأسبوع القادم '+student_name
+                                message_body = f'  - تم نشر خطة أسبوعية جديدة للأسبوع القادم {student_name} '
                     if registration_id:
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
@@ -290,7 +290,8 @@ def twoArgs(message_id,school_name):
                     if parent[0][0]:
                         if 'en' not in parent[0][0]:
                                 message_title = ' الواجبات الإلكترونية'
-                                message_body=message_body.replace(student_name, '')
+                                message_body = message_body.replace(student_name + ' - ', '')
+                                # message_body=message_body.replace(student_name, '')
                                 message_body = student_name + ' - ' + message_body
                     if registration_id:
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,
@@ -338,6 +339,7 @@ def twoArgs(message_id,school_name):
                     if parent[0][0]:
                         if 'en' not in parent[0][0]:
                                 message_body = message_body.replace(student_name+' - ', '')
+
                                 message_title = ' الواجبات المنزلية '
                                 message_body = student_name + ' - ' + message_body
                     if registration_id:
@@ -387,7 +389,7 @@ def twoArgs(message_id,school_name):
                     if parent[0][0]:
                         if 'en' not in parent[0][0]:
                             message_title = 'المناسبات'
-                            message_body = student_name + " " + message_body
+                            message_body = student_name + " - " + message_body
                     if registration_id:
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Meeting","student_name":student_name})
             elif message_title == 'Absence':
@@ -502,7 +504,7 @@ def twoArgs(message_id,school_name):
                                                                    )
             elif message_title == 'clinic':
                 message_title='Clinic'
-                message_body += student_name
+                message_body += ' - '+student_name
                 for parent_id in id :
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
