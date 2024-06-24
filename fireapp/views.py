@@ -244,7 +244,7 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if parent[0][0]:
-                        if 'ar' in parent[0][0]:
+                        if 'en' not in parent[0][0]:
                                 message_title = 'أوسمة'
                                 message_body =  ' تم منح وسام للطالب '   +student_name
                     if registration_id:
@@ -268,7 +268,7 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if parent[0][0]:
-                        if 'ar' in parent[0][0]:
+                        if 'en' not in parent[0][0]:
                                 message_title = 'الخطة الأسبوعية'
                                 message_body ='  - تم نشر خطة أسبوعية جديدة للأسبوع القادم '+student_name
                     if registration_id:
@@ -288,7 +288,7 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if parent[0][0]:
-                        if 'ar' in parent[0][0]:
+                        if 'en' not in parent[0][0]:
                                 message_title = ' الواجبات الإلكترونية'
                                 message_body=message_body.replace(student_name, '')
                                 message_body = student_name + ' - ' + message_body
@@ -310,7 +310,7 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if parent[0][0]:
-                        if 'ar' in parent[0][0]:
+                        if 'en' not in parent[0][0]:
                             message_title = '  الامتحانات الالكترونية'
                             message_body = message_body.replace(student_name+' - ', '')
                             message_body = student_name + ' - ' + message_body
@@ -336,7 +336,7 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if parent[0][0]:
-                        if 'ar' in parent[0][0]:
+                        if 'en' not in parent[0][0]:
                                 message_body = message_body.replace(student_name+' - ', '')
                                 message_title = ' الواجبات المنزلية '
                                 message_body = student_name + ' - ' + message_body
@@ -362,7 +362,7 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if parent[0][0]:
-                        if 'ar' in parent[0][0]:
+                        if 'en' not in parent[0][0]:
                                 message_title = ' الأنشطة المدرسية'
                                 message_body = message_body.replace(student_name+' - ', '')
                                 message_body = student_name + ' - ' + message_body
@@ -385,7 +385,7 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if parent[0][0]:
-                        if 'ar' in parent[0][0]:
+                        if 'en' not in parent[0][0]:
                             message_title = 'المناسبات'
                             message_body = student_name + " " + message_body
                     if registration_id:
@@ -404,7 +404,7 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if parent[0][0]:
-                        if 'ar' in parent[0][0]:
+                        if 'en' not in parent[0][0]:
                                 message_title = 'Absence Request'
                                 message_body = ' Absence has been ' + 'Approved' if 'Approval' in message_body else 'Rejected for ' + student_name
                     if registration_id:
@@ -423,7 +423,7 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if parent[0][0]:
-                        if 'ar' in parent[0][0]:
+                        if 'en' not in parent[0][0]:
                                 message_title = 'العلامات'
 
                                 if "First Exam" in message_body:
@@ -454,7 +454,7 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if parent[0][0]:
-                        if 'ar' in parent[0][0]:
+                        if 'en' not in parent[0][0]:
                                 message_title = 'الشهادة المدرسية'
                     if registration_id:
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,
@@ -482,7 +482,7 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if parent[0][0]:
-                        if 'ar' in parent[0][0]:
+                        if 'en' not in parent[0][0]:
                                 message_title = 'إشعار غياب'
                                 if 'is late on' in message_body:
 
@@ -513,7 +513,7 @@ def twoArgs(message_id,school_name):
                         token_parent.append(tok[0])
                         registration_id = token_parent
                     if parent[0][0]:
-                        if 'ar' in parent[0][0]:
+                        if 'en' not in parent[0][0]:
                                 message_title = 'العيادة'
 
                     if registration_id:
