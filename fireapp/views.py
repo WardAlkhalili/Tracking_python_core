@@ -231,6 +231,7 @@ def twoArgs(message_id,school_name):
 
             message_title = school_message[0][1] if school_message[0][1] else ''
             message_body = school_message[0][0]if school_message[0][0] else ''
+            
             if message_title == 'Badge':
                 message_title='Badge'
                 message_body='A badge has been awarded to '+ student_name
@@ -270,7 +271,7 @@ def twoArgs(message_id,school_name):
                     if parent[0][0]:
                         if 'en' not in parent[0][0]:
                                 message_title = 'الخطة الأسبوعية'
-                                message_body = f'  - تم نشر خطة أسبوعية جديدة للأسبوع القادم {student_name} '
+                                message_body = f'{student_name}  - تم نشر خطة أسبوعية جديدة للأسبوع القادم   '
                     if registration_id:
                         result = push_service.notify_multiple_devices(registration_ids=registration_id,
                                                                    sound='new_beeb.mp3', message_title=message_title,
