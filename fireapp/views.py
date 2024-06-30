@@ -578,8 +578,10 @@ def send_dri(request):
         student_id = request.data.get('student_id')
         round_id = request.data.get('round_id')
         status=''
+
         try:
             status = request.data.get('status')
+
             if mobile_token:
                 # push_service = FCMNotification(
                 #     api_key="AAAAXj2DTK0:APA91bFSxi4txQ8WffLYLBrxFVd3JMCSP5n9WfZafPnLpxC2i9cXHi2SofNoNSBgFWt2tgqjEstSeVkre-1FklyKn4NIy0AuYSwafkQt-RhXcVCth3RJdt8GUbTw9aZI70XFmYBshjuy")
@@ -587,13 +589,16 @@ def send_dri(request):
                     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
                 # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
                 registration_id = mobile_token
+                # registration_id = "dXBExPMQSpOQuPgw1alou8:APA91bEB8GZU9sTzQZlcZQbGr2Ssp_ZD66zSWzwYpvGJvBZCkpLPejq24GnNVtBeeO8KPQ1kisjrVrOgSuPI8jjNa45AlhV20lxLOq0cbVnnfXhAoi3f1S8KxBOiR-ErLicdiGz4g1yH"
+
 
                 message_title = "Picked up by Parents"
                 message_body = "The student " + student_name + " has been picked up by his parents, so please don't be waiting."
-                # if status:
-                #     status=''
-                # else:
-                status="absent"
+                if status:
+                    print("------------------------------------------------------11111", status)
+                    status=status
+                else:
+                    status="absent"
                 result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
                                                            message_body=message_body, message_icon="",
                                                            sound='new_beeb.mp3',
@@ -616,7 +621,7 @@ def send_dri(request):
                 #     api_key="AAAAXj2DTK0:APA91bFSxi4txQ8WffLYLBrxFVd3JMCSP5n9WfZafPnLpxC2i9cXHi2SofNoNSBgFWt2tgqjEstSeVkre-1FklyKn4NIy0AuYSwafkQt-RhXcVCth3RJdt8GUbTw9aZI70XFmYBshjuy")
                 push_service = FCMNotification(
                     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
+                # registration_id = "dXBExPMQSpOQuPgw1alou8:APA91bEB8GZU9sTzQZlcZQbGr2Ssp_ZD66zSWzwYpvGJvBZCkpLPejq24GnNVtBeeO8KPQ1kisjrVrOgSuPI8jjNa45AlhV20lxLOq0cbVnnfXhAoi3f1S8KxBOiR-ErLicdiGz4g1yH"
                 registration_id = mobile_token
 
                 message_title = "Picked up by Parents"
