@@ -596,7 +596,7 @@ def send_dri(request):
                 message_body = "The student " + student_name + " has been picked up by his parents, so please don't be waiting."
                 if status:
                     print("------------------------------------------------------11111", status)
-                    status=status
+                    status='in'
                 else:
                     status="absent"
                 result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
