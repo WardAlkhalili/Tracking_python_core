@@ -28,7 +28,8 @@ def driver_login(request):
             from django.utils.crypto import get_random_string
             unique_id = get_random_string(length=32)
             print("------------------------mobile_token-----------------------",mobile_token)
-            if mobile_token or mobile_token !='null':
+            if mobile_token or str(mobile_token) !='null':
+                print("------------------------1mobile_token1-----------------------",  str(mobile_token) !='null')
                 manager = Manager(token=unique_id, db_name=school_name, driver_id=data_id_bus[0][0],
                                   mobile_token=mobile_token)
                 manager.save()
