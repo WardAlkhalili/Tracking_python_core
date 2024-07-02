@@ -27,13 +27,21 @@ def driver_login(request):
             token_auth, created = Token.objects.get_or_create(user=user)
             from django.utils.crypto import get_random_string
             unique_id = get_random_string(length=32)
-            manager = Manager(token=unique_id, db_name=school_name, driver_id=data_id_bus[0][0],
-                              mobile_token=mobile_token)
-            manager.save()
-            cursor.execute(
-                "UPDATE public.res_partner SET signup_token=%s , token=%s  WHERE id=%s;",
-                [mobile_token,mobile_token, data_id_bus[0][0]])
-
+            print("------------------------mobile_token-----------------------",mobile_token)
+            if mobile_token:
+                manager = Manager(token=unique_id, db_name=school_name, driver_id=data_id_bus[0][0],
+                                  mobile_token=mobile_token)
+                manager.save()
+                cursor.execute(
+                    "UPDATE public.res_partner SET signup_token=%s , token=%s  WHERE id=%s;",
+                    [mobile_token,mobile_token, data_id_bus[0][0]])
+            else:
+                print("-------------------------1----------------------")
+                cursor.execute("select  token  from res_partner WHERE id = %s", [data_id_bus[0][0]])
+                token_driv = cursor.fetchall()
+                manager = Manager(token=unique_id, db_name=school_name, driver_id=data_id_bus[0][0],
+                                  mobile_token=token_driv[0][0])
+                manager.save()
             # *------------------------------------------------------------------------------------------------*
             # Details for login setting
             cursor.execute(
