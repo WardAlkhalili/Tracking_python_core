@@ -14,7 +14,7 @@ import calendar
 import json
 from threading import Timer
 import  re
-from fireapp.models import ManagerTracker
+
 
 # Remember the code we copied from Firebase.
 # This can be copied by clicking on the settings icon > project settings, then scroll down in your firebase dashboard
