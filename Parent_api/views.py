@@ -1652,10 +1652,7 @@ def kids_hstory_new(request):
                         school_name = ManagerParent.pincode(school_name)
                         start_date = request.data.get('start_date')
                         end_date = request.data.get('end_date')
-                        # print(start_date)
-                        # print(end_date)
-                        # print(school_name)
-                        # print("user_id ",parent_id)
+
                         student_round = []
                         student_history_id = []
                         with connections[school_name].cursor() as cursor:
@@ -1698,7 +1695,7 @@ def kids_hstory_new(request):
                             fname_ar = ''
                             for student in student_info:
                                 cursor.execute(
-                                    " select branch_id from res_users where id=%s",
+                                    " select branch_id,year_id from res_users where id=%s",
                                     [student[6]])
                                 branch_id = cursor.fetchall()
                                 # SELECT column_name
@@ -1712,12 +1709,12 @@ def kids_hstory_new(request):
                                 if information_schema:
                                     cursor.execute(
                                         "select  date,message_en,message_ar,title,title_ar,action_id,id,image_link,read_message,plan_name,school_message_id,model_school_messsage from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
-                                        [branch_id[0][0], student[5], student[0]])
+                                        [branch_id[0][0], branch_id[0][1], student[0]])
                                     student_mes = cursor.fetchall()
                                 else:
                                     cursor.execute(
                                         "select  date,message_en,message_ar,title,title_ar,action_id,id,read_message,school_message_id,model_school_messsage from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
-                                        [branch_id[0][0], student[5], student[0]])
+                                        [branch_id[0][0], branch_id[0][1], student[0]])
                                     student_mes = cursor.fetchall()
                                 # cursor.execute(
                                 #         "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
@@ -3145,12 +3142,12 @@ def get_clinic(request, student_id):
                                 academic_year_ids.append(rec[0])
                             if user_id_q:
                                 cursor.execute(
-                                    " select partner_id from res_users where id=%s",
+                                    " select partner_id,year_id from res_users where id=%s",
                                     [user_id_q[0][0]])
                                 partner_id_q = cursor.fetchall()
                                 cursor.execute(
                                     " select id,name,date,note,temperature,blood_pressure,prescription from school_clinic where patient_id=%s and year_id = %s and state='done' ORDER BY ID DESC",
-                                    [partner_id_q[0][0], user_id_q[0][1]])
+                                    [partner_id_q[0][0], partner_id_q[0][1]])
                                 vists = cursor.fetchall()
 
                             for v in vists:
@@ -3203,13 +3200,13 @@ def get_attendance(request, student_id):
                             [student_id])
                         user_id_q = cursor.fetchall()
                         cursor.execute(
-                            " select branch_id from res_users where id=%s",
+                            " select branch_id,year_id from res_users where id=%s",
                             [user_id_q[0][2]])
                         branch_id = cursor.fetchall()
                         if user_id_q:
                             cursor.execute(
                                 " select id,name,start_date,end_date,reason,type,state,arrival_time from student_absence_request where student_id=%s and year_id=%s and branch_id=%s ORDER BY id DESC",
-                                [student_id, user_id_q[0][1], branch_id[0][0]])
+                                [student_id, branch_id[0][1], branch_id[0][0]])
                             studentleaves = cursor.fetchall()
                             cursor.execute(
                                 "SELECT daily_attendance_id,id,note,reason,attendance_status,arrival_time FROM daily_attendance_line WHERE student_id=%s ORDER BY id DESC",
@@ -3487,7 +3484,7 @@ def get_exam(request, student_id):
                                 academic_year_ids.append(rec[0])
                             if user_id_q:
                                 cursor.execute(
-                                    " select partner_id,branch_id from res_users where id=%s",
+                                    " select partner_id,branch_id,year_id from res_users where id=%s",
                                     [user_id_q[0][0]])
                                 partner_id_q = cursor.fetchall()
                                 # print(partner_id_q,user_id_q)
@@ -3497,7 +3494,7 @@ def get_exam(request, student_id):
                                 start = False
                                 cursor.execute(
                                     " select id,survey_id,token,last_displayed_page_id,state from survey_user_input where partner_id=%s and year_id = %s and branch_id =%s   ORDER BY create_date DESC, state DESC",
-                                    [partner_id_q[0][0], user_id_q[0][1], partner_id_q[0][1]])
+                                    [partner_id_q[0][0], partner_id_q[0][2], partner_id_q[0][1]])
                                 assignments = cursor.fetchall()
 
 
@@ -3682,7 +3679,7 @@ def get_student_assignment(request, student_id):
                                 academic_year_ids.append(rec[0])
                             if user_id_q:
                                 cursor.execute(
-                                    " select partner_id,branch_id from res_users where id=%s",
+                                    " select partner_id,branch_id,year_id from res_users where id=%s",
                                     [user_id_q[0][0]])
                                 partner_id_q = cursor.fetchall()
 
@@ -3691,7 +3688,7 @@ def get_student_assignment(request, student_id):
                                 start = False
                                 cursor.execute(
                                     " select id,survey_id,token,last_displayed_page_id,state from survey_user_input where partner_id=%s and year_id = %s and branch_id =%s   ORDER BY create_date DESC, state DESC",
-                                    [partner_id_q[0][0], user_id_q[0][1], partner_id_q[0][1]])
+                                    [partner_id_q[0][0], partner_id_q[0][2], partner_id_q[0][1]])
                                 assignments = cursor.fetchall()
 
                             for assingment in assignments:
@@ -3801,13 +3798,13 @@ def get_all_weekly_plans(request, student_id):
                                 academic_year_ids.append(rec[0])
                             if user_id_q:
                                 cursor.execute(
-                                    " select partner_id,branch_id from res_users where id=%s",
+                                    " select partner_id,branch_id,year_id from res_users where id=%s",
                                     [user_id_q[0][0]])
                                 partner_id_q = cursor.fetchall()
 
                                 cursor.execute(
                                     " select id,name,date_from,date_to from week_plan where state='puplished' and year_id = %s and branch_id =%s   ORDER BY id DESC",
-                                    [user_id_q[0][1], partner_id_q[0][1]])
+                                    [partner_id_q[0][2], partner_id_q[0][1]])
                                 week_plan = cursor.fetchall()
                                 for p in week_plan:
                                     data.append({'id': p[0],
@@ -3983,7 +3980,7 @@ def get_data_worksheets(request, student_id):
                             user_id_q = cursor.fetchall()
                             if user_id_q:
                                 cursor.execute(
-                                    " select partner_id,branch_id from res_users where id=%s",
+                                    " select partner_id,branch_id,year_id from res_users where id=%s",
                                     [user_id_q[0][0]])
                                 partner_id_q = cursor.fetchall()
                                 cursor.execute(
@@ -3997,7 +3994,7 @@ def get_data_worksheets(request, student_id):
                                 if worksheet_id:
                                     cursor.execute(
                                         " select id,name,priority,publishing_date,subject_id,deadline from class_worksheet where state='published' and year_id = %s and branch_id =%s and id in %s  ORDER BY publishing_date DESC",
-                                        [user_id_q[0][1], partner_id_q[0][1], tuple(worksheet_id)])
+                                        [partner_id_q[0][2], partner_id_q[0][1], tuple(worksheet_id)])
                                     class_worksheet = cursor.fetchall()
 
                                     for w in class_worksheet:
@@ -4533,12 +4530,12 @@ def get_marks(request, student_id):
                             user_id_q = cursor.fetchall()
                             if user_id_q:
                                 cursor.execute(
-                                    " select branch_id from res_users where id=%s",
+                                    " select branch_id,year_id from res_users where id=%s",
                                     [user_id_q[0][1]])
                                 branch_id = cursor.fetchall()
                                 cursor.execute(
                                     "SELECT id,name FROM academic_semester WHERE year_id=%s ",
-                                    [user_id_q[0][0]])
+                                    [branch_id[0][1]])
                                 academic_semester = cursor.fetchall()
                             else:
                                 cursor.execute(
@@ -4607,7 +4604,7 @@ def get_marks(request, student_id):
                                                     subject_name = cursor.fetchall()
                                                     cursor.execute(
                                                         " SELECT id,class_id FROM public.mark_mark WHERE subject_id= %s and class_id= %s and exams= %s and semester_id= %s and year_id= %s and branch_id= %s ",
-                                                        [subject_id[0],mark[1],exam[3],semester[0],user_id_q[0][0],branch_id[0][0]])
+                                                        [subject_id[0],mark[1],exam[3],semester[0],branch_id[0][1],branch_id[0][0]])
                                                     mark_mark_x = cursor.fetchall()
                                                     student_mark =None
 
@@ -4660,7 +4657,7 @@ def get_marks(request, student_id):
                                                         cursor.execute(
                                                             " SELECT id,class_id FROM public.mark_mark WHERE subject_id= %s and class_id= %s and exams= %s and semester_id= %s and year_id= %s and branch_id= %s ",
                                                             [subject_id[0], mark[1], exam[3], semester[0],
-                                                             user_id_q[0][0], branch_id[0][0]])
+                                                             branch_id[0][1], branch_id[0][0]])
                                                         mark_mark_x = cursor.fetchall()
                                                         student_mark = None
                                                         if mark_mark_x:
