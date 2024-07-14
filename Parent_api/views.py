@@ -4778,7 +4778,31 @@ def get_worksheet_form_view_data(request, wsheet, std):
                                 [std])
                             user_id_q = cursor.fetchall()
                             student_solution = []
+                            howmork_list = []
+                            link_list = []
+                            external_link=worksheet[0][11] + "\n \n" if  worksheet[0][11] else ''
+                            # external_link +=  "\n"
                             if user_id_q:
+                                cursor.execute(
+                                    "select name,link from worksheet_link where worksheet_id=%s ",
+                                    [worksheet[0][0]])
+                                worksheet_link = cursor.fetchall()
+                                for link in worksheet_link:
+                                    link_list.append({
+                                        'name': str(link[0]),
+                                        'link': str(link[1]),
+                                    })
+                                    external_link+=str(link[0])+'\n\n'+str(link[1])+"\n \n"
+                                cursor.execute(
+                                    "select name,url,flg_att,link_url from class_worksheet_att where school_message_id=%s ",
+                                    [worksheet[0][0]])
+                                class_worksheet_att = cursor.fetchall()
+                                for class_att in class_worksheet_att:
+                                    howmork_list.append({
+                                        'name': str(class_att[0]),
+                                        'link': str(class_att[3]) if str(class_att[2]) !='link' else str(class_att[1]),
+                                        "type":str(class_att[2])
+                                    })
                                 cursor.execute(
                                     "select id from student_details where worksheet_id=%s and student_id=%s",
                                     [worksheet[0][0], std])
@@ -4814,14 +4838,14 @@ def get_worksheet_form_view_data(request, wsheet, std):
                                          'homework': "%s %s" % (s, size_name[i]) if worksheet[0][7] else '',
                                          'homework_name': worksheet[0][8],
                                          'description': worksheet[0][9],
-                                         "external_link": worksheet[0][11] if  worksheet[0][11] else '',
+                                         "external_link": external_link,
                                          'deadline': str(date_time_obj.strftime("%d %b %Y")) if worksheet[0][5] else "",
                                          'end': str(datetime.datetime.now() >= worksheet[0][5]) if worksheet[0][
                                              5] else "",
-                                         'student_solution': student_solution
+                                         'student_solution': student_solution,
+                                         "howmork_list":howmork_list
                                          })
                         result = {'result': data}
-                        # print(result)
                         return Response(result)
                     result = {'result': data}
                     return Response(result)
@@ -6365,3 +6389,4 @@ def get_food_s(request):
             return Response(result)
         result = {'result': 'Not headers'}
         return Response(result)
+
