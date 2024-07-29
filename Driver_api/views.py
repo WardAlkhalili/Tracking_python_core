@@ -201,7 +201,7 @@ def round_list(request):
                                 "SELECT id from academic_year WHERE state='active' ORDER BY ID DESC LIMIT 1",
                                 [])
                             academic_year = cursor.fetchall()
-                            print("--------------",academic_year)
+                            print("--------------",academic_year,request.data.get('bus_id'))
                             if academic_year:
                                 cursor.execute(
                                     "select name,start_time,pick_up_address,drop_off_address,pick_up_lat,pick_up_lng,drop_off_lat,drop_off_lng,route_id,id,is_active from transport_round WHERE vehicle_id = %s and  type = %s and  active_status='active' and year_id=%s",
