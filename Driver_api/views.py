@@ -27,9 +27,9 @@ def driver_login(request):
             token_auth, created = Token.objects.get_or_create(user=user)
             from django.utils.crypto import get_random_string
             unique_id = get_random_string(length=32)
-            print("------------------------mobile_token-----------------------",mobile_token)
+            # print("------------------------mobile_token-----------------------",mobile_token)
             if mobile_token and str(mobile_token) !='null':
-                print("------------------------1mobile_token1-----------------------",  str(mobile_token) !='null')
+                # print("------------------------1mobile_token1-----------------------",  str(mobile_token) !='null')
                 manager = Manager(token=unique_id, db_name=school_name, driver_id=data_id_bus[0][0],
                                   mobile_token=mobile_token)
                 manager.save()
@@ -37,7 +37,7 @@ def driver_login(request):
                     "UPDATE public.res_partner SET signup_token=%s , token=%s  WHERE id=%s;",
                     [mobile_token,mobile_token, data_id_bus[0][0]])
             else:
-                print("-------------------------1----------------------")
+                # print("-------------------------1----------------------")
                 cursor.execute("select  token  from res_partner WHERE id = %s", [data_id_bus[0][0]])
                 token_driv = cursor.fetchall()
                 manager = Manager(token=unique_id, db_name=school_name, driver_id=data_id_bus[0][0],
@@ -201,6 +201,7 @@ def round_list(request):
                                 "SELECT id from academic_year WHERE state='active' ORDER BY ID DESC LIMIT 1",
                                 [])
                             academic_year = cursor.fetchall()
+                            print("--------------",academic_year)
                             if academic_year:
                                 cursor.execute(
                                     "select name,start_time,pick_up_address,drop_off_address,pick_up_lat,pick_up_lng,drop_off_lat,drop_off_lng,route_id,id,is_active from transport_round WHERE vehicle_id = %s and  type = %s and  active_status='active' and year_id=%s",
