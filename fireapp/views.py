@@ -595,7 +595,7 @@ def send_dri(request):
                 message_title = "Picked up by Parents"
                 message_body = "The student " + student_name + " has been picked up by his parents, so please don't be waiting."
                 if status:
-                    print("------------------------------------------------------11111", status)
+
                     status='in'
                 else:
                     status="absent"
@@ -976,7 +976,7 @@ def send_chat_parent(request):
         return Response(result1)
 
 def twoArgsChat(message_id,school_name, mobile_token,student_id):
-    print(message_id,"--------------------------------------------",school_name)
+
     with connections[school_name].cursor() as cursor:
         cursor.execute(
             "select  display_name_search from student_student WHERE  id = %s  And state = 'done'",
@@ -987,7 +987,6 @@ def twoArgsChat(message_id,school_name, mobile_token,student_id):
             "select  body from mail_message WHERE  id = %s ",
             [message_id])
         message = cursor.fetchall()
-        print(message)
         patterns = re.compile('<.*?>')
         message_body = message[0][0]
         message_body= re.sub(patterns, '', message_body)
@@ -1001,7 +1000,7 @@ def twoArgsChat(message_id,school_name, mobile_token,student_id):
 
             result = push_service.notify_single_device(registration_id=registration_id, sound='new_beeb.mp3',
                                                        message_title=message_title,
-                                                       message_body=message_body,
+                                                       message_body=message_body,data_message={"student_id":str(student_id),"picked":False,"model_name":"Chat","student_name":student_name}
                                                        )
         result1 = {
             "route": 'Ok'
