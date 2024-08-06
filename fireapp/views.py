@@ -976,6 +976,7 @@ def send_chat_parent(request):
         return Response(result1)
 
 def twoArgsChat(message_id,school_name, mobile_token,student_id):
+    print(message_id,"--------------------------------------------",school_name)
     with connections[school_name].cursor() as cursor:
         cursor.execute(
             "select  display_name_search from student_student WHERE  id = %s  And state = 'done'",
