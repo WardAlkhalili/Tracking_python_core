@@ -4123,7 +4123,7 @@ def get_worksheet_form_view_data(request, wsheet, std):
                     with connections[school_name].cursor() as cursor:
 
                         cursor.execute(
-                            " select id,name,priority,create_date,subject_id,deadline,link,attached_homework,attach_files,description,teacher_id from class_worksheet where  id = %s  ORDER BY create_date DESC",
+                            " select id,name,priority,publishing_date,subject_id,deadline,link,attached_homework,attach_files,description,teacher_id,external_link from class_worksheet where  id = %s  ORDER BY create_date DESC",
                             [wsheet])
                         worksheet = cursor.fetchall()
                         # cursor.execute(
@@ -4162,8 +4162,8 @@ def get_worksheet_form_view_data(request, wsheet, std):
                                 file = urllib.request.urlopen(worksheet[0][6])
                                 size_name = ("B", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB")
 
-                                i=0
-                                s=0
+                                i = 0
+                                s = 0
                                 if file.length:
                                     i = int(math.floor(math.log(file.length, 1024)))
                                     p = math.pow(1024, i)
@@ -4173,7 +4173,31 @@ def get_worksheet_form_view_data(request, wsheet, std):
                                 [std])
                             user_id_q = cursor.fetchall()
                             student_solution = []
+                            howmork_list = []
+                            link_list = []
+                            external_link=worksheet[0][11] + "\n \n" if  worksheet[0][11] else ''
+                            # external_link +=  "\n"
                             if user_id_q:
+                                cursor.execute(
+                                    "select name,link from worksheet_link where worksheet_id=%s ",
+                                    [worksheet[0][0]])
+                                worksheet_link = cursor.fetchall()
+                                for link in worksheet_link:
+                                    link_list.append({
+                                        'name': str(link[0]),
+                                        'link': str(link[1]),
+                                    })
+                                    external_link+=str(link[0])+'\n\n'+str(link[1])+"\n \n"
+                                cursor.execute(
+                                    "select name,url,flg_att,link_url from class_worksheet_att where school_message_id=%s ",
+                                    [worksheet[0][0]])
+                                class_worksheet_att = cursor.fetchall()
+                                for class_att in class_worksheet_att:
+                                    howmork_list.append({
+                                        'name': str(class_att[0]),
+                                        'link': str(class_att[3]) if str(class_att[2]) !='link' else str(class_att[1]),
+                                        "type":str(class_att[2])
+                                    })
                                 cursor.execute(
                                     "select id from student_details where worksheet_id=%s and student_id=%s",
                                     [worksheet[0][0], std])
@@ -4197,21 +4221,24 @@ def get_worksheet_form_view_data(request, wsheet, std):
 
                             data.append({'worksheet_id': worksheet[0][0],
                                          'name': worksheet[0][1],
-                                         'date': str(worksheet[0][3].strftime("%d %b %Y"))if worksheet[0][3] else '',
+                                         'date': str(worksheet[0][3].strftime("%d %b %Y")) if worksheet[0][3] else '',
                                          'teacher_name': hr_employee[0][1],
                                          'link': worksheet[0][6] if worksheet[0][6] else '',
                                          'teacher_id': hr_employee[0][0],
-                                         'teacher_image': 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' +str(hr_employee[0][2]) if hr_employee[0][
+                                         'teacher_image': 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
+                                             hr_employee[0][2]) if hr_employee[0][
                                              2] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png",
                                          'teacher_position': job_name[0][0] if job_name else 'Teacher',
                                          'subject': subject_name[0][0],
                                          'homework': "%s %s" % (s, size_name[i]) if worksheet[0][7] else '',
                                          'homework_name': worksheet[0][8],
                                          'description': worksheet[0][9],
+                                         "external_link": external_link,
                                          'deadline': str(date_time_obj.strftime("%d %b %Y")) if worksheet[0][5] else "",
                                          'end': str(datetime.datetime.now() >= worksheet[0][5]) if worksheet[0][
                                              5] else "",
-                                         'student_solution': student_solution
+                                         'student_solution': student_solution,
+                                         "howmork_list":howmork_list
                                          })
 
                         result = {'result': data}
