@@ -594,7 +594,8 @@ def kids_list(request):
                                             "name": "Exams",
                                             "name_ar": "امتحانات",
                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png",
-                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg"
+                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg",
+                                            "new_add": False
                                         },
                                         "Badges": {
                                             # "url": "https://" + school_name + ".staging.trackware.com/my/Badges/",tst.tracking.trackware.com
@@ -604,7 +605,9 @@ def kids_list(request):
                                             "name": "Badges",
                                             "name_ar": "الشارات",
                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Badge.png",
-                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Badge.svg"
+                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Badge.svg",
+                                            "new_add": False
+
                                         },
                                         "Weeklyplans":
                                             {
@@ -615,7 +618,8 @@ def kids_list(request):
                                                 "name": "Weekly plans",
                                                 "name_ar": "الخطط الأسبوعية",
                                                 "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Weekly+Plans.png",
-                                                "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg"
+                                                "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg",
+                                                "new_add": False
                                             },
                                         "Assignments": {
                                             "url": "https://"+school_name+".trackware.com/my/Assignments/",
@@ -625,7 +629,9 @@ def kids_list(request):
                                             "name": "Assignments",
                                             "name_ar": "الواجبات الالكترونية",
                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Assignments.png",
-                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg"
+                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg",
+                                            "new_add": False
+
                                         },
                                         # "Exam": {
                                         #     "url": "my/exam/",
@@ -642,7 +648,8 @@ def kids_list(request):
                                              "arabic_url": "https://"+school_name+".trackware.com/ar_SY/my/Events/",
                                              "arabic_name": "الفعاليات و الانشطة",
                                              "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Events.png",
-                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg"
+                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg",
+                                             "new_add": False
                                              },
                                         "Homeworks":
                                             {"name": "Homework",
@@ -652,7 +659,8 @@ def kids_list(request):
                                              "arabic_url": "https://"+school_name+".trackware.com/ar_SY/my/Homeworks/",
                                              "name_ar": "الواجبات المنزلية",
                                              "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/worksheets.png",
-                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg"
+                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg",
+                                             "new_add": False
                                              },
                                         "Calendar":
                                             {"name": "Calendar",
@@ -663,6 +671,8 @@ def kids_list(request):
                                              "name_ar": "التقويم",
                                              "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/School+Calendar.png",
                                              "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg"
+                                             ,
+                                             "new_add": False
                                              },
 
                                         "Clinic":
@@ -674,7 +684,8 @@ def kids_list(request):
                                              "arabic_url": "https://"+school_name+".trackware.com/ar_SY/my/Clinic/",
                                              "arabic_name": "العيادة",
                                              "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
-                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg"
+                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg",
+                                             "new_add": False
                                              },
 
                                         "Library":
@@ -686,7 +697,8 @@ def kids_list(request):
                                              "arabic_url": "https://"+school_name+".trackware.com/ar_SY/my/Library/",
                                              "arabic_name": "العيادة",
                                              "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Clinic.png",
-                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg"
+                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg",
+                                             "new_add": False
                                              },
                                         "Mark":
                                             {"name": "Mark",
@@ -697,7 +709,8 @@ def kids_list(request):
                                              "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Marks/",
                                              "arabic_name": "العلامات",
                                              "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/icons8-curriculum-48.png",
-                                             "icon_svg": "mark_yousef"
+                                             "icon_svg": "mark_yousef",
+                                             "new_add": False
                                              }
 
                                     }
@@ -792,7 +805,8 @@ def kids_list(request):
                                             "name": "Absence",
                                             "name_ar": "الغياب",
                                             "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png",
-                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg"
+                                            "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg",
+                                            "new_add": False
                                         }
                                         )
                                         show_absence = True
@@ -817,7 +831,8 @@ def kids_list(request):
                                                     "name": "Absence",
                                                     "name_ar": "الغياب",
                                                     "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/Absence.png",
-                                                    "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg"
+                                                    "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg",
+                                                    "new_add": False
                                                 }
 
                                         }
