@@ -4716,7 +4716,7 @@ def get_marks(request, student_id):
                                                     exam_det.append({"exam_name_ar": exam[1], "exam_name_en": exam[2],
                                                                      "subject_det": subject_det})
                                         all_exam.append({"semester": semester[1], "exam": exam_det})
-                            result = {'all_exam': all_exam}
+                            result = {'all_exam': all_exam,'code':''}
 
         return Response(result)
 
