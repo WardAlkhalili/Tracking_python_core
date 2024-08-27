@@ -773,8 +773,6 @@ def student_list(request, round_id):
                                             "state": student_student12[0]['state'],
                                             "father_id": student_student12[0]['father_id'],
                                             "mother_id": student_student12[0]['mother_id'],
-                                            "mother_mobile_token": mother_inf[0]['mobile_token'] if mother_inf else "",
-                                            "father_mobile_token": father_inf[0]['mobile_token'] if father_inf else "",
                                             "family_relation_id": student_student12[0]['family_relation_id'],
                                             "message_main_attachment_id": student_student12[0][
                                                 'message_main_attachment_id'],
