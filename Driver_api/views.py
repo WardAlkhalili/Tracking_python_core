@@ -759,6 +759,8 @@ def student_list(request, round_id):
                                             "second_name": student_student12[0]['second_name'],
                                             "third_name": student_student12[0]['third_name'],
                                             "last_name": student_student12[0]['last_name'],
+                                            "mother_mobile_token": mother_inf[0]['mobile_token'] if mother_inf else "",
+                                            "father_mobile_token": father_inf[0]['mobile_token'] if father_inf else "",
                                             "mother_tongue": student_student12[0]['mother_tongue'],
                                             "blood_group": student_student12[0]['blood_group'],
                                             "date_of_birth": student_student12[0]['date_of_birth'],
