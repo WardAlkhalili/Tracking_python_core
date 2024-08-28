@@ -1205,7 +1205,9 @@ def set_round_status(request):
                                                     #     message_title=message_title if lang =="en" else message_title_ar,
                                                     #     message_body=message_body if lang =="en" else message_body_ar,sound='new_beeb.mp3')
                                                     try:
-                                                        push_service.notify_single_device(
+                                                        push_service1 = FCMNotification(
+                                                            api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                                        push_service1.notify_single_device(
                                                             registration_id=registration_id[0],
                                                             message_title=message_title if lang == "en" else message_title_ar,
                                                             message_body=message_body if lang == "en" else message_body_ar,
