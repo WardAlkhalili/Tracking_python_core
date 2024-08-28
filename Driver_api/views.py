@@ -1215,12 +1215,13 @@ def set_round_status(request):
                                                     except Exception as error:
                                                         print("------------------------------")
                                                         print(error)
+                                                        print(message_body_ar)
                                                         print("-------------------------------")
-                                                        push_service.notify_single_device(
-                                                            registration_id=registration_id[0],
-                                                            message_title=message_title if lang == "en" else message_title_ar,
-                                                            message_body=message_body if lang == "en" else message_body_ar,
-                                                            sound='new_beeb.mp3')
+                                                        # push_service.notify_single_device(
+                                                        #     registration_id=registration_id[0],
+                                                        #     message_title=message_title if lang == "en" else message_title_ar,
+                                                        #     message_body=message_body if lang == "en" else message_body_ar,
+                                                        #     sound='new_beeb.mp3')
 
                                     cursor.execute(
                                         "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
