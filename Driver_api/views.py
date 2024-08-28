@@ -691,6 +691,11 @@ def student_list(request, round_id):
                                         columns_m = (x.name for x in cursor.description)
                                         mother = cursor.fetchall()
                                         mother_inf = [dict(zip(columns_m, row)) for row in mother]
+                                        cursor.execute("select * from school_parent WHERE id = %s",
+                                                       [student_student12[0]['responsible_id_value']])
+                                        columns_responsible = (x.name for x in cursor.description)
+                                        responsible = cursor.fetchall()
+                                        responsible_inf = [dict(zip(columns_responsible, row)) for row in responsible]
                                         student_grade = None
 
                                         cursor.execute(
@@ -761,6 +766,7 @@ def student_list(request, round_id):
                                             "last_name": student_student12[0]['last_name'],
                                             "mother_mobile_token": mother_inf[0]['mobile_token'] if mother_inf else "",
                                             "father_mobile_token": father_inf[0]['mobile_token'] if father_inf else "",
+                                            "responsible_mobile_token": responsible_inf[0]['mobile_token'] if responsible_inf else "",
                                             "mother_tongue": student_student12[0]['mother_tongue'],
                                             "blood_group": student_student12[0]['blood_group'],
                                             "date_of_birth": student_student12[0]['date_of_birth'],
