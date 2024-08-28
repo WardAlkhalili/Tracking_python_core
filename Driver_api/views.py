@@ -19,6 +19,7 @@ def driver_login(request):
         pincode = request.data.get('bus_pin')
         mobile_token = request.data.get('mobile_token')
         school_name = Manager.pincode(pincode)
+        
 
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  driver_id,bus_no,id  from fleet_vehicle WHERE bus_pin = %s", [pincode])
@@ -908,16 +909,13 @@ def student_list(request, round_id):
                                           }
 
                                 return Response(result)
-                    if request.method == 'POST':
-                        result = {"status": "error"
-                                  }
-                        return Response(result)
+
                     else:
-                        result = {"status": "Token notFound"
+                        result = {"status": "database notFound"
                                   }
                         return Response(result)
                 else:
-                    result = {"status": "error"
+                    result = {"status": "Token notFound"
                               }
                     return Response(result)
             result = {"status": "error"
@@ -1215,13 +1213,7 @@ def set_round_status(request):
                                                     except Exception as error:
                                                         print("------------------------------")
                                                         print(error)
-                                                        print(message_body_ar)
-                                                        print("-------------------------------")
-                                                        # push_service.notify_single_device(
-                                                        #     registration_id=registration_id[0],
-                                                        #     message_title=message_title if lang == "en" else message_title_ar,
-                                                        #     message_body=message_body if lang == "en" else message_body_ar,
-                                                        #     sound='new_beeb.mp3')
+
 
                                     cursor.execute(
                                         "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
@@ -2393,7 +2385,8 @@ def notify(request):
                                     message_title = "Arrival - Parent" if round_type=="dropoff" else "Bus Arrival"
                                     message_body = "The bus " + str(bus_num[0][0]) + "has arrived at your home"
 
-                                    result = push_service.notify_multiple_devices(registration_ids=registration_id,
+                                    result = push_service.notify_multiple_devices(
+                                        registration_ids=registration_id,
                                                                                message_title=message_title if lang =="en" else message_title_ar,
                                                                                message_body=message_body if lang =="en" else message_body_ar,sound='new_beeb.mp3')
 
