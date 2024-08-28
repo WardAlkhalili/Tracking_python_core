@@ -712,7 +712,7 @@ def student_list(request, round_id):
                                                     "SELECT name FROM public.academic_grade WHERE id = %s",
                                                     [student_distribution_line[0][0]])
                                                 academic_grade = cursor.fetchall()
-                                                student_grade = academic_grade[0][0]
+                                                student_grade = academic_grade[0][0] if academic_grade[0] else None
                                         if student_grade== None:
                                             # ----------------------
                                             cursor.execute(
