@@ -1260,7 +1260,7 @@ def set_round_status(request):
                                                         response1 = requests.request("POST", url,
                                                                                      headers=headers, data=body)
                                                         response = response1.json()
-                                                        
+
                                                     except Exception as e:
                                                         print("-----------1235")
 
@@ -1434,10 +1434,37 @@ def set_round_status(request):
                                                                                 message_body_ar, driver_name[0][0],
                                                                                 student_id=k[0])
                                                             if mobile_token and not ("token" in mobile_token):
-                                                                notify_single_device = push_service.notify_single_device(
-                                                                    registration_id=registration_id[0],
-                                                                    message_title=message_title if lang=='en' else message_title_ar,
-                                                                    message_body=message_body if lang=='en' else message_body_ar,sound='new_beeb.mp3')
+
+                                                                try:
+                                                                    notify_single_device = push_service.notify_single_device(
+                                                                        registration_id=registration_id[0],
+                                                                        message_title=message_title if lang == 'en' else message_title_ar,
+                                                                        message_body=message_body if lang == 'en' else message_body_ar,
+                                                                        sound='new_beeb.mp3')
+                                                                except Exception as e:
+                                                                    try:
+                                                                        body = json.dumps(
+                                                                            {"to": registration_id[0],
+                                                                             "notification": {
+                                                                                 "title": message_title if lang == "en" else message_title_ar,
+                                                                                 "body": message_body if lang == "en" else message_body_ar,
+                                                                                 "mutable_content": True,
+                                                                                 "sound": "new_beeb.mp3"
+                                                                             }})
+
+                                                                        headers = {
+                                                                            'Authorization': "key=AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD",
+                                                                            'Content-Type': 'application/json',
+                                                                        }
+
+                                                                        url = "https://fcm.googleapis.com/fcm/send"
+                                                                        response1 = requests.request("POST", url,
+                                                                                                     headers=headers,
+                                                                                                     data=body)
+                                                                        response = response1.json()
+
+                                                                    except Exception as e:
+                                                                        print("-----------1467")
                                                     else:
                                                         if student_history[0][2]:
                                                             cursor.execute(
