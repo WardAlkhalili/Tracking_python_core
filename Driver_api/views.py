@@ -12,7 +12,7 @@ import calendar
 from pyfcm import FCMNotification
 from Parent_api.models import ManagerParent
 import json
-
+import requests
 @api_view(['POST'])
 def driver_login(request):
     if request.method == 'POST':
@@ -1234,12 +1234,35 @@ def set_round_status(request):
                                                                     message_title, message_title_ar, message_body,
                                                                     message_body_ar, driver_name[0][0],student_id=k[0])
                                                 push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                                
-                                                if mobile_token and not("token" in mobile_token):
-                                                    notify_single_device = push_service.notify_single_device(
+
+                                                try:
+                                                        push_service.notify_single_device(
                                                         registration_id=registration_id[0],
-                                                        message_title=message_title if lang =="en" else message_title_ar,
-                                                        message_body=message_body if lang =="en" else message_body_ar,sound='new_beeb.mp3')
+                                                        message_title=message_title if lang == "en" else message_title_ar,
+                                                        message_body=message_body if lang == "en" else message_body_ar,
+                                                        sound='new_beeb.mp3')
+                                                except Exception as e:
+                                                    try:
+                                                        body = json.dumps({"registration_ids": mobile_token,
+                                                                           "notification": {
+                                                                               "title": message_title if lang == "en" else message_title_ar,
+                                                                               "body": message_body if lang == "en" else message_body_ar,
+                                                                               "mutable_content": True,
+                                                                               "sound": "new_beeb.mp3"
+                                                                           }})
+
+                                                        headers = {
+                                                            'Authorization': "key=AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD",
+                                                            'Content-Type': 'application/json',
+                                                        }
+
+                                                        url = "https://fcm.googleapis.com/fcm/send"
+                                                        response1 = requests.request("POST", url,
+                                                                                     headers=headers, data=body)
+                                                        response = response1.json()
+                                                        
+                                                    except Exception as e:
+                                                        print("-----------1235")
 
                                     cursor.execute(
                                         "select  round_start,id from round_history WHERE round_id = %s and driver_id=%s and vehicle_id = %s and round_name=%s ORDER BY ID DESC LIMIT 1 ",
