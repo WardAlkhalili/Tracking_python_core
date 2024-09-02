@@ -1882,7 +1882,7 @@ def students_bus_checks(request):
                                                                 message_title=message_title,
                                                                 message_body=message_body,sound='new_beeb.mp3')
                                                             mobile_token=[]
-                                                        except Exception as e:
+                                                        except Exception as er:
 
                                                             try:
                                                                 body = json.dumps({"registration_ids": registration_id,
@@ -1903,7 +1903,7 @@ def students_bus_checks(request):
                                                                                              headers=headers, data=body)
                                                                 response = response1.json()
 
-                                                            except Exception as e:
+                                                            except Exception as er:
                                                                 print("-----------1907")
 
 
