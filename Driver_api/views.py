@@ -1082,6 +1082,9 @@ def set_round_status(request):
                     au = request.headers.get('Authorization').replace('Bearer', '').strip()
                     db_name = Manager.objects.filter(token=au).values_list('db_name')
                     driver_id = Manager.objects.filter(token=au).values_list('driver_id')
+                    push_service = FCMNotification(
+                        api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+
                     notifications = []
                     for e in driver_id:
                         driver_id = e[0]
@@ -1181,7 +1184,7 @@ def set_round_status(request):
                                             current_time = datetime.datetime.now()
 
 
-                                            if round_info[0][3] == 'pick_up':
+                                            if round_info[3] == 'pick_up':
                                                 cursor.execute("""
                                                     SELECT name, vehicle_id, driver_id
                                                     FROM transport_round
@@ -1244,7 +1247,6 @@ def set_round_status(request):
                                                 message_body_ar, driver_name[0][0], student_id=student_id
                                             )
 
-                                            push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
 
                                             if mobile_tokens and "token" not in mobile_tokens:
                                                 try:
@@ -1381,7 +1383,122 @@ def set_round_status(request):
                                                 LIMIT 1
                                             """, [round_id, round_info[2], round_info[1], round_id])
                                             round_history = cursor.fetchone()
+                                            for student_name, student_id, father_id, mother_id, responsible_id_value, settings in students_data:
+                                                lang = "en"
+                                                parent_ids = [father_id, mother_id, responsible_id_value]
 
+                                                mobile_tokens = list(
+                                                    ManagerParent.objects.filter(parent_id__in=parent_ids,
+                                                                                 db_name=school_name, is_active=True)
+                                                    .values_list('mobile_token', flat=True).order_by('-pk')
+                                                )
+
+                                                if settings and 'None' not in str(settings):
+                                                    data = json.loads(settings)
+                                                    if isinstance(data.get('notifications'), dict) and "ar" in \
+                                                            data['notifications']['locale']:
+                                                        lang = "ar"
+
+                                                registration_id = mobile_tokens
+                                                message_title = " Bus Notification"
+                                                message_title_ar = 'اشعار من الحافلة'
+                                                message_body_ar = " وصل إلى المدرسة." + student_name[0][0]
+                                                message_body = student_name[0][
+                                                                   0] + "  has just reached the school."
+                                                current_time = datetime.datetime.now()
+
+                                                if round_info[3] == 'pick_up':
+                                                    cursor.execute("""
+                                                        SELECT name, vehicle_id, driver_id
+                                                        FROM transport_round
+                                                        WHERE id = %s
+                                                    """, [round_id])
+                                                    round_info22 = cursor.fetchone()
+
+                                                    cursor.execute("""
+                                                        SELECT id, round_start, round_end, na 
+                                                        FROM round_history 
+                                                        WHERE round_id = %s AND driver_id = %s AND vehicle_id = %s AND round_name = %s 
+                                                        ORDER BY ID DESC LIMIT 1
+                                                    """, [round_id, round_info22[2], round_info22[1], round_id])
+                                                    round_history = cursor.fetchone()
+
+                                                    start_of_day = datetime.datetime.combine(datetime.datetime.now(),
+                                                                                             datetime.time.min)
+
+                                                    if round_history and round_history[1].strftime(
+                                                            '%Y-%m-%d') == datetime.date.today().strftime('%Y-%m-%d'):
+                                                        cursor.execute("""
+                                                            SELECT activity_type, lat, long 
+                                                            FROM student_history 
+                                                            WHERE round_id = %s AND student_id = %s AND history_id = %s
+                                                            ORDER BY ID DESC LIMIT 1
+                                                        """, [round_id, student_id, round_history[0]])
+                                                        student_history = cursor.fetchone()
+
+                                                        cursor.execute("""
+                                                            SELECT activity_type, lat, long 
+                                                            FROM student_history 
+                                                            WHERE round_id = %s AND student_id = %s AND datetime BETWEEN %s AND %s
+                                                            ORDER BY ID DESC LIMIT 1
+                                                        """, [round_id, student_id, start_of_day, current_time])
+                                                        student_history1 = cursor.fetchone()
+
+                                                        if student_history1 and student_history1[0] in ['absent',
+                                                                                                        'absent-all',
+                                                                                                        'no-show',
+                                                                                                        'in']:
+                                                            continue
+                                                    else:
+                                                        cursor.execute("""
+                                                            SELECT activity_type, lat, long 
+                                                            FROM student_history 
+                                                            WHERE round_id = %s AND student_id = %s AND datetime BETWEEN %s AND %s
+                                                            ORDER BY ID DESC LIMIT 1
+                                                        """, [round_id, student_id, start_of_day, current_time])
+                                                        student_history1 = cursor.fetchone()
+
+                                                        if student_history1 and student_history1[0] in ['absent',
+                                                                                                        'absent-all',
+                                                                                                        'no-show']:
+                                                            continue
+
+                                                # Save and send notification
+                                                save_message_wizard(
+                                                    school_name, round_id, current_time,
+                                                    f'App\Model\sta{responsible_id_value}',
+                                                    message_title, message_title_ar, message_body,
+                                                    message_body_ar, driver_name[0][0], student_id=student_id
+                                                )
+
+                                                if mobile_tokens and "token" not in mobile_tokens:
+                                                    try:
+                                                        push_service.notify_single_device(
+                                                            registration_id=registration_id[0],
+                                                            message_title=message_title if lang == "en" else message_title_ar,
+                                                            message_body=message_body if lang == "en" else message_body_ar,
+                                                            sound='new_beeb.mp3'
+                                                        )
+                                                    except Exception as e:
+                                                        try:
+                                                            headers = {
+                                                                'Authorization': "key=AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD",
+                                                                'Content-Type': 'application/json',
+                                                            }
+                                                            body = json.dumps({
+                                                                "registration_ids": mobile_tokens,
+                                                                "notification": {
+                                                                    "title": message_title if lang == "en" else message_title_ar,
+                                                                    "body": message_body if lang == "en" else message_body_ar,
+                                                                    "mutable_content": True,
+                                                                    "sound": "new_beeb.mp3"
+                                                                }
+                                                            })
+                                                            url = "https://fcm.googleapis.com/fcm/send"
+                                                            response = requests.post(url, headers=headers, data=body)
+                                                            print(response.json())
+                                                        except Exception as e:
+                                                            print("Notification failed: ", e)
                                             if round_history:
                                                 now = datetime.date.today()
                                                 round_start_date = round_history[1].date()
@@ -1488,9 +1605,9 @@ def set_round_status(request):
             else:
                 result = {'status': 'error'}
                 return Response(result)
-        # else:
-        #     result = {'status': 'error'}
-        #     return Response(result)
+        else:
+            result = {'status': 'error'}
+            return Response(result)
 
 @api_view(['POST'])
 def students_bus_checks(request):
