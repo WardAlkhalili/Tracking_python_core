@@ -1000,7 +1000,8 @@ def twoArgsChat(message_id,school_name, mobile_token,student_id):
 
             result = push_service.notify_single_device(registration_id=registration_id, sound='new_beeb.mp3',
                                                        message_title=message_title,
-                                                       message_body=message_body,data_message={"student_id":str(student_id),"picked":False,"model_name":"Chat","student_name":student_name}
+                                                       message_body=message_body,data_message={"student_id":str(student_id),
+                                                                                               "picked":False,"model_name":"Chat","student_name":student_name}
                                                        )
         result1 = {
             "route": 'Ok'
