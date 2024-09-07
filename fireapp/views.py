@@ -7,7 +7,11 @@ from pyfcm import FCMNotification
 from django.db import connections
 from Parent_api.models import ManagerParent
 from Driver_api.models import Manager
-
+import firebase_admin
+import requests
+from firebase_admin import credentials
+from google.oauth2 import service_account
+import google.auth.transport.requests
 from django.db.models import Q
 from datetime import datetime
 import calendar
@@ -51,7 +55,23 @@ config = {
 firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()
 database = firebase.database()
+cred = credentials.Certificate("/home/ec2-user/trackware-sms-82ee7532ea90.json")
+# Initialize Firebase Admin SDK
+firebase_admin.initialize_app(cred)
+# default_app = firebase_admin.initialize_app()
+SCOPES = ['https://www.googleapis.com/auth/firebase.messaging']
 
+
+def _get_access_token():
+    """Retrieve a valid access token that can be used to authorize requests.
+
+    :return: Access token.
+    """
+    credentials = service_account.Credentials.from_service_account_file(
+        '/home/ec2-user/trackware-sms-82ee7532ea90.json', scopes=SCOPES)
+    request = google.auth.transport.requests.Request()
+    credentials.refresh(request)
+    return credentials.token
 
 @api_view(['GET'])
 def Get_last_bus_location(request, bus_id, school_name):
