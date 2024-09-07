@@ -13,6 +13,29 @@ from pyfcm import FCMNotification
 from Parent_api.models import ManagerParent
 import json
 import requests
+import firebase_admin
+from firebase_admin import credentials
+from google.oauth2 import service_account
+import google.auth.transport.requests
+
+cred = credentials.Certificate("/home/ec2-user/trackware-sms-82ee7532ea90.json")
+# Initialize Firebase Admin SDK
+firebase_admin.initialize_app(cred)
+# default_app = firebase_admin.initialize_app()
+SCOPES = ['https://www.googleapis.com/auth/firebase.messaging']
+
+
+def _get_access_token():
+    """Retrieve a valid access token that can be used to authorize requests.
+
+    :return: Access token.
+    """
+    credentials = service_account.Credentials.from_service_account_file(
+        '/home/ec2-user/trackware-sms-82ee7532ea90.json', scopes=SCOPES)
+    request = google.auth.transport.requests.Request()
+    credentials.refresh(request)
+    return credentials.token
+
 @api_view(['POST'])
 def driver_login(request):
     if request.method == 'POST':
@@ -215,7 +238,7 @@ def round_list(request):
                                     [request.data.get('bus_id'),
                                      'drop_off' if 'drop' in request.data.get('round_type') else 'pick_up'])
                                 list_round = cursor.fetchall()
-                            # print(list_round)
+                            print(list_round)
                             list_round1 = []
                             columnNames = [column[0] for column in cursor.description]
                             for record in list_round:
@@ -2758,7 +2781,7 @@ def notify(request):
 
 def send_message(token,body,title,data):
     headers = {
-        'Authorization': 'Bearer ya29.c.c0ASRK0GaLpOowzfbNqrMkMA6sNFqHbLhJsdOtxgFoB1mgIqbsGIS9jNH1No0TNcVccuERGV6NaE0MTlJYmCb_IHYJIXf3SMIaVITU9FPqkDVewV8AdtWbd1DUK8Q2TDsbm8mpWkVJCAxsrNZ0Q986vbr2patbCzK20k_61dBejy5V_yNVkNbTuFvYXnHcDVFG5VX_obddTmyxABFXKqj6eQ-s2P0D3vqXx70uPY5xVB54G5ReETtBsl8elQHYQWuHk3DRlb4kFXeOHk9RaNoFhqHZ4XM3V_NJVQoAwhuzunmjzwr7h8BcOaZPJaMqjs1xNBgGWT-wDLUWxoXpFzvQwgDHm1b66Ewnr_8illJI3nS8k1B7GuBrL63DT385Do7OO0q6Wju2bx3O9dYvY5-9wQaX0YynfOmpRY1UloXyfaU3VoRc0bQOXWgIQ0Osv5rwXxkJeX_rFmzVlpWim9ijm6lS1Q8SSvuksX0bk2Ih2uw27notqvW-OJeS_urOh0-cuO3-toYyarmWgc-5hy3lyIvrkuRgmUf6ujf6s4Ra_So7o2Zhx60j9-vwQBvt4YM-ss25Q4--251-2_S15bwZWs77otVoeoMsj1dtVvuo3QwF5rsrBkVQbyFt4UrItx_uJp2mdaVBnadlxQwoBYM9By3s4Bt9gvF-q8kesOggeWp6j62SnxS_y3xoIfZue7u2bny3g4ryVx293e_4_ckai91wQdsgWh8lkJiayxnZbeudS6dvolFw672bIo68uo-aevv1bB_J9YQt_er-0od28kt56yqz4tjuYSip9Q4fqFyg9skmtd6X2eF95vtY5b_dxBnfImlaUR5vhtk-XjmiQ57di_uxz9vf5OWzuBZh3dFvYc5b3bn7F9dF6m41r7pozqsBkbYZmi5i9lclFxy3uRVbe2nQ1QIF-g59ec9Xm20-u5YBVQ-rnms76WwvtOlXy5S10wmg_I0kaJvsw4i9bj41QFz7mY-Ql-sXyqvp5lY2BsBJIlkZdam',
+         'Authorization': 'Bearer ' + _get_access_token(),
         'Content-Type': 'application/json; UTF-8',
     }
     url = "https://fcm.googleapis.com/v1/projects/trackware-sms/messages:send"

@@ -57,7 +57,6 @@ firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()
 database = firebase.database()
 cred = credentials.Certificate("/home/ec2-user/trackware-sms-82ee7532ea90.json")
-#
 # Initialize Firebase Admin SDK
 firebase_admin.initialize_app(cred)
 # default_app = firebase_admin.initialize_app()
