@@ -168,7 +168,8 @@ def send_message(token,body,title,data):
             "data": data
         }
     })
-    requests.post(url, headers=headers, data=payload)
+    r=requests.post(url, headers=headers, data=payload)
+    print(r)
 
 
 @api_view(['POST'])
