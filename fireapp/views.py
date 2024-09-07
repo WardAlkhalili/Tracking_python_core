@@ -18,7 +18,7 @@ from datetime import datetime
 import calendar
 import json
 from threading import Timer
-import  re
+import re
 from fireapp.models import ManagerTracker
 
 # Remember the code we copied from Firebase.
@@ -56,22 +56,25 @@ config = {
 firebase = pyrebase.initialize_app(config)
 authe = firebase.auth()
 database = firebase.database()
-# cred = credentials.Certificate("/home/trackware/Desktop/django_env/yousef/api/Tracking_python_core/trackware-sms-82ee7532ea90.json")
+cred = credentials.Certificate("/home/ec2-user/trackware-sms-82ee7532ea90.json")
 #
-# # Initialize Firebase Admin SDK
-# firebase_admin.initialize_app(cred)
-# # default_app = firebase_admin.initialize_app()
-# SCOPES = ['https://www.googleapis.com/auth/firebase.messaging']
-# def _get_access_token():
-#   """Retrieve a valid access token that can be used to authorize requests.
-#
-#   :return: Access token.
-#   """
-#   credentials = service_account.Credentials.from_service_account_file(
-#     '/home/trackware/Desktop/django_env/yousef/api/Tracking_python_core/trackware-sms-82ee7532ea90.json', scopes=SCOPES)
-#   request = google.auth.transport.requests.Request()
-#   credentials.refresh(request)
-#   return credentials.token
+# Initialize Firebase Admin SDK
+firebase_admin.initialize_app(cred)
+# default_app = firebase_admin.initialize_app()
+SCOPES = ['https://www.googleapis.com/auth/firebase.messaging']
+
+
+def _get_access_token():
+    """Retrieve a valid access token that can be used to authorize requests.
+
+    :return: Access token.
+    """
+    credentials = service_account.Credentials.from_service_account_file(
+        '/home/ec2-user/trackware-sms-82ee7532ea90.json', scopes=SCOPES)
+    request = google.auth.transport.requests.Request()
+    credentials.refresh(request)
+    return credentials.token
+
 
 @api_view(['GET'])
 def Get_last_bus_location(request, bus_id, school_name):
@@ -136,10 +139,10 @@ def Get_last_bus_location(request, bus_id, school_name):
         return Response(result)
 
 
-def send_message(token,body,title,data):
+def send_message(token, body, title, data):
     print(token)
     headers = {
-        'Authorization': 'Bearer ya29.c.c0ASRK0GaLpOowzfbNqrMkMA6sNFqHbLhJsdOtxgFoB1mgIqbsGIS9jNH1No0TNcVccuERGV6NaE0MTlJYmCb_IHYJIXf3SMIaVITU9FPqkDVewV8AdtWbd1DUK8Q2TDsbm8mpWkVJCAxsrNZ0Q986vbr2patbCzK20k_61dBejy5V_yNVkNbTuFvYXnHcDVFG5VX_obddTmyxABFXKqj6eQ-s2P0D3vqXx70uPY5xVB54G5ReETtBsl8elQHYQWuHk3DRlb4kFXeOHk9RaNoFhqHZ4XM3V_NJVQoAwhuzunmjzwr7h8BcOaZPJaMqjs1xNBgGWT-wDLUWxoXpFzvQwgDHm1b66Ewnr_8illJI3nS8k1B7GuBrL63DT385Do7OO0q6Wju2bx3O9dYvY5-9wQaX0YynfOmpRY1UloXyfaU3VoRc0bQOXWgIQ0Osv5rwXxkJeX_rFmzVlpWim9ijm6lS1Q8SSvuksX0bk2Ih2uw27notqvW-OJeS_urOh0-cuO3-toYyarmWgc-5hy3lyIvrkuRgmUf6ujf6s4Ra_So7o2Zhx60j9-vwQBvt4YM-ss25Q4--251-2_S15bwZWs77otVoeoMsj1dtVvuo3QwF5rsrBkVQbyFt4UrItx_uJp2mdaVBnadlxQwoBYM9By3s4Bt9gvF-q8kesOggeWp6j62SnxS_y3xoIfZue7u2bny3g4ryVx293e_4_ckai91wQdsgWh8lkJiayxnZbeudS6dvolFw672bIo68uo-aevv1bB_J9YQt_er-0od28kt56yqz4tjuYSip9Q4fqFyg9skmtd6X2eF95vtY5b_dxBnfImlaUR5vhtk-XjmiQ57di_uxz9vf5OWzuBZh3dFvYc5b3bn7F9dF6m41r7pozqsBkbYZmi5i9lclFxy3uRVbe2nQ1QIF-g59ec9Xm20-u5YBVQ-rnms76WwvtOlXy5S10wmg_I0kaJvsw4i9bj41QFz7mY-Ql-sXyqvp5lY2BsBJIlkZdam',
+        'Authorization': 'Bearer ' + _get_access_token(),
         'Content-Type': 'application/json; UTF-8',
     }
     url = "https://fcm.googleapis.com/v1/projects/trackware-sms/messages:send"
@@ -169,7 +172,7 @@ def send_message(token,body,title,data):
             "data": data
         }
     })
-    r=requests.post(url, headers=headers, data=payload)
+    r = requests.post(url, headers=headers, data=payload)
     print(r)
 
 
@@ -215,10 +218,9 @@ def send_school_message(request):
     # except Exception as e:
     #     print(e)
     if request.method == 'POST':
-
         school_name = request.data.get('school_name')
         message_id = request.data.get('message_id')
-        r =Timer(3.0, twoArgs, (message_id, school_name))
+        r = Timer(3.0, twoArgs, (message_id, school_name))
         r.start()
         result1 = {
             "route": 'Ok'
@@ -228,9 +230,7 @@ def send_school_message(request):
     return Response(result1)
 
 
-
-
-def twoArgs(message_id,school_name):
+def twoArgs(message_id, school_name):
     result1 = {
         "route": 'Ok'
 
@@ -251,263 +251,275 @@ def twoArgs(message_id,school_name):
             r_id.append(id[0])
         r_id = list(dict.fromkeys(r_id))
 
-
         if r_id:
-           for std in r_id:
-            cursor.execute(
-                "select  mother_id,father_id,responsible_id_value,display_name_search from student_student WHERE id = %s ",
-                [std])
-            student = cursor.fetchall()
-            student_name=''
-            id = []
-            for rec in student:
-                student_name=rec[3]
-                if rec[0]:
-                    id.append(rec[0])
-                if rec[1]:
-                    id.append(rec[1])
-                if rec[2]:
-                    id.append(rec[2])
-            id = list(dict.fromkeys(id))
+            for std in r_id:
+                cursor.execute(
+                    "select  mother_id,father_id,responsible_id_value,display_name_search from student_student WHERE id = %s ",
+                    [std])
+                student = cursor.fetchall()
+                student_name = ''
+                id = []
+                for rec in student:
+                    student_name = rec[3]
+                    if rec[0]:
+                        id.append(rec[0])
+                    if rec[1]:
+                        id.append(rec[1])
+                    if rec[2]:
+                        id.append(rec[2])
+                id = list(dict.fromkeys(id))
 
+                mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id), Q(db_name=school_name),
+                                                            Q(is_active=True)).values_list('mobile_token').order_by(
+                    '-pk')
 
-            mobile_token = ManagerParent.objects.filter(Q(parent_id__in=id), Q(db_name=school_name),
-                                                        Q(is_active=True)).values_list('mobile_token').order_by('-pk')
+                token = []
 
-            token = []
+                for tok in mobile_token:
+                    token.append(tok[0])
 
+                push_service = FCMNotification(
+                    api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                registration_id = token
 
-            for tok in mobile_token:
+                message_title = school_message[0][1] if school_message[0][1] else ''
+                message_body = school_message[0][0] if school_message[0][0] else ''
 
-                token.append(tok[0])
-
-
-            push_service = FCMNotification(
-                api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-            registration_id = token
-
-            message_title = school_message[0][1] if school_message[0][1] else ''
-            message_body = school_message[0][0]if school_message[0][0] else ''
-            
-            if message_title == 'Badge':
-                message_title='Badge'
-                message_body='A badge has been awarded to '+ student_name
-                for parent_id in id :
-                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-                    parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-                                                                Q(is_active=True)).values_list('mobile_token').order_by('-pk')
-                    token_parent=[]
-                    for tok in mobile_token_parent:
-                        token_parent.append(tok[0])
-                        registration_id = token_parent
-                    if parent[0][0]:
-                        if 'en' not in parent[0][0]:
+                if message_title == 'Badge':
+                    message_title = 'Badge'
+                    message_body = 'A badge has been awarded to ' + student_name
+                    for parent_id in id:
+                        cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                        parent = cursor.fetchall()
+                        mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                           Q(is_active=True)).values_list(
+                            'mobile_token').order_by('-pk')
+                        token_parent = []
+                        for tok in mobile_token_parent:
+                            token_parent.append(tok[0])
+                            registration_id = token_parent
+                        if parent[0][0]:
+                            if 'en' not in parent[0][0]:
                                 message_title = 'أوسمة'
-                                message_body =  ' تم منح وسام للطالب '   +student_name
-                    if registration_id:
-                        registration_id = list(dict.fromkeys(registration_id))
-                        for token in registration_id:
-                            send_message(token, message_body, message_title, {"student_id":str(std),"picked":False,"model_name":"Badge","student_name":student_name})
-                        # result = push_service.notify_multiple_devices(registration_ids=registration_id,
-                        #                                            sound='new_beeb.mp3', message_title=message_title,
-                        #                                            message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Badge","student_name":student_name})
-            elif  message_title == 'Weekly Plan':
-                message_title='Weekly Plan'
-                message_body= student_name+ '  - A new weekly plan for the next week has been published'
-                cursor.execute("select  action_id,plan_name from message_student WHERE student_id = %s and school_message_id=%s",
-                               [std, message_id])
-                action = cursor.fetchall()
-                for parent_id in id :
-                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-                    parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-                                                                Q(is_active=True)).values_list('mobile_token').order_by('-pk')
-                    token_parent=[]
-                    for tok in mobile_token_parent:
-                        token_parent.append(tok[0])
-                        registration_id = token_parent
-                    if parent[0][0]:
-                        if 'en' not in parent[0][0]:
+                                message_body = ' تم منح وسام للطالب ' + student_name
+                        if registration_id:
+                            registration_id = list(dict.fromkeys(registration_id))
+                            for token in registration_id:
+                                send_message(token, message_body, message_title,
+                                             {"student_id": str(std), "picked": False, "model_name": "Badge",
+                                              "student_name": student_name})
+                            # result = push_service.notify_multiple_devices(registration_ids=registration_id,
+                            #                                            sound='new_beeb.mp3', message_title=message_title,
+                            #                                            message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Badge","student_name":student_name})
+                elif message_title == 'Weekly Plan':
+                    message_title = 'Weekly Plan'
+                    message_body = student_name + '  - A new weekly plan for the next week has been published'
+                    cursor.execute(
+                        "select  action_id,plan_name from message_student WHERE student_id = %s and school_message_id=%s",
+                        [std, message_id])
+                    action = cursor.fetchall()
+                    for parent_id in id:
+                        cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                        parent = cursor.fetchall()
+                        mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                           Q(is_active=True)).values_list(
+                            'mobile_token').order_by('-pk')
+                        token_parent = []
+                        for tok in mobile_token_parent:
+                            token_parent.append(tok[0])
+                            registration_id = token_parent
+                        if parent[0][0]:
+                            if 'en' not in parent[0][0]:
                                 message_title = 'الخطة الأسبوعية'
                                 message_body = f'{student_name}  - تم نشر خطة أسبوعية جديدة للأسبوع القادم   '
-                    if registration_id:
-                        for token in registration_id:
-                            send_message(token, message_body, message_title, {"student_id":str(std),"picked":False,"model_name":"Weekly","student_name":student_name,"action":str(action[0][0]),"plan_name":str(action[0][1])})
-                        # result = push_service.notify_multiple_devices(registration_ids=registration_id,
-                        #                                            sound='new_beeb.mp3', message_title=message_title,
-                        #                                            message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Weekly","student_name":student_name,"action":str(action[0][0]),"plan_name":str(action[0][1])} )
-            elif message_title == 'Assignment':
-                message_title = 'Online Assignment '
-                message_body = student_name + ' - '+message_body
-                for parent_id in id :
-                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-                    parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-                                                                Q(is_active=True)).values_list('mobile_token').order_by('-pk')
-                    token_parent=[]
-                    for tok in mobile_token_parent:
-                        token_parent.append(tok[0])
-                        registration_id = token_parent
-                    if parent[0][0]:
-                        if 'en' not in parent[0][0]:
+                        if registration_id:
+                            for token in registration_id:
+                                send_message(token, message_body, message_title,
+                                             {"student_id": str(std), "picked": False, "model_name": "Weekly",
+                                              "student_name": student_name, "action": str(action[0][0]),
+                                              "plan_name": str(action[0][1])})
+                            # result = push_service.notify_multiple_devices(registration_ids=registration_id,
+                            #                                            sound='new_beeb.mp3', message_title=message_title,
+                            #                                            message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Weekly","student_name":student_name,"action":str(action[0][0]),"plan_name":str(action[0][1])} )
+                elif message_title == 'Assignment':
+                    message_title = 'Online Assignment '
+                    message_body = student_name + ' - ' + message_body
+                    for parent_id in id:
+                        cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                        parent = cursor.fetchall()
+                        mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                           Q(is_active=True)).values_list(
+                            'mobile_token').order_by('-pk')
+                        token_parent = []
+                        for tok in mobile_token_parent:
+                            token_parent.append(tok[0])
+                            registration_id = token_parent
+                        if parent[0][0]:
+                            if 'en' not in parent[0][0]:
                                 message_title = ' الواجبات الإلكترونية'
                                 message_body = message_body.replace(student_name + ' - ', '')
                                 # message_body=message_body.replace(student_name, '')
                                 message_body = student_name + ' - ' + message_body
-                    if registration_id:
-                        for token in registration_id:
-                            send_message(token, message_body, message_title,
-                                         {"student_id":str(std),"picked":False,"model_name":"Assignment","student_name":student_name})
-                        # result = push_service.notify_multiple_devices(registration_ids=registration_id,
-                        #                                            sound='new_beeb.mp3', message_title=message_title,
-                        #                                            message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Assignment","student_name":student_name})
-            elif message_title == 'Exam':
-                message_title = 'Online Exam '
-                message_body = student_name + ' - ' + message_body
-                for parent_id in id:
-                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-                    parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-                                                                       Q(is_active=True)).values_list(
-                        'mobile_token').order_by('-pk')
-                    token_parent = []
-                    for tok in mobile_token_parent:
-                        token_parent.append(tok[0])
-                        registration_id = token_parent
-                    if parent[0][0]:
-                        if 'en' not in parent[0][0]:
-                            message_title = '  الامتحانات الالكترونية'
-                            message_body = message_body.replace(student_name+' - ', '')
-                            message_body = student_name + ' - ' + message_body
-                    if registration_id:
-                        for token in registration_id:
-                            send_message(token, message_body, message_title,
-                                         {"student_id": str(std), "picked": False, "model_name": "Exam",
-                                          "student_name": student_name})
-                        # result = push_service.notify_multiple_devices(registration_ids=registration_id,
-                        #                                            sound='new_beeb.mp3', message_title=message_title,
-                        #                                            message_body=message_body,data_message=
-                        #                                               {"student_id":str(std),"picked":False,"model_name":"Exam","student_name":student_name} )
-            elif message_title == 'Homework':
-                message_title = ' Homework'
-                message_body = student_name + ' - ' + message_body
-                cursor.execute("select  action_id from message_student WHERE student_id = %s and school_message_id=%s",
-                               [std, message_id])
-                action = cursor.fetchall()
-                for parent_id in id:
-                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-                    parent = cursor.fetchall()
+                        if registration_id:
+                            for token in registration_id:
+                                send_message(token, message_body, message_title,
+                                             {"student_id": str(std), "picked": False, "model_name": "Assignment",
+                                              "student_name": student_name})
+                            # result = push_service.notify_multiple_devices(registration_ids=registration_id,
+                            #                                            sound='new_beeb.mp3', message_title=message_title,
+                            #                                            message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Assignment","student_name":student_name})
+                elif message_title == 'Exam':
+                    message_title = 'Online Exam '
+                    message_body = student_name + ' - ' + message_body
+                    for parent_id in id:
+                        cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                        parent = cursor.fetchall()
+                        mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                           Q(is_active=True)).values_list(
+                            'mobile_token').order_by('-pk')
+                        token_parent = []
+                        for tok in mobile_token_parent:
+                            token_parent.append(tok[0])
+                            registration_id = token_parent
+                        if parent[0][0]:
+                            if 'en' not in parent[0][0]:
+                                message_title = '  الامتحانات الالكترونية'
+                                message_body = message_body.replace(student_name + ' - ', '')
+                                message_body = student_name + ' - ' + message_body
+                        if registration_id:
+                            for token in registration_id:
+                                send_message(token, message_body, message_title,
+                                             {"student_id": str(std), "picked": False, "model_name": "Exam",
+                                              "student_name": student_name})
+                            # result = push_service.notify_multiple_devices(registration_ids=registration_id,
+                            #                                            sound='new_beeb.mp3', message_title=message_title,
+                            #                                            message_body=message_body,data_message=
+                            #                                               {"student_id":str(std),"picked":False,"model_name":"Exam","student_name":student_name} )
+                elif message_title == 'Homework':
+                    message_title = ' Homework'
+                    message_body = student_name + ' - ' + message_body
+                    cursor.execute(
+                        "select  action_id from message_student WHERE student_id = %s and school_message_id=%s",
+                        [std, message_id])
+                    action = cursor.fetchall()
+                    for parent_id in id:
+                        cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                        parent = cursor.fetchall()
 
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-                                                                       Q(is_active=True)).values_list(
-                        'mobile_token').order_by('-pk')
-                    token_parent = []
-                    for tok in mobile_token_parent:
-                        token_parent.append(tok[0])
-                        registration_id = token_parent
-                    if parent[0][0]:
-                        if 'en' not in parent[0][0]:
-                                message_body = message_body.replace(student_name+' - ', '')
+                        mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                           Q(is_active=True)).values_list(
+                            'mobile_token').order_by('-pk')
+                        token_parent = []
+                        for tok in mobile_token_parent:
+                            token_parent.append(tok[0])
+                            registration_id = token_parent
+                        if parent[0][0]:
+                            if 'en' not in parent[0][0]:
+                                message_body = message_body.replace(student_name + ' - ', '')
 
                                 message_title = ' الواجبات المنزلية '
                                 message_body = student_name + ' - ' + message_body
-                    if registration_id:
-                        for token in registration_id:
-                            send_message(token, message_body, message_title,
-                                     {"student_id":str(std),"picked":False,"model_name":"Homework","student_name":student_name,"action":str(action[0][0])})
-                    #     result = push_service.notify_multiple_devices(registration_ids=registration_id,
-                    #                                                sound='new_beeb.mp3', message_title=message_title,
-                    #                                                message_body=message_body,
-                    # data_message={"student_id":str(std),"picked":False,"model_name":"Homework","student_name":student_name,"action":str(action[0][0])}  )
-            elif message_title == 'Event':
-                message_title = 'School Event'
-                message_body = student_name + ' - ' + message_body
-                cursor.execute("select  action_id from message_student WHERE student_id = %s and school_message_id=%s",
-                               [std, message_id])
-                action = cursor.fetchall()
-                for parent_id in id:
-                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-                    parent = cursor.fetchall()
+                        if registration_id:
+                            for token in registration_id:
+                                send_message(token, message_body, message_title,
+                                             {"student_id": str(std), "picked": False, "model_name": "Homework",
+                                              "student_name": student_name, "action": str(action[0][0])})
+                        #     result = push_service.notify_multiple_devices(registration_ids=registration_id,
+                        #                                                sound='new_beeb.mp3', message_title=message_title,
+                        #                                                message_body=message_body,
+                        # data_message={"student_id":str(std),"picked":False,"model_name":"Homework","student_name":student_name,"action":str(action[0][0])}  )
+                elif message_title == 'Event':
+                    message_title = 'School Event'
+                    message_body = student_name + ' - ' + message_body
+                    cursor.execute(
+                        "select  action_id from message_student WHERE student_id = %s and school_message_id=%s",
+                        [std, message_id])
+                    action = cursor.fetchall()
+                    for parent_id in id:
+                        cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                        parent = cursor.fetchall()
 
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-                                                                       Q(is_active=True)).values_list(
-                        'mobile_token').order_by('-pk')
-                    token_parent = []
-                    for tok in mobile_token_parent:
-                        token_parent.append(tok[0])
-                        registration_id = token_parent
-                    if parent[0][0]:
-                        if 'en' not in parent[0][0]:
+                        mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                           Q(is_active=True)).values_list(
+                            'mobile_token').order_by('-pk')
+                        token_parent = []
+                        for tok in mobile_token_parent:
+                            token_parent.append(tok[0])
+                            registration_id = token_parent
+                        if parent[0][0]:
+                            if 'en' not in parent[0][0]:
                                 message_title = ' الأنشطة المدرسية'
-                                message_body = message_body.replace(student_name+' - ', '')
+                                message_body = message_body.replace(student_name + ' - ', '')
                                 message_body = student_name + ' - ' + message_body
 
-                    if registration_id:
-                        for token in registration_id:
-                            send_message(token, message_body, message_title,
-                                         {"student_id":str(std),"picked":False,"model_name":"Event","student_name":student_name,"action":str(action[0][0])})
-                        # result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Event","student_name":student_name,"action":str(action[0][0])})
-            elif message_title == 'Meeting':
-                message_title = 'Events'
-                message_body = message_body.replace(student_name+' - ', '')
-                message_body = student_name +" "+message_body
-                for parent_id in id:
-                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-                    parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-                                                                       Q(is_active=True)).values_list(
-                        'mobile_token').order_by('-pk')
-                    token_parent = []
-                    for tok in mobile_token_parent:
-                        token_parent.append(tok[0])
-                        registration_id = token_parent
-                    if parent[0][0]:
-                        if 'en' not in parent[0][0]:
-                            message_title = 'المناسبات'
-                            message_body = student_name + " - " + message_body
-                    if registration_id:
-                        for token in registration_id:
-                            send_message(token, message_body, message_title,
-                                         {"student_id":str(std),"picked":False,"model_name":"Meeting","student_name":student_name})
-                        # result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Meeting","student_name":student_name})
-            elif message_title == 'Absence':
-                message_title = 'Absence Request'
-                message_body = ' Absence has been '+'Approved'if 'Approval' in message_body else 'Rejected for ' +student_name
-                for parent_id in id:
-                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-                    parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-                                                                       Q(is_active=True)).values_list(
-                        'mobile_token').order_by('-pk')
-                    token_parent = []
-                    for tok in mobile_token_parent:
-                        token_parent.append(tok[0])
-                        registration_id = token_parent
-                    if parent[0][0]:
-                        if 'en' not in parent[0][0]:
+                        if registration_id:
+                            for token in registration_id:
+                                send_message(token, message_body, message_title,
+                                             {"student_id": str(std), "picked": False, "model_name": "Event",
+                                              "student_name": student_name, "action": str(action[0][0])})
+                            # result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Event","student_name":student_name,"action":str(action[0][0])})
+                elif message_title == 'Meeting':
+                    message_title = 'Events'
+                    message_body = message_body.replace(student_name + ' - ', '')
+                    message_body = student_name + " " + message_body
+                    for parent_id in id:
+                        cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                        parent = cursor.fetchall()
+                        mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                           Q(is_active=True)).values_list(
+                            'mobile_token').order_by('-pk')
+                        token_parent = []
+                        for tok in mobile_token_parent:
+                            token_parent.append(tok[0])
+                            registration_id = token_parent
+                        if parent[0][0]:
+                            if 'en' not in parent[0][0]:
+                                message_title = 'المناسبات'
+                                message_body = student_name + " - " + message_body
+                        if registration_id:
+                            for token in registration_id:
+                                send_message(token, message_body, message_title,
+                                             {"student_id": str(std), "picked": False, "model_name": "Meeting",
+                                              "student_name": student_name})
+                            # result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Meeting","student_name":student_name})
+                elif message_title == 'Absence':
+                    message_title = 'Absence Request'
+                    message_body = ' Absence has been ' + 'Approved' if 'Approval' in message_body else 'Rejected for ' + student_name
+                    for parent_id in id:
+                        cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                        parent = cursor.fetchall()
+                        mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                           Q(is_active=True)).values_list(
+                            'mobile_token').order_by('-pk')
+                        token_parent = []
+                        for tok in mobile_token_parent:
+                            token_parent.append(tok[0])
+                            registration_id = token_parent
+                        if parent[0][0]:
+                            if 'en' not in parent[0][0]:
                                 message_title = 'Absence Request'
                                 message_body = ' Absence has been ' + 'Approved' if 'Approval' in message_body else 'Rejected for ' + student_name
-                    if registration_id:
-                        for token in registration_id:
-                            send_message(token, message_body, message_title,
-                                         {"student_id":str(std),"picked":False,"model_name":"Absence","student_name":student_name})
-                        # result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Absence","student_name":student_name})
-            elif message_title == 'Mark' :
-                for parent_id in id:
-                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-                    parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-                                                                       Q(is_active=True)).values_list(
-                        'mobile_token').order_by('-pk')
-                    token_parent = []
-                    message_title = 'Marks'
-                    message_body += student_name
-                    for tok in mobile_token_parent:
-                        token_parent.append(tok[0])
-                        registration_id = token_parent
-                    if parent[0][0]:
-                        if 'en' not in parent[0][0]:
+                        if registration_id:
+                            for token in registration_id:
+                                send_message(token, message_body, message_title,
+                                             {"student_id": str(std), "picked": False, "model_name": "Absence",
+                                              "student_name": student_name})
+                            # result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Absence","student_name":student_name})
+                elif message_title == 'Mark':
+                    for parent_id in id:
+                        cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                        parent = cursor.fetchall()
+                        mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                           Q(is_active=True)).values_list(
+                            'mobile_token').order_by('-pk')
+                        token_parent = []
+                        message_title = 'Marks'
+                        message_body += student_name
+                        for tok in mobile_token_parent:
+                            token_parent.append(tok[0])
+                            registration_id = token_parent
+                        if parent[0][0]:
+                            if 'en' not in parent[0][0]:
                                 message_title = 'العلامات'
 
                                 if "First Exam" in message_body:
@@ -520,63 +532,64 @@ def twoArgs(message_id,school_name):
                                     message_body = message_body.replace("Midterm Exam", "امتحان منتصف الفصل")
                                 elif "Final Exam" in message_body:
                                     message_body = message_body.replace("Final Exam", "الامتحان النهائي")
-                        else:
-                            message_title = 'Marks'
+                            else:
+                                message_title = 'Marks'
 
-                    if registration_id:
-                        for token in registration_id:
-                            send_message(token, message_body, message_title,
-                                         {"student_id":str(std),"picked":False,"model_name":"Mark","student_name":student_name})
-                        # result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Mark","student_name":student_name})
-            elif message_title == 'certification':
-                message_title = 'الشهادة المدرسية'
-                for parent_id in id:
-                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-                    parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-                                                                       Q(is_active=True)).values_list(
-                        'mobile_token').order_by('-pk')
-                    token_parent = []
-                    for tok in mobile_token_parent:
-                        token_parent.append(tok[0])
-                        registration_id = token_parent
-                    if parent[0][0]:
-                        if 'en' not in parent[0][0]:
+                        if registration_id:
+                            for token in registration_id:
+                                send_message(token, message_body, message_title,
+                                             {"student_id": str(std), "picked": False, "model_name": "Mark",
+                                              "student_name": student_name})
+                            # result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Mark","student_name":student_name})
+                elif message_title == 'certification':
+                    message_title = 'الشهادة المدرسية'
+                    for parent_id in id:
+                        cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                        parent = cursor.fetchall()
+                        mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                           Q(is_active=True)).values_list(
+                            'mobile_token').order_by('-pk')
+                        token_parent = []
+                        for tok in mobile_token_parent:
+                            token_parent.append(tok[0])
+                            registration_id = token_parent
+                        if parent[0][0]:
+                            if 'en' not in parent[0][0]:
                                 message_title = 'الشهادة المدرسية'
-                    if registration_id:
-                        for token in registration_id:
-                            send_message(token, message_body, message_title,
-                                         {})
-                        # result = push_service.notify_multiple_devices(registration_ids=registration_id,
-                        #                                            sound='new_beeb.mp3',
-                        #                                            message_title=message_title,
-                        #                                            message_body=message_body,
-                        #                                            )
-            elif message_title == 'daily_attendance':
-                st = 'Your Child ' + student_name
-                message_body = message_body.replace("Your Child", st)
-                if 'is late on' in message_body:
-                    message_title = 'Late Notification'
-                elif 'is absent on' in message_body:
-                    message_title = 'Absence Notification'
-                    # st = 'Your Child ' + student_name
-                    # message_body = message_body.replace("Your Child", st)
-                for parent_id in id:
-                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-                    parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-                                                                       Q(is_active=True)).values_list(
-                        'mobile_token').order_by('-pk')
-                    token_parent = []
-                    for tok in mobile_token_parent:
-                        token_parent.append(tok[0])
-                        registration_id = token_parent
-                    if parent[0][0]:
-                        if 'en' not in parent[0][0]:
+                        if registration_id:
+                            for token in registration_id:
+                                send_message(token, message_body, message_title,
+                                             {})
+                            # result = push_service.notify_multiple_devices(registration_ids=registration_id,
+                            #                                            sound='new_beeb.mp3',
+                            #                                            message_title=message_title,
+                            #                                            message_body=message_body,
+                            #                                            )
+                elif message_title == 'daily_attendance':
+                    st = 'Your Child ' + student_name
+                    message_body = message_body.replace("Your Child", st)
+                    if 'is late on' in message_body:
+                        message_title = 'Late Notification'
+                    elif 'is absent on' in message_body:
+                        message_title = 'Absence Notification'
+                        # st = 'Your Child ' + student_name
+                        # message_body = message_body.replace("Your Child", st)
+                    for parent_id in id:
+                        cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                        parent = cursor.fetchall()
+                        mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                           Q(is_active=True)).values_list(
+                            'mobile_token').order_by('-pk')
+                        token_parent = []
+                        for tok in mobile_token_parent:
+                            token_parent.append(tok[0])
+                            registration_id = token_parent
+                        if parent[0][0]:
+                            if 'en' not in parent[0][0]:
                                 message_title = 'إشعار غياب'
                                 if 'is late on' in message_body:
 
-                                    message_body=f"   حضر الطالب  {student_name}   متأخرا   "
+                                    message_body = f"   حضر الطالب  {student_name}   متأخرا   "
                                     message_title = ' إشعار تأخير'
                                 elif 'is absent on' in message_body:
                                     message_body = ""
@@ -584,50 +597,50 @@ def twoArgs(message_id,school_name):
                                     message_title = 'إشعار غياب'
                                     # st = 'Your Child ' + student_name
                                     # message_body = message_body.replace("Your Child", st)
-                    if registration_id:
-                        for token in registration_id:
-                            send_message(token, message_body, message_title,
-                                         {"student_id":str(std),"picked":False,"model_name":"Absence","student_name":student_name})
-                        # result = push_service.notify_multiple_devices(registration_ids=registration_id,
-                        #                                            sound='new_beeb.mp3',
-                        #                                            message_title=message_title,
-                        #                                            message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Absence","student_name":student_name}
-                        #                                            )
-            elif message_title == 'clinic':
-                message_title='Clinic'
-                message_body += ' - '+student_name
-                for parent_id in id :
-                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-                    parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
-                                                                Q(is_active=True)).values_list('mobile_token').order_by('-pk')
-                    token_parent=[]
-                    for tok in mobile_token_parent:
-                        token_parent.append(tok[0])
-                        registration_id = token_parent
-                    if parent[0][0]:
-                        if 'en' not in parent[0][0]:
+                        if registration_id:
+                            for token in registration_id:
+                                send_message(token, message_body, message_title,
+                                             {"student_id": str(std), "picked": False, "model_name": "Absence",
+                                              "student_name": student_name})
+                            # result = push_service.notify_multiple_devices(registration_ids=registration_id,
+                            #                                            sound='new_beeb.mp3',
+                            #                                            message_title=message_title,
+                            #                                            message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Absence","student_name":student_name}
+                            #                                            )
+                elif message_title == 'clinic':
+                    message_title = 'Clinic'
+                    message_body += ' - ' + student_name
+                    for parent_id in id:
+                        cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                        parent = cursor.fetchall()
+                        mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                                                                           Q(is_active=True)).values_list(
+                            'mobile_token').order_by('-pk')
+                        token_parent = []
+                        for tok in mobile_token_parent:
+                            token_parent.append(tok[0])
+                            registration_id = token_parent
+                        if parent[0][0]:
+                            if 'en' not in parent[0][0]:
                                 message_title = 'العيادة'
 
-                    if registration_id:
-                        for token in registration_id:
-                            send_message(token, message_body, message_title,
-                                         {"student_id":str(std),"picked":False,"model_name":"clinic","student_name":student_name})
-                        # result = push_service.notify_multiple_devices(registration_ids=registration_id,
-                        #                                            sound='new_beeb.mp3', message_title=message_title,
-                        #                                            message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"clinic","student_name":student_name})
-            else:
-                for token in registration_id:
-                    print("ddddddddddddddddddddddddddddddddddddddddddddddaaaaaaa")
-                    send_message(token, message_body, message_title,
-                                 {})
+                        if registration_id:
+                            for token in registration_id:
+                                send_message(token, message_body, message_title,
+                                             {"student_id": str(std), "picked": False, "model_name": "clinic",
+                                              "student_name": student_name})
+                            # result = push_service.notify_multiple_devices(registration_ids=registration_id,
+                            #                                            sound='new_beeb.mp3', message_title=message_title,
+                            #                                            message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"clinic","student_name":student_name})
+                else:
+                    for token in registration_id:
+                        print("ddddddddddddddddddddddddddddddddddddddddddddddaaaaaaa")
+                        send_message(token, message_body, message_title,
+                                     {})
 
-                # result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
-                #                                               registration_ids=registration_id,
-                #                                               data_message={},sound='new_beeb.mp3',)
-
-
-
+                    # result = push_service.notify_multiple_devices(message_title=message_title, message_body=message_body,
+                    #                                               registration_ids=registration_id,
+                    #                                               data_message={},sound='new_beeb.mp3',)
 
     return Response(result1)
 
@@ -637,11 +650,12 @@ def send_confirmation_message_to_parent(request):
     if request.method == 'POST':
         school_name = request.data.get('school_name')
         student_name = request.data.get('student_name')
-        student_id=request.data.get('student_id')
+        student_id = request.data.get('student_id')
         parent_id = request.data.get('parent_id')
 
         # student_name=''
-        mobile_token = ManagerParent.objects.filter(Q(parent_id=parent_id) , Q(db_name=school_name),Q(is_active=True)).values_list(
+        mobile_token = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
+                                                    Q(is_active=True)).values_list(
             'mobile_token').order_by('-pk')
         for e in mobile_token:
             mobile_token = e[0]
@@ -651,7 +665,6 @@ def send_confirmation_message_to_parent(request):
         # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
         registration_id = mobile_token
 
- 
         message_title = "picked up"
         message_body = "please confirm that you have picked up  " + student_name + "from the school"
         # result = push_service.notify_single_device(registration_id=registration_id,
@@ -659,7 +672,7 @@ def send_confirmation_message_to_parent(request):
         #                                            message_body=message_body)
         # for token in registration_id:
         send_message(registration_id, message_body, message_title,
-                     {"student_id":str(student_id),"picked":True})
+                     {"student_id": str(student_id), "picked": True})
         # result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
         #                                            message_body=message_body,data_message={"student_id":str(student_id),"picked":True})
         # #
@@ -670,6 +683,7 @@ def send_confirmation_message_to_parent(request):
 
         return Response(result1)
 
+
 @api_view(['POST'])
 def send_dri(request):
     if request.method == 'POST':
@@ -677,7 +691,7 @@ def send_dri(request):
         student_name = request.data.get('student_name')
         student_id = request.data.get('student_id')
         round_id = request.data.get('round_id')
-        status=''
+        status = ''
 
         try:
             status = request.data.get('status')
@@ -691,14 +705,13 @@ def send_dri(request):
                 registration_id = mobile_token
                 # registration_id = "dXBExPMQSpOQuPgw1alou8:APA91bEB8GZU9sTzQZlcZQbGr2Ssp_ZD66zSWzwYpvGJvBZCkpLPejq24GnNVtBeeO8KPQ1kisjrVrOgSuPI8jjNa45AlhV20lxLOq0cbVnnfXhAoi3f1S8KxBOiR-ErLicdiGz4g1yH"
 
-
                 message_title = "Picked up by Parents"
                 message_body = "The student " + student_name + " has been picked up by his parents, so please don't be waiting."
                 if status:
 
-                    status='in'
+                    status = 'in'
                 else:
-                    status="absent"
+                    status = "absent"
                 # for token in registration_id:
                 send_message(registration_id, message_body, message_title,
                              {"json_data": json.dumps(
@@ -720,7 +733,7 @@ def send_dri(request):
                 #     mobile_token2.append(e[0])
                 # if mobile_token2 and not ("token" in mobile_token2):
         except:
-            status=''
+            status = ''
             # dFcb6UaVQAeAbMrAgnCF59:APA91bExNfxIYZF9QOZMHrp1bDABtihTkDc-8boLfqBvHIg76mlHv8zgEayFM3gT08YoMaeLTnwfGZKGCVNVd_x1zAbGFx4WjOE2_NTZGjRRT3s4clNxHk3XmJZdfvWl3beQDahHsFSc
             if mobile_token:
                 # push_service = FCMNotification(
@@ -753,7 +766,7 @@ def send_dri(request):
                 #     mobile_token2.append(e[0])
                 # if mobile_token2 and not ("token" in mobile_token2):
 
-        signup_token=''
+        signup_token = ''
         # with connections['tst'].cursor() as cursor:
         #     cursor.execute("select  driver_id from transport_round WHERE id = %s", [round_id])
         #     data_id_bus = cursor.fetchall()
@@ -763,15 +776,13 @@ def send_dri(request):
         #     signup_token = cursor.fetchall()
         # mobile_token = signup_token[0][0]
 
-
-
-
-
         result1 = {
             "route": 'Ok'
         }
 
         return Response(result1)
+
+
 @api_view(['POST'])
 def send_survey_message_to_parent(request):
     if request.method == 'POST':
@@ -803,6 +814,8 @@ def send_survey_message_to_parent(request):
         }
 
         return Response(result1)
+
+
 @api_view(['POST'])
 def push_notification(request):
     if request.method == 'POST':
@@ -835,117 +848,123 @@ def push_notification(request):
                             # for rec in parent_id:
 
                             with connections[str(school_name)].cursor() as cursor:
-                                    if  user_id != 0:
-                                        cursor.execute("select  father_id,mother_id,responsible_id_value from student_student WHERE id= %s",
-                                                       [user_id])
-                                        student_info = cursor.fetchall()
-                                        if student_info:
-                                            for rec in student_info[0]:
+                                if user_id != 0:
+                                    cursor.execute(
+                                        "select  father_id,mother_id,responsible_id_value from student_student WHERE id= %s",
+                                        [user_id])
+                                    student_info = cursor.fetchall()
+                                    if student_info:
+                                        for rec in student_info[0]:
 
+                                            cursor.execute("select  settings from school_parent WHERE id = %s", [rec])
+                                            settings = cursor.fetchall()
+                                            mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec),
+                                                                                         Q(db_name=school_name),
+                                                                                         Q(is_active=True)).values_list(
+                                                'mobile_token').order_by('-pk')
+                                            if settings:
+                                                if settings[0] != 'None' and str(settings[0][0]) != 'None':
+                                                    data = json.loads(settings[0][0])
+                                                    for e in mobile_token1:
+                                                        notifications = {"locale": 'en',
+                                                                         "nearby": True,
+                                                                         "check_in": True,
+                                                                         "check_out": True}
+                                                        if type(data['notifications']) is str:
+                                                            li = list(data['notifications'].split(","))
+                                                            notifications = {
 
-                                                cursor.execute("select  settings from school_parent WHERE id = %s", [rec])
-                                                settings = cursor.fetchall()
-                                                mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec), Q(db_name=school_name),Q(is_active=True)).values_list('mobile_token').order_by('-pk')
-                                                if settings:
-                                                    if settings[0] != 'None' and  str(settings[0][0]) != 'None':
-                                                        data = json.loads(settings[0][0])
-                                                        for e in mobile_token1:
-                                                            notifications ={  "locale":  'en',
-                                                                        "nearby": True ,
-                                                                        "check_in": True ,
-                                                                        "check_out": True }
-                                                            if type(data['notifications']) is str:
-                                                                li = list(data['notifications'].split(","))
+                                                                "locale": "ar" if "ar" in li[3] else 'en',
+                                                                "nearby": True if "true" in li[0] else False,
+                                                                "check_in": True if "true" in li[1] else False,
+                                                                "check_out": True if "true" in li[2] else False
+
+                                                            }
+                                                        elif type(data['notifications']) is dict:
+                                                            try:
                                                                 notifications = {
 
-                                                                        "locale": "ar" if "ar" in li[3] else 'en',
-                                                                        "nearby": True if "true" in li[0] else False,
-                                                                        "check_in": True if "true" in li[1] else False,
-                                                                        "check_out": True if "true" in li[2] else False
+                                                                    "locale": data['notifications']['locale'],
+                                                                    "nearby": data['notifications']['nearby'],
+                                                                    "check_in": data['notifications']['check_in'],
+                                                                    "check_out": data['notifications']['check_out']
 
                                                                 }
-                                                            elif type(data['notifications']) is dict:
-                                                                try:
-                                                                    notifications = {
+                                                            except:
 
-                                                                        "locale": data['notifications']['locale'],
-                                                                        "nearby": data['notifications']['nearby'],
-                                                                        "check_in": data['notifications']['check_in'],
-                                                                        "check_out": data['notifications']['check_out']
+                                                                notifications = {"locale": 'en',
+                                                                                 "nearby": True,
+                                                                                 "check_in": True,
+                                                                                 "check_out": True}
+                                                        # notifications = json.loads(str(data['notifications']))
 
-                                                                }
-                                                                except:
+                                                        # print(type(notifications))
+                                                        if notifications['nearby'] and (
+                                                                action == 'near' or action == 'driver'):
+                                                            mobile_token.append(e[0])
+                                                        elif notifications['check_in'] and (
+                                                                action == 'near' or action == 'driver'):
+                                                            mobile_token.append(e[0])
+                                                        elif notifications['check_out'] and (
+                                                                action == 'near' or action == 'driver'):
+                                                            mobile_token.append(e[0])
+                                                        else:
+                                                            mobile_token.append(e[0])
+                                            else:
 
-                                                                    notifications = {"locale": 'en',
-                                                                                     "nearby": True,
-                                                                                     "check_in": True,
-                                                                                     "check_out": True}
-                                                            # notifications = json.loads(str(data['notifications']))
+                                                for e in mobile_token1:
+                                                    mobile_token.append(e[0])
+                                            if mobile_token1:
+                                                push_service = FCMNotification(
+                                                    api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                                # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
+                                                registration_id = mobile_token1[0][0]
+                                                message_title = title
+                                                message_body = message
+                                                send_message(registration_id, message_body, message_title,
+                                                             {})
 
-                                                            # print(type(notifications))
-                                                            if notifications['nearby'] and (action == 'near' or action == 'driver'):
-                                                                mobile_token.append(e[0])
-                                                            elif notifications['check_in'] and (
-                                                                    action == 'near' or action == 'driver'):
-                                                                mobile_token.append(e[0])
-                                                            elif notifications['check_out'] and (
-                                                                    action == 'near' or action == 'driver'):
-                                                                mobile_token.append(e[0])
-                                                            else:
-                                                                mobile_token.append(e[0])
-                                                else:
+                                                # result = push_service.notify_single_device(registration_id=registration_id,
+                                                #                                            message_title=message_title,
+                                                #                                            message_body=message_body,sound='new_beeb.mp3')
 
-                                                    for e in mobile_token1:
-                                                        mobile_token.append(e[0])
-                                                if mobile_token1:
-                                                    push_service = FCMNotification(
-                                                        api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                                    # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
-                                                    registration_id = mobile_token1[0][0]
-                                                    message_title = title
-                                                    message_body = message
-                                                    send_message(registration_id, message_body, message_title,
-                                                                 {})
+                                                result1 = {
+                                                    "route": 'Ok'
+                                                }
+                                                return Response(result1)
+                                    result1 = {
+                                        "route": 'Ok111'
+                                    }
+                                    return Response(result1)
 
-                                                    # result = push_service.notify_single_device(registration_id=registration_id,
-                                                    #                                            message_title=message_title,
-                                                    #                                            message_body=message_body,sound='new_beeb.mp3')
+                                    # if settings:
+                                    #     parent_id=settings[0][1]
+                                else:
+                                    cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
+                                    settings = cursor.fetchall()
 
-                                                    result1 = {
-                                                        "route": 'Ok'
-                                                    }
-                                                    return Response(result1)
-                                        result1 = {
-                                            "route": 'Ok111'
-                                        }
-                                        return Response(result1)
+                                mobile_token1 = ManagerParent.objects.filter(Q(parent_id=parent_id),
+                                                                             Q(db_name=school_name),
+                                                                             Q(is_active=True)).values_list(
+                                    'mobile_token').order_by('-pk')
 
-                                        # if settings:
-                                        #     parent_id=settings[0][1]
-                                    else:
-                                        cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
-                                        settings = cursor.fetchall()
-
-                                    mobile_token1 = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
-                                                                                 Q(is_active=True)).values_list(
-                                        'mobile_token').order_by('-pk')
-
-
-                                # print(rec,school_id, ManagerParent.objects.filter(Q(user_id=rec) , Q(db_name=school_name),Q(is_active=True)).values_list(
-                                #     'mobile_token').order_by('-pk'))
+                            # print(rec,school_id, ManagerParent.objects.filter(Q(user_id=rec) , Q(db_name=school_name),Q(is_active=True)).values_list(
+                            #     'mobile_token').order_by('-pk'))
 
                             if settings:
-                                if settings[0]=='None':
+                                if settings[0] == 'None':
                                     data = json.loads(settings[0][0])
                                     for e in mobile_token1:
-                                        if data['notifications']['nearby'] and (action =='near' or action =='driver'):
+                                        if data['notifications']['nearby'] and (action == 'near' or action == 'driver'):
                                             mobile_token.append(e[0])
-                                        elif    data['notifications']['check_in'] and (action =='near' or action =='driver'):
+                                        elif data['notifications']['check_in'] and (
+                                                action == 'near' or action == 'driver'):
                                             mobile_token.append(e[0])
-                                        elif data['notifications']['check_out'] and (action =='near' or action =='driver'):
+                                        elif data['notifications']['check_out'] and (
+                                                action == 'near' or action == 'driver'):
                                             mobile_token.append(e[0])
                                         else:
-                                             mobile_token.append(e[0])
+                                            mobile_token.append(e[0])
                                 for e in mobile_token1:
                                     mobile_token.append(e[0])
                                 if mobile_token:
@@ -990,7 +1009,9 @@ def push_notification(request):
                                 "route": 'Ok'
                             }
                             return Response(result1)
-@api_view(['POST','GET'])
+
+
+@api_view(['POST', 'GET'])
 def test_lis(request):
     if request.method == 'POST':
         # school_name = request.data.get('school_name')
@@ -1002,7 +1023,7 @@ def test_lis(request):
             "route": 'successful'
         }
         return Response(result1)
-    elif request.method=='GET':
+    elif request.method == 'GET':
         manager = ManagerTracker(data_api='unique_id')
         manager.save()
         result1 = {
@@ -1012,14 +1033,14 @@ def test_lis(request):
         return Response(result1)
 
 
-@api_view(['POST','GET'])
+@api_view(['POST', 'GET'])
 def send_chat_parent(request):
     if request.method == 'POST':
         school_name = request.data.get('school_name')
         message_body = ''
         message_id = request.data.get('message_id')
         parent_id = request.data.get('parent_id')
-        f_id=request.data.get('f_id')
+        f_id = request.data.get('f_id')
         m_id = request.data.get('m_id')
         student_id = request.data.get('student_id')
         student_name = ''
@@ -1040,15 +1061,15 @@ def send_chat_parent(request):
         #     print(message_body)
 
         mobile_token_g = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
-                                                    Q(is_active=True)).values_list(
+                                                      Q(is_active=True)).values_list(
             'mobile_token').order_by('-pk')
         mobile_token_f = ManagerParent.objects.filter(Q(parent_id=f_id), Q(db_name=school_name),
-                                                    Q(is_active=True)).values_list(
+                                                      Q(is_active=True)).values_list(
             'mobile_token').order_by('-pk')
         mobile_token_m = ManagerParent.objects.filter(Q(parent_id=m_id), Q(db_name=school_name),
-                                                    Q(is_active=True)).values_list(
+                                                      Q(is_active=True)).values_list(
             'mobile_token').order_by('-pk')
-        mobile_token=[]
+        mobile_token = []
         for e in mobile_token_g:
             mobile_token_g = e[0]
             mobile_token.append(e[0])
@@ -1058,7 +1079,7 @@ def send_chat_parent(request):
         for e in mobile_token_f:
             mobile_token_f = e[0]
             mobile_token.append(e[0])
-        r = Timer(3.0, twoArgsChat, (message_id, school_name,mobile_token, student_id))
+        r = Timer(3.0, twoArgsChat, (message_id, school_name, mobile_token, student_id))
         r.start()
         # push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
         # if mobile_token_g:
@@ -1093,8 +1114,8 @@ def send_chat_parent(request):
         #
         return Response(result1)
 
-def twoArgsChat(message_id,school_name, mobile_token,student_id):
 
+def twoArgsChat(message_id, school_name, mobile_token, student_id):
     with connections[school_name].cursor() as cursor:
         cursor.execute(
             "select  display_name_search from student_student WHERE  id = %s  And state = 'done'",
@@ -1107,7 +1128,7 @@ def twoArgsChat(message_id,school_name, mobile_token,student_id):
         message = cursor.fetchall()
         patterns = re.compile('<.*?>')
         message_body = message[0][0]
-        message_body= re.sub(patterns, '', message_body)
+        message_body = re.sub(patterns, '', message_body)
         mobile_token = list(dict.fromkeys(mobile_token))
         push_service = FCMNotification(
             api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
