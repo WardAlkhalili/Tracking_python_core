@@ -7,11 +7,11 @@ from pyfcm import FCMNotification
 from django.db import connections
 from Parent_api.models import ManagerParent
 from Driver_api.models import Manager
-# import firebase_admin
+import firebase_admin
 import requests
-# from firebase_admin import credentials
-# from google.oauth2 import service_account
-# import google.auth.transport.requests
+from firebase_admin import credentials
+from google.oauth2 import service_account
+import google.auth.transport.requests
 
 from django.db.models import Q
 from datetime import datetime
