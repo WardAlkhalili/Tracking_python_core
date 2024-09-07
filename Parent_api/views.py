@@ -21,6 +21,65 @@ import datetime
 
 import urllib.request
 import math
+
+
+import firebase_admin
+from firebase_admin import credentials
+from google.oauth2 import service_account
+import google.auth.transport.requests
+
+# cred = credentials.Certificate("/home/ec2-user/trackware-sms-82ee7532ea90.json")
+# # Initialize Firebase Admin SDK
+# firebase_admin.initialize_app(cred)
+# default_app = firebase_admin.initialize_app()
+SCOPES = ['https://www.googleapis.com/auth/firebase.messaging']
+
+
+def _get_access_token():
+    """Retrieve a valid access token that can be used to authorize requests.
+
+    :return: Access token.
+    """
+    credentials = service_account.Credentials.from_service_account_file(
+        '/home/ec2-user/trackware-sms-82ee7532ea90.json', scopes=SCOPES)
+    request = google.auth.transport.requests.Request()
+    credentials.refresh(request)
+    return credentials.token
+def send_message(token,body,title,data):
+    headers = {
+         'Authorization': 'Bearer ' + _get_access_token(),
+        'Content-Type': 'application/json; UTF-8',
+    }
+    url = "https://fcm.googleapis.com/v1/projects/trackware-sms/messages:send"
+    payload = json.dumps({
+        "message": {
+            "token": token,
+            "notification": {
+                "body": body,
+                "title": title
+            },
+            "android": {
+                "notification": {
+                    "sound": "new_beeb"
+                }
+            },
+            "apns": {
+                "payload": {
+                    "aps": {
+                        "alert": {
+                            "title": title,
+                            "body": body
+                        },
+                        "sound": "new_beeb.mp3"
+                    }
+                }
+            },
+            "data": data
+        }
+    })
+    re=requests.post(url, headers=headers, data=payload)
+    print(re)
+
 @api_view(['POST'])
 def parent_login(request):
     if request.method == 'POST':
@@ -2969,13 +3028,17 @@ def send_driver_notif(mobile_token,student_id,student_name,round_id,type,when):
     # else:
     #     message_title = "Absent All Day "
     message_title='Round\'s Absence'
-    result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
-                                               message_body=message_body, message_icon="",
-                                               data_message={"json_data": json.dumps(
+    send_message(registration_id, message_body, message_title,    {"json_data": json.dumps(
                                                    {"student_id": student_id, "status": "absent",
                                                     "student_name": student_name, "round_id": round_id,
-                                                    "date_time": ""})}
-                                               )
+                                                    "date_time": ""})})
+    # result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
+    #                                            message_body=message_body, message_icon="",
+    #                                            data_message={"json_data": json.dumps(
+    #                                                {"student_id": student_id, "status": "absent",
+    #                                                 "student_name": student_name, "round_id": round_id,
+    #                                                 "date_time": ""})}
+    #                                            )
 
 
 @api_view(['GET'])
