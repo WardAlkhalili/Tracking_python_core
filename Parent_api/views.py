@@ -27,9 +27,9 @@ from firebase_admin import credentials
 from google.oauth2 import service_account
 import google.auth.transport.requests
 
-cred = credentials.Certificate("/home/ec2-user/trackware-sms-82ee7532ea90.json")
-# Initialize Firebase Admin SDK
-firebase_admin.initialize_app(cred)
+# cred = credentials.Certificate("/home/ec2-user/trackware-sms-82ee7532ea90.json")
+# # Initialize Firebase Admin SDK
+# firebase_admin.initialize_app(cred)
 # default_app = firebase_admin.initialize_app()
 SCOPES = ['https://www.googleapis.com/auth/firebase.messaging']
 
