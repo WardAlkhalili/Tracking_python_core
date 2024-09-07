@@ -616,6 +616,7 @@ def twoArgs(message_id,school_name):
                         #                                            message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"clinic","student_name":student_name})
             else:
                 for token in registration_id:
+                    print("ddddddddddddddddddddddddddddddddddddddddddddddaaaaaaa")
                     send_message(token, message_body, message_title,
                                  {})
 
