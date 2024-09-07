@@ -2809,4 +2809,5 @@ def send_message(token,body,title,data):
             "data": data
         }
     })
-    requests.post(url, headers=headers, data=payload)
+    re=requests.post(url, headers=headers, data=payload)
+    print(re)
