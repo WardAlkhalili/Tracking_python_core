@@ -1249,33 +1249,37 @@ def set_round_status(request):
 
 
                                             if mobile_tokens and "token" not in mobile_tokens:
-                                                try:
-                                                    push_service.notify_single_device(
-                                                        registration_id=registration_id[0],
-                                                        message_title=message_title if lang == "en" else message_title_ar,
-                                                        message_body=message_body if lang == "en" else message_body_ar,
-                                                        sound='new_beeb.mp3'
-                                                    )
-                                                except Exception as e:
-                                                    try:
-                                                        headers = {
-                                                            'Authorization': "key=AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD",
-                                                            'Content-Type': 'application/json',
-                                                        }
-                                                        body = json.dumps({
-                                                            "registration_ids": mobile_tokens,
-                                                            "notification": {
-                                                                "title": message_title if lang == "en" else message_title_ar,
-                                                                "body": message_body if lang == "en" else message_body_ar,
-                                                                "mutable_content": True,
-                                                                "sound": "new_beeb.mp3"
-                                                            }
-                                                        })
-                                                        url = "https://fcm.googleapis.com/fcm/send"
-                                                        response = requests.post(url, headers=headers, data=body)
-                                                        print(response.json())
-                                                    except Exception as e:
-                                                        print("Notification failed: ", e)
+                                                send_message(registration_id[0],
+                                                             message_body if lang == "en" else message_body_ar,
+                                                             message_title if lang == "en" else message_title_ar,
+                                                             {})
+                                                # try:
+                                                #     push_service.notify_single_device(
+                                                #         registration_id=registration_id[0],
+                                                #         message_title=message_title if lang == "en" else message_title_ar,
+                                                #         message_body=message_body if lang == "en" else message_body_ar,
+                                                #         sound='new_beeb.mp3'
+                                                #     )
+                                                # except Exception as e:
+                                                #     try:
+                                                #         headers = {
+                                                #             'Authorization': "key=AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD",
+                                                #             'Content-Type': 'application/json',
+                                                #         }
+                                                #         body = json.dumps({
+                                                #             "registration_ids": mobile_tokens,
+                                                #             "notification": {
+                                                #                 "title": message_title if lang == "en" else message_title_ar,
+                                                #                 "body": message_body if lang == "en" else message_body_ar,
+                                                #                 "mutable_content": True,
+                                                #                 "sound": "new_beeb.mp3"
+                                                #             }
+                                                #         })
+                                                #         url = "https://fcm.googleapis.com/fcm/send"
+                                                #         response = requests.post(url, headers=headers, data=body)
+                                                #         print(response.json())
+                                                #     except Exception as e:
+                                                #         print("Notification failed: ", e)
 
                                         # Update round history
                                         cursor.execute("""
@@ -1472,33 +1476,37 @@ def set_round_status(request):
                                                 )
 
                                                 if mobile_tokens and "token" not in mobile_tokens:
-                                                    try:
-                                                        push_service.notify_single_device(
-                                                            registration_id=registration_id[0],
-                                                            message_title=message_title if lang == "en" else message_title_ar,
-                                                            message_body=message_body if lang == "en" else message_body_ar,
-                                                            sound='new_beeb.mp3'
-                                                        )
-                                                    except Exception as e:
-                                                        try:
-                                                            headers = {
-                                                                'Authorization': "key=AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD",
-                                                                'Content-Type': 'application/json',
-                                                            }
-                                                            body = json.dumps({
-                                                                "registration_ids": mobile_tokens,
-                                                                "notification": {
-                                                                    "title": message_title if lang == "en" else message_title_ar,
-                                                                    "body": message_body if lang == "en" else message_body_ar,
-                                                                    "mutable_content": True,
-                                                                    "sound": "new_beeb.mp3"
-                                                                }
-                                                            })
-                                                            url = "https://fcm.googleapis.com/fcm/send"
-                                                            response = requests.post(url, headers=headers, data=body)
-                                                            print(response.json())
-                                                        except Exception as e:
-                                                            print("Notification failed: ", e)
+                                                    send_message(registration_id,
+                                                                 message_body if lang == "en" else message_body_ar,
+                                                                 message_title if lang == "en" else message_title_ar,
+                                                                 {})
+                                                    # try:
+                                                    #     push_service.notify_single_device(
+                                                    #         registration_id=registration_id[0],
+                                                    #         message_title=message_title if lang == "en" else message_title_ar,
+                                                    #         message_body=message_body if lang == "en" else message_body_ar,
+                                                    #         sound='new_beeb.mp3'
+                                                    #     )
+                                                    # except Exception as e:
+                                                    #     try:
+                                                    #         headers = {
+                                                    #             'Authorization': "key=AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD",
+                                                    #             'Content-Type': 'application/json',
+                                                    #         }
+                                                    #         body = json.dumps({
+                                                    #             "registration_ids": mobile_tokens,
+                                                    #             "notification": {
+                                                    #                 "title": message_title if lang == "en" else message_title_ar,
+                                                    #                 "body": message_body if lang == "en" else message_body_ar,
+                                                    #                 "mutable_content": True,
+                                                    #                 "sound": "new_beeb.mp3"
+                                                    #             }
+                                                    #         })
+                                                    #         url = "https://fcm.googleapis.com/fcm/send"
+                                                    #         response = requests.post(url, headers=headers, data=body)
+                                                    #         print(response.json())
+                                                    #     except Exception as e:
+                                                    #         print("Notification failed: ", e)
                                             if round_history:
                                                 now = datetime.date.today()
                                                 round_start_date = round_history[1].date()
@@ -1973,36 +1981,39 @@ def students_bus_checks(request):
                                                     message_body = message if lang == "en" else message_ar
 
                                                     if mobile_token and not ("token" in mobile_token):
-
-                                                        try:
-                                                            notify_single_device = push_service.notify_multiple_devices(
-                                                                registration_ids=registration_id,
-                                                                message_title=message_title,
-                                                                message_body=message_body,sound='new_beeb.mp3')
-                                                            mobile_token=[]
-                                                        except Exception as er:
-
-                                                            try:
-                                                                body = json.dumps({"registration_ids": registration_id,
-                                                                                   "notification": {
-                                                                                       "title": message_title ,
-                                                                                       "body": message_body ,
-                                                                                       "mutable_content": True,
-                                                                                       "sound": "new_beeb.mp3"
-                                                                                   }})
-
-                                                                headers = {
-                                                                    'Authorization': "key=AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD",
-                                                                    'Content-Type': 'application/json',
-                                                                }
-
-                                                                url = "https://fcm.googleapis.com/fcm/send"
-                                                                response1 = requests.request("POST", url,
-                                                                                             headers=headers, data=body)
-                                                                response = response1.json()
-
-                                                            except Exception as er:
-                                                                print("-----------1907")
+                                                        send_message(registration_id,
+                                                                     message_body,
+                                                                     message_title,
+                                                                     {})
+                                                        # try:
+                                                        #     notify_single_device = push_service.notify_multiple_devices(
+                                                        #         registration_ids=registration_id,
+                                                        #         message_title=message_title,
+                                                        #         message_body=message_body,sound='new_beeb.mp3')
+                                                        #     mobile_token=[]
+                                                        # except Exception as er:
+                                                        #
+                                                        #     try:
+                                                        #         body = json.dumps({"registration_ids": registration_id,
+                                                        #                            "notification": {
+                                                        #                                "title": message_title ,
+                                                        #                                "body": message_body ,
+                                                        #                                "mutable_content": True,
+                                                        #                                "sound": "new_beeb.mp3"
+                                                        #                            }})
+                                                        #
+                                                        #         headers = {
+                                                        #             'Authorization': "key=AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD",
+                                                        #             'Content-Type': 'application/json',
+                                                        #         }
+                                                        #
+                                                        #         url = "https://fcm.googleapis.com/fcm/send"
+                                                        #         response1 = requests.request("POST", url,
+                                                        #                                      headers=headers, data=body)
+                                                        #         response = response1.json()
+                                                        #
+                                                        #     except Exception as er:
+                                                        #         print("-----------1907")
 
 
 
@@ -2295,34 +2306,39 @@ def send_notification(mobile_token1 ,message_title,message_body):
         api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
     registration_id = mobile_token
     if mobile_token and not ("token" in mobile_token):
-        try:
-            notify_single_device = push_service.notify_single_device(
-                registration_id=registration_id[0],
-                message_title=message_title,
-                message_body=message_body,sound='new_beeb.mp3')
-        except Exception as e:
-            try:
-                body = json.dumps({"to": registration_id[0],
-                                   "notification": {
-                                       "title": message_title ,
-                                       "body": message_body ,
-                                       "mutable_content": True,
-                                       "sound": "new_beeb.mp3"
-                                   }})
 
-                headers = {
-                    'Authorization': "key=AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD",
-                    'Content-Type': 'application/json',
-                }
-
-                url = "https://fcm.googleapis.com/fcm/send"
-                response1 = requests.request("POST", url,
-                                             headers=headers, data=body)
-                response = response1.json()
-
-            except Exception as e:
-                print("--------------2226")
-                # print("-----------2588")
+        send_message(registration_id,
+                     message_body ,
+                     message_title ,
+                     {})
+        # try:
+        #     notify_single_device = push_service.notify_single_device(
+        #         registration_id=registration_id[0],
+        #         message_title=message_title,
+        #         message_body=message_body,sound='new_beeb.mp3')
+        # except Exception as e:
+        #     try:
+        #         body = json.dumps({"to": registration_id[0],
+        #                            "notification": {
+        #                                "title": message_title ,
+        #                                "body": message_body ,
+        #                                "mutable_content": True,
+        #                                "sound": "new_beeb.mp3"
+        #                            }})
+        #
+        #         headers = {
+        #             'Authorization': "key=AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD",
+        #             'Content-Type': 'application/json',
+        #         }
+        #
+        #         url = "https://fcm.googleapis.com/fcm/send"
+        #         response1 = requests.request("POST", url,
+        #                                      headers=headers, data=body)
+        #         response = response1.json()
+        #
+        #     except Exception as e:
+        #         print("--------------2226")
+        #         # print("-----------2588")
 
 @api_view(['POST'])
 def reordered_students(request):
@@ -2704,35 +2720,72 @@ def notify(request):
                                     message_body_ar =" لقد وصلت الحافلة " + str(bus_num[0][0]) +" إلى المنزل " if round_type=="dropoff" else "لقد وصلت الحافلة " + str(bus_num[0][0]) + ".الرجاء إرسال " +student_name[0][0]+"للصعود للحافلة"
                                     message_title = "Arrival - Parent" if round_type=="dropoff" else "Bus Arrival"
                                     message_body = "The bus " + str(bus_num[0][0]) + "has arrived at your home"
-                                    try:
-                                        result = push_service.notify_multiple_devices(registration_ids=registration_id,
-                                                                               message_title=message_title if lang =="en" else message_title_ar,
-                                                                               message_body=message_body if lang =="en" else message_body_ar,sound='new_beeb.mp3')
-                                    except Exception as e:
-                                        try:
-                                            body = json.dumps({"registration_ids": registration_id,
-                                                               "notification": {
-                                                                   "title": message_title if lang == "en" else message_title_ar,
-                                                                   "body": message_body if lang == "en" else message_body_ar,
-                                                                   "mutable_content": True,
-                                                                   "sound": "new_beeb.mp3"
-                                                               }})
-
-                                            headers = {
-                                                'Authorization': "key=AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD",
-                                                'Content-Type': 'application/json',
-                                            }
-
-                                            url = "https://fcm.googleapis.com/fcm/send"
-                                            response1 = requests.request("POST", url,
-                                                                         headers=headers, data=body)
-                                            response = response1.json()
-
-                                        except Exception as e:
-                                            print("-----------2588")
+                                    send_message(registration_id,
+                                                 message_body if lang =="en" else message_body_ar,
+                                                 message_title if lang =="en" else message_title_ar,
+                                                 {})
+                                    # try:
+                                    #     result = push_service.notify_multiple_devices(registration_ids=registration_id,
+                                    #                                            message_title=message_title if lang =="en" else message_title_ar,
+                                    #                                            message_body=message_body if lang =="en" else message_body_ar,sound='new_beeb.mp3')
+                                    # except Exception as e:
+                                    #     try:
+                                    #         body = json.dumps({"registration_ids": registration_id,
+                                    #                            "notification": {
+                                    #                                "title": message_title if lang == "en" else message_title_ar,
+                                    #                                "body": message_body if lang == "en" else message_body_ar,
+                                    #                                "mutable_content": True,
+                                    #                                "sound": "new_beeb.mp3"
+                                    #                            }})
+                                    #
+                                    #         headers = {
+                                    #             'Authorization': "key=AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD",
+                                    #             'Content-Type': 'application/json',
+                                    #         }
+                                    #
+                                    #         url = "https://fcm.googleapis.com/fcm/send"
+                                    #         response1 = requests.request("POST", url,
+                                    #                                      headers=headers, data=body)
+                                    #         response = response1.json()
+                                    #
+                                    #     except Exception as e:
+                                    #         print("-----------2588")
                                 # user_no_move_time_exceeded
 
                                 result ={'status': "ok"}
                                 return Response(result)
 
 
+def send_message(token,body,title,data):
+    headers = {
+        'Authorization': 'Bearer ya29.c.c0ASRK0GaLpOowzfbNqrMkMA6sNFqHbLhJsdOtxgFoB1mgIqbsGIS9jNH1No0TNcVccuERGV6NaE0MTlJYmCb_IHYJIXf3SMIaVITU9FPqkDVewV8AdtWbd1DUK8Q2TDsbm8mpWkVJCAxsrNZ0Q986vbr2patbCzK20k_61dBejy5V_yNVkNbTuFvYXnHcDVFG5VX_obddTmyxABFXKqj6eQ-s2P0D3vqXx70uPY5xVB54G5ReETtBsl8elQHYQWuHk3DRlb4kFXeOHk9RaNoFhqHZ4XM3V_NJVQoAwhuzunmjzwr7h8BcOaZPJaMqjs1xNBgGWT-wDLUWxoXpFzvQwgDHm1b66Ewnr_8illJI3nS8k1B7GuBrL63DT385Do7OO0q6Wju2bx3O9dYvY5-9wQaX0YynfOmpRY1UloXyfaU3VoRc0bQOXWgIQ0Osv5rwXxkJeX_rFmzVlpWim9ijm6lS1Q8SSvuksX0bk2Ih2uw27notqvW-OJeS_urOh0-cuO3-toYyarmWgc-5hy3lyIvrkuRgmUf6ujf6s4Ra_So7o2Zhx60j9-vwQBvt4YM-ss25Q4--251-2_S15bwZWs77otVoeoMsj1dtVvuo3QwF5rsrBkVQbyFt4UrItx_uJp2mdaVBnadlxQwoBYM9By3s4Bt9gvF-q8kesOggeWp6j62SnxS_y3xoIfZue7u2bny3g4ryVx293e_4_ckai91wQdsgWh8lkJiayxnZbeudS6dvolFw672bIo68uo-aevv1bB_J9YQt_er-0od28kt56yqz4tjuYSip9Q4fqFyg9skmtd6X2eF95vtY5b_dxBnfImlaUR5vhtk-XjmiQ57di_uxz9vf5OWzuBZh3dFvYc5b3bn7F9dF6m41r7pozqsBkbYZmi5i9lclFxy3uRVbe2nQ1QIF-g59ec9Xm20-u5YBVQ-rnms76WwvtOlXy5S10wmg_I0kaJvsw4i9bj41QFz7mY-Ql-sXyqvp5lY2BsBJIlkZdam',
+        'Content-Type': 'application/json; UTF-8',
+    }
+    url = "https://fcm.googleapis.com/v1/projects/trackware-sms/messages:send"
+    payload = json.dumps({
+        "message": {
+            "token": token,
+            "notification": {
+                "body": body,
+                "title": title
+            },
+            "android": {
+                "notification": {
+                    "sound": "new_beeb"
+                }
+            },
+            "apns": {
+                "payload": {
+                    "aps": {
+                        "alert": {
+                            "title": title,
+                            "body": body
+                        },
+                        "sound": "new_beeb.mp3"
+                    }
+                }
+            },
+            "data": data
+        }
+    })
+    requests.post(url, headers=headers, data=payload)

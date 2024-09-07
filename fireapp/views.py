@@ -169,15 +169,7 @@ def send_message(token,body,title,data):
         }
     })
     requests.post(url, headers=headers, data=payload)
-    # result = {
-    #     "lat": headers,
-    #     "response":response
-    #
-    # }
 
-
-
-    # return Response(result)
 
 @api_view(['POST'])
 def Get_round_locations(request):

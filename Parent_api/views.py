@@ -3507,15 +3507,51 @@ def send_driver_notif(mobile_token, student_id, student_name, round_id, type, wh
     # else:
     #     message_title = "Absent All Day "
     message_title = 'Round\'s Absence'
-    result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
-                                               message_body=message_body, message_icon="",
-                                               data_message={"json_data": json.dumps(
+    send_message(registration_id,message_body,message_body,{"json_data": json.dumps(
                                                    {"student_id": student_id, "status": "absent",
                                                     "student_name": student_name, "round_id": round_id,
-                                                    "date_time": ""})}
-                                               )
+                                                    "date_time": ""})})
+    # result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
+    #                                            message_body=message_body, message_icon="",
+    #                                            data_message={"json_data": json.dumps(
+    #                                                {"student_id": student_id, "status": "absent",
+    #                                                 "student_name": student_name, "round_id": round_id,
+    #                                                 "date_time": ""})}
+    #                                            )
 
-
+def send_message(token,body,title,data):
+    headers = {
+        'Authorization': 'Bearer ya29.c.c0ASRK0GaLpOowzfbNqrMkMA6sNFqHbLhJsdOtxgFoB1mgIqbsGIS9jNH1No0TNcVccuERGV6NaE0MTlJYmCb_IHYJIXf3SMIaVITU9FPqkDVewV8AdtWbd1DUK8Q2TDsbm8mpWkVJCAxsrNZ0Q986vbr2patbCzK20k_61dBejy5V_yNVkNbTuFvYXnHcDVFG5VX_obddTmyxABFXKqj6eQ-s2P0D3vqXx70uPY5xVB54G5ReETtBsl8elQHYQWuHk3DRlb4kFXeOHk9RaNoFhqHZ4XM3V_NJVQoAwhuzunmjzwr7h8BcOaZPJaMqjs1xNBgGWT-wDLUWxoXpFzvQwgDHm1b66Ewnr_8illJI3nS8k1B7GuBrL63DT385Do7OO0q6Wju2bx3O9dYvY5-9wQaX0YynfOmpRY1UloXyfaU3VoRc0bQOXWgIQ0Osv5rwXxkJeX_rFmzVlpWim9ijm6lS1Q8SSvuksX0bk2Ih2uw27notqvW-OJeS_urOh0-cuO3-toYyarmWgc-5hy3lyIvrkuRgmUf6ujf6s4Ra_So7o2Zhx60j9-vwQBvt4YM-ss25Q4--251-2_S15bwZWs77otVoeoMsj1dtVvuo3QwF5rsrBkVQbyFt4UrItx_uJp2mdaVBnadlxQwoBYM9By3s4Bt9gvF-q8kesOggeWp6j62SnxS_y3xoIfZue7u2bny3g4ryVx293e_4_ckai91wQdsgWh8lkJiayxnZbeudS6dvolFw672bIo68uo-aevv1bB_J9YQt_er-0od28kt56yqz4tjuYSip9Q4fqFyg9skmtd6X2eF95vtY5b_dxBnfImlaUR5vhtk-XjmiQ57di_uxz9vf5OWzuBZh3dFvYc5b3bn7F9dF6m41r7pozqsBkbYZmi5i9lclFxy3uRVbe2nQ1QIF-g59ec9Xm20-u5YBVQ-rnms76WwvtOlXy5S10wmg_I0kaJvsw4i9bj41QFz7mY-Ql-sXyqvp5lY2BsBJIlkZdam',
+        'Content-Type': 'application/json; UTF-8',
+    }
+    url = "https://fcm.googleapis.com/v1/projects/trackware-sms/messages:send"
+    payload = json.dumps({
+        "message": {
+            "token": token,
+            "notification": {
+                "body": body,
+                "title": title
+            },
+            "android": {
+                "notification": {
+                    "sound": "new_beeb"
+                }
+            },
+            "apns": {
+                "payload": {
+                    "aps": {
+                        "alert": {
+                            "title": title,
+                            "body": body
+                        },
+                        "sound": "new_beeb.mp3"
+                    }
+                }
+            },
+            "data": data
+        }
+    })
+    requests.post(url, headers=headers, data=payload)
 @api_view(['GET'])
 def get_badge(request, student_id):
     if request.method == 'GET':
