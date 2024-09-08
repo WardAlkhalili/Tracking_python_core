@@ -1763,8 +1763,9 @@ def send_notification_student(mobile_token,title,message):
     message_body = message
 
     if mobile_token and not ("token" in mobile_token):
-        send_message(registration_id, message_body ,
-                     message_title , {})
+        for token in registration_id:
+            send_message(token, message_body ,
+                         message_title , {})
 
         # try:
         #      push_service.notify_multiple_devices(
