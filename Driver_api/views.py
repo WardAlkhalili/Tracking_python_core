@@ -2492,9 +2492,9 @@ def notify(request):
                                     message_body_ar =" لقد وصلت الحافلة " + str(bus_num[0][0]) +" إلى المنزل " if round_type=="dropoff" else "لقد وصلت الحافلة " + str(bus_num[0][0]) + ".الرجاء إرسال " +student_name[0][0]+"للصعود للحافلة"
                                     message_title = "Arrival - Parent" if round_type=="dropoff" else "Bus Arrival"
                                     message_body = "The bus " + str(bus_num[0][0]) + "has arrived at your home"
-
-                                    send_message(registration_id[0], message_body if lang =="en" else message_body_ar,
-                                                 message_title if lang =="en" else message_title_ar, {})
+                                    for token in registration_id:
+                                        send_message(token, message_body if lang =="en" else message_body_ar,
+                                                     message_title if lang =="en" else message_title_ar, {})
                                     # try:
                                     #
                                     #     result = push_service.notify_multiple_devices(
