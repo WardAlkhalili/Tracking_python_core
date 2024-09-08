@@ -1469,7 +1469,7 @@ def checked(student_id,round_type,bus_num,student_name,round_id,driver_name,rec,
     title_ar = "اشعار من الحافلة"
     if round_type != 'pick_up':
         title = "School Departure"
-    message_ar = "صعد إلى الحافلة" + student_name + str(bus_num)
+    message_ar = " صعد إلى الحافلة " + student_name + str(bus_num)
     message = student_name+ ' has just been checked into the bus'
     date_string = datetime.datetime.now().strftime(
         "%Y-%m-%d %H:%M:%S")
@@ -1829,6 +1829,7 @@ def students_bus_checks(request):
                                         if student_name[0][4]:
                                             parent_id.append(student_name[0][4])
                                         parent_id = list(dict.fromkeys(parent_id))
+                                    print("---------------------1832---",parent_id )
 
                                     if type(driver_id) is not int:
                                         for e in driver_id:
@@ -1897,7 +1898,6 @@ def students_bus_checks(request):
                                                 else:
                                                     near(round_info[0][3], bus_num[0][0], student_name[0][0],
                                                          school_name, parent_id)
-
                                             else:
 
                                                 if round_info[0][3] == 'pick_up':

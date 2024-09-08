@@ -73,6 +73,46 @@ def _get_access_token():
     credentials.refresh(request)
     return credentials.token
 
+def send_message(token,body,title,data):
+    headers = {
+         'Authorization': 'Bearer ' + _get_access_token(),
+        'Content-Type': 'application/json; UTF-8',
+    }
+    url = "https://fcm.googleapis.com/v1/projects/trackware-sms/messages:send"
+    payload = json.dumps({
+        "message": {
+            "token": token,
+            "notification": {
+                "body": body,
+                "title": title
+            },
+            "android": {
+                "notification": {
+                    "sound": "new_beeb"
+                }
+            },
+            "apns": {
+                "payload": {
+                    "aps": {
+                        "alert": {
+                            "title": title,
+                            "body": body
+                        },
+                        "sound": "new_beeb.mp3"
+                    }
+                }
+            },
+            "data": data
+        }
+    })
+    re=requests.post(url, headers=headers, data=payload)
+    if re.status_code == 200:
+        print("Message sent successfully.")
+    else:
+        print(f"Failed to send message. Status code: {re.status_code}")
+        print(body)
+        print(re.text)
+
 @api_view(['GET'])
 def Get_last_bus_location(request, bus_id, school_name):
     if request.method == 'GET':
@@ -822,16 +862,16 @@ def push_notification(request):
                                                     for e in mobile_token1:
                                                         mobile_token.append(e[0])
                                                 if mobile_token1:
-                                                    push_service = FCMNotification(
-                                                        api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                                    # push_service = FCMNotification(
+                                                    #     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
                                                     # registration_id = "fw7CryLaRjW8TEKOyspKLo:APA91bFQYaCp4MYes5BIQtHFkOQtcPdtVLB0e5BJ-dQKE2WeYBeZ3XSmNpgWJX-veRO_35lOuGzTm6QBv1c2YZM-4WcT1drKBvLdJxEFkhG5l5c-Af_IRtCJzOOKf7c5SmEzzyvoBrQx"
                                                     registration_id = mobile_token1[0][0]
                                                     message_title = title
                                                     message_body = message
-
-                                                    result = push_service.notify_single_device(registration_id=registration_id,
-                                                                                               message_title=message_title,
-                                                                                               message_body=message_body,sound='new_beeb.mp3')
+                                                    send_message(registration_id, message_body, message_title, {})
+                                                    # result = push_service.notify_single_device(registration_id=registration_id,
+                                                    #                                            message_title=message_title,
+                                                    #                                            message_body=message_body,sound='new_beeb.mp3')
                                                     # print(result)
 
                                                     result1 = {
