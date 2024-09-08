@@ -172,7 +172,12 @@ def send_message(token, body, title, data):
         }
     })
     r = requests.post(url, headers=headers, data=payload)
-    print(r)
+    if r.status_code == 200:
+        print("Message sent successfully.")
+    else:
+        print(f"Failed to send message. Status code: {r.status_code}")
+        print(r.text)
+    # print(r)
 
 
 @api_view(['POST'])
