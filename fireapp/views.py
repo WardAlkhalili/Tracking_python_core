@@ -149,8 +149,8 @@ def send_message(token, body, title, data):
         "message": {
             "token": token,
             "notification": {
-                "body": body,
-                "title": title
+                "body": 'body',
+                "title": 'title'
             },
             "android": {
                 "notification": {
@@ -161,8 +161,8 @@ def send_message(token, body, title, data):
                 "payload": {
                     "aps": {
                         "alert": {
-                            "title": title,
-                            "body": body
+                            "title": 'title',
+                            "body": 'body'
                         },
                         "sound": "new_beeb.mp3"
                     }
