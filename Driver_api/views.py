@@ -1519,6 +1519,7 @@ def checked(student_id,round_type,bus_num,student_name,round_id,driver_name,rec,
                     for res in mobile_token1:
                         mobile_token.append(res[0])
                     if mobile_token:
+                        locale = "en"
                         send_notification_student(mobile_token, title if locale == 'en' else title_ar,
                                                   message if locale == 'en' else message_ar)
             else:
