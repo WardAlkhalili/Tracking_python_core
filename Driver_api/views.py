@@ -69,6 +69,7 @@ def send_message(token,body,title,data):
         print("Message sent successfully.")
     else:
         print(f"Failed to send message. Status code: {re.status_code}")
+        print(body)
         print(re.text)
 
 @api_view(['POST'])
@@ -1255,7 +1256,9 @@ def set_round_status(request):
                                                 push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
 
                                                 if mobile_token and not("token" in mobile_token):
-                                                    send_message(registration_id[0],message_body if lang == "en" else message_body_ar,message_title if lang == "en" else message_title_ar,{})
+                                                    registration_id = list(dict.fromkeys(registration_id))
+                                                    for token in registration_id:
+                                                        send_message(token,message_body if lang == "en" else message_body_ar,message_title if lang == "en" else message_title_ar,{})
 
                                                     # notify_single_device = push_service.notify_single_device(
                                                     #     registration_id=registration_id[0],
@@ -1761,8 +1764,11 @@ def send_notification_student(mobile_token,title,message):
     registration_id = mobile_token
     message_title = title
     message_body = message
+    print("ddddddddddddddddddddddddddddddd",message)
+    print(mobile_token)
 
     if mobile_token and not ("token" in mobile_token):
+        registration_id = list(dict.fromkeys(registration_id))
         for token in registration_id:
             send_message(token, message_body ,
                          message_title , {})
@@ -2082,8 +2088,10 @@ def send_notification(mobile_token1 ,message_title,message_body):
         api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
     registration_id = mobile_token
     if mobile_token and not ("token" in mobile_token):
-        send_message(registration_id[0], message_body,
-                     message_title, {})
+        registration_id = list(dict.fromkeys(registration_id))
+        for token in registration_id:
+            send_message(token, message_body,
+                         message_title, {})
         # try:
         #     notify_single_device = push_service.notify_single_device(
         #         registration_id=registration_id[0],
@@ -2492,6 +2500,7 @@ def notify(request):
                                     message_body_ar =" لقد وصلت الحافلة " + str(bus_num[0][0]) +" إلى المنزل " if round_type=="dropoff" else "لقد وصلت الحافلة " + str(bus_num[0][0]) + ".الرجاء إرسال " +student_name[0][0]+"للصعود للحافلة"
                                     message_title = "Arrival - Parent" if round_type=="dropoff" else "Bus Arrival"
                                     message_body = "The bus " + str(bus_num[0][0]) + "has arrived at your home"
+                                    registration_id = list(dict.fromkeys(registration_id))
                                     for token in registration_id:
                                         send_message(token, message_body if lang =="en" else message_body_ar,
                                                      message_title if lang =="en" else message_title_ar, {})
