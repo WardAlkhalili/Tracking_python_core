@@ -65,7 +65,11 @@ def send_message(token,body,title,data):
         }
     })
     re=requests.post(url, headers=headers, data=payload)
-    print(re)
+    if re.status_code == 200:
+        print("Message sent successfully.")
+    else:
+        print(f"Failed to send message. Status code: {re.status_code}")
+        print(re.text)
 
 @api_view(['POST'])
 def driver_login(request):
