@@ -482,6 +482,7 @@ def twoArgs(message_id, school_name):
                                 message_body = student_name + " - " + message_body
                         if registration_id:
                             for token in registration_id:
+                                print(student_name)
                                 send_message(token, message_body, message_title,
                                              {"student_id": str(std), "picked": False, "model_name": "Meeting",
                                               "student_name": student_name})
