@@ -145,7 +145,35 @@ def send_message(token, body, title, data):
         'Content-Type': 'application/json; UTF-8',
     }
     url = "https://fcm.googleapis.com/v1/projects/trackware-sms/messages:send"
-    payload = json.dumps({
+    if data:
+        payload = json.dumps({
+            "message": {
+                "token": token,
+                "notification": {
+                    "body": body,
+                    "title": title
+                },
+                "android": {
+                    "notification": {
+                        "sound": "new_beeb"
+                    }
+                },
+                "apns": {
+                    "payload": {
+                        "aps": {
+                            "alert": {
+                                "title": title,
+                                "body": body
+                            },
+                            "sound": "new_beeb.mp3"
+                        }
+                    }
+                },
+                "data": data
+            }
+        })
+    else:
+         payload = json.dumps({
         "message": {
             "token": token,
             "notification": {
