@@ -340,7 +340,7 @@ def twoArgs(message_id, school_name):
                             registration_id = list(dict.fromkeys(registration_id))
                             for token in registration_id:
                                 send_message(token, message_body, message_title,
-                                             {"student_id": str(std), "picked": False, "model_name": "Badge",
+                                             {"student_id": str(std), "picked": str(False), "model_name": "Badge",
                                               "student_name": student_name})
                             # result = push_service.notify_multiple_devices(registration_ids=registration_id,
                             #                                            sound='new_beeb.mp3', message_title=message_title,
@@ -369,7 +369,7 @@ def twoArgs(message_id, school_name):
                         if registration_id:
                             for token in registration_id:
                                 send_message(token, message_body, message_title,
-                                             {"student_id": str(std), "picked": False, "model_name": "Weekly",
+                                             {"student_id": str(std), "picked": str(False), "model_name": "Weekly",
                                               "student_name": student_name, "action": str(action[0][0]),
                                               "plan_name": str(action[0][1])})
                             # result = push_service.notify_multiple_devices(registration_ids=registration_id,
@@ -397,7 +397,7 @@ def twoArgs(message_id, school_name):
                         if registration_id:
                             for token in registration_id:
                                 send_message(token, message_body, message_title,
-                                             {"student_id": str(std), "picked": False, "model_name": "Assignment",
+                                             {"student_id": str(std), "picked": str(False), "model_name": "Assignment",
                                               "student_name": student_name})
                             # result = push_service.notify_multiple_devices(registration_ids=registration_id,
                             #                                            sound='new_beeb.mp3', message_title=message_title,
@@ -423,7 +423,7 @@ def twoArgs(message_id, school_name):
                         if registration_id:
                             for token in registration_id:
                                 send_message(token, message_body, message_title,
-                                             {"student_id": str(std), "picked": False, "model_name": "Exam",
+                                             {"student_id": str(std), "picked": str(False), "model_name": "Exam",
                                               "student_name": student_name})
                             # result = push_service.notify_multiple_devices(registration_ids=registration_id,
                             #                                            sound='new_beeb.mp3', message_title=message_title,
@@ -456,7 +456,7 @@ def twoArgs(message_id, school_name):
                         if registration_id:
                             for token in registration_id:
                                 send_message(token, message_body, message_title,
-                                             {"student_id": str(std), "picked": False, "model_name": "Homework",
+                                             {"student_id": str(std), "picked": str(False), "model_name": "Homework",
                                               "student_name": student_name, "action": str(action[0][0])})
                         #     result = push_service.notify_multiple_devices(registration_ids=registration_id,
                         #                                                sound='new_beeb.mp3', message_title=message_title,
@@ -489,7 +489,7 @@ def twoArgs(message_id, school_name):
                         if registration_id:
                             for token in registration_id:
                                 send_message(token, message_body, message_title,
-                                             {"student_id": str(std), "picked": False, "model_name": "Event",
+                                             {"student_id": str(std), "picked": str(False), "model_name": "Event",
                                               "student_name": student_name, "action": str(action[0][0])})
                             # result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Event","student_name":student_name,"action":str(action[0][0])})
                 elif message_title == 'Meeting':
@@ -537,7 +537,7 @@ def twoArgs(message_id, school_name):
                         if registration_id:
                             for token in registration_id:
                                 send_message(token, message_body, message_title,
-                                             {"student_id": str(std), "picked": False, "model_name": "Absence",
+                                             {"student_id": str(std), "picked": str(False), "model_name": "Absence",
                                               "student_name": student_name})
                             # result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Absence","student_name":student_name})
                 elif message_title == 'Mark':
@@ -573,7 +573,7 @@ def twoArgs(message_id, school_name):
                         if registration_id:
                             for token in registration_id:
                                 send_message(token, message_body, message_title,
-                                             {"student_id": str(std), "picked": False, "model_name": "Mark",
+                                             {"student_id": str(std), "picked": str(False), "model_name": "Mark",
                                               "student_name": student_name})
                             # result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Mark","student_name":student_name})
                 elif message_title == 'certification':
@@ -635,7 +635,7 @@ def twoArgs(message_id, school_name):
                         if registration_id:
                             for token in registration_id:
                                 send_message(token, message_body, message_title,
-                                             {"student_id": str(std), "picked": False, "model_name": "Absence",
+                                             {"student_id": str(std), "picked": str(False), "model_name": "Absence",
                                               "student_name": student_name})
                             # result = push_service.notify_multiple_devices(registration_ids=registration_id,
                             #                                            sound='new_beeb.mp3',
@@ -662,7 +662,7 @@ def twoArgs(message_id, school_name):
                         if registration_id:
                             for token in registration_id:
                                 send_message(token, message_body, message_title,
-                                             {"student_id": str(std), "picked": False, "model_name": "clinic",
+                                             {"student_id": str(std), "picked": str(False), "model_name": "clinic",
                                               "student_name": student_name})
                             # result = push_service.notify_multiple_devices(registration_ids=registration_id,
                             #                                            sound='new_beeb.mp3', message_title=message_title,
