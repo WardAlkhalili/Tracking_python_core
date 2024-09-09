@@ -707,7 +707,7 @@ def send_confirmation_message_to_parent(request):
         #                                            message_body=message_body)
         # for token in registration_id:
         send_message(registration_id, message_body, message_title,
-                     {"student_id": str(student_id), "picked": True})
+                     {"student_id": str(student_id), "picked": str(False)})
         # result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
         #                                            message_body=message_body,data_message={"student_id":str(student_id),"picked":True})
         # #
@@ -1173,7 +1173,7 @@ def twoArgsChat(message_id, school_name, mobile_token, student_id):
             message_body = message_body
             send_message(registration_id, message_body, message_title,
                          {"student_id": str(student_id),
-                          "picked": False, "model_name": "Chat", "student_name": student_name})
+                          "picked": str(False), "model_name": "Chat", "student_name": student_name})
             # result = push_service.notify_single_device(registration_id=registration_id, sound='new_beeb.mp3',
             #                                            message_title=message_title,
             #                                            message_body=message_body,data_message={"student_id":str(student_id),
