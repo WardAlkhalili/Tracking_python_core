@@ -138,9 +138,10 @@ def Get_last_bus_location(request, bus_id, school_name):
         return Response(result)
 
 
-def send_message(token,body,title,data):
+def send_message(token, body, title, data):
+    print(token)
     headers = {
-         'Authorization': 'Bearer ' + _get_access_token(),
+        'Authorization': 'Bearer ' + _get_access_token(),
         'Content-Type': 'application/json; UTF-8',
     }
     url = "https://fcm.googleapis.com/v1/projects/trackware-sms/messages:send"
@@ -167,11 +168,16 @@ def send_message(token,body,title,data):
                     }
                 }
             },
-            "data": data
+            # "data": data
         }
     })
-    re=requests.post(url, headers=headers, data=payload)
-    print(re)
+    r = requests.post(url, headers=headers, data=payload)
+    if r.status_code == 200:
+        print("Message sent successfully.")
+    else:
+        print(f"Failed to send message. Status code: {r.status_code}")
+        print(r.text)
+    # print(r)
 
 
 @api_view(['POST'])
