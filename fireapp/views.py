@@ -514,7 +514,7 @@ def twoArgs(message_id, school_name):
                             for token in registration_id:
                                 print(student_name)
                                 send_message(token, message_body, message_title,
-                                             {"student_id": str(std), "picked": False, "model_name": "Meeting",
+                                             {"student_id": str(std), "picked": str(False), "model_name": "Meeting",
                                               "student_name": student_name})
                             # result = push_service.notify_multiple_devices(registration_ids=registration_id,sound='new_beeb.mp3',message_title=message_title,message_body=message_body,data_message={"student_id":str(std),"picked":False,"model_name":"Meeting","student_name":student_name})
                 elif message_title == 'Absence':
