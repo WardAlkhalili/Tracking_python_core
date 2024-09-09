@@ -145,7 +145,7 @@ def send_message(token, body, title, data):
         'Content-Type': 'application/json; UTF-8',
     }
     url = "https://fcm.googleapis.com/v1/projects/trackware-sms/messages:send"
-
+    print("-------------------",len(data))
     if len(data):
         payload = json.dumps({
             "message": {
@@ -174,6 +174,7 @@ def send_message(token, body, title, data):
             }
         })
     else:
+         print("---------------ddddd----", len(data))
          payload = json.dumps({
         "message": {
             "token": token,
