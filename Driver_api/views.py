@@ -2296,11 +2296,12 @@ def notify(request):
                                     "select  name,driver_id,type  from transport_round WHERE id = %s  ",
                                     [round_id])
                                 round_info = cursor.fetchall()
+                                display_name= student_original[0][0] if  student_original[0] else ""
                                 message_en = 'The driver ' + driver_id[0][
                                     0] + ' has changed the planed route of the round ' + round_info[0][
                                                 0] + '.The driver' + round_info[0][2] + ' the student ' + \
                                             student_picked[0][0] + ' before the student' + \
-                                            student_original[0][0] + ' .'
+                                            display_name + ' .'
 
                                 cursor.execute(
                                     "INSERT INTO sh_message_wizard(create_date,from_type, type, message_en,sender_name)VALUES (%s,%s,%s,%s,%s);",
