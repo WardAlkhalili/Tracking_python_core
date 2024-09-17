@@ -3430,6 +3430,9 @@ def post_workSheet(request):
                                 'Content-Type': 'application/json',
                             }
                             base_url= str(base_url).replace("http", "https")
+                            if "httpss" in base_url:
+                                base_url = str(base_url).replace("httpss", "https")
+
                             url = str(base_url) + "upload_worksheet"
                             response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
