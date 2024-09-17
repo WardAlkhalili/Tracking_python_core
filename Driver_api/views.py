@@ -1148,8 +1148,9 @@ def set_round_status(request):
                                     [driver_id])
                                 driver_name = cursor.fetchall()
                                 if status == 'start':
-
-
+                                    insert_sql="INSERT INTO  round_history (round_name,round_id,distance,vehicle_id,driver_id,round_start,attendant_id) VALUES"
+                                    insert_sql_message_student="INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES"
+                                    insert_sql_message_wizard="INSERT INTO sh_message_wizard(round_id,create_date,from_type,type,message_en,message_ar,sender_name,type_ar)VALUES"
                                     st_id = []
                                     for k in rounds_count_student:
                                         cursor.execute(
@@ -1158,12 +1159,17 @@ def set_round_status(request):
 
                                         student_name = cursor.fetchall()
                                         cursor.execute(
-                                            "select father_id,mother_id,responsible_id_value from student_student WHERE id = %s ",
+                                            "select father_id,mother_id,responsible_id_value,year_id,user_id from student_student WHERE id = %s ",
                                             [k[0]])
 
                                         student_student2 = cursor.fetchall()
-
+                                        # print(student_student2,"=============")
+                                        cursor.execute(
+                                            " select branch_id from res_users where id=%s",
+                                            [student_student2[0][4]])
+                                        branch_id = cursor.fetchall()
                                         for rec in student_student2[0]:
+
                                             # yousef ahmad 123
                                             lang="en"
                                             mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec), Q(db_name=school_name),
@@ -1197,10 +1203,8 @@ def set_round_status(request):
                                                            0] + " ready."
 
                                         message_body_ar =  "بدأت الجولة الصباحية, الرجاء ان يكون "+student_name[0][0]+" مستعداً"
-                                        date_string = datetime.datetime.now().strftime(
-                                            "%Y-%m-%d %H:%M:%S")
-                                        r = datetime.datetime.strptime(date_string,
-                                                                       '%Y-%m-%d %H:%M:%S')
+                                        date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                        r = datetime.datetime.strptime(date_string,'%Y-%m-%d %H:%M:%S')
 
                                         if round_info1[0][1]== 'pick_up' :
                                                 cursor.execute(
@@ -1246,11 +1250,13 @@ def set_round_status(request):
                                                                 continue
 
 
-                                                save_message_wizard(school_name, round_id, r, 'App\Model\sta' + str(rec),
-                                                                    message_title, message_title_ar, message_body,
-                                                                    message_body_ar, driver_name[0][0],student_id=k[0])
-                                                push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-
+                                                # save_message_wizard(school_name, round_id, r, 'App\Model\sta' + str(rec),
+                                                #                     message_title, message_title_ar, message_body,
+                                                #                     message_body_ar, driver_name[0][0],student_id=k[0])
+                                                notifications_title = 'Pick-up round'
+                                                insert_sql_message_student+=str((date_string, 'App\Model\drive', message_body,message_body_ar, notifications_title,notifications_title, date_string,student_student2[0][3],branch_id[0][0],k[0]))+","
+                                                # push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                                insert_sql_message_wizard+=str((round_id, date_string, 'App\Model\sta', message_title, message_body, message_body_ar,driver_name[0][0], message_title_ar))+","
                                                 if mobile_token and not("token" in mobile_token):
                                                     registration_id = list(dict.fromkeys(registration_id))
                                                     for token in registration_id:
@@ -1371,15 +1377,44 @@ def set_round_status(request):
                                                             "UPDATE public.transport_participant SET transport_state = %s,write_date=%s WHERE student_id = %s AND round_schedule_id= %s",
                                                             ["in", datetime.datetime.now(), rec[0],
                                                              rounds_details[0][0]])
-                                            cursor.execute(
-                                                "INSERT INTO  round_history (round_name,round_id,distance,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
-                                                [round_id, round_id, distance, round_info[0][1], round_info[0][2],
-                                                 datetime.datetime.now(),  round_info[0][4] if round_info[0][4] else ''])
+                                            data_insert=(round_id, round_id, distance, round_info[0][1], round_info[0][2],datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),  round_info[0][4] if round_info[0][4] else '')
+                                            insert_sql+=str(data_insert)+","
+                                            # cursor.execute(
+                                            #     "INSERT INTO  round_history (round_name,round_id,distance,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
+                                            #     [round_id, round_id, distance, round_info[0][1], round_info[0][2],
+                                            #      datetime.datetime.now(),  round_info[0][4] if round_info[0][4] else ''])
                                     else:
-                                        cursor.execute(
-                                            "INSERT INTO  round_history (round_name,round_id,distance,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
-                                            [round_id, round_id, distance, round_info[0][1], round_info[0][2],
-                                             datetime.datetime.now(), round_info[0][4] if round_info[0][4] else ''])
+                                        data_insert = (round_id, round_id, distance, round_info[0][1], round_info[0][2],
+                                             datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'), round_info[0][4] if round_info[0][4] else '')
+
+                                        insert_sql+=str(data_insert)+","
+                                        # cursor.execute(
+                                        #     "INSERT INTO  round_history (round_name,round_id,distance,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
+                                        #     [round_id, round_id, distance, round_info[0][1], round_info[0][2],
+                                        #      datetime.datetime.now(), round_info[0][4] if round_info[0][4] else ''])
+
+
+
+                                    try:
+                                        insert_sql = insert_sql[:-1]
+                                        cursor.execute(insert_sql)
+                                    except Exception as e:
+                                        print(e)
+                                    try:
+                                        insert_sql_message_student = insert_sql_message_student[:-1]
+                                        # print("---------------1409")
+                                        # print(insert_sql_message_student)
+                                        cursor.execute(insert_sql_message_student)
+                                    except Exception as es:
+                                        print(es)
+
+                                    try:
+                                        insert_sql_message_wizard = insert_sql_message_wizard[:-1]
+                                        # print("---------------1417")
+                                        # print(insert_sql_message_wizard)
+                                        cursor.execute(insert_sql_message_wizard)
+                                    except Exception as em:
+                                        print(em)
                                 elif status == 'end' or status == 'force_end':
                                     st_id = []
 
