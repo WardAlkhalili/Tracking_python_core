@@ -1168,7 +1168,6 @@ def set_round_status(request):
                                             " select branch_id from res_users where id=%s",
                                             [student_name[0][3]])
                                         branch_id = cursor.fetchall()
-                                        print(student_student2[0],"0000000000000000000000")
                                         for rec in student_student2[0]:
 
                                             # yousef ahmad 123
@@ -1196,8 +1195,7 @@ def set_round_status(request):
                                                         lang = "ar" if "ar" in li[3] else 'en'
 
                                         mobile_token=[]
-                                        print(mobile_token1)
-                                        print(student_name)
+
                                         for e in mobile_token1:
                                             mobile_token.append(e[0])
 
