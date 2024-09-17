@@ -1158,18 +1158,18 @@ def set_round_status(request):
                                     st_id = []
                                     for k in rounds_count_student:
                                         cursor.execute(
-                                            "select  display_name_search,id from student_student WHERE id= %s",
+                                            "select  display_name_search,id,year_id,user_id from student_student WHERE id= %s",
                                             [k[0]])
 
                                         student_name = cursor.fetchall()
                                         cursor.execute(
-                                            "select father_id,mother_id,responsible_id_value,year_id,user_id from student_student WHERE id = %s  ",
+                                            "select father_id,mother_id,responsible_id_value from student_student WHERE id = %s  ",
                                             [k[0]])
 
                                         student_student2 = cursor.fetchall()
                                         cursor.execute(
                                             " select branch_id from res_users where id=%s",
-                                            [student_student2[0][4]])
+                                            [student_name[0][3]])
                                         branch_id = cursor.fetchall()
 
                                         for rec in student_student2[0]:
@@ -1258,9 +1258,8 @@ def set_round_status(request):
                                                 # save_message_wizard(school_name, round_id, r, 'App\Model\sta' + str(rec),
                                                 #                     message_title, message_title_ar, message_body,
                                                 #                     message_body_ar, driver_name[0][0],student_id=k[0])
-                                                push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                                print(mobile_token)
-                                                print("--------------------------------------------------------")
+                                                # push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+
                                                 if mobile_token and not("token" in mobile_token):
                                                     registration_id = list(dict.fromkeys(registration_id))
                                                     for token in registration_id:
@@ -1302,7 +1301,7 @@ def set_round_status(request):
                                                     #     except Exception as e:
                                                     #         print("-----------1235")
                                                 notifications_title = 'Pick-up round'
-                                                insert_sql_message_student+=str((date_string, 'App\Model\drive', message_body,message_body_ar, notifications_title,notifications_title, date_string,student_student2[0][3],branch_id[0][0],k[0]))+","
+                                                insert_sql_message_student+=str((date_string, 'App\Model\drive', message_body,message_body_ar, notifications_title,notifications_title, date_string,student_name[0][2],branch_id[0][0],k[0]))+","
                                                 insert_sql_message_wizard += str((
                                                                                  round_id, date_string, 'App\Model\sta',
                                                                                  message_title, message_body,

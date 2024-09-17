@@ -303,10 +303,9 @@ def twoArgs(message_id,school_name):
                 token.append(tok[0])
 
 
-            push_service = FCMNotification(
-                api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+            # push_service = FCMNotification(
+            #     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
             registration_id = token
-
             message_title = school_message[0][1] if school_message[0][1] else ''
             message_body = school_message[0][0]if school_message[0][0] else ''
 
@@ -316,7 +315,7 @@ def twoArgs(message_id,school_name):
                 for parent_id in id :
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
                                                                 Q(is_active=True)).values_list('mobile_token').order_by('-pk')
                     token_parent=[]
                     for tok in mobile_token_parent:
@@ -343,7 +342,7 @@ def twoArgs(message_id,school_name):
                 for parent_id in id :
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
                                                                 Q(is_active=True)).values_list('mobile_token').order_by('-pk')
                     token_parent=[]
                     for tok in mobile_token_parent:
@@ -366,7 +365,7 @@ def twoArgs(message_id,school_name):
                 for parent_id in id :
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
                                                                 Q(is_active=True)).values_list('mobile_token').order_by('-pk')
                     token_parent=[]
                     for tok in mobile_token_parent:
@@ -391,7 +390,7 @@ def twoArgs(message_id,school_name):
                 for parent_id in id:
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
                                                                        Q(is_active=True)).values_list(
                         'mobile_token').order_by('-pk')
                     token_parent = []
@@ -420,7 +419,7 @@ def twoArgs(message_id,school_name):
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
 
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
                                                                        Q(is_active=True)).values_list(
                         'mobile_token').order_by('-pk')
                     token_parent = []
@@ -450,7 +449,7 @@ def twoArgs(message_id,school_name):
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
 
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
                                                                        Q(is_active=True)).values_list(
                         'mobile_token').order_by('-pk')
                     token_parent = []
@@ -475,7 +474,7 @@ def twoArgs(message_id,school_name):
                 for parent_id in id:
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
                                                                        Q(is_active=True)).values_list(
                         'mobile_token').order_by('-pk')
                     token_parent = []
@@ -497,7 +496,7 @@ def twoArgs(message_id,school_name):
                 for parent_id in id:
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
                                                                        Q(is_active=True)).values_list(
                         'mobile_token').order_by('-pk')
                     token_parent = []
@@ -517,7 +516,7 @@ def twoArgs(message_id,school_name):
                 for parent_id in id:
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
                                                                        Q(is_active=True)).values_list(
                         'mobile_token').order_by('-pk')
                     token_parent = []
@@ -553,7 +552,7 @@ def twoArgs(message_id,school_name):
                 for parent_id in id:
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
                                                                        Q(is_active=True)).values_list(
                         'mobile_token').order_by('-pk')
                     token_parent = []
@@ -584,7 +583,7 @@ def twoArgs(message_id,school_name):
                 for parent_id in id:
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
                                                                        Q(is_active=True)).values_list(
                         'mobile_token').order_by('-pk')
                     token_parent = []
