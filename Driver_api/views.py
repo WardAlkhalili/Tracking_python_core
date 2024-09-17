@@ -1175,8 +1175,8 @@ def set_round_status(request):
                                             lang="en"
                                             mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec), Q(db_name=school_name),
                                                             Q(is_active=True)).values_list('mobile_token').order_by('-pk')
-                                            print(mobile_token1)
-                                            print("-------------------------------------------------------")
+                                            # print(mobile_token1)
+                                            # print("-------------------------------------------------------")
 
                                             cursor.execute("select  settings from school_parent WHERE id = %s", [rec])
                                             settings = cursor.fetchall()
@@ -1196,6 +1196,8 @@ def set_round_status(request):
                                                         lang = "ar" if "ar" in li[3] else 'en'
 
                                         mobile_token=[]
+                                        print(mobile_token1)
+                                        print(student_name)
                                         for e in mobile_token1:
                                             mobile_token.append(e[0])
 
