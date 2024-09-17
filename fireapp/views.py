@@ -619,8 +619,9 @@ def twoArgs(message_id,school_name):
                 for parent_id in id :
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
-                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=id), Q(db_name=school_name),
+                    mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
                                                                 Q(is_active=True)).values_list('mobile_token').order_by('-pk')
+                    # print(mobile_token_parent)
                     token_parent=[]
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])

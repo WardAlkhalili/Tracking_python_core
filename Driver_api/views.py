@@ -1395,16 +1395,17 @@ def set_round_status(request):
                                             "INSERT INTO  round_history (round_name,round_id,distance,vehicle_id,driver_id,round_start,attendant_id) VALUES (%s,%s,%s,%s,%s,%s,%s); ",
                                             [round_id, round_id, distance, round_info[0][1], round_info[0][2],
                                              datetime.datetime.now(), round_info[0][4] if round_info[0][4] else ''])
-                                    try:
-                                        insert_sql_message_student = insert_sql_message_student[:-1]
-                                        cursor.execute(insert_sql_message_student)
-                                    except Exception as es:
-                                        print(es)
-                                    try:
-                                        insert_sql_message_wizard = insert_sql_message_wizard[:-1]
-                                        cursor.execute(insert_sql_message_wizard)
-                                    except Exception as em:
-                                        print(em)
+                                    if round_info1[0][1] == 'pick_up':
+                                        try:
+                                            insert_sql_message_student = insert_sql_message_student[:-1]
+                                            cursor.execute(insert_sql_message_student)
+                                        except Exception as es:
+                                            print(es)
+                                        try:
+                                            insert_sql_message_wizard = insert_sql_message_wizard[:-1]
+                                            cursor.execute(insert_sql_message_wizard)
+                                        except Exception as em:
+                                            print(em)
                                 elif status == 'end' or status == 'force_end':
                                     st_id = []
 
