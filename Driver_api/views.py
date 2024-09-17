@@ -1258,14 +1258,9 @@ def set_round_status(request):
                                                 # save_message_wizard(school_name, round_id, r, 'App\Model\sta' + str(rec),
                                                 #                     message_title, message_title_ar, message_body,
                                                 #                     message_body_ar, driver_name[0][0],student_id=k[0])
-                                                # push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                                notifications_title = 'Pick-up round'
-                                                insert_sql_message_student+=str((date_string, 'App\Model\drive', message_body,message_body_ar, notifications_title,notifications_title, date_string,student_student2[0][3],branch_id[0][0],k[0]))+","
-                                                insert_sql_message_wizard += str((
-                                                                                 round_id, date_string, 'App\Model\sta',
-                                                                                 message_title, message_body,
-                                                                                 message_body_ar, driver_name[0][0],
-                                                                                 message_title_ar)) + ","
+                                                push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                                print(mobile_token)
+                                                print("--------------------------------------------------------")
                                                 if mobile_token and not("token" in mobile_token):
                                                     registration_id = list(dict.fromkeys(registration_id))
                                                     for token in registration_id:
@@ -1306,6 +1301,14 @@ def set_round_status(request):
                                                     #         print(response, "------------------")
                                                     #     except Exception as e:
                                                     #         print("-----------1235")
+                                                notifications_title = 'Pick-up round'
+                                                insert_sql_message_student+=str((date_string, 'App\Model\drive', message_body,message_body_ar, notifications_title,notifications_title, date_string,student_student2[0][3],branch_id[0][0],k[0]))+","
+                                                insert_sql_message_wizard += str((
+                                                                                 round_id, date_string, 'App\Model\sta',
+                                                                                 message_title, message_body,
+                                                                                 message_body_ar, driver_name[0][0],
+                                                                                 message_title_ar)) + ","
+
 
 
                                     cursor.execute(
