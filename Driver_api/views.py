@@ -1168,6 +1168,7 @@ def set_round_status(request):
                                             " select branch_id from res_users where id=%s",
                                             [student_student2[0][4]])
                                         branch_id = cursor.fetchall()
+                                        print(student_student2[0],"0000000000000000000000")
                                         for rec in student_student2[0]:
 
                                             # yousef ahmad 123
@@ -1176,6 +1177,7 @@ def set_round_status(request):
                                                             Q(is_active=True)).values_list('mobile_token').order_by('-pk')
                                             print(mobile_token1)
                                             print("-------------------------------------------------------")
+
                                             cursor.execute("select  settings from school_parent WHERE id = %s", [rec])
                                             settings = cursor.fetchall()
                                             if settings:
