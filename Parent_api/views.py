@@ -3945,6 +3945,9 @@ def post_attendance(request):
                             url = base_url + "check_user_type1"
                             response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
+                            print(response1)
+                            print("--------------------------------------------------------------------------")
+                            print(url)
 
                             result = {'result': 'ok'}
                             return Response(result)
