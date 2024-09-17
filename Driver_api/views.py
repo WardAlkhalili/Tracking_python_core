@@ -1174,6 +1174,8 @@ def set_round_status(request):
                                             lang="en"
                                             mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec), Q(db_name=school_name),
                                                             Q(is_active=True)).values_list('mobile_token').order_by('-pk')
+                                            print(mobile_token1)
+                                            print("-------------------------------------------------------")
                                             cursor.execute("select  settings from school_parent WHERE id = %s", [rec])
                                             settings = cursor.fetchall()
                                             if settings:
