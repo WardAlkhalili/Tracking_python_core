@@ -630,6 +630,8 @@ def twoArgs(message_id,school_name):
                                 message_title = 'العيادة'
 
                     if registration_id:
+                        registration_id = list(dict.fromkeys(registration_id))
+                        print("---------------------------clinc ",len(registration_id))
                         for token in registration_id:
                             send_message(token, message_body, message_title,
                                          {"student_id":str(std),"picked":str(False),"model_name":"clinic","student_name":student_name})
