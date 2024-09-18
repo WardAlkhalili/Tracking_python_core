@@ -100,7 +100,7 @@ def parent_login(request):
             }
 
             response1 = requests.request("POST", url, headers=headers, data=body)
-            print(response1)
+
             response = response1.json()
             if "error" in response:
                 result = {
@@ -115,15 +115,12 @@ def parent_login(request):
                 "status": "erorr2"
                           ""}
             return Response(result)
-        print(school_name)
+        # school_name ='tst'
         with connections[school_name].cursor() as cursor:
             cursor.execute("select id from school_parent WHERE user_id = %s", [response['result']['uid']])
             parent_id = cursor.fetchall()
-            print(parent_id)
             user = User.objects.all().first()
             user = User.objects.all().first()
-            user = User.objects.all().first()
-            print(user)
 
             token_auth, created = Token.objects.get_or_create(user=user)
             from django.utils.crypto import get_random_string
@@ -539,7 +536,7 @@ def kids_list(request):
                             school_name = e[0]
                     for e in mobile_token:
                         mobile_token = e[0]
-                    database_yousef_test = ManagerParent.objects.filter(mobile_token=mobile_token).values_list('db_name').order_by('id').last()
+                    database_yousef_test = ManagerParent.objects.filter(mobile_token=mobile_token).values_list('db_name')
                     for d in database_yousef_test:
                         db_name_test.append(d[0])
                     for e in parent_id:
