@@ -100,7 +100,7 @@ def parent_login(request):
             }
 
             response1 = requests.request("POST", url, headers=headers, data=body)
-
+            print(response1)
             response = response1.json()
             if "error" in response:
                 result = {
@@ -115,10 +115,11 @@ def parent_login(request):
                 "status": "erorr2"
                           ""}
             return Response(result)
-        # school_name ='tst'
+        print(school_name)
         with connections[school_name].cursor() as cursor:
             cursor.execute("select id from school_parent WHERE user_id = %s", [response['result']['uid']])
             parent_id = cursor.fetchall()
+            print(parent_id)
             user = User.objects.all().first()
             user = User.objects.all().first()
 
