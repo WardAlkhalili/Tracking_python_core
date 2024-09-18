@@ -122,6 +122,8 @@ def parent_login(request):
             print(parent_id)
             user = User.objects.all().first()
             user = User.objects.all().first()
+            user = User.objects.all().first()
+            print(user)
 
             token_auth, created = Token.objects.get_or_create(user=user)
             from django.utils.crypto import get_random_string
