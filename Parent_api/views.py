@@ -537,7 +537,7 @@ def kids_list(request):
                             school_name = e[0]
                     for e in mobile_token:
                         mobile_token = e[0]
-                    database_yousef_test = ManagerParent.objects.filter(mobile_token=mobile_token).values_list('db_name')
+                    database_yousef_test = ManagerParent.objects.filter(mobile_token=mobile_token).values_list('db_name').order_by('id').last()
                     for d in database_yousef_test:
                         db_name_test.append(d[0])
                     for e in parent_id:
