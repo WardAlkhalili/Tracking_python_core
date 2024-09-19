@@ -615,12 +615,14 @@ def twoArgs(message_id,school_name):
             elif message_title == 'clinic':
                 message_title='Clinic'
                 message_body += ' - '+student_name
+                print(id)
                 for parent_id in id :
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
+                    print(parent)
                     mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
                                                                 Q(is_active=True)).values_list('mobile_token').order_by('-pk')
-                    # print(mobile_token_parent)
+                    print(mobile_token_parent)
                     token_parent=[]
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
