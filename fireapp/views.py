@@ -325,7 +325,7 @@ def twoArgs(message_id,school_name):
                         if 'en' not in parent[0][0]:
                                 message_title = 'أوسمة'
                                 message_body =  ' تم منح وسام للطالب '   +student_name
-                    if registration_id:
+                    if token_parent:
                         registration_id = list(dict.fromkeys(registration_id))
                         for token in registration_id:
                             send_message(token, message_body, message_title,
@@ -352,7 +352,7 @@ def twoArgs(message_id,school_name):
                         if 'en' not in parent[0][0]:
                                 message_title = 'الخطة الأسبوعية'
                                 message_body = f'{student_name}  - تم نشر خطة أسبوعية جديدة للأسبوع القادم   '
-                    if registration_id:
+                    if token_parent:
                         for token in registration_id:
                             send_message(token, message_body, message_title,
                                          {"student_id":str(std),"picked":str(False),"model_name":"Weekly","student_name":student_name,"action":str(action[0][0]),"plan_name":str(action[0][1])})
@@ -377,7 +377,7 @@ def twoArgs(message_id,school_name):
                                 message_body = message_body.replace(student_name + ' - ', '')
                                 # message_body=message_body.replace(student_name, '')
                                 message_body = student_name + ' - ' + message_body
-                    if registration_id:
+                    if token_parent:
                         for token in registration_id:
                             send_message(token, message_body, message_title,
                                          {"student_id":str(std),"picked":str(False),"model_name":"Assignment","student_name":student_name})
@@ -402,7 +402,7 @@ def twoArgs(message_id,school_name):
                             message_title = '  الامتحانات الالكترونية'
                             message_body = message_body.replace(student_name+' - ', '')
                             message_body = student_name + ' - ' + message_body
-                    if registration_id:
+                    if token_parent:
                         for token in registration_id:
                             send_message(token, message_body, message_title,
                                          {"student_id":str(std),"picked":str(False),"model_name":"Exam","student_name":student_name})
@@ -432,7 +432,7 @@ def twoArgs(message_id,school_name):
 
                                 message_title = ' الواجبات المنزلية '
                                 message_body = student_name + ' - ' + message_body
-                    if registration_id:
+                    if token_parent:
                         for token in registration_id:
                             send_message(token, message_body, message_title,
                                          {"student_id":str(std),"picked":str(False),"model_name":"Homework","student_name":student_name,"action":str(action[0][0])})
@@ -462,7 +462,7 @@ def twoArgs(message_id,school_name):
                                 message_body = message_body.replace(student_name+' - ', '')
                                 message_body = student_name + ' - ' + message_body
 
-                    if registration_id:
+                    if token_parent:
                         for token in registration_id:
                             send_message(token, message_body, message_title,
                                          {"student_id":str(std),"picked":str(False),"model_name":"Event","student_name":student_name,"action":str(action[0][0])})
@@ -485,7 +485,7 @@ def twoArgs(message_id,school_name):
                         if 'en' not in parent[0][0]:
                             message_title = 'المناسبات'
                             message_body = student_name + " - " + message_body
-                    if registration_id:
+                    if token_parent:
                         for token in registration_id:
                             send_message(token, message_body, message_title,
                                          {"student_id":str(std),"picked":str(False),"model_name":"Meeting","student_name":student_name})
@@ -507,7 +507,7 @@ def twoArgs(message_id,school_name):
                         if 'en' not in parent[0][0]:
                                 message_title = 'Absence Request'
                                 message_body = ' Absence has been ' + 'Approved' if 'Approval' in message_body else 'Rejected for ' + student_name
-                    if registration_id:
+                    if token_parent:
                         for token in registration_id:
                             send_message(token, message_body, message_title,
                                          {"student_id":str(std),"picked":str(False),"model_name":"Absence","student_name":student_name})
@@ -542,7 +542,7 @@ def twoArgs(message_id,school_name):
                         else:
                             message_title = 'Marks'
 
-                    if registration_id:
+                    if token_parent:
                         for token in registration_id:
                             send_message(token, message_body, message_title,
                                          {"student_id":str(std),"picked":str(False),"model_name":"Mark","student_name":student_name})
@@ -562,7 +562,7 @@ def twoArgs(message_id,school_name):
                     if parent[0][0]:
                         if 'en' not in parent[0][0]:
                                 message_title = 'الشهادة المدرسية'
-                    if registration_id:
+                    if token_parent:
                         for token in registration_id:
                             send_message(token, message_body, message_title,
                                      {})
@@ -603,7 +603,7 @@ def twoArgs(message_id,school_name):
                                     message_title = 'إشعار غياب'
                                     # st = 'Your Child ' + student_name
                                     # message_body = message_body.replace("Your Child", st)
-                    if registration_id:
+                    if token_parent:
                         for token in registration_id:
                             send_message(token, message_body, message_title,
                                          {"student_id":str(std),"picked":str(False),"model_name":"Absence","student_name":student_name})
@@ -615,14 +615,13 @@ def twoArgs(message_id,school_name):
             elif message_title == 'clinic':
                 message_title='Clinic'
                 message_body += ' - '+student_name
-                print(id)
+
                 for parent_id in id :
                     cursor.execute("select  settings from school_parent WHERE id = %s", [parent_id])
                     parent = cursor.fetchall()
-                    print(parent)
+
                     mobile_token_parent = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
                                                                 Q(is_active=True)).values_list('mobile_token').order_by('-pk')
-                    print(mobile_token_parent)
                     token_parent=[]
                     for tok in mobile_token_parent:
                         token_parent.append(tok[0])
@@ -633,7 +632,7 @@ def twoArgs(message_id,school_name):
 
                     if token_parent:
                         registration_id = list(dict.fromkeys(registration_id))
-                        print("---------------------------clinc ",len(registration_id))
+
                         for token in registration_id:
                             send_message(token, message_body, message_title,
                                          {"student_id":str(std),"picked":str(False),"model_name":"clinic","student_name":student_name})
