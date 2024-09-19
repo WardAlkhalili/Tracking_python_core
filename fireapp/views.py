@@ -631,7 +631,7 @@ def twoArgs(message_id,school_name):
                         if 'en' not in parent[0][0]:
                                 message_title = 'العيادة'
 
-                    if registration_id:
+                    if token_parent:
                         registration_id = list(dict.fromkeys(registration_id))
                         print("---------------------------clinc ",len(registration_id))
                         for token in registration_id:
