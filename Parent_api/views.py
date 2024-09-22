@@ -3619,13 +3619,17 @@ def get_badge(request, student_id):
                             school_badge = cursor.fetchall()
 
                             cursor.execute(
-                                "select  name,image_url,job_id  from hr_employee WHERE id = %s ",
+                                "select  name,image_url,job_id,gender_choice  from hr_employee WHERE id = %s ",
                                 [b[1]])
                             teacher_name = cursor.fetchall()
                             cursor.execute(
                                 "select  name from hr_job WHERE id = %s ",
                                 [teacher_name[0][2]])
                             job_name = cursor.fetchall()
+                            defaultImage = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/fma.png'
+                            if teacher_name[0][3] == 'male':
+                                defaultImage = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/male.png'
+
 
                             subject_name = ''
                             delta = ''
@@ -3658,7 +3662,7 @@ def get_badge(request, student_id):
                                          'job_name': job_name[0][0] if job_name else '',
                                          'image_teacher': 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
                                              teacher_name[0][1]) if teacher_name[0][
-                                             1] else "https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png",
+                                             1] else defaultImage,
 
                                          })
 
