@@ -13,8 +13,8 @@ from pyfcm import FCMNotification
 from Parent_api.models import ManagerParent
 import json
 import requests
-import firebase_admin
-from firebase_admin import credentials
+#import firebase_admin
+#from firebase_admin import credentials
 from google.oauth2 import service_account
 import google.auth.transport.requests
 
@@ -2718,5 +2718,12 @@ def end_round(student_name,school_name,round_id,rec,driver_name,student_id,paren
                         mobile_token.append(res[0])
                     if mobile_token:
                         for token in mobile_token:
-                            send_message(token, message_title if locale == 'en' else message_title_ar,
-                                                      message_body if locale == 'en' else message_body_ar)
+                            try:
+                                body_message=message_body if locale == 'en' else message_body_ar
+                                title_message= message_title if locale == 'en' else message_title_ar
+                                send_message(token,title_message,body_message,{})
+                            except Exception as error:
+                                print(error)
+                                body_message=message_body
+                                title_message= message_title
+                                send_message(token, title_message, body_message,{})
