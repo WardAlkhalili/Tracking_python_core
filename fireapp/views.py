@@ -1192,9 +1192,9 @@ def send_chat_teacher(request):
     if request.method == 'POST':
         try:
             # school_name = request.data.get('school_name')
-            # message_body = request.data.get('message')
-            # mobile_token=request.data.get('mobile_token')
-            # send_message(mobile_token, message_body, 'Chat',{ "model_name": "Chat"})
+            message_body = request.data.get('message')
+            mobile_token=request.data.get('mobile_token')
+            send_message(mobile_token, message_body, 'Chat',{ "model_name": "Chat"})
             result1 = {
                 "route": 'Ok'
 
