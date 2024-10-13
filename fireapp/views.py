@@ -1199,9 +1199,11 @@ def send_chat_teacher(request):
                 "route": 'Ok'
 
             }
+            print("---------------sss")
 
             return Response(result1)
         except Exception as e:
+            print(e)
             result1 = {
                 "route": e
 
