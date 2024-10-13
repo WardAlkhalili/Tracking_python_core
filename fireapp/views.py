@@ -19,6 +19,7 @@ import calendar
 import json
 from threading import Timer
 import re
+from rest_framework import status
 from fireapp.models import ManagerTracker
 
 # Remember the code we copied from Firebase.
@@ -1191,24 +1192,28 @@ def twoArgsChat(message_id, school_name, mobile_token, student_id):
 def send_chat_teacher(request):
     if request.method == 'POST':
         try:
-            # school_name = request.data.get('school_name')
+            # Logging request data for debugging
             print("---------------sss")
             print(request.data)
+
+            # Get the message and mobile_token from request data
             message_body = request.data.get('message')
-            mobile_token=request.data.get('mobile_token')
-            send_message(mobile_token, message_body, 'Chat',{ "model_name": "Chat"})
-            result1 = {
-                "route": 'Ok'
+            mobile_token = request.data.get('mobile_token')
 
-            }
+            if not message_body or not mobile_token:
+                # Return bad request if required fields are missing
+                return Response({"error": "Missing 'message' or 'mobile_token' in request."},
+                                status=status.HTTP_400_BAD_REQUEST)
 
+            # Send message function (assuming this is defined elsewhere)
+            send_message(mobile_token, message_body, 'Chat', {"model_name": "Chat"})
 
-            return Response(result1)
+            # Success response
+            return Response({"route": "Ok"}, status=status.HTTP_200_OK)
+
         except Exception as e:
-            print(e)
-            result1 = {
-                "route": e
+            # Logging the exception for debugging
+            print(f"Error: {str(e)}")
 
-            }
-
-            return Response(result1)
+            # Return a proper error response with status 500 (Internal Server Error)
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
