@@ -1185,3 +1185,13 @@ def twoArgsChat(message_id, school_name, mobile_token, student_id):
         }
 
         return Response(result1)
+
+
+@api_view(['POST'])
+def send_chat_teacher(request):
+    if request.method == 'POST':
+        school_name = request.data.get('school_name')
+        message_body = request.data.get('message')
+        mobile_token=request.data.get('mobile_token')
+        send_message(mobile_token, message_body, 'Chat',
+                     { "model_name": "Chat",})

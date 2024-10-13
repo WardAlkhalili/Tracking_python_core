@@ -12,7 +12,7 @@ urlpatterns = [
     path('rt/api/schools/push-notification', views.push_notification),
     path('api/test', views.test_lis),
     path('api/send_chat_parent', views.send_chat_parent),
-
+    path('api/send_chat_teacher', views.send_chat_teacher),
     # path('api/send_confirmation_message_to_parent', views.send_confirmation_message_to_parent),
     # path('index/', views.index, name='index'),
 ]
