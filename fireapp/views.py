@@ -1190,14 +1190,22 @@ def twoArgsChat(message_id, school_name, mobile_token, student_id):
 @api_view(['POST'])
 def send_chat_teacher(request):
     if request.method == 'POST':
-        school_name = request.data.get('school_name')
-        message_body = request.data.get('message')
-        mobile_token=request.data.get('mobile_token')
-        send_message(mobile_token, message_body, 'Chat',
-                     { "model_name": "Chat",})
-        result1 = {
-            "route": 'Ok'
+        try:
+            school_name = request.data.get('school_name')
+            message_body = request.data.get('message')
+            mobile_token=request.data.get('mobile_token')
+            send_message(mobile_token, message_body, 'Chat',
+                         { "model_name": "Chat",})
+            result1 = {
+                "route": 'Ok'
 
-        }
+            }
 
-        return Response(result1)
+            return Response(result1)
+        except Exception as e:
+            result1 = {
+                "route": e
+
+            }
+
+            return Response(result1)
