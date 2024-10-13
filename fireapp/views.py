@@ -1195,3 +1195,9 @@ def send_chat_teacher(request):
         mobile_token=request.data.get('mobile_token')
         send_message(mobile_token, message_body, 'Chat',
                      { "model_name": "Chat",})
+        result1 = {
+            "route": 'Ok'
+
+        }
+
+        return Response(result1)
