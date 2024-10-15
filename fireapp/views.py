@@ -532,8 +532,9 @@ def twoArgs(message_id, school_name):
                             registration_id = token_parent
                         if parent[0][0]:
                             if 'en' not in parent[0][0]:
-                                message_title = 'Absence Request'
-                                message_body = ' Absence has been ' + 'Approved' if 'Approval' in message_body else 'Rejected for ' + student_name
+                                message_title = 'طلبات الغياب'
+                                #
+                                message_body = f"   {student_name}   تم قبول طلب الغياب   " if 'Approval' in message_body else f"   {student_name}   تم رفض طلب الغياب   "
                         if registration_id:
                             for token in registration_id:
                                 send_message(token, message_body, message_title,
