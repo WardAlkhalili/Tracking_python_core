@@ -1938,6 +1938,10 @@ def students_bus_checks(request):
 
                                                 if status == 'out' or status == 'in':
                                                     if status == 'in':
+                                                        print(bus_num[0][0])
+                                                        print(round_info[0][3])
+                                                        print(student_name[0][0])
+                                                        print(driver_name[0][0])
                                                         checked(student_id, round_info[0][3], bus_num[0][0], student_name[0][0],
                                                                 round_id,
                                                                 driver_name[0][0], student_id, school_name,parent_id)
