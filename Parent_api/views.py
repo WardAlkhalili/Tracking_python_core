@@ -137,36 +137,74 @@ def parent_login(request):
                                            parent_id=parent_id[0][0],
                                            school_id=company_id, mobile_token=mobile_token)
             manager_parent.save()
-            result = {
-                "status": "ok",
-                "kids": [],
-                "notifications_text": [
-                    {
-                        "type": "drop-off",
-                        "actions": [
-                            {
-                                "no-show": "@student_name did not show today in @round_name",
-                                "check_in": "@student_name just checked into the bus @bus_num",
-                                "check_out": "@student_name just reached home."
-                            }
-                        ]
-                    },
-                    {
-                        "type": "pick-up",
-                        "actions": [
-                            {
-                                "absent": "@student_name is absent today",
-                                "check_in": "@student_name just checked into the bus @bus_num",
-                                "check_out": "@student_name just reached the school",
-                                "near_by": "You are next in route. Please have @student_name ready"
-                            }
-                        ]
-                    }
-                ],
-                "uid": uid,
-                "session_id": session.get_dict()['session_id'],
-                "web_base_url": response['result']['web_base_url'],
-                "Authorization": "Bearer " + unique_id}
+            if school_name=='tw':
+                result = {
+                    "status": "ok",
+                    "kids": [],
+                    "notifications_text": [
+                        {
+                            "type": "drop-off",
+                            "actions": [
+                                {
+                                    "no-show": "@student_name did not show today in @round_name",
+                                    "check_in": "@student_name just checked into the bus @bus_num",
+                                    "check_out": "@student_name just reached home."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "pick-up",
+                            "actions": [
+                                {
+                                    "absent": "@student_name is absent today",
+                                    "check_in": "@student_name just checked into the bus @bus_num",
+                                    "check_out": "@student_name just reached the school",
+                                    "near_by": "You are next in route. Please have @student_name ready"
+                                }
+                            ]
+                        }
+                    ],
+                    # "sms_system": sms_system,
+                    # "tracking_system": tracking_system,
+                    # "full_system": full_system,
+                    "tracking_system": True,
+                    "full_system": False,
+                    "sms_system": False,
+                    "uid": uid,
+                    "session_id": session.get_dict()['session_id'],
+                    "web_base_url": response['result']['web_base_url'],
+                    "Authorization": "Bearer " + unique_id}
+            else:
+                result = {
+                    "status": "ok",
+                    "kids": [],
+                    "notifications_text": [
+                        {
+                            "type": "drop-off",
+                            "actions": [
+                                {
+                                    "no-show": "@student_name did not show today in @round_name",
+                                    "check_in": "@student_name just checked into the bus @bus_num",
+                                    "check_out": "@student_name just reached home."
+                                }
+                            ]
+                        },
+                        {
+                            "type": "pick-up",
+                            "actions": [
+                                {
+                                    "absent": "@student_name is absent today",
+                                    "check_in": "@student_name just checked into the bus @bus_num",
+                                    "check_out": "@student_name just reached the school",
+                                    "near_by": "You are next in route. Please have @student_name ready"
+                                }
+                            ]
+                        }
+                    ],
+                    "uid": uid,
+                    "session_id": session.get_dict()['session_id'],
+                    "web_base_url": response['result']['web_base_url'],
+                    "Authorization": "Bearer " + unique_id}
 
         return Response(result)
 
