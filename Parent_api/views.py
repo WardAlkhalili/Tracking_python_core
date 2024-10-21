@@ -137,7 +137,7 @@ def parent_login(request):
                                            parent_id=parent_id[0][0],
                                            school_id=company_id, mobile_token=mobile_token)
             manager_parent.save()
-            if school_name=='tw':
+            if school_name=='alhasaad':
                 result = {
                     "status": "ok",
                     "kids": [],
