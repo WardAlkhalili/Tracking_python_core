@@ -526,12 +526,9 @@ def parent_login(request):
                         ]
                     }
                 ],
-                # "sms_system": sms_system,
-                # "tracking_system": tracking_system,
-                # "full_system": full_system,
-                "tracking_system": True,
-                "full_system": False,
-                "sms_system": False,
+                "sms_system": sms_system,
+                "tracking_system": tracking_system,
+                "full_system": full_system,
                 "uid": uid,
                 "session_id": session.get_dict()['session_id'],
                 "web_base_url": response['result']['web_base_url'],
