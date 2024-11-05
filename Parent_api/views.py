@@ -4867,8 +4867,9 @@ def get_worksheet_form_view_data(request, wsheet, std):
                                         'link': str(class_att[3]) if str(class_att[2]) !='link' else str(class_att[1]),
                                         "type":str(class_att[2])
                                     })
+                                #     notes = fields.Text()
                                 cursor.execute(
-                                    "select id from student_details where worksheet_id=%s and student_id=%s",
+                                    "select id,notes from student_details where worksheet_id=%s and student_id=%s",
                                     [worksheet[0][0], std])
                                 detail = cursor.fetchall()
 
@@ -4907,7 +4908,8 @@ def get_worksheet_form_view_data(request, wsheet, std):
                                          'end': str(datetime.datetime.now() >= worksheet[0][5]) if worksheet[0][
                                              5] else "",
                                          'student_solution': student_solution,
-                                         "howmork_list":howmork_list
+                                         "howmork_list":howmork_list,
+                                         "notes":detail[0][1] if detail[0][1] else ''
                                          })
                         result = {'result': data}
                         return Response(result)
