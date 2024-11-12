@@ -1881,6 +1881,8 @@ def get_info_message_new(deadline, notifications_text, avatar, create_date, noti
                 icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg'
         elif ('Meeting' in notifications_title):
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg'
+        elif ('Badge' in notifications_title):
+            icon_tracking = 'https://tst.tracking.trackware.com/school_registration/static/src/img/icons/Achievements.svg'
         else:
             icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
 
