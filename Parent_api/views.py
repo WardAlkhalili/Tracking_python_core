@@ -901,7 +901,7 @@ def kids_list(request):
                             parent_show_map = cursor.fetchall()
                             show_map = True if parent_show_map[0][0] else False
                             cursor.execute(
-                                "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type,name,name_ar,gender,password,national_id,passport_number from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
+                                "select  id,display_name_search,user_id,pick_up_type,drop_off_type,image_url,father_id,mother_id,state,academic_grade_name1,pick_up_type,name,name_ar,gender,password,national_id,passport_number,new_chat from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
                                 [parent_id, parent_id, parent_id])
                             student = cursor.fetchall()
                             student1 = []
@@ -1368,6 +1368,7 @@ def kids_list(request):
                                 # session = response1.cookies
 
                                 studen_list.append({
+                                    "new_chat":student1[rec]['new_chat'],
                                     "schoolImage": school_logo[0][0] if school_logo[0][
                                         0] else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
                                     "name": student1[rec]['display_name_search'],
