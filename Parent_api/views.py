@@ -3938,6 +3938,7 @@ def post_attendance(request):
 
                             attached_files = request.data.get("file")
                             print(reason)
+                            reason = reason if not("select reason" == reason or "سبب" in reason) else ''
                             body = json.dumps({"jsonrpc": "2.0",
                                                "params": {"student_id": int(student_id), "attachments": attached_files,
                                                           "arrival_time": arrival_time,
