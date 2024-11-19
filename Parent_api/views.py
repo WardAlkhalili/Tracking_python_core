@@ -3937,6 +3937,7 @@ def post_attendance(request):
                         with connections[school_name].cursor() as cursor:
 
                             attached_files = request.data.get("file")
+                            print(reason)
                             body = json.dumps({"jsonrpc": "2.0",
                                                "params": {"student_id": int(student_id), "attachments": attached_files,
                                                           "arrival_time": arrival_time,
