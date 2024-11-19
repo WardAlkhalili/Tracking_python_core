@@ -3950,10 +3950,12 @@ def post_attendance(request):
                                 'Content-Type': 'application/json',
                             }
                             url = base_url + "check_user_type1"
+
                             response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
-                            print(response1)
-                            print("--------------------------------------------------------------------------")
+                            response = response1.json()
+                            print(response)
+                            print("--------------------------------------------------------------------------responseresponseresponseresponse")
                             print(url)
 
                             result = {'result': 'ok'}
