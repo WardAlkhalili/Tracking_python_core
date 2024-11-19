@@ -930,18 +930,16 @@ def student_list(request, round_id):
                                             "parents_info": [
                                                 {
                                                     "father": {
-                                                        "mobile_token": father_inf[0][
-                                                            'mobile_token'] if father_inf else "",
+                                                        "mobile_token": father_inf[0]['mobile_token'] if father_inf else "",
                                                         "settings": father_inf[0]['settings'] if father_inf else "",
-                                                        "number": father_inf[0]['mobile'] if father_inf else "",
+                                                        "number": father_inf[0]['mobile'] if father_inf else mother_inf[0]['mobile'] if mother_inf else "",
                                                         "id": father_inf[0]['id'] if father_inf else -1
 
                                                     },
                                                     "mother": {
-                                                        "mobile_token": mother_inf[0][
-                                                            'mobile_token'] if mother_inf else "",
+                                                        "mobile_token": mother_inf[0]['mobile_token'] if mother_inf else "",
                                                         "settings": mother_inf[0]['settings'] if mother_inf else "",
-                                                        "number": mother_inf[0]['mobile'] if mother_inf else "",
+                                                        "number": mother_inf[0]['mobile'] if mother_inf else father_inf[0]['mobile'] if father_inf else "",
                                                         "id": mother_inf[0]['id'] if mother_inf else -1
                                                     }
                                                 }
