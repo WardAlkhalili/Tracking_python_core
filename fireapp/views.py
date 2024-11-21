@@ -1215,4 +1215,8 @@ def send_chat_teacher(request):
 
 @api_view(['POST'])
 def get_access_token_fierbase(request):
-    return  'Bearer ' + _get_access_token()
+    result = {
+        "token": 'Bearer ' + _get_access_token()
+
+    }
+    return  result
