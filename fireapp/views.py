@@ -1219,4 +1219,4 @@ def get_access_token_fierbase(request):
         "token": 'Bearer ' + _get_access_token()
 
     }
-    return  result
+    return Response(result)
