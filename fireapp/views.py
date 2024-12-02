@@ -205,17 +205,35 @@ def send_message(token, body, title, data):
     })
     r = requests.post(url, headers=headers, data=payload)
     if r.status_code == 200:
-        #  with connections[school_name].cursor() as cursor:
-        #         cursor.execute(
-        #             "select  message,title  from school_message where id = %s",
-        #             [message_id])
-        #         school_message = cursor.fetchall()
-        print(parent_id[0][0])
-        print(school_name[0][0])
+
+        try:
+            # print(parent_id[0][0])
+            # print(school_name[0][0])
+            #
+             with connections[school_name[0][0]].cursor() as cursor:
+                 date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                 date = datetime.datetime.strptime(date_string,'%Y-%m-%d %H:%M:%S')
+                 cursor.execute(
+                        "INSERT INTO parent_message(parent_id,create_date,message,arrived_message_flg,arrived_message)VALUES (%s,%s,%s,%s,%s);",
+                        [parent_id[0][0], date, body, True,
+                         "Message sent successfully."])
+
+        except:
+            pass
         print("Message sent successfully.")
     else:
-        print(parent_id)
-        print(school_name)
+        try:
+            with connections[school_name[0][0]].cursor() as cursor:
+                date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                date = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+                cursor.execute(
+                    "INSERT INTO parent_message(parent_id,create_date,message,arrived_message_flg,arrived_message)VALUES (%s,%s,%s,%s,%s);",
+                    [parent_id[0][0], date, body, False,
+                     f"Failed to send message. Status code: {r.status_code}"+r.text])
+            print(parent_id[0][0])
+            print(school_name[0][0])
+        except:
+            pass
         print(f"Failed to send message. Status code: {r.status_code}")
         print(r.text)
     # print(r)
