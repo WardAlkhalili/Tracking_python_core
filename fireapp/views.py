@@ -141,8 +141,7 @@ def Get_last_bus_location(request, bus_id, school_name):
 def send_message(token, body, title, data):
 
     parent_id = ManagerParent.objects.filter(Q(mobile_token=token),Q(is_active=True)).values_list('parent_id').order_by('-pk')
-    school_name = ManagerParent.objects.filter(Q(mobile_token=token), Q(is_active=True)).values_list(
-        'school_name').order_by('-pk')
+    school_name = ManagerParent.objects.filter(Q(mobile_token=token), Q(is_active=True)).values_list('db_name').order_by('-pk')
     headers = {
         'Authorization': 'Bearer ' + _get_access_token(),
         'Content-Type': 'application/json; UTF-8',
