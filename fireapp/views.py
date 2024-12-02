@@ -219,9 +219,9 @@ def send_message(token, body, title, data):
                          "Message sent successfully."])
 
         except Exception as e:
-            print(e)
+            # print(e)
             pass
-        print("Message sent successfully.")
+        # print("Message sent successfully.")
     else:
         try:
             with connections[school_name[0][0]].cursor() as cursor:
@@ -231,12 +231,12 @@ def send_message(token, body, title, data):
                     "INSERT INTO parent_message(parent_id,create_date,message,arrived_message_flg,arrived_message)VALUES (%s,%s,%s,%s,%s);",
                     [parent_id[0][0], date, body, False,
                      f"Failed to send message. Status code: {r.status_code}"+r.text])
-            print(parent_id[0][0])
-            print(school_name[0][0])
+            # print(parent_id[0][0])
+            # print(school_name[0][0])
         except:
             pass
-        print(f"Failed to send message. Status code: {r.status_code}")
-        print(r.text)
+        # print(f"Failed to send message. Status code: {r.status_code}")
+        # print(r.text)
     # print(r)
 
 
