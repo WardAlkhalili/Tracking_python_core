@@ -216,7 +216,7 @@ def send_message(token, body, title, data):
                  cursor.execute(
                         "INSERT INTO parent_message(parent_id,create_date,message,arrived_message_flg,arrived_message)VALUES (%s,%s,%s,%s,%s);",
                         [parent_id[0][0], date, body, True,
-                         "Message sent successfully."])
+                         "Message sent successfully. "+r.text])
 
         except Exception as e:
             print(e)
