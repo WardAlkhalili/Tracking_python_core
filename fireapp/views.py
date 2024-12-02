@@ -218,7 +218,8 @@ def send_message(token, body, title, data):
                         [parent_id[0][0], date, body, True,
                          "Message sent successfully."])
 
-        except:
+        except Exception as e:
+            print(e)
             pass
         print("Message sent successfully.")
     else:
