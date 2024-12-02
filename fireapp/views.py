@@ -139,13 +139,16 @@ def Get_last_bus_location(request, bus_id, school_name):
 
 
 def send_message(token, body, title, data):
-    print(token)
+
+    parent_id = ManagerParent.objects.filter(Q(mobile_token=token),Q(is_active=True)).values_list('parent_id').order_by('-pk')
+    school_name = ManagerParent.objects.filter(Q(mobile_token=token), Q(is_active=True)).values_list(
+        'school_name').order_by('-pk')
     headers = {
         'Authorization': 'Bearer ' + _get_access_token(),
         'Content-Type': 'application/json; UTF-8',
     }
     url = "https://fcm.googleapis.com/v1/projects/trackware-sms/messages:send"
-    print("-------------------",len(data))
+
     if len(data):
         payload = json.dumps({
             "message": {
@@ -203,8 +206,17 @@ def send_message(token, body, title, data):
     })
     r = requests.post(url, headers=headers, data=payload)
     if r.status_code == 200:
+        #  with connections[school_name].cursor() as cursor:
+        #         cursor.execute(
+        #             "select  message,title  from school_message where id = %s",
+        #             [message_id])
+        #         school_message = cursor.fetchall()
+        print(parent_id)
+        print(school_name)
         print("Message sent successfully.")
     else:
+        print(parent_id)
+        print(school_name)
         print(f"Failed to send message. Status code: {r.status_code}")
         print(r.text)
     # print(r)
