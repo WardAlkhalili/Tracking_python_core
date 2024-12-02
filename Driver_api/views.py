@@ -2673,7 +2673,36 @@ def send_message(token,body,title,data):
         }
     })
     re=requests.post(url, headers=headers, data=payload)
-    print(re)
+    parent_id = ManagerParent.objects.filter(Q(mobile_token=token),Q(is_active=True)).values_list('parent_id').order_by('-pk')
+    school_name = ManagerParent.objects.filter(Q(mobile_token=token), Q(is_active=True)).values_list('db_name').order_by('-pk')
+    if re.status_code == 200:
+
+        try:
+             with connections[school_name[0][0]].cursor() as cursor:
+                 date_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                 date = datetime.strptime(date_string,'%Y-%m-%d %H:%M:%S')
+                 cursor.execute(
+                        "INSERT INTO parent_message(parent_id,create_date,message,arrived_message_flg,arrived_message)VALUES (%s,%s,%s,%s,%s);",
+                        [parent_id[0][0], date, body, True,
+                         "Message sent successfully."])
+
+        except Exception as e:
+            pass
+        # print("Message sent successfully.")
+    else:
+        try:
+            with connections[school_name[0][0]].cursor() as cursor:
+                date_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                date = datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+                cursor.execute(
+                    "INSERT INTO parent_message(parent_id,create_date,message,arrived_message_flg,arrived_message)VALUES (%s,%s,%s,%s,%s);",
+                    [parent_id[0][0], date, body, False,
+                     f"Failed to send message. Status code: {re.status_code}"+re.text])
+
+        except:
+            pass
+
+
 def end_round(student_name,school_name,round_id,rec,driver_name,student_id,parent_id):
 
     message_title = " Bus Notification"
