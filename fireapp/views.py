@@ -225,8 +225,8 @@ def send_message(token, body, title, data):
     else:
         try:
             with connections[school_name[0][0]].cursor() as cursor:
-                date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                date = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+                date_string = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                date = datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
                 cursor.execute(
                     "INSERT INTO parent_message(parent_id,create_date,message,arrived_message_flg,arrived_message)VALUES (%s,%s,%s,%s,%s);",
                     [parent_id[0][0], date, body, False,
