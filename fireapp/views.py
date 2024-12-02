@@ -210,8 +210,8 @@ def send_message(token, body, title, data):
         #             "select  message,title  from school_message where id = %s",
         #             [message_id])
         #         school_message = cursor.fetchall()
-        print(parent_id)
-        print(school_name)
+        print(parent_id[0])
+        print(school_name[0])
         print("Message sent successfully.")
     else:
         print(parent_id)
