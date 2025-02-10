@@ -6082,6 +6082,7 @@ def get_category_Item(request):
                         response1 = requests.request("POST", url, headers=headers, data=body)
 
                         response = response1.json()
+                        result = {'category': [], "product": [],"r":response}
                         product_template = response['result']['data']
 
                         if "error" in response:
