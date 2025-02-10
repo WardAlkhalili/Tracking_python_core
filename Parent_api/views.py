@@ -6043,14 +6043,14 @@ def get_category_Item(request):
                                                  json={"jsonrpc": "2.0", "params": {"student": 0}})
 
                         response_data = response.json()
-                        print(response_data)
+                        # print(response_data)
                         if "error" in response_data:
                             return Response({'category': categories, "product": products, "error": str(response_data)})
 
                             # product_templates = []
                         else:
                             product_templates = response_data['result']['data']
-                            return Response({'category': categories, "product": products, "error": product_templates})
+                            # return Response({'category': categories, "product": products, "error": product_templates})
 
 
                     except Exception as error:
