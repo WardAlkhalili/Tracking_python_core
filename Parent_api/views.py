@@ -6070,7 +6070,7 @@ def get_category_Item(request):
                     #     [True])
                     product_template = []
                     try:
-                        url = ''
+                        url = 'https://tst.tracking.trackware.com/my/canteenApp'
                         body = json.dumps(
                             {"jsonrpc": "2.0",
                              "params": {"student": school_name, }})
