@@ -6068,7 +6068,7 @@ def get_category_Item(request):
                     # cursor.execute(
                     #     "select id,name,pos_categ_id,list_price,image_url from product_template WHERE is_canteen=%s",
                     #     [True])
-                    product_template = []
+                    # product_template = []
                     try:
                         url = 'https://tst.tracking.trackware.com/my/canteenApp'
                         body = json.dumps(
