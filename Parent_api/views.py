@@ -6069,7 +6069,6 @@ def get_category_Item(request):
                     #     "select id,name,pos_categ_id,list_price,image_url from product_template WHERE is_canteen=%s",
                     #     [True])
                     # product_template = []
-                    m=''
                     try:
                         url = 'https://tst.tracking.trackware.com/my/canteenApp'
                         body = json.dumps(
@@ -6083,15 +6082,13 @@ def get_category_Item(request):
                         response1 = requests.request("POST", url, headers=headers, data=body)
 
                         response = response1.json()
-                        m=response
                         product_template = response['result']['data']
 
                         if "error" in response:
-                            m=response
                             product_template =[]
 
                     except Exception as error:
-                        m=error
+
                         product_template = []
                     for category1 in product_template:
                         type = 'all'
@@ -6124,7 +6121,7 @@ def get_category_Item(request):
                                          "sta": False
 
                                          })
-                result = {'m':m,'category': category, "product": date}
+                result = {'category': category, "product": date}
                 return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
