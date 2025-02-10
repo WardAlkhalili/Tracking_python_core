@@ -6059,7 +6059,7 @@ def get_category_Item(request):
                     # معالجة المنتجات
                     for product in product_templates:
                         category_type = 'all' if not product['pos_category'] else product['pos_category']
-                        image_url = product['imageS3'] if product[
+                        image_url ="https://trackware-schools.s3.eu-central-1.amazonaws.com/" + product['imageS3'] if product[
                             'imageS3'] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png'
 
                         products.append({
