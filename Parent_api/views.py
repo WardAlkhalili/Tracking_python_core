@@ -6041,9 +6041,9 @@ def get_category_Item(request):
                         headers = {'Content-Type': 'application/json'}
                         response = requests.post(url, headers=headers,
                                                  json={"jsonrpc": "2.0", "params": {"student": db_name}})
-                        print(response)
-                        response_data = response.json()
 
+                        response_data = response.json()
+                        print(response_data)
                         if "error" in response_data:
                             return Response({'category': categories, "product": products, "error": str(response_data)})
 
