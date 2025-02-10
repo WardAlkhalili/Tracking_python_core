@@ -6044,9 +6044,13 @@ def get_category_Item(request):
                         response_data = response.json()
 
                         if "error" in response_data:
-                            product_templates = []
+                            return Response({'category': categories, "product": products, "error": str(response_data)})
+
+                            # product_templates = []
                         else:
                             product_templates = response_data['result']['data']
+                            return Response({'category': categories, "product": products, "error": product_templates})
+
 
                     except Exception as error:
                         return Response({'category': categories, "product": products, "error": str(error)})
