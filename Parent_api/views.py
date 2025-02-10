@@ -6064,25 +6064,53 @@ def get_category_Item(request):
                         "select id,name,pos_categ_id,list_price,image_url from product_template WHERE is_canteen=%s",
                         [True])
                     product_template = cursor.fetchall()
+
+                    # cursor.execute(
+                    #     "select id,name,pos_categ_id,list_price,image_url from product_template WHERE is_canteen=%s",
+                    #     [True])
+                    product_template = []
+                    try:
+                        url = ''
+                        body = json.dumps(
+                            {"jsonrpc": "2.0",
+                             "params": {"student": school_name, }})
+
+                        headers = {
+                            'Content-Type': 'application/json',
+                        }
+
+                        response1 = requests.request("POST", url, headers=headers, data=body)
+
+                        response = response1.json()
+                        product_template = response['result']['data']
+
+                        if "error" in response:
+                            product_template =[]
+
+                    except Exception as error:
+
+                        product_template = []
                     for category1 in product_template:
                         type = 'all'
-                        if category1[2]:
-                            cursor.execute("select id,name,parent_id from pos_category WHERE id=%s",
-                                           [category1[2]])
-                            pos_category = cursor.fetchall()
-                            if pos_category[0][2]:
-                                cursor.execute("select id,name,parent_id from pos_category WHERE id=%s",
-                                               [pos_category[0][2]])
-                                pos_category = cursor.fetchall()
+                        if category1['pos_category']:
+                            # cursor.execute("select id,name,parent_id from pos_category WHERE id=%s",
+                            #                [category1[2]])
+                            # pos_category = cursor.fetchall()
+                            # if pos_category[0][2]:
+                            #     cursor.execute("select id,name,parent_id from pos_category WHERE id=%s",
+                            #                    [pos_category[0][2]])
+                            #     pos_category = cursor.fetchall()
 
-                            type = pos_category[0][1]
+                            type = category1['pos_category']
+
+
                         date.append({
-                            "name": str(category1[1]),
-                            "id": category1[0],
+                            "name": str(category1['name']),
+                            "id": category1['id'],
                             "type": str(type),
-                            "price": str(category1[3]) + " " + str('JOD'),
-                            "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" + category1[4] if
-                            category1[4] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png',
+                            "price": str(category1['list_price']) + " " + str('JOD'),
+                            "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" + category1['imageS3'] if
+                            category1['imageS3'] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png',
 
                         })
 
