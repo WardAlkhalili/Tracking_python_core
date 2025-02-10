@@ -6012,121 +6012,74 @@ def post_banned(request):
 @api_view(['GET'])
 def get_category_Item(request):
     if request.method == 'GET':
-        if request.headers:
-            if request.headers.get('Authorization'):
-                au = request.headers.get('Authorization').replace('Bearer', '').strip()
-                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+        authorization = request.headers.get('Authorization')
+        if authorization:
+            token = authorization.replace('Bearer', '').strip()
+            db_name = ManagerParent.objects.filter(token=token).values_list('db_name', flat=True).first()
+            parent_id = ManagerParent.objects.filter(token=token).values_list('parent_id', flat=True).first()
 
-                if db_name:
-                    for e in db_name:
-                        school_name = e[0]
-                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+            if db_name and parent_id:
+                ManagerParent.objects.filter(parent_id=parent_id, db_name=db_name).update(mobile_token='')
 
-                if parent_id:
-                    for e in parent_id:
-                        parent_id = e[0]
-                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
-                    mobile_token='')
-                date = []
-                category = []
-                with connections[school_name].cursor() as cursor:
-                    # canteen_spending
-                    # student_id = request.data.get('student_id')
-                    # cursor.execute(
-                    #     "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
-                    #     [student_id])
-                    # student_info = cursor.fetchall()
-                    #
-                    # cursor.execute(
-                    #     "select branch_id,company_id from res_users WHERE id=%s",
-                    #     [student_info[0][1]])
-                    # student_info_users = cursor.fetchall()
-                    # res.config.settings
-                    # cursor.execute("select currency_id from  res_config_settings ",
-                    #                [])
-                    # currency_id = cursor.fetchall()
-                    # cursor.execute("select name from res_currency WHERE id=%s",
-                    #                [currency_id[0][0]])
-                    # currency = cursor.fetchall()
-                    category.append({"name": 'all',
-                                     "id": 0,
-                                     "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/allergic.svg",
-                                     "sta": True
+                categories = [{"name": 'all', "id": 0,
+                               "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/allergic.svg",
+                               "sta": True}]
+                products = []
 
-                                     })
-
-                    cursor.execute("select id,name,parent_id from pos_category WHERE parent_id isNull",
-                                   [])
-                    pos_category1 = cursor.fetchall()
-                    # print(pos_category1)
-
-                    cursor.execute(
-                        "select id,name,pos_categ_id,list_price,image_url from product_template WHERE is_canteen=%s",
-                        [True])
-                    product_template = cursor.fetchall()
+                with connections[db_name].cursor() as cursor:
+                    cursor.execute("SELECT id, name, parent_id FROM pos_category WHERE parent_id IS NULL")
+                    pos_categories = cursor.fetchall()
 
                     # cursor.execute(
-                    #     "select id,name,pos_categ_id,list_price,image_url from product_template WHERE is_canteen=%s",
+                    #     "SELECT id, name, pos_categ_id, list_price, image_url FROM product_template WHERE is_canteen=%s",
                     #     [True])
-                    product_template = []
+                    # product_templates = cursor.fetchall()
+
+                    # استدعاء API خارجي
                     try:
                         url = 'https://tst.tracking.trackware.com/my/canteenApp'
-                        body = json.dumps(
-                            {"jsonrpc": "2.0",
-                             "params": {"student": 0, }})
+                        headers = {'Content-Type': 'application/json'}
+                        response = requests.post(url, headers=headers,
+                                                 json={"jsonrpc": "2.0", "params": {"student": 0}})
 
-                        headers = {
-                            'Content-Type': 'application/json',
-                        }
+                        response_data = response.json()
+                        print(response_data)
+                        if "error" in response_data:
+                            return Response({'category': categories, "product": products, "error": str(response_data)})
 
-                        response1 = requests.request("POST", url, headers=headers, data=body)
+                            # product_templates = []
+                        else:
+                            product_templates = response_data['result']['data']
+                            return Response({'category': categories, "product": products, "error": product_templates})
 
-                        response = response1.json()
-                        product_template = response['result']['data']
-
-                        if "error" in response:
-                            product_template =[]
 
                     except Exception as error:
+                        return Response({'category': categories, "product": products, "error": str(error)})
 
-                        product_template = []
-                    for category1 in product_template:
-                        type = 'all'
-                        if category1['pos_category']:
-                            # cursor.execute("select id,name,parent_id from pos_category WHERE id=%s",
-                            #                [category1[2]])
-                            # pos_category = cursor.fetchall()
-                            # if pos_category[0][2]:
-                            #     cursor.execute("select id,name,parent_id from pos_category WHERE id=%s",
-                            #                    [pos_category[0][2]])
-                            #     pos_category = cursor.fetchall()
+                    # معالجة المنتجات
+                    for product in product_templates:
+                        category_type = 'all' if not product['pos_category'] else product['pos_category']
+                        image_url = product['imageS3'] if product[
+                            'imageS3'] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png'
 
-                            type = category1['pos_category']
-
-
-                        date.append({
-                            "name": str(category1['name']),
-                            "id": category1['id'],
-                            "type": str(type),
-                            "price": str(category1['list_price']) + " " + str('JOD'),
-                            "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" + category1['imageS3'] if
-                            category1['imageS3'] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png',
-
+                        products.append({
+                            "name": str(product['name']),
+                            "id": product['id'],
+                            "type": str(category_type),
+                            "price": str(product['list_price']) + " JOD",
+                            "image": image_url
                         })
 
-                    for category1 in pos_category1:
-                        category.append({"name": category1[1],
-                                         "id": category1[0],
-                                         "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/allergic.svg",
-                                         "sta": False
+                    # معالجة الفئات
+                    for category in pos_categories:
+                        categories.append({"name": category[1], "id": category[0],
+                                           "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/allergic.svg",
+                                           "sta": False})
 
-                                         })
-                result = {'category': category, "product": date}
-                return Response(result)
-            result = {'result': 'Not Authorization'}
-            return Response(result)
-        result = {'result': 'Not headers'}
-        return Response(result)
+                return Response({'category': categories, "product": products})
+            return Response({'result': 'Invalid Authorization'}, status=400)
+        return Response({'result': 'Missing Authorization Header'}, status=400)
+    return Response({'result': 'Missing Authorization Header'}, status=400)
 
 
 @api_view(['POST'])
