@@ -6083,13 +6083,16 @@ def get_category_Item(request):
 
                         response = response1.json()
                         result = {'category': [], "product": [],"r":response}
+                        return result
                         product_template = response['result']['data']
 
                         if "error" in response:
+
                             product_template =[]
 
                     except Exception as error:
-
+                        result = {'category': [], "product": [], "error": error}
+                        return result
                         product_template = []
                     for category1 in product_template:
                         type = 'all'
