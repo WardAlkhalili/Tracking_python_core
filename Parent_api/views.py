@@ -6206,7 +6206,7 @@ def post_sec_item(request):
                     for allergies in student_food_day:
                         if allergies[0] not in canteen_banned:
                            cursor.execute(
-                                "SELECT product_templ_id  FROM product_product WHERE id = %s",
+                                "SELECT product_tmpl_id  FROM product_product WHERE id = %s",
                                 [student_info_users[0][0]])
                            product_templ_id = cursor.fetchall()
                            q= cursor.execute(
@@ -6217,7 +6217,7 @@ def post_sec_item(request):
                         print(q)
                     for allergies in canteen_banned:
                         cursor.execute(
-                            "SELECT product_templ_id  FROM product_product WHERE id = %s",
+                            "SELECT product_tmpl_id  FROM product_product WHERE id = %s",
                             [allergies])
                         product_templ_id = cursor.fetchall()
                         x=cursor.execute(
@@ -6429,7 +6429,7 @@ def get_food_s(request):
 
                     for allergies in student_food_day:
                         cursor.execute(
-                            "SELECT product_templ_id,list_price  FROM product_product WHERE id = %s",
+                            "SELECT product_tmpl_id,list_price  FROM product_product WHERE id = %s",
                             [allergies[1]])
                         product_templ_id = cursor.fetchall()
                         cursor.execute(
