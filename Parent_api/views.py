@@ -6429,7 +6429,7 @@ def get_food_s(request):
 
                     for allergies in student_food_day:
                         cursor.execute(
-                            "SELECT product_tmpl_id,list_price  FROM product_product WHERE id = %s",
+                            "SELECT product_tmpl_id  FROM product_product WHERE id = %s",
                             [allergies[1]])
                         product_templ_id = cursor.fetchall()
                         cursor.execute(
@@ -6445,7 +6445,7 @@ def get_food_s(request):
                         date_ite.append({
                             "name": str(product_template[0][1]),
                             "id": allergies[0],
-                            "price": str(product_templ_id[0][1]) + " " + str('JOD'),
+                            "price": str(product_template[0][3]) + " " + str('JOD'),
                             "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" + product_template[0][
                                 5] if product_template[0][
                                 5] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png',
