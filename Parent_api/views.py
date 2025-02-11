@@ -6461,88 +6461,66 @@ def get_food_s(request):
         result = {'result': 'Not headers'}
         return Response(result)
 
+
 @api_view(['POST'])
 def post_canteen_all_same_day(request):
     if request.method == 'POST':
-        if request.headers:
-            if request.headers.get('Authorization'):
-                au = request.headers.get('Authorization').replace('Bearer', '').strip()
-                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+        auth_header = request.headers.get('Authorization')
+        if not auth_header:
+            return Response({'result': 'Not Authorization'}, status=401)
 
-                if db_name:
-                    for e in db_name:
-                        school_name = e[0]
-                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+        token = auth_header.replace('Bearer', '').strip()
+        parent = ManagerParent.objects.filter(token=token).values('db_name', 'parent_id').first()
 
-                if parent_id:
-                    for e in parent_id:
-                        parent_id = e[0]
-                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
-                    mobile_token='')
-                student_id = request.data.get('student_id')
-                day_id = request.data.get('day_id')
-                with connections[school_name].cursor() as cursor:
+        if not parent:
+            return Response({'result': 'Invalid Token'}, status=403)
+
+        school_name = parent['db_name']
+        parent_id = parent['parent_id']
+
+        # تحديث `mobile_token` في نفس الاستعلام
+        ManagerParent.objects.filter(parent_id=parent_id, db_name=school_name).update(mobile_token='')
+
+        student_id = request.data.get('student_id')
+        day_id = request.data.get('day_id')
+
+        if not student_id or not day_id:
+            return Response({'result': 'Missing student_id or day_id'}, status=400)
+
+        with connections[school_name].cursor() as cursor:
+            cursor.execute("SELECT year_id, user_id, canteen_spending FROM student_student WHERE id = %s", [student_id])
+            student_info = cursor.fetchone()
+
+            if not student_info:
+                return Response({'result': 'Student not found'}, status=404)
+
+            cursor.execute("SELECT branch_id, company_id FROM res_users WHERE id = %s", [student_info[1]])
+            student_info_users = cursor.fetchone()
+
+            if not student_info_users:
+                return Response({'result': 'User not found'}, status=404)
+
+            cursor.execute(
+                "SELECT product_id, product_product_id FROM allergies_food_day WHERE student_id = %s AND day_id = %s",
+                [student_id, day_id]
+            )
+            allergies_food_day = cursor.fetchall()
+            print(allergies_food_day)
+            cursor.execute(
+                "DELETE FROM allergies_food_day WHERE student_id = %s AND day_id != %s AND year_id = %s AND branch_id = %s AND company_id = %s",
+                [student_id, day_id, student_info[0], student_info_users[0], student_info_users[1]]
+            )
+
+            cursor.execute("SELECT id FROM school_day WHERE id != %s AND checkbox_day = TRUE", [day_id])
+            school_day = cursor.fetchall()
+
+            for day in school_day:
+                for food_day in allergies_food_day:
                     cursor.execute(
-                        "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
-                        [student_id])
-                    student_info = cursor.fetchall()
+                        "INSERT INTO allergies_food_day (year_id, student_id, branch_id, company_id, product_product_id, day_id, product_id) VALUES (%s, %s, %s, %s, %s, %s, %s);",
+                        [student_info[0], student_id, student_info_users[0], student_info_users[1], food_day[1], day[0], food_day[0]]
+                    )
 
-                    cursor.execute(
-                        "select branch_id,company_id from res_users WHERE id=%s",
-                        [student_info[0][1]])
-                    student_info_users = cursor.fetchall()
-
-                    cursor.execute(
-                        "select product_id,product_product_id from allergies_food_day WHERE student_id=%s and day_id=%s",
-                        [student_id,day_id])
-                    allergies_food_day = cursor.fetchall()
-
-                    cursor.execute(
-                        "delete from allergies_food_day where student_id=%s and day_id != %s and year_id =%s and branch_id=%s",
-                        [student_id,day_id,student_info[0][0],student_info_users[0][0],student_info_users[0][1]])
-
-                    cursor.execute(
-                        "select id from school_day WHERE id!=%s and checkbox_day =true",
-                        [day_id])
-                    school_day = cursor.fetchall()
-                    for day in school_day:
-                        for food_day in allergies_food_day:
-                            cursor.execute(
-                                "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_product_id,day_id,product_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                [student_info_users[0][2],
-                                 student_id,
-                                 student_info_users[0][0],
-                                 student_info_users[0][0],
-                                 food_day[1],
-                                 day[0],
-                                 food_day[0]])
-                # استدعاء API خارجي
-                # try:
-                #     print(student_id)
-                #     print(day_id)
-                #     url = 'https://tst.tracking.trackware.com/my/Canteen/all_day_children'
-                #     headers = {'Content-Type': 'application/json'}
-                #     response = requests.post(url, headers=headers,
-                #                              json={"jsonrpc": "2.0", "params": {"student_id": student_id,"day_id":day_id}})
-                #
-                #     response_data = response.json()
-                #
-                #     if "error" in response_data:
-                #         print(response_data)
-                #         result = {'result': str(response_data)}
-                #
-                #     else:
-                #         print(response_data)
-                #         result = {'result': 'ok'}
-                #
-                # except Exception as error:
-                #     return Response({ "result": str(error)})
-
-                result = {'result': 'ok'}
-                return Response(result)
-            result = {'result': 'Not Authorization'}
-            return Response(result)
-        result = {'result': 'Not headers'}
-        return Response(result)
+        return Response({'result': 'ok'}, status=200)
 
 
