@@ -6483,6 +6483,8 @@ def post_canteen_all_same_day(request):
                 day_id = request.data.get('day_id')
                 # استدعاء API خارجي
                 try:
+                    print(student_id)
+                    print(day_id)
                     url = 'https://tst.tracking.trackware.com/my/Canteen/all_day_children'
                     headers = {'Content-Type': 'application/json'}
                     response = requests.post(url, headers=headers,
