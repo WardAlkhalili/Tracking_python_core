@@ -5849,7 +5849,7 @@ def get_info_canteen_student(request):
 
                     # تنفيذ الاستعلام
                     cursor.execute(
-                        "SELECT amount_total FROM pos_order WHERE partner_id = %s AND state = %s AND data_order BETWEEN %s AND %s",
+                        "SELECT amount_total FROM pos_order WHERE partner_id = %s AND state = %s AND date_order BETWEEN %s AND %s",
                         [student_info_users[0][3], 'paid', start_of_day, end_of_day]
                     )
                     pos_order = cursor.fetchall()
