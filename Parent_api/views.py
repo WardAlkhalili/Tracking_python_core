@@ -6494,6 +6494,7 @@ def post_canteen_all_same_day(request):
                         result = {'result': str(response_data)}
 
                     else:
+                        print(response_data)
                         result = {'result': 'ok'}
 
                 except Exception as error:
