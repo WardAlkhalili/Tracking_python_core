@@ -54,6 +54,7 @@ urlpatterns = [
     path('api/get_food_s', views.get_food_s),
     path('api/delete_food', views.delete_food),
     path('api/canteen_all_day', views.post_canteen_all_same_day),
+
 #     post_canteen_all_same_day
 #   get_banned_food_s  get_category_Item post_banned_item post_sec_item delete_banned get_food_s delete_food
 # post_banned
