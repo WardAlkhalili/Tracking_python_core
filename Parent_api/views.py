@@ -6491,6 +6491,7 @@ def post_canteen_all_same_day(request):
                     response_data = response.json()
 
                     if "error" in response_data:
+                        print(response_data)
                         result = {'result': str(response_data)}
 
                     else:
