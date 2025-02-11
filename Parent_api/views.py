@@ -6513,7 +6513,7 @@ def post_canteen_all_same_day(request):
 
             cursor.execute("SELECT id FROM school_day WHERE id != %s AND checkbox_day = TRUE", [day_id])
             school_day = cursor.fetchall()
-
+            print(school_day,"school_dayschool_dayschool_dayschool_day")
             for day in school_day:
                 for food_day in allergies_food_day:
                     cursor.execute(
