@@ -6461,3 +6461,50 @@ def get_food_s(request):
         result = {'result': 'Not headers'}
         return Response(result)
 
+@api_view(['POST'])
+def post_canteen_all_same_day(request):
+    if request.method == 'POST':
+        if request.headers:
+            if request.headers.get('Authorization'):
+                au = request.headers.get('Authorization').replace('Bearer', '').strip()
+                db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+
+                if db_name:
+                    for e in db_name:
+                        school_name = e[0]
+                parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
+
+                if parent_id:
+                    for e in parent_id:
+                        parent_id = e[0]
+                ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name).update(
+                    mobile_token='')
+                student_id = request.data.get('student_id')
+                day_id = request.data.get('day_id')
+                # استدعاء API خارجي
+                try:
+                    url = 'https://tst.tracking.trackware.com/my/Canteen/all_day_children'
+                    headers = {'Content-Type': 'application/json'}
+                    response = requests.post(url, headers=headers,
+                                             json={"jsonrpc": "2.0", "params": {"student_id": student_id,"day_id":day_id}})
+
+                    response_data = response.json()
+
+                    if "error" in response_data:
+                        result = {'result': str(response_data)}
+
+                    else:
+                        result = {'result': 'ok'}
+
+                except Exception as error:
+                    return Response({ "result": str(error)})
+
+
+                return Response(result)
+            result = {'result': 'Not Authorization'}
+            return Response(result)
+        result = {'result': 'Not headers'}
+        return Response(result)
+    result = {'result': 'not Post'}
+    return Response(result)
+
