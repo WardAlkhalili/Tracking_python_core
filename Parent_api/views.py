@@ -6432,7 +6432,7 @@ def get_food_s(request):
                             "SELECT product_tmpl_id  FROM product_product WHERE id = %s",
                             [allergies[1]])
                         product_templ_id = cursor.fetchall()
-                        print(product_templ_id,'--------------------')
+                        print(product_templ_id,'--------------------',allergies[1],allergies)
                         cursor.execute(
                             "select id,name,pos_categ_id,list_price,is_canteen,image_url from product_template WHERE id=%s ",
                             [product_templ_id[0][0]])
