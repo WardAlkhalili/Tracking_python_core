@@ -6205,16 +6205,18 @@ def post_sec_item(request):
 
                     for allergies in student_food_day:
                         if allergies[0] not in canteen_banned:
-                            cursor.execute(
+                           q= cursor.execute(
                                 "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_product_id,day_id)VALUES (%s,%s,%s,%s,%s,%s);",
                                 [student_info_users[0][2], student_id, student_info_users[0][0],
                                  student_info_users[0][0],
                                  allergies, day_id])
+                        print(q)
                     for allergies in canteen_banned:
-                        cursor.execute(
+                        x=cursor.execute(
                             "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_product_id,day_id)VALUES (%s,%s,%s,%s,%s,%s);",
                             [student_info_users[0][2], student_id, student_info_users[0][0], student_info_users[0][0],
                              allergies, day_id])
+                        print(x)
 
                 result = {'result': 'ok'}
 
