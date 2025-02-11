@@ -6205,17 +6205,25 @@ def post_sec_item(request):
 
                     for allergies in student_food_day:
                         if allergies[0] not in canteen_banned:
+                           cursor.execute(
+                                "SELECT product_templ_id  FROM product_product WHERE id = %s",
+                                [student_info_users[0][0]])
+                           product_templ_id = cursor.fetchall()
                            q= cursor.execute(
-                                "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_product_id,day_id)VALUES (%s,%s,%s,%s,%s,%s);",
+                                "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_product_id,day_id,product_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                                 [student_info_users[0][2], student_id, student_info_users[0][0],
                                  student_info_users[0][0],
-                                 allergies, day_id])
+                                 allergies, day_id,product_templ_id[0][0]])
                         print(q)
                     for allergies in canteen_banned:
+                        cursor.execute(
+                            "SELECT product_templ_id  FROM product_product WHERE id = %s",
+                            [allergies])
+                        product_templ_id = cursor.fetchall()
                         x=cursor.execute(
-                            "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_product_id,day_id)VALUES (%s,%s,%s,%s,%s,%s);",
+                            "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_product_id,day_id,product_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
                             [student_info_users[0][2], student_id, student_info_users[0][0], student_info_users[0][0],
-                             allergies, day_id])
+                             allergies, day_id,product_templ_id[0][0]])
                         print(x)
 
                 result = {'result': 'ok'}
@@ -6420,10 +6428,13 @@ def get_food_s(request):
                     student_food_day = cursor.fetchall()
 
                     for allergies in student_food_day:
-
+                        cursor.execute(
+                            "SELECT product_templ_id,list_price  FROM product_product WHERE id = %s",
+                            [allergies[1]])
+                        product_templ_id = cursor.fetchall()
                         cursor.execute(
                             "select id,name,pos_categ_id,list_price,is_canteen,image_url from product_template WHERE id=%s ",
-                            [allergies[1]])
+                            [product_templ_id[0][0]])
                         product_template = cursor.fetchall()
                         type = ''
                         if product_template[0][2]:
@@ -6434,7 +6445,7 @@ def get_food_s(request):
                         date_ite.append({
                             "name": str(product_template[0][1]),
                             "id": allergies[0],
-                            "price": str(product_template[0][3]) + " " + str('JOD'),
+                            "price": str(product_templ_id[0][1]) + " " + str('JOD'),
                             "image": "https://trackware-schools.s3.eu-central-1.amazonaws.com/" + product_template[0][
                                 5] if product_template[0][
                                 5] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png',
