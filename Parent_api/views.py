@@ -5854,6 +5854,7 @@ def get_info_canteen_student(request):
                         student_food_day = cursor.fetchall()
                         date_schdule.append({'name': day[1], "len_item": str(len(student_food_day)), "day_id": day[0]})
                     # allergies.food.day
+                    print(date_schdule)
                     for allergies in allergies_food:
                         cursor.execute(
                             "select name from product_attribute_value WHERE id = %s ",
@@ -6216,6 +6217,7 @@ def post_sec_item(request):
                              allergies, day_id])
 
                 result = {'result': 'ok'}
+
                 return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
