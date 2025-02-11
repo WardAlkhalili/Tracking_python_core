@@ -5819,7 +5819,7 @@ def get_info_canteen_student(request):
                     student_info = cursor.fetchall()
 
                     cursor.execute(
-                        "select branch_id,company_id,year_id from res_users WHERE id=%s",
+                        "select branch_id,company_id,year_id,partner_id from res_users WHERE id=%s",
                         [student_info[0][1]])
                     student_info_users = cursor.fetchall()
 
@@ -5838,7 +5838,26 @@ def get_info_canteen_student(request):
                         "SELECT id, name FROM school_day WHERE id in (SELECT school_day_id FROM public.res_company_school_day_rel where res_company_id=%s)",
                         [student_info_users[0][1]])
                     school_day = cursor.fetchall()
-                    student_spending = 1
+                    import datetime
+
+                    # الحصول على تاريخ اليوم بدون وقت
+                    today = datetime.date.today()
+
+                    # إنشاء بداية ونهاية اليوم (لضمان شمول كامل اليوم)
+                    start_of_day = datetime.datetime.combine(today, datetime.time.min)  # 00:00:00
+                    end_of_day = datetime.datetime.combine(today, datetime.time.max)  # 23:59:59
+
+                    # تنفيذ الاستعلام
+                    cursor.execute(
+                        "SELECT amount_total FROM pos_order WHERE partner_id = %s AND state = %s AND data_order BETWEEN %s AND %s",
+                        [student_info_users[0][3], 'paid', start_of_day, end_of_day]
+                    )
+                    pos_order = cursor.fetchall()
+                    sum_amount_total=0
+                    for pos in pos_order:
+                        sum_amount_total=sum_amount_total+pos[0]
+                    student_spending = student_info[0][2]if student_info[0][2] else 0
+                    student_spending=student_spending- sum_amount_total
                     date_spending.append({
                         "canteen_spending": str(student_info[0][2]) if student_info[0][2] else "0",
                         "student_spending": str(student_spending),
