@@ -5825,18 +5825,18 @@ def get_info_canteen_student(request):
 
                     cursor.execute(
                         "select attribute_value_id from allergies_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
-                        [student_id, student_info_users[0][1], student_info_users[0][0], student_info_users[0][0]])
+                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][1]])
                     allergies_food = cursor.fetchall()
 
                     allergies_food = list(set(allergies_food))
 
                     cursor.execute(
                         "select id from banned_food WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s",
-                        [student_id, student_info_users[0][1], student_info_users[0][0], student_info_users[0][0]])
+                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][1]])
                     banned_food = cursor.fetchall()
                     cursor.execute(
                         "SELECT id, name FROM school_day WHERE id in (SELECT school_day_id FROM public.res_company_school_day_rel where res_company_id=%s)",
-                        [student_info_users[0][0]])
+                        [student_info_users[0][1]])
                     school_day = cursor.fetchall()
                     student_spending = 1
                     date_spending.append({
@@ -5849,7 +5849,7 @@ def get_info_canteen_student(request):
                     for day in school_day:
                         cursor.execute(
                             "SELECT id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
-                            [student_id, student_info_users[0][1], student_info_users[0][0], student_info_users[0][0],
+                            [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][1],
                              day[0]])
                         student_food_day = cursor.fetchall()
                         date_schdule.append({'name': day[1], "len_item": str(len(student_food_day)), "day_id": day[0]})
