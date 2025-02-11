@@ -6505,7 +6505,7 @@ def post_canteen_all_same_day(request):
                 [student_id, day_id]
             )
             allergies_food_day = cursor.fetchall()
-            print(allergies_food_day)
+            # print(allergies_food_day)
             cursor.execute(
                 "DELETE FROM allergies_food_day WHERE student_id = %s AND day_id != %s AND year_id = %s AND branch_id = %s AND company_id = %s",
                 [student_id, day_id, student_info[0], student_info_users[0], student_info_users[1]]
@@ -6513,7 +6513,7 @@ def post_canteen_all_same_day(request):
 
             cursor.execute("SELECT id FROM school_day WHERE id != %s AND checkbox_day = TRUE", [day_id])
             school_day = cursor.fetchall()
-            print(school_day,"school_dayschool_dayschool_dayschool_day")
+            # print(school_day,"school_dayschool_dayschool_dayschool_day")
             for day in school_day:
                 for food_day in allergies_food_day:
                     cursor.execute(
