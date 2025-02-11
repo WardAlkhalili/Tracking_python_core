@@ -6481,34 +6481,68 @@ def post_canteen_all_same_day(request):
                     mobile_token='')
                 student_id = request.data.get('student_id')
                 day_id = request.data.get('day_id')
+                with connections[school_name].cursor() as cursor:
+                    cursor.execute(
+                        "select year_id, user_id,canteen_spending from student_student WHERE id=%s",
+                        [student_id])
+                    student_info = cursor.fetchall()
+
+                    cursor.execute(
+                        "select branch_id,company_id from res_users WHERE id=%s",
+                        [student_info[0][1]])
+                    student_info_users = cursor.fetchall()
+
+                    cursor.execute(
+                        "select product_id,product_product_id from allergies_food_day WHERE student_id=%s and day_id=%s",
+                        [student_id,day_id])
+                    allergies_food_day = cursor.fetchall()
+
+                    cursor.execute(
+                        "delete from allergies_food_day where student_id=%s and day_id != %s and year_id =%s and branch_id=%s",
+                        [student_id,day_id,student_info[0][0],student_info_users[0][0],student_info_users[0][1]])
+
+                    cursor.execute(
+                        "select id from school_day WHERE id!=%s and checkbox_day =true",
+                        [day_id])
+                    school_day = cursor.fetchall()
+                    for day in school_day:
+                        for food_day in allergies_food_day:
+                            cursor.execute(
+                                "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_product_id,day_id,product_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                                [student_info_users[0][2],
+                                 student_id,
+                                 student_info_users[0][0],
+                                 student_info_users[0][0],
+                                 food_day[1],
+                                 day[0],
+                                 food_day[0]])
                 # استدعاء API خارجي
-                try:
-                    print(student_id)
-                    print(day_id)
-                    url = 'https://tst.tracking.trackware.com/my/Canteen/all_day_children'
-                    headers = {'Content-Type': 'application/json'}
-                    response = requests.post(url, headers=headers,
-                                             json={"jsonrpc": "2.0", "params": {"student_id": student_id,"day_id":day_id}})
+                # try:
+                #     print(student_id)
+                #     print(day_id)
+                #     url = 'https://tst.tracking.trackware.com/my/Canteen/all_day_children'
+                #     headers = {'Content-Type': 'application/json'}
+                #     response = requests.post(url, headers=headers,
+                #                              json={"jsonrpc": "2.0", "params": {"student_id": student_id,"day_id":day_id}})
+                #
+                #     response_data = response.json()
+                #
+                #     if "error" in response_data:
+                #         print(response_data)
+                #         result = {'result': str(response_data)}
+                #
+                #     else:
+                #         print(response_data)
+                #         result = {'result': 'ok'}
+                #
+                # except Exception as error:
+                #     return Response({ "result": str(error)})
 
-                    response_data = response.json()
-
-                    if "error" in response_data:
-                        print(response_data)
-                        result = {'result': str(response_data)}
-
-                    else:
-                        print(response_data)
-                        result = {'result': 'ok'}
-
-                except Exception as error:
-                    return Response({ "result": str(error)})
-
-
+                result = {'result': 'ok'}
                 return Response(result)
             result = {'result': 'Not Authorization'}
             return Response(result)
         result = {'result': 'Not headers'}
         return Response(result)
-    result = {'result': 'not Post'}
-    return Response(result)
+
 
