@@ -6308,6 +6308,7 @@ def get_banned_food_s(request):
                             data_cat.append({
                                 "name": pos_category[0][1],
                                 "id": allergies[0],
+                                "product_id":allergies[2],
                                 "category_sup": category_sup
 
                             })
