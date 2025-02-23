@@ -6308,7 +6308,7 @@ def get_banned_food_s(request):
                             data_cat.append({
                                 "name": pos_category[0][1],
                                 "id": allergies[0],
-                                "product_id":allergies[2],
+
                                 "category_sup": category_sup
 
                             })
@@ -6328,6 +6328,7 @@ def get_banned_food_s(request):
                                 pos_category = cursor.fetchall()
                                 type = pos_category[0][1] if pos_category[0][1] else ''
                             date_ite.append({
+                                "product_id": allergies[2],
                                 "name": str(product_template[0][1]),
                                 "id": allergies[0],
                                 "price": str(product_template[0][3]) + " " + str('JOD'),
