@@ -6313,8 +6313,12 @@ def get_banned_food_s(request):
                             })
                         else:
                             cursor.execute(
-                                "select id,name,pos_categ_id,list_price,is_canteen,image_url from product_template WHERE id=%s ",
+                                "select product_tmpl_id from product_product WHERE id=%s ",
                                 [allergies[2]])
+                            product_product = cursor.fetchall()
+                            cursor.execute(
+                                "select id,name,pos_categ_id,list_price,is_canteen,image_url from product_template WHERE id=%s ",
+                                [product_product[0]])
                             product_template = cursor.fetchall()
                             type = ''
                             if product_template[0][2]:
