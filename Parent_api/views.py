@@ -6210,30 +6210,30 @@ def post_sec_item(request):
                         "select branch_id,company_id,year_id from res_users WHERE id=%s",
                         [student_info[0][1]])
                     student_info_users = cursor.fetchall()
-                    cursor.execute(
-                        "SELECT id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
-                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0],
-                         day_id])
-                    student_food_day = cursor.fetchall()
-                    student_food_day = list(set(student_food_day))
-                    canteen_banned = list(set(canteen_banned))
-                    cursor.execute(
-                        "delete from allergies_food_day where student_id=%s and  year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
-                        [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0],
-                         day_id])
-
-                    for allergies in student_food_day:
-                        if allergies[0] not in canteen_banned:
-                           cursor.execute(
-                                "SELECT product_tmpl_id  FROM product_product WHERE id = %s",
-                                [student_info_users[0][0]])
-                           product_templ_id = cursor.fetchall()
-                           q= cursor.execute(
-                                "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_product_id,day_id,product_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
-                                [student_info_users[0][2], student_id, student_info_users[0][0],
-                                 student_info_users[0][0],
-                                 allergies, day_id,product_templ_id[0][0]])
-                        print(q)
+                    # cursor.execute(
+                    #     "SELECT id  FROM allergies_food_day WHERE student_id = %s and year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
+                    #     [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0],
+                    #      day_id])
+                    # student_food_day = cursor.fetchall()
+                    # student_food_day = list(set(student_food_day))
+                    # canteen_banned = list(set(canteen_banned))
+                    # cursor.execute(
+                    #     "delete from allergies_food_day where student_id=%s and  year_id=%s and branch_id=%s and company_id=%s and day_id=%s",
+                    #     [student_id, student_info_users[0][2], student_info_users[0][0], student_info_users[0][0],
+                    #      day_id])
+                    #
+                    # for allergies in student_food_day:
+                    #     if allergies[0] not in canteen_banned:
+                    #        cursor.execute(
+                    #             "SELECT product_tmpl_id  FROM product_product WHERE id = %s",
+                    #             [student_info_users[0][0]])
+                    #        product_templ_id = cursor.fetchall()
+                    #        q= cursor.execute(
+                    #             "INSERT INTO allergies_food_day(year_id, student_id, branch_id,company_id,product_product_id,day_id,product_id)VALUES (%s,%s,%s,%s,%s,%s,%s);",
+                    #             [student_info_users[0][2], student_id, student_info_users[0][0],
+                    #              student_info_users[0][0],
+                    #              allergies, day_id,product_templ_id[0][0]])
+                    #     print(q)
                     for allergies in canteen_banned:
                         cursor.execute(
                             "SELECT product_tmpl_id  FROM product_product WHERE id = %s",
