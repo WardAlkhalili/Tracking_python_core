@@ -1369,8 +1369,7 @@ def kids_list(request):
 
                                 studen_list.append({
                                     "new_chat":student1[rec]['new_chat'],
-                                    "schoolImage": school_logo[0][0] if school_logo[0][
-                                        0] else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
+                                    "schoolImage": school_logo[0][0] if school_logo[0][0] else 'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
                                     "name": student1[rec]['display_name_search'],
                                     "fname": fname,
                                     "id": student1[rec]['id'],
@@ -6080,7 +6079,7 @@ def get_category_Item(request):
                     for product in product_templates:
                         category_type = 'all' if not product['pos_category'] else product['pos_category']
                         image_url ="https://trackware-schools.s3.eu-central-1.amazonaws.com/" + product['imageS3'] if product[
-                            'imageS3'] else 'https://trackware-schools.s3.eu-central-1.amazonaws.com/product.png'
+                            'imageS3'] else 'https://tst.tracking.trackware.com/school_canteen_portal/static/src/img/no_image.png'
 
                         products.append({
                             "name": str(product['name']),
