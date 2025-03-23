@@ -4763,7 +4763,7 @@ def get_marks(request, student_id):
                 [tuple(student_class)])
             mark_eva = cursor.fetchall()
             if mark_eva:
-                for semester in academic_semester:
+                for semester in academic_semesters:
                     exam_det = []
                     for mark in mark_eva:
                         cursor.execute(
@@ -4819,7 +4819,7 @@ def get_marks(request, student_id):
                     [class_id])
                 mark_eva = cursor.fetchall()
                 if mark_eva:
-                    for semester in academic_semester:
+                    for semester in academic_semesters:
                         exam_det = []
                         for mark in mark_eva:
                             cursor.execute(
