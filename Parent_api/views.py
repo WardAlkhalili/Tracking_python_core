@@ -4725,9 +4725,13 @@ def get_marks(request, student_id):
                 return Response({'error': 'Student not found'}, status=404)
             year_id, user_id, branch_id = student_data
             academic_semesters = get_academic_semesters(cursor, year_id)
+            print(academic_semesters)
             all_exam = []
-           
-
+            cursor.execute(
+                "select year_id,user_id from student_student where id=%s",
+                [student_id])
+            user_id_q = cursor.fetchall()
+       
             class_id = 0
             # ----------------------
             cursor.execute(
@@ -4770,8 +4774,6 @@ def get_marks(request, student_id):
                             " SELECT semester_id FROM mark_exam WHERE id=%s",
                             [mark[0]])
                         mark_exam = cursor.fetchall()
-                        print(semester)
-                        print(mark_exam)
                         if semester == mark_exam[0][0]:
                             cursor.execute(
                                 " SELECT id,exam_name_arabic,exam_name_english,related_exam FROM exam_group WHERE mark_exam_id=%s ORDER BY id ASC ",
@@ -4791,7 +4793,7 @@ def get_marks(request, student_id):
                                     subject_name = cursor.fetchall()
                                     cursor.execute(
                                         " SELECT id,class_id FROM public.mark_mark WHERE subject_id= %s and class_id= %s and exams= %s and semester_id= %s and year_id= %s and branch_id= %s ",
-                                        [subject_id[0], mark[1], exam[3], semester[0], branch_id[0][1],
+                                        [subject_id[0], mark[1], exam[3], semester, branch_id[0][1],
                                          branch_id[0][0]])
                                     mark_mark_x = cursor.fetchall()
                                     student_mark = None
@@ -4847,7 +4849,7 @@ def get_marks(request, student_id):
                                         subject_name = cursor.fetchall()
                                         cursor.execute(
                                             " SELECT id,class_id FROM public.mark_mark WHERE subject_id= %s and class_id= %s and exams= %s and semester_id= %s and year_id= %s and branch_id= %s ",
-                                            [subject_id[0], mark[1], exam[3], semester[0],
+                                            [subject_id[0], mark[1], exam[3], semester,
                                              branch_id[0][1], branch_id[0][0]])
                                         mark_mark_x = cursor.fetchall()
                                         student_mark = None
