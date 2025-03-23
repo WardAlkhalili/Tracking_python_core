@@ -4752,7 +4752,7 @@ def get_marks(request, student_id):
 
         # Fetch Marks Data
         cursor.execute("""
-            SELECT ml.subject_id, ml.mark_line_id, ml.mark, ss.name, mm.class_id, mm.exams, mm.semester_id 
+            SELECT mm.subject_id, ml.mark_line_id, ml.mark, ss.name, mm.class_id, mm.exams, mm.semester_id 
             FROM mark_line ml
             JOIN mark_mark mm ON ml.mark_line_id = mm.id
             JOIN school_subject ss ON mm.subject_id = ss.id
