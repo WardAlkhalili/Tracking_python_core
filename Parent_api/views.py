@@ -4719,7 +4719,7 @@ def get_marks(request, student_id):
         db_name = get_authenticated_db(request)
         if not db_name:
             return Response({'error': 'Unauthorized'}, status=401)
-        with connections[school_name].cursor() as cursor:
+        with connections[db_name].cursor() as cursor:
             student_data = get_student_details(cursor, student_id)
             if not student_data:
                 return Response({'error': 'Student not found'}, status=404)
