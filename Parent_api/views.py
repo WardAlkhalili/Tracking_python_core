@@ -4792,10 +4792,11 @@ def get_marks(request, student_id):
                         "semester": semester[1],
                         "exam": exam_det
                     })
-
+                print(str(all_exam))
                 return Response({"all_exam": all_exam})
 
             except Exception as e:
+                print(str(e))
                 return Response({"error": str(e)}, status=500)
 
 
