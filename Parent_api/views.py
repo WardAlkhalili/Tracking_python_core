@@ -1141,7 +1141,7 @@ def kids_list(request):
                                     })
 
                         result = {'message': '', 'students': studen_list, "parent_id": int(parent_id)}
-                        # print(result)
+                        print(len(studen_list))
                         return Response(result)
 
                     result = {'status': 'error'}
@@ -4659,6 +4659,7 @@ def post_library(request):
 @api_view(['GET'])
 def get_marks(request, student_id):
     if request.method == 'GET':
+        print(student_id,"-----------------------")
         if request.headers:
             if request.headers.get('Authorization'):
                 if 'Bearer' in request.headers.get('Authorization'):
@@ -4821,7 +4822,8 @@ def get_marks(request, student_id):
                                                                      "subject_det": subject_det})
                                         all_exam.append({"semester": semester[1], "exam": exam_det})
                             result = {'all_exam': all_exam,'code':''}
-
+        print(result)
+        print("--------------------------4825")
         return Response(result)
 
 
