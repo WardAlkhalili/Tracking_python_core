@@ -34,6 +34,29 @@ import google.auth.transport.requests
 # default_app = firebase_admin.initialize_app()
 SCOPES = ['https://www.googleapis.com/auth/firebase.messaging']
 
+def get_authenticated_db(request):
+    """Extracts and validates the Authorization token, returning the database name."""
+    auth_header = request.headers.get('Authorization')
+    if auth_header and auth_header.startswith('Bearer '):
+        token = auth_header.replace('Bearer ', '').strip()
+        db_name = ManagerParent.objects.filter(token=token).values_list('db_name', flat=True).first()
+        return db_name
+    return None
+def get_student_details(cursor, student_id):
+    """Fetch student details (year_id, user_id, branch_id) using a single query."""
+    cursor.execute("""
+        SELECT s.year_id, s.user_id, u.branch_id 
+        FROM student_student s
+        JOIN res_users u ON s.user_id = u.id
+        WHERE s.id = %s
+    """, [student_id])
+    return cursor.fetchone()
+def get_academic_semesters(cursor, year_id):
+    """Fetch all academic semesters for the given year."""
+    cursor.execute("SELECT id, name FROM academic_semester WHERE year_id = %s", [year_id])
+    return {row[0]: row[1] for row in cursor.fetchall()}  # Returns {semester_id: semester_name}
+
+
 
 def _get_access_token():
     """Retrieve a valid access token that can be used to authorize requests.
@@ -4691,173 +4714,74 @@ def post_library(request):
 
 @api_view(['GET'])
 def get_marks(request, student_id):
-    if request.method == 'GET':
-        # print(student_id,"-----------------------")
-        if request.headers:
-            if request.headers.get('Authorization'):
-                if 'Bearer' in request.headers.get('Authorization'):
-                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
-                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+    db_name = get_authenticated_db(request)
+    if not db_name:
+        return Response({'error': 'Unauthorized'}, status=401)
 
-                    if db_name:
-                        for e in db_name:
-                            school_name = e[0]
-                        with connections[school_name].cursor() as cursor:
-                            all_exam = []
-                            cursor.execute(
-                                "select year_id,user_id from student_student where id=%s",
-                                [student_id])
-                            user_id_q = cursor.fetchall()
-                            if user_id_q:
-                                cursor.execute(
-                                    " select branch_id,year_id from res_users where id=%s",
-                                    [user_id_q[0][1]])
-                                branch_id = cursor.fetchall()
-                                cursor.execute(
-                                    "SELECT id,name FROM academic_semester WHERE year_id=%s ",
-                                    [branch_id[0][1]])
-                                academic_semester = cursor.fetchall()
-                            else:
-                                cursor.execute(
-                                    "SELECT id,name FROM academic_semester WHERE year_id=(SELECT year_id FROM student_student WHERE id=%s)",
-                                    [student_id])
-                                academic_semester = cursor.fetchall()
+    with connections[db_name].cursor() as cursor:
+        student_data = get_student_details(cursor, student_id)
+        if not student_data:
+            return Response({'error': 'Student not found'}, status=404)
 
-                            class_id = 0
-                            # ----------------------
-                            cursor.execute(
-                                "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = (SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s ORDER BY student_distribution_line_id DESC LIMIT 1)",
-                                [student_id])
-                            student_distribution_line = cursor.fetchall()
-                            student_grade=None
+        year_id, user_id, branch_id = student_data
+        academic_semesters = get_academic_semesters(cursor, year_id)
 
-                            cursor.execute(
-                                "select academic_grade_id from school_class where id="
-                                "(select class_id from res_partner where id=(select partner_id from res_users where id="
-                                "(select user_id from student_student where id=%s)))",
-                                [student_id])
-                            academic_grade_q = cursor.fetchall()
-                            student_grade = academic_grade_q[0][0] if academic_grade_q else ''
-                            if student_grade == None:
-                                if student_distribution_line:
-                                    cursor.execute(
-                                        "SELECT id,name FROM public.academic_grade WHERE id = %s",
-                                        [student_distribution_line[0][0]])
-                                    academic_grade = cursor.fetchall()
-                                    student_grade = academic_grade[0][0] if academic_grade else ''
+        # Fetch Student Grade & Class
+        cursor.execute("""
+            SELECT sc.id, sc.academic_grade_id 
+            FROM school_class sc
+            WHERE sc.academic_grade_id = (
+                SELECT academic_grade_id FROM school_class 
+                WHERE id = (SELECT class_id FROM res_partner WHERE id = (
+                    SELECT partner_id FROM res_users WHERE id = %s)))
+        """, [user_id])
+        school_classes = {row[0]: row[1] for row in cursor.fetchall()}  # {class_id: grade_id}
 
-                            cursor.execute(
-                                " SELECT id FROM public.school_class WHERE academic_grade_id=%s",
-                                [student_grade])
-                            school_class = cursor.fetchall()
-                            student_class=[]
-                            for res in school_class:
-                                student_class.append(res[0])
-                            cursor.execute(
-                                " SELECT mark_exam_id,school_class_id FROM mark_exam_school_class_rel WHERE school_class_id in %s ",
-                                [tuple(student_class)])
-                            mark_eva = cursor.fetchall()
-                            if mark_eva :
-                                for semester in academic_semester:
-                                    exam_det = []
-                                    for mark in mark_eva:
-                                        cursor.execute(
-                                            " SELECT semester_id FROM mark_exam WHERE id=%s",
-                                            [mark[0]])
-                                        mark_exam = cursor.fetchall()
-                                        if semester[0]==mark_exam[0][0]:
-                                            cursor.execute(
-                                                " SELECT id,exam_name_arabic,exam_name_english,related_exam FROM exam_group WHERE mark_exam_id=%s ORDER BY id ASC ",
-                                                [mark[0]])
-                                            exam_name = cursor.fetchall()
-                                            exam_det=[]
-                                            for exam in exam_name:
-                                                cursor.execute(
-                                                    " SELECT subject_id,max FROM public.subject_mark_line WHERE mark_subject_line_id=%s",
-                                                    [exam[0]])
-                                                subject_mark_line = cursor.fetchall()
-                                                subject_det = []
-                                                for subject_id in subject_mark_line:
-                                                    cursor.execute(
-                                                        " SELECT name FROM public.school_subject WHERE id=%s",
-                                                        [subject_id[0]])
-                                                    subject_name = cursor.fetchall()
-                                                    cursor.execute(
-                                                        " SELECT id,class_id FROM public.mark_mark WHERE subject_id= %s and class_id= %s and exams= %s and semester_id= %s and year_id= %s and branch_id= %s ",
-                                                        [subject_id[0],mark[1],exam[3],semester[0],branch_id[0][1],branch_id[0][0]])
-                                                    mark_mark_x = cursor.fetchall()
-                                                    student_mark =None
+        # Get Exam Details
+        cursor.execute("""
+            SELECT me.mark_exam_id, me.school_class_id, mg.id, mg.exam_name_arabic, mg.exam_name_english, mg.related_exam
+            FROM mark_exam_school_class_rel me
+            JOIN exam_group mg ON me.mark_exam_id = mg.mark_exam_id
+            WHERE me.school_class_id IN %s
+        """, [tuple(school_classes.keys())])
+        exams = {}
+        for row in cursor.fetchall():
+            exams.setdefault(row[0], []).append({
+                "exam_id": row[2], "exam_name_ar": row[3], "exam_name_en": row[4], "related_exam": row[5]
+            })
 
-                                                    if mark_mark_x:
-                                                        cursor.execute(
-                                                            "SELECT mark FROM public.mark_line WHERE mark_line_id=%s and   exams= %s and student_id=%s and published_students=%s ORDER BY mark_line_id DESC LIMIT 1  ",
-                                                            [mark_mark_x[0][0],exam[3],student_id,True])
-                                                        student_mark1 = cursor.fetchall()
-                                                        if student_mark1 and class_id==0:
-                                                            class_id =mark_mark_x[0][1]
-                                                            break
+        # Fetch Marks Data
+        cursor.execute("""
+            SELECT ml.subject_id, ml.mark_line_id, ml.mark, ss.name, mm.class_id, mm.exams, mm.semester_id 
+            FROM mark_line ml
+            JOIN mark_mark mm ON ml.mark_line_id = mm.id
+            JOIN school_subject ss ON ml.subject_id = ss.id
+            WHERE ml.student_id = %s AND ml.published_students = TRUE
+        """, [student_id])
+        student_marks = {}
+        for row in cursor.fetchall():
+            subject_id, mark_line_id, mark, subject_name, class_id, exams, semester_id = row
+            student_marks.setdefault(semester_id, {}).setdefault(exams, []).append({
+                "subject_name": subject_name,
+                "student_mark": str(mark),
+            })
 
+        # Organize Final Data Structure
+        all_exam_data = []
+        for semester_id, semester_name in academic_semesters.items():
+            exams_data = []
+            for exam in exams.get(semester_id, []):
+                exam_data = {
+                    "exam_name_ar": exam["exam_name_ar"],
+                    "exam_name_en": exam["exam_name_en"],
+                    "subject_det": student_marks.get(semester_id, {}).get(exam["related_exam"], [])
+                }
+                exams_data.append(exam_data)
 
-                                                    subject_det.append({"subject_name":subject_name[0][0] if subject_name else '',"student_mark":str(student_mark[0][0]) if student_mark else "0.0","max_mark":str(subject_id[1])if subject_id else "0.0" })
-
-                                                exam_det.append({"exam_name_ar": exam[1], "exam_name_en": exam[2],"subject_det":subject_det})
-                                    all_exam.append({"semester": semester[1], "exam": exam_det})
-                            if class_id !=0:
-
-                                all_exam = []
-                                cursor.execute(
-                                    " SELECT mark_exam_id,school_class_id FROM mark_exam_school_class_rel WHERE school_class_id = %s ",
-                                    [class_id])
-                                mark_eva = cursor.fetchall()
-                                if mark_eva:
-                                    for semester in academic_semester:
-                                        exam_det = []
-                                        for mark in mark_eva:
-                                            cursor.execute(
-                                                " SELECT semester_id FROM mark_exam WHERE id=%s",
-                                                [mark[0]])
-                                            mark_exam = cursor.fetchall()
-                                            if semester[0] == mark_exam[0][0]:
-                                                cursor.execute(
-                                                    " SELECT id,exam_name_arabic,exam_name_english,related_exam FROM exam_group WHERE mark_exam_id=%s ORDER BY id ASC ",
-                                                    [mark[0]])
-                                                exam_name = cursor.fetchall()
-                                                exam_det = []
-                                                for exam in exam_name:
-                                                    cursor.execute(
-                                                        " SELECT subject_id,max FROM public.subject_mark_line WHERE mark_subject_line_id=%s",
-                                                        [exam[0]])
-                                                    subject_mark_line = cursor.fetchall()
-                                                    subject_det = []
-                                                    for subject_id in subject_mark_line:
-                                                        cursor.execute(
-                                                            " SELECT name FROM public.school_subject WHERE id=%s",
-                                                            [subject_id[0]])
-                                                        subject_name = cursor.fetchall()
-                                                        cursor.execute(
-                                                            " SELECT id,class_id FROM public.mark_mark WHERE subject_id= %s and class_id= %s and exams= %s and semester_id= %s and year_id= %s and branch_id= %s ",
-                                                            [subject_id[0], mark[1], exam[3], semester[0],
-                                                             branch_id[0][1], branch_id[0][0]])
-                                                        mark_mark_x = cursor.fetchall()
-                                                        student_mark = None
-                                                        if mark_mark_x:
-                                                            cursor.execute(
-                                                                "SELECT mark FROM public.mark_line WHERE mark_line_id=%s and   exams= %s and student_id=%s and published_students=%s ORDER BY mark_line_id DESC LIMIT 1  ",
-                                                                [mark_mark_x[0][0], exam[3], student_id, True])
-                                                            student_mark = cursor.fetchall()
-                                                        subject_det.append(
-                                                            {"subject_name": subject_name[0][0] if subject_name else '',
-                                                             "student_mark": str(
-                                                                 student_mark[0][0]) if student_mark else "0.0",
-                                                             "max_mark": str(subject_id[1]) if subject_id else "0.0"})
-
-                                                    exam_det.append({"exam_name_ar": exam[1], "exam_name_en": exam[2],
-                                                                     "subject_det": subject_det})
-                                        all_exam.append({"semester": semester[1], "exam": exam_det})
-                            result = {'all_exam': all_exam,'code':''}
-        print(result)
-        # print("--------------------------4825")
-        return Response(result)
+            if exams_data:
+                all_exam_data.append({"semester": semester_name, "exam": exams_data})
+        print(all_exam_data)
+        return Response({"all_exam": all_exam_data, "code": ""})
 
 
 
