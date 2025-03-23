@@ -4725,7 +4725,6 @@ def get_marks(request, student_id):
                 return Response({'error': 'Student not found'}, status=404)
             year_id, user_id, branch_id = student_data
             academic_semesters = get_academic_semesters(cursor, year_id)
-            print(academic_semesters)
             all_exam = []
             cursor.execute(
                 "select year_id,user_id from student_student where id=%s",
@@ -4793,8 +4792,8 @@ def get_marks(request, student_id):
                                     subject_name = cursor.fetchall()
                                     cursor.execute(
                                         " SELECT id,class_id FROM public.mark_mark WHERE subject_id= %s and class_id= %s and exams= %s and semester_id= %s and year_id= %s and branch_id= %s ",
-                                        [subject_id[0], mark[1], exam[3], semester, branch_id[0][1],
-                                         branch_id[0][0]])
+                                        [subject_id[0], mark[1], exam[3], semester,year_id,
+                                         branch_id])
                                     mark_mark_x = cursor.fetchall()
                                     student_mark = None
 
@@ -4814,7 +4813,7 @@ def get_marks(request, student_id):
 
                                 exam_det.append(
                                     {"exam_name_ar": exam[1], "exam_name_en": exam[2], "subject_det": subject_det})
-                    all_exam.append({"semester": semester[1], "exam": exam_det})
+                    all_exam.append({"semester": academic_semesters[semester], "exam": exam_det})
             if class_id != 0:
 
                 all_exam = []
@@ -4850,7 +4849,7 @@ def get_marks(request, student_id):
                                         cursor.execute(
                                             " SELECT id,class_id FROM public.mark_mark WHERE subject_id= %s and class_id= %s and exams= %s and semester_id= %s and year_id= %s and branch_id= %s ",
                                             [subject_id[0], mark[1], exam[3], semester,
-                                             branch_id[0][1], branch_id[0][0]])
+                                             year_id, branch_id])
                                         mark_mark_x = cursor.fetchall()
                                         student_mark = None
                                         if mark_mark_x:
@@ -4866,7 +4865,7 @@ def get_marks(request, student_id):
 
                                     exam_det.append({"exam_name_ar": exam[1], "exam_name_en": exam[2],
                                                      "subject_det": subject_det})
-                        all_exam.append({"semester": semester[1], "exam": exam_det})
+                        all_exam.append({"semester": academic_semesters[semester], "exam": exam_det})
             result = {'all_exam': all_exam, 'code': ''}
         # if request.headers:
         #     if request.headers.get('Authorization'):
