@@ -1848,14 +1848,14 @@ def kids_hstory_new(request):
                                         [branch_id[0][0], branch_id[0][1], student[0]]
                                     )
 
+                                    student_mes11 = cursor.fetchall()
+                                    print(len(student_mes11), "--------------------1826")
+
+                                    cursor.execute(
+                                        "select  date,message_en,message_ar,title,title_ar,action_id,id,image_link,read_message,plan_name,school_message_id,model_school_messsage from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC ",
+                                        [branch_id[0][0], branch_id[0][1], student[0]])
                                     student_mes = cursor.fetchall()
-                                    # print(len(student_mes11), "--------------------1826")
-                                    # 
-                                    # cursor.execute(
-                                    #     "select  date,message_en,message_ar,title,title_ar,action_id,id,image_link,read_message,plan_name,school_message_id,model_school_messsage from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC ",
-                                    #     [branch_id[0][0], branch_id[0][1], student[0]])
-                                    # student_mes = cursor.fetchall()
-                                    # print(len(student_mes),"--------------------1831")
+                                    print(len(student_mes),"--------------------1831")
                                 else:
                                     cursor.execute(
                                         "select  date,message_en,message_ar,title,title_ar,action_id,id,read_message,school_message_id,model_school_messsage from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
