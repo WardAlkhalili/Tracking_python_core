@@ -4710,7 +4710,7 @@ def get_marks(request, student_id):
             try:
                 # ✅ استعلام الحصول على بيانات الطالب بعد تصحيح `r.branch_id`
                 cursor.execute("""
-                    SELECT s.year_id, u.branch_id, u.user_id, ag.id AS student_grade
+                    SELECT s.year_id, u.branch_id, s.user_id, ag.id AS student_grade
                     FROM student_student s
                     JOIN res_users u ON u.id = s.user_id
                     JOIN res_partner rp ON rp.id = u.partner_id
