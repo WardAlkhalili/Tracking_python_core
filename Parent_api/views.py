@@ -4720,7 +4720,7 @@ def get_marks(request, student_id):
         if not db_name:
             return Response({'error': 'Unauthorized'}, status=401)
 
-        url = 'https://' + school_name + '.trackware.com/web/session/authenticate'
+        url = 'https://' + db_name + '.trackware.com/get_student_marks_list'
 
         try:
 
