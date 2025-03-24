@@ -4738,7 +4738,6 @@ def get_marks(request, student_id):
                 result = {
                     "status": "erorrq"}
                 return Response(result)
-            print(response)
             all_exam = response['result']['all_exam']
             result = {'all_exam': all_exam, 'code': ''}
             return Response(result)
