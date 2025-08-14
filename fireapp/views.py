@@ -1007,3 +1007,66 @@ def push_notification(request):
                                     }
                                     return Response(result1)
 
+@api_view(['POST', 'GET'])
+def send_chat_parent(request):
+    if request.method == 'POST':
+        school_name = request.data.get('school_name')
+        message_body = ''
+        message_id = request.data.get('message_id')
+        parent_id = request.data.get('parent_id')
+        f_id = request.data.get('f_id')
+        m_id = request.data.get('m_id')
+        student_id = request.data.get('student_id')
+        student_name = ''
+
+        mobile_token_g = ManagerParent.objects.filter(Q(parent_id=parent_id), Q(db_name=school_name),
+                                                      Q(is_active=True)).values_list(
+            'mobile_token').order_by('-pk')
+        mobile_token_f = ManagerParent.objects.filter(Q(parent_id=f_id), Q(db_name=school_name),
+                                                      Q(is_active=True)).values_list(
+            'mobile_token').order_by('-pk')
+        mobile_token_m = ManagerParent.objects.filter(Q(parent_id=m_id), Q(db_name=school_name),
+                                                      Q(is_active=True)).values_list(
+            'mobile_token').order_by('-pk')
+        mobile_token = []
+        for e in mobile_token_g:
+            mobile_token_g = e[0]
+            mobile_token.append(e[0])
+        for e in mobile_token_m:
+            mobile_token_m = e[0]
+            mobile_token.append(e[0])
+        for e in mobile_token_f:
+            mobile_token_f = e[0]
+            mobile_token.append(e[0])
+        r = Timer(3.0, twoArgsChat, (message_id, school_name, mobile_token, student_id))
+        r.start()
+
+        result1 = {
+            "route": 'Ok'
+        }
+        #
+        return Response(result1)
+
+@api_view(['POST'])
+def send_chat_teacher(request):
+    if request.method == 'POST':
+        try:
+            # school_name = request.data.get('school_name')
+            message_body = request.data.get('message')
+            mobile_token=request.data.get('mobile_token')
+            send_message(mobile_token, message_body, 'Chat',{ "model_name": "Chat"})
+            result1 = {
+                "route": 'Ok'
+
+            }
+
+
+            return Response(result1)
+        except Exception as e:
+            print(e)
+            result1 = {
+                "route": e
+
+            }
+
+            return Response(result1)
