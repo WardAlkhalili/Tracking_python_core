@@ -62,6 +62,43 @@ firebase_admin.initialize_app(cred)
 SCOPES = ['https://www.googleapis.com/auth/firebase.messaging']
 
 
+def twoArgsChat(message_id, school_name, mobile_token, student_id):
+    with connections[school_name].cursor() as cursor:
+        cursor.execute(
+            "select  display_name_search from student_student WHERE  id = %s  And state = 'done'",
+            [student_id])
+        student = cursor.fetchall()
+        student_name = student[0][0]
+        cursor.execute(
+            "select  body from mail_message WHERE  id = %s ",
+            [message_id])
+        message = cursor.fetchall()
+        patterns = re.compile('<.*?>')
+        message_body = message[0][0]
+        message_body = re.sub(patterns, '', message_body)
+        mobile_token = list(dict.fromkeys(mobile_token))
+        push_service = FCMNotification(
+            api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+        for mobile in mobile_token:
+            registration_id = mobile
+            message_title = student_name
+            message_body = message_body
+            send_message(registration_id, message_body, message_title,
+                         {"student_id": str(student_id),
+                          "picked": str(False), "model_name": "Chat", "student_name": student_name})
+            # result = push_service.notify_single_device(registration_id=registration_id, sound='new_beeb.mp3',
+            #                                            message_title=message_title,
+            #                                            message_body=message_body,data_message={"student_id":str(student_id),
+            #                                                                                    "picked":False,"model_name":"Chat","student_name":student_name}
+            #                                            )
+        result1 = {
+            "route": 'Ok'
+
+        }
+
+        return Response(result1)
+
+
 def _get_access_token():
     """Retrieve a valid access token that can be used to authorize requests.
 
