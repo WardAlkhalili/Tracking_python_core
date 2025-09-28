@@ -850,7 +850,7 @@ def kids_list(request):
                                     url_m = {}
                                     model_list = ("Achievements", "Clinic", "Calendar", "Homework", "Events",
                                                   "Online Assignments",
-                                                  "Plans", 'Online Exams', 'Library', 'Grades')
+                                                  "Plans", 'Online Exams', 'Library', 'Grades','Timetable')
                                     model_list_icon = ("school_registration,static/src/img/icons/Achievements.svg",
                                                        "school_clinic,static/src/img/icons/Clinic.svg",
                                                        "school_library,static/src/img/icons/Library.svg",
@@ -860,7 +860,7 @@ def kids_list(request):
                                                            , "school_event,static/src/img/icons/Events.svg",
                                                        "school_worksheet,static/src/img/icons/Homework.svg",
                                                        "school_assignment,static/src/img/icons/Online-Assignments.svg",
-                                                       "school_certificates,static/src/img/icons/marks_svg.svg")
+                                                       "school_certificates,static/src/img/icons/marks_svg.svg","school_time_table,static/src/img/icons/timetable.svg")
                                     cursor.execute(
                                         "select name from ir_ui_menu where name in %s and active=true and web_icon in %s  ",
                                         [model_list, model_list_icon])
