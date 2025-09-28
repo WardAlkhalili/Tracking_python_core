@@ -843,7 +843,8 @@ def kids_list(request):
                                              # "arabic_url": "https://tst.tracking.trackware.com/ar_SY/my/Timetable/",
                                              "arabic_name": "الجدول الدراسي",
                                              "icon": "https://trackware-schools.s3.eu-central-1.amazonaws.com/icons8-curriculum-48.png",
-                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/icons8-curriculum-48.svg"
+                                             "icon_svg": "https://trackware-schools.s3.eu-central-1.amazonaws.com/icons8-curriculum-48.svg",
+                                              "new_add": False
                                              }
 
                                     }
