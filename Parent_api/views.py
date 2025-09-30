@@ -117,6 +117,9 @@ def parent_login(request):
         mobile_token = request.data.get('mobile_token')
         # http://192.168.1.82/
         url = 'https://' + school_name + '.trackware.com/web/session/authenticate'
+        if user_name=='test-001' and password =='Prt30110':
+            password =='Prt44659'
+            print("----------password------------",password)
         # url = 'http://192.168.1.28:9098/web/session/authenticate'
         try:
             if user_name=='test-001' and password =='Prt30110':
