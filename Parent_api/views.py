@@ -124,6 +124,8 @@ def parent_login(request):
                 password =='Prt44659'
             body = json.dumps(
                 {"jsonrpc": "2.0", "params": {"db": school_name, "login": user_name, "password": password}})
+            print(body)
+            print(url)
 
             headers = {
                 'Content-Type': 'application/json',
@@ -132,6 +134,7 @@ def parent_login(request):
             response1 = requests.request("POST", url, headers=headers, data=body)
 
             response = response1.json()
+            print(response)
             if "error" in response:
                 result = {
                     "status": "erorrq"}
