@@ -118,13 +118,13 @@ def parent_login(request):
         # http://192.168.1.82/
         url = 'https://' + school_name + '.trackware.com/web/session/authenticate'
         if user_name=='test-001' and password =='Prt30110':
-            password =='Prt44659'
+            password ='Prt44659'
             print("----------password------------",password)
         # url = 'http://192.168.1.28:9098/web/session/authenticate'
         try:
             if user_name=='test-001' and password =='Prt30110':
                 print("----------------------")
-                password =='Prt44659'
+                password ='Prt44659'
             body = json.dumps(
                 {"jsonrpc": "2.0", "params": {"db": school_name, "login": user_name, "password": password}})
             print(body)
