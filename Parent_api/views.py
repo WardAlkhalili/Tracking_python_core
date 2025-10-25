@@ -3543,7 +3543,7 @@ def post_attendance(request):
                                 type="late"
                             if reason =="مرض":
                                reason='sick'
-                            else if reason =='حادث'
+                            else if reason =='حادث':
                                  reason ="accidental"
                             attached_files = request.data.get("file")
                             body = json.dumps({"jsonrpc": "2.0",
