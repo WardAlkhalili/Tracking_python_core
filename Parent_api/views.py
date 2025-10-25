@@ -3555,6 +3555,7 @@ def post_attendance(request):
                             response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
                             print(response1)
+                            print(response1.text)
                             try:
                                 print(response1.json())
                             except ValueError:
