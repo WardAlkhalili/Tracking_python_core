@@ -3536,7 +3536,14 @@ def post_attendance(request):
                         base_url = request.data.get('base_url')
                         print(school_name,student_id,start_date,end_date,type,notes,departure_time,reason,Session)
                         with connections[school_name].cursor() as cursor:
-
+                            if type =="غياب":
+                                type="absence"
+                            else:
+                                type = "late"
+                            if reason =="مرض":
+                                reason="sick"
+                            elif reason =="حادث":
+                                reason = "accidental"
                             attached_files = request.data.get("file")
                             body = json.dumps({"jsonrpc": "2.0",
                                                "params": {"student_id": int(student_id), "attachments": attached_files,
