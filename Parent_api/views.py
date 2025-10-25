@@ -3534,6 +3534,7 @@ def post_attendance(request):
                         reason = request.data.get('Reason')
                         arrival_time = request.data.get('arrival_time')
                         base_url = request.data.get('base_url')
+                        print(school_name,student_id,start_date,end_date,type,notes,departure_time,reason,Session)
                         with connections[school_name].cursor() as cursor:
 
                             attached_files = request.data.get("file")
@@ -3554,6 +3555,10 @@ def post_attendance(request):
                             response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
                             print(response1)
+                            try:
+                                print(response1.json())
+                            except ValueError:
+                                print("الاستجابة ليست JSON صالحًا")
 
                             result = {'result': 'ok'}
                             return Response(result)
