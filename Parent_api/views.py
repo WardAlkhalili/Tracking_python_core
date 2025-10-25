@@ -3541,7 +3541,7 @@ def post_attendance(request):
                                 type="absence"
                             else :
                                 type="late"
-                            if reason =="مرض"
+                            if reason =="مرض":
                                reason='sick'
                             else if reason =='حادث'
                                  reason ="accidental"
