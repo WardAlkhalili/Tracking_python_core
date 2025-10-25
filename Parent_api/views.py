@@ -3544,6 +3544,10 @@ def post_attendance(request):
                                 reason="sick"
                             elif reason =="حادث":
                                 reason = "accidental"
+                            elif reason =="اخرى":
+                                reason = "other"
+                            else:
+                                reason = "death"
                             attached_files = request.data.get("file")
                             body = json.dumps({"jsonrpc": "2.0",
                                                "params": {"student_id": int(student_id), "attachments": attached_files,
