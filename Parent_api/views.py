@@ -3534,7 +3534,7 @@ def post_attendance(request):
                         reason = request.data.get('Reason')
                         arrival_time = request.data.get('arrival_time')
                         base_url = request.data.get('base_url')
-                        print(school_name,student_id,start_date,end_date,type,notes,departure_time,reason,Session)
+                        # print(school_name,student_id,start_date,end_date,type,notes,departure_time,reason,Session)
                         with connections[school_name].cursor() as cursor:
                             if type =="غياب":
                                 type="absence"
@@ -3563,15 +3563,14 @@ def post_attendance(request):
                             }
                             base_url = base_url.replace("http://", "https://")
                             url = base_url + "check_user_type1"
-                            print(url)
                             response1 = requests.request("POST", url,
                                                          headers=headers, data=body)
-                            print(response1)
-                            print(response1.text)
-                            try:
-                                print(response1.json())
-                            except ValueError:
-                                print("الاستجابة ليست JSON صالحًا")
+                            # print(response1)
+                            # print(response1.text)
+                            # try:
+                            #     print(response1.json())
+                            # except ValueError:
+                            #     print("الاستجابة ليست JSON صالحًا")
 
                             result = {'result': 'ok'}
                             return Response(result)
