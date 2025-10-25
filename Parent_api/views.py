@@ -3550,6 +3550,7 @@ def post_attendance(request):
                                 'X-Openerp-Session-Id': Session,
                                 'Content-Type': 'application/json',
                             }
+                            base_url = base_url.replace("http://", "https://")
                             url = base_url + "check_user_type1"
                             print(url)
                             response1 = requests.request("POST", url,
