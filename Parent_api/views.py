@@ -3359,86 +3359,188 @@ def get_clinic(request, student_id):
                     return Response(result)
 
 
+
 @api_view(['GET'])
 def get_attendance(request, student_id):
-    if request.method == 'GET':
-        if request.headers:
-            if request.headers.get('Authorization'):
-                if 'Bearer' in request.headers.get('Authorization'):
-                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
-                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+    # نتأكد من Authorization
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or 'Bearer' not in auth_header:
+        return Response({'error': 'Authorization header missing or invalid'}, status=401)
 
-                    if db_name:
-                        for e in db_name:
-                            school_name = e[0]
-                    with connections[school_name].cursor() as cursor:
-                        absence_request = []
-                        daily_attendance = []
+    token = auth_header.replace('Bearer', '').strip()
 
-                        cursor.execute(
-                            "select display_name_search,year_id,user_id from student_student where id=%s",
-                            [student_id])
-                        user_id_q = cursor.fetchall()
-                        cursor.execute(
-                            " select branch_id,year_id from res_users where id=%s",
-                            [user_id_q[0][2]])
-                        branch_id = cursor.fetchall()
-                        if user_id_q:
-                            cursor.execute(
-                                " select id,name,start_date,end_date,reason,type,state,arrival_time from student_absence_request where student_id=%s and year_id=%s and branch_id=%s ORDER BY id DESC",
-                                [student_id, branch_id[0][1], branch_id[0][0]])
-                            studentleaves = cursor.fetchall()
-                            cursor.execute(
-                                "SELECT daily_attendance_id,id,note,reason,attendance_status,arrival_time FROM daily_attendance_line WHERE student_id=%s ORDER BY id DESC",
-                                [student_id])
-                            daily_attendance_line = cursor.fetchall()
-                            for s in daily_attendance_line:
-                                if not s[0]:
-                                    continue
-                                cursor.execute(
-                                    "SELECT state,date FROM daily_attendance WHERE id = %s",
-                                    [s[0]])
-                                daily = cursor.fetchall()
-                                if daily[0][0] == 'draft':
-                                    continue
-                                if s[4] == 'present':
-                                    continue
-                                if s[2] != False:
-                                    daily_attendance.append({'leave_id': s[1],
-                                                             'name': user_id_q[0][0],
-                                                             'start_date': daily[0][1].strftime("%d %b %Y"),
-                                                             'end_date': '30 Sep 2021',
-                                                             'reason': 'Death of A Relative' if s[3] == 'death' else s[
-                                                                 3],
-                                                             'type': s[4],
-                                                             'arrival_time': str(s[5]) if s[5] else "0"
-                                                             })
-                                else:
-                                    daily_attendance.append({'leave_id': s[1],
-                                                             'name': user_id_q[0][0],
-                                                             'start_date': None,
-                                                             'end_date': '30 Sep 2021',
-                                                             'reason': 'Death of A Relative' if s[3] == 'death' else s[
-                                                                 3],
-                                                             'type': s[4],
-                                                             'arrival_time': str(s[5]) if s[5] else "0"
-                                                             })
-                            for st in studentleaves:
-                                arrival_time = calculate_time(st[7])
+    # نجيب db_name مرة واحدة
+    school_name = (
+        ManagerParent.objects
+        .filter(token=token)
+        .values_list('db_name', flat=True)
+        .first()
+    )
 
-                                absence_request.append({'leave_id': st[0],
-                                                        'name': st[1],
-                                                        'start_date': st[2].strftime("%d %b %Y"),
-                                                        'end_date': st[3].strftime("%d %b %Y"),
-                                                        'reason': 'Death of A Relative' if st[4] == 'death' else (
-                                                            st[4].capitalize() if st[4] else ""),
-                                                        'type': st[5].capitalize() if st[5] else "",
-                                                        'status': st[6].capitalize() if st[6] else "",
-                                                        'arrival_time': arrival_time})
-                    result = {'absence_request': absence_request,
-                              'daily_attendance': daily_attendance}
+    if not school_name:
+        return Response({'error': 'Invalid token'}, status=401)
 
-                    return Response(result)
+    # نفتح اتصال مع قاعدة مدرسة الطالب
+    with connections[school_name].cursor() as cursor:
+        absence_request = []
+        daily_attendance = []
+
+        # بيانات الطالب الأساسية
+        cursor.execute(
+            """
+            SELECT display_name_search, year_id, user_id
+            FROM student_student
+            WHERE id = %s
+            """,
+            [student_id]
+        )
+        student_row = cursor.fetchone()
+        if not student_row:
+            # طالب غير موجود
+            result = {
+                'absence_request': [],
+                'daily_attendance': []
+            }
+            return Response(result, status=404)
+
+        student_name, student_year_id, student_user_id = student_row
+
+        # branch/year للطالب من res_users
+        cursor.execute(
+            """
+            SELECT branch_id, year_id
+            FROM res_users
+            WHERE id = %s
+            """,
+            [student_user_id]
+        )
+        branch_row = cursor.fetchone()
+        if not branch_row:
+            result = {
+                'absence_request': [],
+                'daily_attendance': []
+            }
+            return Response(result)
+
+        branch_id, year_id = branch_row
+
+        # طلبات الغياب student_absence_request (كلها بكويري واحد)
+        cursor.execute(
+            """
+            SELECT
+                id,
+                name,
+                start_date,
+                end_date,
+                reason,
+                type,
+                state,
+                arrival_time
+            FROM student_absence_request
+            WHERE student_id = %s
+              AND year_id = %s
+              AND branch_id = %s
+            ORDER BY id DESC
+            """,
+            [student_id, year_id, branch_id]
+        )
+        student_leaves = cursor.fetchall()
+
+        # الحضور اليومي: ندمج line + attendance في كويري واحد
+        cursor.execute(
+            """
+            SELECT
+                dal.daily_attendance_id,
+                dal.id,
+                dal.note,
+                dal.reason,
+                dal.attendance_status,
+                dal.arrival_time,
+                da.state,
+                da.date
+            FROM daily_attendance_line dal
+            JOIN daily_attendance da
+              ON da.id = dal.daily_attendance_id
+            WHERE dal.student_id = %s
+            ORDER BY dal.id DESC
+            """,
+            [student_id]
+        )
+        daily_attendance_rows = cursor.fetchall()
+
+        # بناء daily_attendance بالضبط مثل الكود القديم
+        for row in daily_attendance_rows:
+            daily_attendance_id = row[0]
+            leave_id = row[1]
+            note = row[2]          # s[2]
+            reason = row[3]        # s[3]
+            attendance_status = row[4]  # s[4]
+            arrival_time = row[5]  # s[5]
+            daily_state = row[6]   # daily[0][0]
+            daily_date = row[7]    # daily[0][1]
+
+            # استبعاد المسودّات
+            if daily_state == 'draft':
+                continue
+
+            # استبعاد present مثل الكود القديم
+            if attendance_status == 'present':
+                continue
+
+            # السبب (death → Death of A Relative)
+            reason_label = 'Death of A Relative' if reason == 'death' else reason
+
+            # start_date: لو note مش False نستخدم تاريخ daily، غير هيك None
+            if note is not False:
+                start_date_str = daily_date.strftime("%d %b %Y") if daily_date else None
+            else:
+                start_date_str = None
+
+            daily_attendance.append({
+                'leave_id': leave_id,
+                'name': student_name,
+                'start_date': start_date_str,
+                'end_date': '30 Sep 2021',  # نفس الهاردكود تبعك
+                'reason': reason_label,
+                'type': attendance_status,
+                'arrival_time': str(arrival_time) if arrival_time else "0",
+            })
+
+        # بناء absence_request مثل القديم
+        for st in student_leaves:
+            leave_id = st[0]
+            name = st[1]
+            start_date = st[2]
+            end_date = st[3]
+            reason = st[4]
+            leave_type = st[5]
+            state = st[6]
+            arr_time = st[7]
+
+            arrival_time_str = calculate_time(arr_time)
+
+            reason_label = 'Death of A Relative' if reason == 'death' else (
+                reason.capitalize() if reason else ""
+            )
+
+            absence_request.append({
+                'leave_id': leave_id,
+                'name': name,
+                'start_date': start_date.strftime("%d %b %Y") if start_date else None,
+                'end_date': end_date.strftime("%d %b %Y") if end_date else None,
+                'reason': reason_label,
+                'type': leave_type.capitalize() if leave_type else "",
+                'status': state.capitalize() if state else "",
+                'arrival_time': arrival_time_str,
+            })
+
+    # نفس شكل الريسبونس
+    result = {
+        'absence_request': absence_request,
+        'daily_attendance': daily_attendance
+    }
+    return Response(result)
+
 
 
 @api_view(['POST'])
