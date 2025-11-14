@@ -97,6 +97,22 @@ DATABASES = {
         'HOST': 'odoo-db.ccrvo5dlzlxw.eu-central-1.rds.amazonaws.com',
         'PORT': '5432',
     },
+    'sarmad': {
+        'NAME': 'sarmad',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'postgres',
+        'PASSWORD': 'P0sTgR3$*981',
+        'HOST': 'odoo-db.ccrvo5dlzlxw.eu-central-1.rds.amazonaws.com',
+        'PORT': '5432',
+    },
+    'tw': {
+        'NAME': 'tw',
+        'ENGINE': 'django.db.backends.postgresql',
+        'USER': 'postgres',
+        'PASSWORD': 'P0sTgR3$*981',
+        'HOST': 'odoo-db.ccrvo5dlzlxw.eu-central-1.rds.amazonaws.com',
+        'PORT': '5432',
+    },
     'cbis': {
         'NAME': 'cbis',
         'ENGINE': 'django.db.backends.postgresql',
