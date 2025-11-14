@@ -23,9 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = 'a7qjks^)2_g&32($+f8=%e3i=jogr*%$lf9prkaws-uoi+jfhu'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
-ALLOWED_HOSTS = ['http://apipy.trackware.com','localhost']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
