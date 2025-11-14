@@ -1412,153 +1412,6 @@ def hide_message(request):
             return Response(result)
 
 
-def get_info_message_new(deadline, notifications_text, avatar, create_date, notifications_title, student_name,
-                         student_id, id=0, stutes_notif=None, show_notif=None, action_id='0', notifications_title_ar='',
-                         notifications_text_ar='',
-                         student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
-                         image_link='', plan_name='', attachments=[], school_mo=False):
-    show = show_notif
-    # if student_image:
-    #     print(student_image)
-    if not notifications_title:
-        notifications_title = ''
-    if not notifications_text:
-        notifications_text = ''
-    stutes = stutes_notif
-    # print(stutes)
-    if stutes == 'Read' or stutes:
-        stutes = "Mark As UnRead"
-    elif stutes == 'UnRead' or not stutes:
-        stutes = "Mark As Read"
-    else:
-        stutes = "Mark As Read"
-
-    if show == None:
-        show = "show"
-
-    notificationsType = ''
-    icon_tracking = ''
-    if 'weekly plan' in notifications_title.lower() or 'assignment' in notifications_title.lower() or 'homework' in notifications_title.lower() or 'exam' in notifications_title.lower() or 'educational' in notifications_title:
-
-        if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
-            notificationsType = 'announcement'
-            notifications_title = ''
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
-        else:
-            notificationsType = 'educational'
-            if ('Weekly Plan' in notifications_title or 'educational' in notifications_title):
-
-                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg'
-            elif ('Assignment' in notifications_title):
-                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg'
-            elif ('Exam' in notifications_title):
-                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg'
-            elif ('Homework' in notifications_title):
-                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg'
-
-    elif 'Pick Up By Parent' in notifications_title or (
-            'Absence' in notifications_title and notifications_title != "Absence notification") or 'clinic' in notifications_title.lower() or 'library' in notifications_title.lower():
-
-        notificationsType = 'Absence'
-        if ('clinic' in notifications_title.lower()):
-
-            if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
-                notificationsType = 'announcement'
-                notifications_title = ''
-                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
-            else:
-                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg'
-        elif ('library' in notifications_title.lower()):
-            if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
-                notificationsType = 'announcement'
-                notifications_title = ''
-                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
-            else:
-                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg'
-        else:
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
-    elif notifications_title == 'Pick-up round' or notifications_title == 'School Departure' or notifications_title == 'Checkout Notification' or notifications_title == 'No Show Notification' or "has arrived at your home" in notifications_text or "has just reached the school" in notifications_text or "has just been checked into the bus" in notifications_text or notifications_title == "Absence notification" or 'Message from bus no' in notifications_title:
-
-        notificationsType = 'tracking'
-        if (notifications_title == 'Pick-up round' or notifications_title == 'School Departure'):
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-get-on-bus.svg'
-        elif (notifications_title == 'Checkout Notification'):
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
-        elif (notifications_title == 'No Show Notification'):
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-get-on-bus+(1).svg'
-        elif "has arrived at your home" in notifications_text:
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-house+(1).svg'
-        elif "has just reached the school." in notifications_text:
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
-        elif "has just been checked into the bus." in notifications_text:
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-get-on-bus.svg'
-        elif notifications_title == "Absence notification":
-            notifications_title = "bsence notification"
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
-        else:
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-shuttle-bus.svg'
-    else:
-        notificationsType = 'announcement'
-        if (notifications_title == 'survey'):
-            icon_tracking = show_notif
-        elif ('event' in notifications_title.lower()):
-            if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
-                notifications_title = ''
-                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
-            else:
-                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg'
-        elif ('Meeting' in notifications_title):
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg'
-        else:
-            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
-
-    if student_name:
-        return {
-            "avatar": avatar,
-            "date_time": date_time(deadline),
-            "notifications_text": notifications_text,
-            "create_date": create_date,
-            "notifications_title": notifications_title,
-            "student_name": student_name,
-            "student_id": str(student_id),
-            "notificationsType": notificationsType,
-            "icon_tracking": icon_tracking,
-            "id": str(id),
-            "stutes": stutes,
-            "show": show,
-            "student_image": student_image,
-            "action_id": str(action_id),
-            "notifications_text_ar": notifications_text_ar if notifications_text_ar else notifications_text,
-            "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
-            "imageLink": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
-                image_link) if image_link else '',
-            "plan_name": plan_name if plan_name else '',
-            'attachments': attachments
-
-        }
-    else:
-        return {
-            "avatar": avatar,
-            "date_time": date_time(deadline),
-            "notifications_text": notifications_text,
-            "create_date": create_date,
-            "notifications_title": notifications_title,
-            "student_id": str(student_id),
-            "notificationsType": notificationsType,
-            "icon_tracking": icon_tracking,
-            "id": id,
-            "stutes": stutes,
-            "show": show,
-            "student_image": student_image,
-            "action_id": str(action_id),
-            "notifications_text_ar": notifications_text_ar if notifications_text_ar else notifications_text,
-            "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
-            "imageLink": 'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(
-                image_link) if image_link else '',
-            "plan_name": plan_name if plan_name else '',
-            "attachments": attachments
-
-        }
 
 
 # get school message
@@ -1816,157 +1669,426 @@ def get_bus_notifition_student_new(school_name, student_name, notifications_text
     return notifications
 
 
+def get_info_message_new(
+    deadline,
+    notifications_text,
+    avatar,
+    create_date,
+    notifications_title,
+    student_name,
+    student_id,
+    id=0,
+    stutes_notif=None,
+    show_notif=None,
+    action_id='0',
+    notifications_title_ar='',
+    notifications_text_ar='',
+    student_image='https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
+    image_link='',
+    plan_name='',
+    attachments=None,
+    school_mo=False
+):
+    if attachments is None:
+        attachments = []
+
+    # normalize نصوص
+    notifications_title = notifications_title or ''
+    notifications_text = notifications_text or ''
+
+    # حالة القراءة / عدمها (toggle سليم)
+    if stutes_notif == 'Read':
+        stutes = "Mark As UnRead"
+    elif stutes_notif == 'UnRead' or not stutes_notif:
+        stutes = "Mark As Read"
+    else:
+        stutes = "Mark As Read"
+
+    # show
+    show = show_notif if show_notif is not None else "show"
+
+    notificationsType = ''
+    icon_tracking = ''
+
+    # ---------- Educational / Weekly plan / Assignment / Exam ----------
+    if (
+        ('weekly plan' in notifications_title.lower())
+        or ('assignment' in notifications_title.lower())
+        or ('homework' in notifications_title.lower())
+        or ('exam' in notifications_title.lower())
+        or ('educational' in notifications_title)
+    ):
+        if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
+            notificationsType = 'announcement'
+            notifications_title = ''
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
+        else:
+            notificationsType = 'educational'
+            if 'Weekly Plan' in notifications_title or 'educational' in notifications_title:
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Weekly+Plans.svg'
+            elif 'Assignment' in notifications_title:
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Assignments.svg'
+            elif 'Exam' in notifications_title:
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Exams.svg'
+            elif 'Homework' in notifications_title:
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Worksheets.svg'
+
+    # ---------- Absence / Clinic / Library ----------
+    elif (
+        'Pick Up By Parent' in notifications_title
+        or ('Absence' in notifications_title and notifications_title != "Absence notification")
+        or 'clinic' in notifications_title.lower()
+        or 'library' in notifications_title.lower()
+    ):
+        notificationsType = 'Absence'
+        if 'clinic' in notifications_title.lower():
+            if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
+                notificationsType = 'announcement'
+                notifications_title = ''
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
+            else:
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Clinic.svg'
+        elif 'library' in notifications_title.lower():
+            if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
+                notificationsType = 'announcement'
+                notifications_title = ''
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
+            else:
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/book-app.svg'
+        else:
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
+
+    # ---------- Tracking ----------
+    elif (
+        notifications_title in ['Pick-up round', 'School Departure', 'Checkout Notification', 'No Show Notification']
+        or "has arrived at your home" in notifications_text
+        or "has just reached the school" in notifications_text
+        or "has just been checked into the bus" in notifications_text
+        or notifications_title == "Absence notification"
+        or 'Message from bus no' in notifications_title
+    ):
+        notificationsType = 'tracking'
+        if notifications_title in ['Pick-up round', 'School Departure']:
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-get-on-bus.svg'
+        elif notifications_title == 'Checkout Notification':
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
+        elif notifications_title == 'No Show Notification':
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-get-on-bus+(1).svg'
+        elif "has arrived at your home" in notifications_text:
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-house+(1).svg'
+        elif "has just reached the school." in notifications_text:
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
+        elif "has just been checked into the bus." in notifications_text:
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-get-on-bus.svg'
+        elif notifications_title == "Absence notification":
+            notifications_title = "Absence notification"
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Absence.svg'
+        else:
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/icons8-shuttle-bus.svg'
+
+    # ---------- Announcement (افتراضي) ----------
+    else:
+        notificationsType = 'announcement'
+        if notifications_title == 'survey':
+            icon_tracking = show  # نفس سلوكك القديم
+        elif 'event' in notifications_title.lower():
+            if school_mo and create_date > datetime.datetime.strptime('2024-02-14', "%Y-%m-%d"):
+                notifications_title = ''
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
+            else:
+                icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/Events.svg'
+        elif 'Meeting' in notifications_title:
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/flutter_app/calendar.svg'
+        else:
+            icon_tracking = 'https://trackware-schools.s3.eu-central-1.amazonaws.com/School+messages.svg'
+
+    base_payload = {
+        "avatar": avatar,
+        "date_time": date_time(deadline),
+        "notifications_text": notifications_text,
+        "create_date": create_date,
+        "notifications_title": notifications_title,
+        "student_id": str(student_id),
+        "notificationsType": notificationsType,
+        "icon_tracking": icon_tracking,
+        "id": str(id),
+        "stutes": stutes,
+        "show": show,
+        "student_image": student_image,
+        "action_id": str(action_id),
+        "notifications_text_ar": notifications_text_ar if notifications_text_ar else notifications_text,
+        "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
+        "imageLink": (
+            'https://trackware-schools.s3.eu-central-1.amazonaws.com/' + str(image_link)
+            if image_link else ''
+        ),
+        "plan_name": plan_name if plan_name else '',
+        "attachments": attachments,
+    }
+
+    if student_name:
+        base_payload["student_name"] = student_name
+    return base_payload
+
+
 @api_view(['POST'])
 def kids_hstory_new(request):
-    if request.method == 'POST':
-        if request.headers:
-            if request.headers.get('Authorization'):
-                if 'Bearer' in request.headers.get('Authorization'):
-                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
-                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
-                    parent_id = ManagerParent.objects.filter(token=au).values_list('parent_id')
-                    notifications = []
-                    notifications_not_d = []
-                    seen = set()
-                    for e in parent_id:
-                        parent_id = e[0]
-                    if db_name:
-                        for e in db_name:
-                            school_name = e[0]
-                        school_name = ManagerParent.pincode(school_name)
-                        start_date = request.data.get('start_date')
-                        end_date = request.data.get('end_date')
+    # تأمين الميثود (decorator كافي، بس زيادة أمان)
+    if request.method != 'POST':
+        return Response({'status': 'Method not allowed'}, status=405)
 
-                        student_round = []
-                        student_history_id = []
-                        with connections[school_name].cursor() as cursor:
-                            cursor.execute(
-                                "SELECT column_name FROM information_schema.columns WHERE table_name='survey_user_input' and column_name='read_message'",
-                                [])
-                            information_schema_survey = cursor.fetchall()
-                            if information_schema_survey:
-                                notifications += get_survey(parent_id, school_name)
-                            # notifications +=get_survey(parent_id,school_name)
-                            cursor.execute(
-                                "select  id,display_name_search,image_url,name,name_ar,year_id,user_id from student_student WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  And state = 'done'",
-                                [parent_id, parent_id, parent_id])
-                            student_info = cursor.fetchall()
-                            student_round_id = []
-                            cursor.execute(
-                                "select name from res_lang WHERE id = (select first_lang  from res_company  ORDER BY ID DESC LIMIT 1) ",
-                                [])
-                            lang = cursor.fetchall()
-                            fname = ''
-                            fname_ar = ''
-                            for student in student_info:
-                                cursor.execute(
-                                    " select branch_id,year_id from res_users where id=%s",
-                                    [student[6]])
-                                branch_id = cursor.fetchall()
-                                cursor.execute(
-                                    "SELECT column_name FROM information_schema.columns WHERE table_name='message_student' and column_name='image_link'",
-                                    [])
-                                information_schema = cursor.fetchall()
-                                if information_schema:
-                                    cursor.execute(
-                                        """
-                                        SELECT 
-                                            date, 
-                                            message_en, 
-                                            message_ar, 
-                                            title, 
-                                            title_ar, 
-                                            action_id, 
-                                            id, 
-                                            image_link, 
-                                            read_message, 
-                                            plan_name, 
-                                            school_message_id, 
-                                            model_school_messsage 
-                                        FROM 
-                                            message_student 
-                                        WHERE 
-                                            branch_id = %s 
-                                            AND year_id = %s 
-                                            AND student_id = %s 
-                                            AND (show_message IS NULL OR show_message = TRUE) 
-                                            AND date >= CURRENT_DATE - INTERVAL '2 months' 
-                                        ORDER BY 
-                                            ID DESC
-                                        """,
-                                        [branch_id[0][0], branch_id[0][1], student[0]]
-                                    )
+    # التأكد من وجود الهيدرز
+    if not request.headers:
+        return Response({'status': 'Not found headers'})
 
-                                    student_mes = cursor.fetchall()
-                                else:
-                                    cursor.execute(
-                                        "select  date,message_en,message_ar,title,title_ar,action_id,id,read_message,school_message_id,model_school_messsage from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
-                                        [branch_id[0][0], branch_id[0][1], student[0]])
-                                    student_mes = cursor.fetchall()
-                                avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                                for mes in student_mes:
-                                    action_id = mes[5]
-                                    attachments = []
-                                    if mes[3]:
-                                        if ('Event' in mes[3]):
-                                            cursor.execute(
-                                                " select id,event_id,state,new_added from school_event_registration where  student_id =%s and  event_id =%s  ORDER BY create_date DESC",
-                                                [student[0], mes[5]])
-                                            events = cursor.fetchall()
+    auth_header = request.headers.get('Authorization')
+    if not auth_header:
+        return Response({'status': 'Not found Authorization'})
 
-                                            if events:
-                                                action_id = events[0][0]
-                                    cursor.execute(
-                                        "select id,name,url from ir_attachment where school_message_id=%s",
-                                        [mes[10] if information_schema else mes[8]])
+    if 'Bearer' not in auth_header:
+        return Response({'status': 'error Authorization'})
 
-                                    ir_attachment = cursor.fetchall()
+    # استخراج التوكن
+    token = auth_header.replace('Bearer', '').strip()
 
-                                    if ir_attachment:
-                                        for att in ir_attachment:
-                                            if att[2]:
-                                                attachments.append(
-                                                    {'id': att[0], 'name': att[1], 'datas': att[2]})
-                                    title = mes[3]
-                                    title_ar = mes[4]
-                                    model_school_messsage = mes[11] if information_schema else mes[9]
-                                    notifications.append(
-                                        get_info_message_new(mes[0],
-                                                             mes[1],
-                                                             avatar,
-                                                             mes[0].replace(
-                                                                 second=0) if mes[0] else '',
-                                                             title,
-                                                             student[1], student[0], mes[6],
-                                                             mes[8] if information_schema else mes[7], None,
-                                                             action_id if mes[5] else '0', title_ar,
-                                                             mes[2],
-                                                             'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
-                                                             mes[7] if information_schema else '',
-                                                             plan_name=mes[9] if information_schema else '',
-                                                             attachments=attachments, school_mo=model_school_messsage))
-                            notifications.sort(key=get_year, reverse=True)
-                            for d in notifications:
-                                t = (d['student_id'], d['notifications_text'], d['create_date'], d['date_time'],
-                                     d['student_name'], d['notifications_title'], d['notificationsType'],
-                                     d['notificationsType'])
-                                if t not in seen:
-                                    seen.add(t)
-                                    notifications_not_d.append(d)
-                            result = {"notifications": notifications_not_d}
-                            return Response(result)
-                    else:
-                        result = {'status': 'error'}
-                        return Response(result)
-                else:
-                    result = {'status': 'error Authorization'}
-                    return Response(result)
+    # جلب المدرسة + الوالد بكويري واحد
+    mp_row = (
+        ManagerParent.objects
+        .filter(token=token)
+        .values_list('db_name', 'parent_id')
+        .first()
+    )
+
+    if not mp_row:
+        return Response({'status': 'error'})
+
+    db_name, parent_id = mp_row
+    notifications = []
+    notifications_not_d = []
+    seen = set()
+
+    if not db_name:
+        return Response({'status': 'error'})
+
+    # فك اسم المدرسة
+    school_name = ManagerParent.pincode(db_name)
+
+    # لو حاب تستخدم start / end لاحقاً، جاهزين:
+    start_date = request.data.get('start_date')
+    end_date = request.data.get('end_date')
+
+    with connections[school_name].cursor() as cursor:
+        # هل عند survey_user_input عمود read_message؟
+        cursor.execute(
+            """
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name='survey_user_input' 
+              AND column_name='read_message'
+            """
+        )
+        information_schema_survey = cursor.fetchall()
+        if information_schema_survey:
+            notifications += get_survey(parent_id, school_name)
+
+        # بيانات الطلاب المرتبطين بالوالد
+        cursor.execute(
+            """
+            SELECT 
+                id,
+                display_name_search,
+                image_url,
+                name,
+                name_ar,
+                year_id,
+                user_id
+            FROM student_student 
+            WHERE (father_id = %s OR mother_id = %s OR responsible_id_value = %s)  
+              AND state = 'done'
+            """,
+            [parent_id, parent_id, parent_id]
+        )
+        student_info = cursor.fetchall()
+
+        # هل message_student فيها image_link؟
+        cursor.execute(
+            """
+            SELECT column_name 
+            FROM information_schema.columns 
+            WHERE table_name='message_student' 
+              AND column_name='image_link'
+            """
+        )
+        information_schema = cursor.fetchall()
+        has_image_link = bool(information_schema)
+
+        # اللغة (كنت تجيبها بس ما تستخدمها، تركتها لو تحتاجها لاحقاً)
+        cursor.execute(
+            "SELECT name FROM res_lang WHERE id = (SELECT first_lang FROM res_company ORDER BY id DESC LIMIT 1)"
+        )
+        lang = cursor.fetchall()  # غير مستخدم حالياً
+
+        avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
+
+        for student in student_info:
+            student_id = student[0]
+            student_display_name = student[1]
+            student_year_id = student[5]
+            student_user_id = student[6]
+
+            # branch_id, year_id للطالب
+            cursor.execute(
+                "SELECT branch_id, year_id FROM res_users WHERE id=%s",
+                [student_user_id]
+            )
+            branch_row = cursor.fetchone()
+            if not branch_row:
+                continue
+
+            branch_id, year_id = branch_row
+
+            # رسائل الطالب
+            if has_image_link:
+                # يوجد image_link و plan_name
+                cursor.execute(
+                    """
+                    SELECT 
+                        date, 
+                        message_en, 
+                        message_ar, 
+                        title, 
+                        title_ar, 
+                        action_id, 
+                        id, 
+                        image_link, 
+                        read_message, 
+                        plan_name, 
+                        school_message_id, 
+                        model_school_messsage 
+                    FROM 
+                        message_student 
+                    WHERE 
+                        branch_id = %s 
+                        AND year_id = %s 
+                        AND student_id = %s 
+                        AND (show_message IS NULL OR show_message = TRUE) 
+                        AND date >= CURRENT_DATE - INTERVAL '2 months' 
+                    ORDER BY 
+                        id DESC
+                    """,
+                    [branch_id, year_id, student_id]
+                )
             else:
-                result = {'status': 'Not found Authorization'}
-                return Response(result)
-        else:
-            result = {'status': 'Not found headers'}
-            return Response(result)
+                cursor.execute(
+                    """
+                    SELECT  
+                        date,
+                        message_en,
+                        message_ar,
+                        title,
+                        title_ar,
+                        action_id,
+                        id,
+                        read_message,
+                        school_message_id,
+                        model_school_messsage
+                    FROM message_student 
+                    WHERE  
+                        branch_id = %s 
+                        AND year_id = %s  
+                        AND student_id = %s 
+                        AND (show_message IS NULL OR show_message = TRUE) 
+                    ORDER BY id DESC
+                    """,
+                    [branch_id, year_id, student_id]
+                )
+
+            student_mes = cursor.fetchall()
+
+            for mes in student_mes:
+                action_id = mes[5]
+                attachments = []
+
+                title = mes[3]
+                title_ar = mes[4]
+
+                # لو الرسالة Event نجيب registration
+                if title and ('Event' in title):
+                    cursor.execute(
+                        """
+                        SELECT id, event_id, state, new_added 
+                        FROM school_event_registration 
+                        WHERE student_id = %s 
+                          AND event_id = %s  
+                        ORDER BY create_date DESC
+                        """,
+                        [student_id, mes[5]]
+                    )
+                    events = cursor.fetchall()
+                    if events:
+                        action_id = events[0][0]
+
+                # attachments
+                school_message_id = mes[10] if has_image_link else mes[8]
+                cursor.execute(
+                    "SELECT id, name, url FROM ir_attachment WHERE school_message_id=%s",
+                    [school_message_id]
+                )
+                ir_attachment = cursor.fetchall()
+                if ir_attachment:
+                    for att in ir_attachment:
+                        if att[2]:
+                            attachments.append(
+                                {'id': att[0], 'name': att[1], 'datas': att[2]}
+                            )
+
+                model_school_messsage = mes[11] if has_image_link else mes[9]
+
+                # بناء النوتيفيكيشن
+                notification_dict = get_info_message_new(
+                    mes[0],                          # deadline
+                    mes[1],                          # notifications_text
+                    avatar,
+                    mes[0].replace(second=0) if mes[0] else '',  # create_date normalized
+                    title,                           # notifications_title
+                    student_display_name,            # student_name
+                    student_id,                      # student_id
+                    mes[6],                          # id
+                    mes[8] if has_image_link else mes[7],  # stutes_notif
+                    None,                            # show_notif
+                    action_id if mes[5] else '0',   # action_id
+                    title_ar,                        # notifications_title_ar
+                    mes[2],                          # notifications_text_ar
+                    'https://s3.eu-central-1.amazonaws.com/trackware.schools/public_images/default_student.png',
+                    mes[7] if has_image_link else '',        # image_link
+                    plan_name=mes[9] if has_image_link else '',
+                    attachments=attachments,
+                    school_mo=model_school_messsage
+                )
+
+                notifications.append(notification_dict)
+
+        # ترتيب النوتيفيكيشنز
+        notifications.sort(key=get_year, reverse=True)
+
+        # إزالة التكرار بنفس طريقتك
+        for d in notifications:
+            t = (
+                d.get('student_id'),
+                d.get('notifications_text'),
+                d.get('create_date'),
+                d.get('date_time'),
+                d.get('student_name', ''),
+                d.get('notifications_title'),
+                d.get('notificationsType'),
+                d.get('notificationsType'),
+            )
+            if t not in seen:
+                seen.add(t)
+                notifications_not_d.append(d)
+
+        result = {"notifications": notifications_not_d}
+        return Response(result)
 
 
 def get_info_message(deadline, notifications_text, avatar, create_date, notifications_title, student_name, student_id):
