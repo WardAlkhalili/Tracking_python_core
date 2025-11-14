@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import *
 from django.db import connections
-
+from django.http import HttpResponseNotAllowed
 from pyfcm import FCMNotification
 import pandas as pd
 from rest_framework.authtoken.models import Token
@@ -4562,39 +4562,63 @@ def post_library(request):
 
 @api_view(['GET'])
 def get_marks(request, student_id):
-    if request.method == 'GET':
-        # print(student_id,"-----------------------")
-        db_name = get_authenticated_db(request)
-        if not db_name:
-            return Response({'error': 'Unauthorized'}, status=401)
+    if request.method != 'GET':
+        return HttpResponseNotAllowed(['GET'])
 
-        url = 'https://' + db_name + '.trackware.com/get_student_marks_list'
+    db_name = get_authenticated_db(request)
+    if not db_name:
+        return Response({'error': 'Unauthorized'}, status=401)
+
+    url = f'https://{db_name}.trackware.com/get_student_marks_list'
+
+    payload = {
+        "jsonrpc": "2.0",
+        "params": {"student_id": student_id},
+    }
+
+    try:
+        # نستخدم json= بدل data+json.dumps
+        # ونضيف timeout (مثلاً 10 ثواني، غيّرها حسب احتياجك)
+        resp = requests.post(
+            url,
+            json=payload,
+            headers={'Content-Type': 'application/json'},
+            timeout=10,
+        )
+
+        # لو رجّع 4xx/5xx يرمي Exception
+        resp.raise_for_status()
 
         try:
+            data = resp.json()
+        except ValueError:
+            # السيرفر ما رجّع JSON صحيح
+            logger.exception("Invalid JSON from marks service")
+            return Response({"status": "error_invalid_json"}, status=502)
 
-            body = json.dumps(
-                {"jsonrpc": "2.0", "params": {"student_id": student_id}})
+        if "error" in data:
+            # نفس منطقك السابق تقريباً
+            return Response({"status": "erorrq"}, status=502)
 
-            headers = {
-                'Content-Type': 'application/json',
-            }
+        result_data = data.get("result", {})
+        all_exam = result_data.get("all_exam", [])
 
-            response1 = requests.request("POST", url, headers=headers, data=body)
+        return Response({"all_exam": all_exam, "code": ""})
 
-            response = response1.json()
-            if "error" in response:
-                result = {
-                    "status": "erorrq"}
-                return Response(result)
-            all_exam = response['result']['all_exam']
-            result = {'all_exam': all_exam, 'code': ''}
-            return Response(result)
+    except requests.Timeout:
+        # الخدمة الخارجية بطيئة أو لا تستجيب
+        logger.exception("Timeout calling marks service")
+        return Response({"status": "error_timeout"}, status=504)
 
-        except:
-            result = {
-                "status": "erorr2"
-                          ""}
-            return Response(result)
+    except requests.RequestException as e:
+        # أي خطأ شبكة آخر (DNS, اتصال, SSL, ...)
+        logger.exception("Error calling marks service")
+        return Response({"status": "error_upstream"}, status=502)
+
+    except Exception:
+        # احتياط أخير لو صار أي شيء غير متوقع
+        logger.exception("Unexpected error in get_marks")
+        return Response({"status": "erorr2"}, status=500)
         with connections[db_name].cursor() as cursor:
             student_data = get_student_details(cursor, student_id)
             if not student_data:
