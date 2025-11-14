@@ -4071,51 +4071,82 @@ def get_student_assignment(request, student_id):
 
 @api_view(['GET'])
 def get_all_weekly_plans(request, student_id):
-    if request.method == 'GET':
-        if request.headers:
-            if request.headers.get('Authorization'):
-                if 'Bearer' in request.headers.get('Authorization'):
-                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
-                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+    # التحقق من الـ Authorization
+    auth_header = request.headers.get('Authorization')
+    if not auth_header or 'Bearer' not in auth_header:
+        return Response({'error': 'Authorization header missing or invalid'}, status=401)
 
-                    if db_name:
-                        for e in db_name:
-                            school_name = e[0]
+    token = auth_header.replace('Bearer', '').strip()
 
-                    with connections[school_name].cursor() as cursor:
+    # جلب database الخاصة بالوالد
+    school_name = (
+        ManagerParent.objects
+        .filter(token=token)
+        .values_list('db_name', flat=True)
+        .first()
+    )
 
-                        cursor.execute(
-                            "select  id  from academic_year WHERE state = %s",
-                            ['active'])
-                        academic_year = cursor.fetchall()
-                        academic_year_ids = []
-                        data = []
-                        cursor.execute(
-                            "select user_id,year_id from student_student where id=%s",
-                            [student_id])
-                        user_id_q = cursor.fetchall()
-                        if user_id_q:
-                            for rec in academic_year:
-                                academic_year_ids.append(rec[0])
-                            if user_id_q:
-                                cursor.execute(
-                                    " select partner_id,branch_id,year_id from res_users where id=%s",
-                                    [user_id_q[0][0]])
-                                partner_id_q = cursor.fetchall()
+    if not school_name:
+        return Response({'error': 'Invalid token'}, status=401)
 
-                                cursor.execute(
-                                    " select id,name,date_from,date_to from week_plan where state='puplished' and year_id = %s and branch_id =%s   ORDER BY id DESC",
-                                    [partner_id_q[0][2], partner_id_q[0][1]])
-                                week_plan = cursor.fetchall()
-                                for p in week_plan:
-                                    data.append({'id': p[0],
-                                                 'plan_name': p[1],
-                                                 'start_date': str(p[2].strftime("%d %b %Y")),
-                                                 'end_date': str(p[3].strftime("%d %b %Y"))
-                                                 })
-                                result = {'result': data}
+    with connections[school_name].cursor() as cursor:
+        # جلب user_id / year_id للطالب
+        cursor.execute(
+            """
+            SELECT user_id, year_id
+            FROM student_student
+            WHERE id = %s
+            """,
+            [student_id]
+        )
+        student_row = cursor.fetchone()
+        if not student_row:
+            return Response({'result': []})
 
-                                return Response(result)
+        user_id, student_year_id = student_row
+
+        # بيانات المستخدم (branch_id, year_id)
+        cursor.execute(
+            """
+            SELECT partner_id, branch_id, year_id
+            FROM res_users
+            WHERE id = %s
+            """,
+            [user_id]
+        )
+        user_info = cursor.fetchone()
+        if not user_info:
+            return Response({'result': []})
+
+        partner_id, branch_id, year_id = user_info
+
+        # جلب جميع الخطط الأسبوعية المنشورة لنفس سنة الطالب ونفس الفرع
+        cursor.execute(
+            """
+            SELECT id, name, date_from, date_to
+            FROM week_plan
+            WHERE state = 'puplished'
+              AND year_id = %s
+              AND branch_id = %s
+            ORDER BY id DESC
+            """,
+            [year_id, branch_id]
+        )
+        weekly_plans = cursor.fetchall()
+
+        result_data = []
+        for wp in weekly_plans:
+            plan_id, plan_name, date_from, date_to = wp
+
+            result_data.append({
+                'id': plan_id,
+                'plan_name': plan_name,
+                'start_date': date_from.strftime("%d %b %Y") if date_from else "",
+                'end_date': date_to.strftime("%d %b %Y") if date_to else "",
+            })
+
+        return Response({'result': result_data})
+
 
 
 @api_view(['GET'])
