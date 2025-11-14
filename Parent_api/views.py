@@ -4593,7 +4593,7 @@ def get_marks(request, student_id):
             data = resp.json()
         except ValueError:
             # السيرفر ما رجّع JSON صحيح
-            logger.exception("Invalid JSON from marks service")
+            # logger.exception("Invalid JSON from marks service")
             return Response({"status": "error_invalid_json"}, status=502)
 
         if "error" in data:
@@ -4607,17 +4607,17 @@ def get_marks(request, student_id):
 
     except requests.Timeout:
         # الخدمة الخارجية بطيئة أو لا تستجيب
-        logger.exception("Timeout calling marks service")
+        # logger.exception("Timeout calling marks service")
         return Response({"status": "error_timeout"}, status=504)
 
     except requests.RequestException as e:
         # أي خطأ شبكة آخر (DNS, اتصال, SSL, ...)
-        logger.exception("Error calling marks service")
+        # logger.exception("Error calling marks service")
         return Response({"status": "error_upstream"}, status=502)
 
     except Exception:
         # احتياط أخير لو صار أي شيء غير متوقع
-        logger.exception("Unexpected error in get_marks")
+        # logger.exception("Unexpected error in get_marks")
         return Response({"status": "erorr2"}, status=500)
         with connections[db_name].cursor() as cursor:
             student_data = get_student_details(cursor, student_id)
