@@ -20,16 +20,11 @@ import datetime
 
 import urllib.request
 import math
-
+from django.utils.crypto import get_random_string
 import firebase_admin
 from firebase_admin import credentials
 from google.oauth2 import service_account
 import google.auth.transport.requests
-
-# cred = credentials.Certificate("/home/ec2-user/trackware-sms-82ee7532ea90.json")
-# # Initialize Firebase Admin SDK
-# firebase_admin.initialize_app(cred)
-# default_app = firebase_admin.initialize_app()
 SCOPES = ['https://www.googleapis.com/auth/firebase.messaging']
 
 
@@ -119,17 +114,12 @@ def parent_login(request):
         url = 'https://' + school_name + '.trackware.com/web/session/authenticate'
         if user_name=='test-001' and password =='Prt30110':
             password ='Prt44659'
-            print("----------password------------",password)
         # url = 'http://192.168.1.28:9098/web/session/authenticate'
         try:
             if user_name=='test-001' and password =='Prt30110':
-                print("----------------------")
                 password ='Prt44659'
             body = json.dumps(
                 {"jsonrpc": "2.0", "params": {"db": school_name, "login": user_name, "password": password}})
-            print(body)
-            print(url)
-
             headers = {
                 'Content-Type': 'application/json',
             }
@@ -137,7 +127,6 @@ def parent_login(request):
             response1 = requests.request("POST", url, headers=headers, data=body)
 
             response = response1.json()
-            print(response)
             if "error" in response:
                 result = {
                     "status": "erorrq"}
@@ -159,7 +148,7 @@ def parent_login(request):
             user = User.objects.all().first()
 
             token_auth, created = Token.objects.get_or_create(user=user)
-            from django.utils.crypto import get_random_string
+
             unique_id = get_random_string(length=32)
 
             ManagerParent.objects.filter(parent_id=parent_id[0][0], db_name=school_name, user_id=uid).update(
@@ -1098,7 +1087,6 @@ def kids_list(request):
                                     if not user_name:
                                         user_name = student1[rec]['passport_number']
                                     url = 'https://' + school_name + '.trackware.com/web/session/authenticate'
-                                    # url = 'http://192.168.1.28:9098/web/session/authenticate'
                                     session = ''
                                     try:
 
@@ -1128,9 +1116,6 @@ def kids_list(request):
                                         result = {
                                             "status": "erorr2"
                                                       ""}
-                                        # return Response(result)
-                                    # session = response1.cookies
-                                    # ,pick_up_lat,pick_up_lng,drop_off_lat,drop_off_lng
                                     pick_up_lat = str(student1[rec]['pick_up_lat']) if student1[rec][
                                         'pick_up_lat'] else '0'
                                     pick_up_lng = str(student1[rec]['pick_up_lng']) if student1[rec][
@@ -1214,10 +1199,6 @@ def kids_list(request):
 
 
 def date_time(deadline):
-    # cursor.execute(
-    #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
-    # transport_setting = cursor.fetchall()
-    # date_tz = transport_setting[0][0]
     date_tz = 'Asia/Kuwait'
 
     if deadline:
@@ -1353,14 +1334,12 @@ def read_message(request):
                                 " select read_message from school_message_student_student where id=%s ",
                                 [message_id])
                             read_message = cursor.fetchall()
-                            # print(read_message[0][0])
                             if read_message[0][0]:
-                                # print("ddddddddddddddddddddddddd")
                                 cursor.execute(
                                     "UPDATE public.message_student SET read_message=not(read_message) WHERE id=%s;",
                                     [message_id])
                             else:
-                                # print("ddddddddddddddddddddddddqqd")
+
                                 cursor.execute(
                                     "UPDATE public.school_message_student_student SET read_message=true WHERE id=%s;",
                                     [message_id])
@@ -1861,25 +1840,6 @@ def kids_hstory_new(request):
                         student_round = []
                         student_history_id = []
                         with connections[school_name].cursor() as cursor:
-                            if start_date and end_date:
-                                cursor.execute(
-                                    "select  id  from school_message WHERE create_date >= %s AND create_date <= %s",
-                                    [start_date, end_date])
-                                school_message = cursor.fetchall()
-                            elif start_date and not end_date:
-                                cursor.execute(
-                                    "select  id  from school_message WHERE create_date >= %s ",
-                                    [start_date])
-
-                                school_message = cursor.fetchall()
-                            elif not start_date and end_date:
-                                cursor.execute(
-                                    "select  id  from school_message WHERE  create_date <= %s",
-                                    [end_date])
-                                school_message = cursor.fetchall()
-                            elif not start_date and not end_date:
-                                cursor.execute("select  id  from school_message ")
-                                school_message = cursor.fetchall()
                             cursor.execute(
                                 "SELECT column_name FROM information_schema.columns WHERE table_name='survey_user_input' and column_name='read_message'",
                                 [])
@@ -1903,10 +1863,6 @@ def kids_hstory_new(request):
                                     " select branch_id,year_id from res_users where id=%s",
                                     [student[6]])
                                 branch_id = cursor.fetchall()
-                                # SELECT column_name
-                                # FROM information_schema.columns
-                                # WHERE table_name='res_partner' and column_name='yousef';
-
                                 cursor.execute(
                                     "SELECT column_name FROM information_schema.columns WHERE table_name='message_student' and column_name='image_link'",
                                     [])
@@ -1942,22 +1898,11 @@ def kids_hstory_new(request):
                                     )
 
                                     student_mes = cursor.fetchall()
-                                    # print(len(student_mes11), "--------------------1826")
-
-                                    # cursor.execute(
-                                    #     "select  date,message_en,message_ar,title,title_ar,action_id,id,image_link,read_message,plan_name,school_message_id,model_school_messsage from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC ",
-                                    #     [branch_id[0][0], branch_id[0][1], student[0]])
-                                    # student_mes = cursor.fetchall()
-                                    # print(len(student_mes),"--------------------1831")
                                 else:
                                     cursor.execute(
                                         "select  date,message_en,message_ar,title,title_ar,action_id,id,read_message,school_message_id,model_school_messsage from message_student WHERE  branch_id = %s And year_id = %s  And student_id = %s AND (show_message  is null or show_message=true) ORDER BY ID DESC",
                                         [branch_id[0][0], branch_id[0][1], student[0]])
                                     student_mes = cursor.fetchall()
-                                # cursor.execute(
-                                #         "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
-                                #         [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
-                                #         year_id = fields.Many2one('academic.year', 'Academic Year', ondelete='cascade')
                                 avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
                                 for mes in student_mes:
                                     action_id = mes[5]
@@ -1982,13 +1927,9 @@ def kids_hstory_new(request):
                                             if att[2]:
                                                 attachments.append(
                                                     {'id': att[0], 'name': att[1], 'datas': att[2]})
-                                                # print(attachments)
                                     title = mes[3]
                                     title_ar = mes[4]
                                     model_school_messsage = mes[11] if information_schema else mes[9]
-                                    # if  model_school_messsage :
-                                    #     title=''
-                                    #     title_ar=''
                                     notifications.append(
                                         get_info_message_new(mes[0],
                                                              mes[1],
@@ -2004,203 +1945,14 @@ def kids_hstory_new(request):
                                                              mes[7] if information_schema else '',
                                                              plan_name=mes[9] if information_schema else '',
                                                              attachments=attachments, school_mo=model_school_messsage))
-                            #
-                            #     student_round = []
-                            #     if  any('English'  in x[0]  for x in lang):
-                            #
-                            #         fname = student[3]
-                            #
-                            #     else:
-                            #
-                            #         fname = student[4]
-                            #     notifications += get_school_message_new(student[0], school_name, school_message, fname)
-                            #     notifications += get_student_history_new(student[0], school_name, fname)
-                            #     cursor.execute(
-                            #         "select  round_schedule_id from transport_participant WHERE student_id = %s",
-                            #         [student[0]])
-                            #     round_schedule_id = cursor.fetchall()
-                            #     #     get bus message
-                            #     for rec in round_schedule_id:
-                            #
-                            #         cursor.execute(
-                            #             "select  round_id from round_schedule WHERE id = %s",
-                            #             [rec[0]])
-                            #         round_schedule = cursor.fetchall()
-                            #
-                            #         round_schedules = []
-                            #         student_round_h = []
-                            #         for rec in round_schedule:
-                            #
-                            #             if rec[0] in student_round:
-                            #
-                            #                 continue
-                            #             else:
-                            #                 cursor.execute(
-                            #                     "select  type from transport_round WHERE id = %s",
-                            #                     [rec[0]])
-                            #
-                            #                 type = cursor.fetchall()
-                            #
-                            #                 if type[0][0] == 'pick_up':
-                            #                     student_round_h.append(rec[0])
-                            #                 student_round.append(rec[0])
-                            #                 round_schedules.append(rec[0])
-                            #         round_schedules = list(dict.fromkeys(student_round))
-                            #
-                            #         for rec_s in round_schedules:
-                            #             if rec_s in student_round_id:
-                            #                 pass
-                            #             else:
-                            #                 student_round_id.append(rec_s)
-                            #
-                            #                 cursor.execute(
-                            #                     "select  message_ar,create_date,type,round_id,id,type_ar,message_en from sh_message_wizard WHERE round_id = %s and (type= %s or from_type =%s ) ORDER BY ID DESC LIMIT 50",
-                            #                     [rec_s, 'emergency',
-                            #                      'App\Model\sta' + str(parent_id)])
-                            #                 sh_message_wizard = cursor.fetchall()
-                            #
-                            #
-                            #
-                            #                 # save bus message
-                            #                 for message_wizard in range(len(sh_message_wizard)):
-                            #                     avatar = "https://s3.eu-central-1.amazonaws.com/notifications-images/mobile-notifications-icons/notification_icon_check_in_drop.png"
-                            #                     for std in student_info:
-                            #                         if any('English'  not in x[0]  for x in lang):
-                            #                             fname = std[3]
-                            #                             fname_ar=std[4]
-                            #
-                            #                         else:
-                            #                             fname = std[4]
-                            #                             fname_ar = std[3]
-                            #
-                            #                         deadline = sh_message_wizard[message_wizard][1]
-                            #                         notifications_text = str(
-                            #                             sh_message_wizard[message_wizard][6]) if \
-                            #                             sh_message_wizard[message_wizard][6] else ''
-                            #                         notifications_text_ar = str(
-                            #                             sh_message_wizard[message_wizard][0]) if \
-                            #                             sh_message_wizard[message_wizard][0] else ''
-                            #
-                            #                         notifications += get_bus_notifition_student_new(school_name,
-                            #                                                                         fname,
-                            #                                                                         notifications_text,
-                            #                                                                         sh_message_wizard[
-                            #                                                                             message_wizard][
-                            #                                                                             2],
-                            #                                                                         deadline, rec_s,
-                            #                                                                         None,
-                            #                                                                         std[0],
-                            #                                                                         sh_message_wizard[
-                            #                                                                             message_wizard][
-                            #                                                                             5],
-                            #                                                                         notifications_text_ar,fname_ar)
-                            #
-                            #
-                            #             if student_round_h:
-                            #
-                            #                 cursor.execute(
-                            #                     "select  id,round_start from round_history WHERE round_id in %s and round_name in %s ORDER BY ID DESC LIMIT 1 ",
-                            #                     [tuple(student_round_h), tuple(student_round_h)])
-                            #                 round_history = cursor.fetchall()
-                            #
-                            #                 if round_history:
-                            #                     history_round = []
-                            #
-                            #                     for round_h in round_history:
-                            #                         history_round.append(round_h[0])
-                            #                     for std in student_info:
-                            #
-                            #                         cursor.execute(
-                            #                             "select  datetime,id,time_out,bus_check_in from round_student_history WHERE round_id in %s and student_id = %s and history_id in %s  ORDER BY ID DESC LIMIT 1 ",
-                            #                             [tuple(student_round_h), std[0], tuple(history_round)])
-                            #                         student_history = cursor.fetchall()
-                            #
-                            #                         if student_history:
-                            #
-                            #                             for student_history1 in student_history:
-                            #                                 if student_history1[3]:
-                            #
-                            #                                     if student_history1[1] in student_history_id:
-                            #                                         continue
-                            #                                     else:
-                            #                                         student_history_id.append(student_history1[1])
-                            #
-                            #                                         cursor.execute(
-                            #                                             "select time_out,student_id,bus_check_in from round_student_history WHERE id = %s  ",
-                            #                                             [student_history1[1]])
-                            #                                         time_out = cursor.fetchall()
-                            #                                         if time_out:
-                            #                                             cursor.execute(
-                            #                                                 "select  display_name_search,name,name_ar from student_student WHERE  id = %s",
-                            #                                                 [time_out[0][1]])
-                            #                                             name = cursor.fetchall()
-                            #
-                            #                                             if time_out[0][0] and time_out[0][2]:
-                            #                                                 if any('English'  in x[0]  for x in lang):
-                            #                                                     if name[0][1]:
-                            #                                                         fname = name[0][1]
-                            #                                                     else:
-                            #                                                         fname = name[0][2]
-                            #
-                            #                                                 else:
-                            #                                                     if not name[0][2]:
-                            #                                                         fname = name[0][1]
-                            #                                                     else:
-                            #                                                         fname = name[0][2]
-                            #
-                            #                                                 deadline = time_out[0][0] if time_out[0][
-                            #                                                     0] else time_out[0][2]
-                            #
-                            #                                                 notifications.append(
-                            #                                                     get_info_message_new(deadline,
-                            #                                                                      fname + " has just reached the school.  ",
-                            #                                                                      avatar,
-                            #                                                                      deadline.replace(
-                            #                                                                          second=0) if deadline else '',
-                            #                                                                      "Bus notification",
-                            #                                                                      fname, time_out[0][1],0,None,None,'0',"اشعار من الحافلة"," وصل إلى المدرسة."+ fname))
                             notifications.sort(key=get_year, reverse=True)
                             for d in notifications:
-                                # t = tuple(d.items())
                                 t = (d['student_id'], d['notifications_text'], d['create_date'], d['date_time'],
                                      d['student_name'], d['notifications_title'], d['notificationsType'],
                                      d['notificationsType'])
                                 if t not in seen:
                                     seen.add(t)
                                     notifications_not_d.append(d)
-                                    date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                                    r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
-                                    # print(d['notifications_text_ar'],d['notifications_title'])
-                                    #   return {
-                                    #             "avatar": avatar,
-                                    #             "date_time": date_time(deadline),
-                                    #             "notifications_text": notifications_text,
-                                    #             "create_date": create_date,
-                                    #             "notifications_title": notifications_title,
-                                    #             "student_id": str(student_id),
-                                    #             "notificationsType": notificationsType,
-                                    #             "icon_tracking":icon_tracking,
-                                    #             "id":id,
-                                    #             "stutes":stutes,
-                                    #             "show":show,
-                                    #             "student_image": student_image,
-                                    #             "action_id": str(action_id),
-                                    #             "notifications_text_ar": notifications_text_ar if notifications_text_ar else notifications_text,
-                                    #             "notifications_title_ar": notifications_title_ar if notifications_title_ar else notifications_title,
-                                    #
-                                    #         }
-                                    # cursor.execute(
-                                    #     "select  year_id,user_id from student_student WHERE id = %s",
-                                    #     [d['student_id']])
-                                    # student_name = cursor.fetchall()
-                                    # cursor.execute(
-                                    #     " select branch_id from res_users where id=%s",
-                                    #     [student_name[0][1]])
-                                    # branch_id = cursor.fetchall()
-                                    # cursor.execute(
-                                    #     "INSERT INTO message_student(create_date, type, message_en,message_ar,title,title_ar,date,year_id,branch_id,student_id)VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s);",
-                                    #     [r, 'App\Model\drive', d['notifications_text'], d['notifications_text_ar'], d['notifications_title'], d['notifications_title_ar'], d['date_time'],student_name[0][0],branch_id[0][0],d['student_id']])
-                            # print("-------------------------------------------------",len(notifications_not_d))
                             result = {"notifications": notifications_not_d}
                             return Response(result)
                     else:
@@ -4810,202 +4562,236 @@ def post_library(request):
 
 @api_view(['GET'])
 def get_marks(request, student_id):
-    if request.method == 'GET':
-        # print(student_id,"-----------------------")
-        db_name = get_authenticated_db(request)
-        if not db_name:
-            return Response({'error': 'Unauthorized'}, status=401)
+    # الديكوريتر أصلاً يضمن GET فقط، بس نخليها للاحتياط
+    if request.method != 'GET':
+        return Response({'error': 'Method not allowed'}, status=405)
 
-        # url = 'https://' + db_name + '.trackware.com/get_student_marks_list'
-        #
-        # try:
-        #
-        #     body = json.dumps(
-        #         {"jsonrpc": "2.0", "params": {"student_id": student_id}})
-        #
-        #     headers = {
-        #         'Content-Type': 'application/json',
-        #     }
-        #
-        #     response1 = requests.request("POST", url, headers=headers, data=body)
-        #
-        #     response = response1.json()
-        #     if "error" in response:
-        #         result = {
-        #             "status": "erorrq"}
-        #         return Response(result)
-        #     all_exam = response['result']['all_exam']
-        #     result = {'all_exam': all_exam, 'code': ''}
-        #     return Response(result)
-        #
-        # except:
-        #     result = {
-        #         "status": "erorr2"
-        #                   ""}
-        #     return Response(result)
-        with connections[db_name].cursor() as cursor:
-            student_data = get_student_details(cursor, student_id)
-            if not student_data:
-                return Response({'error': 'Student not found'}, status=404)
-            year_id, user_id, branch_id = student_data
-            academic_semesters = get_academic_semesters(cursor, year_id)
-            all_exam = []
+    # 1) التأكد من الـ DB الخاص بالمدرسة / العميل
+    db_name = get_authenticated_db(request)
+    if not db_name:
+        return Response({'error': 'Unauthorized'}, status=401)
 
-            class_id = 0
-            # ----------------------
-            cursor.execute(
-                "SELECT academic_grade_id FROM public.student_distribution_line WHERE id = (SELECT student_distribution_line_id FROM student_distribution_line_student_student_rel WHERE student_student_id=%s ORDER BY student_distribution_line_id DESC LIMIT 1)",
-                [student_id])
-            student_distribution_line = cursor.fetchall()
-            student_grade = None
+    with connections[db_name].cursor() as cursor:
+        # 2) بيانات الطالب + الفصول الدراسية
+        student_data = get_student_details(cursor, student_id)
+        if not student_data:
+            return Response({'error': 'Student not found'}, status=404)
 
-            cursor.execute(
-                "select academic_grade_id from school_class where id="
-                "(select class_id from res_partner where id=(select partner_id from res_users where id="
-                "(select user_id from student_student where id=%s)))",
-                [student_id])
-            academic_grade_q = cursor.fetchall()
-            student_grade = academic_grade_q[0][0] if academic_grade_q else ''
-            if student_grade == None:
-                if student_distribution_line:
-                    cursor.execute(
-                        "SELECT id,name FROM public.academic_grade WHERE id = %s",
-                        [student_distribution_line[0][0]])
-                    academic_grade = cursor.fetchall()
-                    student_grade = academic_grade[0][0] if academic_grade else ''
+        year_id, user_id, branch_id = student_data
+        # متوقع ترجع dict بالشكل {semester_id: semester_name}
+        academic_semesters = get_academic_semesters(cursor, year_id)
 
-            cursor.execute(
-                " SELECT id FROM public.school_class WHERE academic_grade_id=%s",
-                [student_grade])
-            school_class = cursor.fetchall()
-            student_class = []
-            for res in school_class:
-                student_class.append(res[0])
-            cursor.execute(
-                " SELECT mark_exam_id,school_class_id FROM mark_exam_school_class_rel WHERE school_class_id in %s ",
-                [tuple(student_class)])
-            mark_eva = cursor.fetchall()
-            if mark_eva:
-                for semester in academic_semesters:
-                    exam_det = []
-                    for mark in mark_eva:
-                        cursor.execute(
-                            " SELECT semester_id FROM mark_exam WHERE id=%s",
-                            [mark[0]])
-                        mark_exam = cursor.fetchall()
-                        if semester == mark_exam[0][0]:
-                            cursor.execute(
-                                " SELECT id,exam_name_arabic,exam_name_english,related_exam FROM exam_group WHERE mark_exam_id=%s ORDER BY id ASC ",
-                                [mark[0]])
-                            exam_name = cursor.fetchall()
-                            exam_det = []
-                            for exam in exam_name:
-                                cursor.execute(
-                                    " SELECT subject_id,max FROM public.subject_mark_line WHERE mark_subject_line_id=%s",
-                                    [exam[0]])
-                                subject_mark_line = cursor.fetchall()
-                                subject_det = []
-                                for subject_id in subject_mark_line:
-                                    cursor.execute(
-                                        " SELECT name FROM public.school_subject WHERE id=%s",
-                                        [subject_id[0]])
-                                    subject_name = cursor.fetchall()
-                                    cursor.execute(
-                                        " SELECT id,class_id FROM public.mark_mark WHERE subject_id= %s and class_id= %s and exams= %s and semester_id= %s and year_id= %s and branch_id= %s ",
-                                        [subject_id[0], mark[1], exam[3], semester,year_id,
-                                         branch_id])
-                                    mark_mark_x = cursor.fetchall()
-                                    student_mark = None
+        if not academic_semesters:
+            return Response({'all_exam': [], 'code': ''})
 
-                                    if mark_mark_x:
-                                        cursor.execute(
-                                            "SELECT mark FROM public.mark_line WHERE mark_line_id=%s and   exams= %s and student_id=%s and published_students=%s ORDER BY mark_line_id DESC LIMIT 1  ",
-                                            [mark_mark_x[0][0], exam[3], student_id, True])
-                                        student_mark1 = cursor.fetchall()
-                                        if student_mark1 and class_id == 0:
-                                            class_id = mark_mark_x[0][1]
-                                            break
+        # 3) تحديد class_id الذي للطالب فيه درجات منشورة (بدل اللفات المعقدة السابقة)
+        cursor.execute(
+            """
+            SELECT DISTINCT mm.class_id
+            FROM mark_mark mm
+            JOIN mark_line ml ON ml.mark_line_id = mm.id
+            WHERE ml.student_id = %s
+              AND ml.published_students = TRUE
+              AND mm.year_id = %s
+              AND mm.branch_id = %s
+            ORDER BY mm.id DESC
+            LIMIT 1
+            """,
+            [student_id, year_id, branch_id],
+        )
+        class_row = cursor.fetchone()
+        if not class_row:
+            # لا توجد درجات منشورة لهذا الطالب
+            return Response({'all_exam': [], 'code': ''})
 
-                                    subject_det.append({"subject_name": subject_name[0][0] if subject_name else '',
-                                                        "student_mark": str(
-                                                            student_mark[0][0]) if student_mark else "0.0",
-                                                        "max_mark": str(subject_id[1]) if subject_id else "0.0"})
+        class_id = class_row[0]
 
-                                exam_det.append(
-                                    {"exam_name_ar": exam[1], "exam_name_en": exam[2], "subject_det": subject_det})
-                    all_exam.append({"semester": academic_semesters[semester], "exam": exam_det})
-            if class_id != 0:
-                all_exam = []
+        # 4) جميع الامتحانات المرتبطة بهذا الصف
+        cursor.execute(
+            "SELECT mark_exam_id FROM mark_exam_school_class_rel WHERE school_class_id = %s",
+            [class_id],
+        )
+        mark_exam_rows = cursor.fetchall()
+        if not mark_exam_rows:
+            return Response({'all_exam': [], 'code': ''})
 
-                # Fetch exam-class relationships
-                cursor.execute(
-                    "SELECT mark_exam_id, school_class_id FROM mark_exam_school_class_rel WHERE school_class_id = %s",
-                    [class_id])
-                mark_eva = cursor.fetchall()
+        mark_exam_ids = list({row[0] for row in mark_exam_rows})  # إزالة التكرار
+        if not mark_exam_ids:
+            return Response({'all_exam': [], 'code': ''})
 
-                if mark_eva:
-                    for semester in academic_semesters:
-                        exam_det = []
-                        for mark in mark_eva:
-                            cursor.execute("SELECT semester_id FROM mark_exam WHERE id=%s", [mark[0]])
-                            mark_exam = cursor.fetchone()  # Fetch a single result
+        # 5) ربط كل امتحان بالفصل الدراسي الخاص به
+        cursor.execute(
+            "SELECT id, semester_id FROM mark_exam WHERE id IN %s",
+            [tuple(mark_exam_ids)],
+        )
+        exam_semester_rows = cursor.fetchall()
+        exam_to_semester = {row[0]: row[1] for row in exam_semester_rows}
 
-                            if mark_exam and semester == mark_exam[0]:
-                                cursor.execute(
-                                    """SELECT id, exam_name_arabic, exam_name_english, related_exam
-                                    FROM exam_group WHERE mark_exam_id=%s ORDER BY id ASC""",
-                                    [mark[0]])
-                                exam_name = cursor.fetchall()
+        # mapping: semester_id -> [mark_exam_ids]
+        semester_to_exam_ids = {}
+        for exam_id, semester_id in exam_to_semester.items():
+            if semester_id in academic_semesters:
+                semester_to_exam_ids.setdefault(semester_id, []).append(exam_id)
 
-                                for exam in exam_name:
-                                    cursor.execute(
-                                        "SELECT subject_id, max FROM public.subject_mark_line WHERE mark_subject_line_id=%s",
-                                        [exam[0]])
-                                    subject_mark_line = cursor.fetchall()
+        if not semester_to_exam_ids:
+            return Response({'all_exam': [], 'code': ''})
 
-                                    subject_det = []
-                                    for subject_id, max_mark in subject_mark_line:
-                                        cursor.execute(
-                                            "SELECT name FROM public.school_subject WHERE id=%s",
-                                            [subject_id])
-                                        subject_name = cursor.fetchone()
+        # 6) جلب exam_group لكل الامتحانات دفعة واحدة
+        all_exam_ids_for_groups = list(exam_to_semester.keys())
+        cursor.execute(
+            """
+            SELECT id, exam_name_arabic, exam_name_english, related_exam, mark_exam_id
+            FROM exam_group
+            WHERE mark_exam_id IN %s
+            ORDER BY id ASC
+            """,
+            [tuple(all_exam_ids_for_groups)],
+        )
+        exam_group_rows = cursor.fetchall()
+        # (id, exam_name_arabic, exam_name_english, related_exam, mark_exam_id)
 
-                                        cursor.execute(
-                                            """SELECT id, class_id FROM public.mark_mark
-                                            WHERE subject_id=%s AND class_id=%s AND exams=%s
-                                            AND semester_id=%s AND year_id=%s AND branch_id=%s""",
-                                            [subject_id, mark[1], exam[3], semester, year_id, branch_id])
-                                        mark_mark_x = cursor.fetchone()
+        exam_groups_by_exam = {}
+        exam_group_ids = []
+        for row in exam_group_rows:
+            eg_id, exam_name_ar, exam_name_en, related_exam, eg_mark_exam_id = row
+            exam_group_ids.append(eg_id)
+            exam_groups_by_exam.setdefault(eg_mark_exam_id, []).append(row)
 
-                                        student_mark = None
-                                        if mark_mark_x:
-                                            cursor.execute(
-                                                """SELECT mark FROM public.mark_line
-                                                WHERE mark_line_id=%s AND exams=%s
-                                                AND student_id=%s AND published_students=%s
-                                                ORDER BY mark_line_id DESC LIMIT 1""",
-                                                [mark_mark_x[0], exam[3], student_id, True])
-                                            student_mark = cursor.fetchone()
+        if not exam_group_ids:
+            return Response({'all_exam': [], 'code': ''})
 
-                                        subject_det.append({
-                                            "subject_name": subject_name[0] if subject_name else '',
-                                            "student_mark": str(student_mark[0]) if student_mark else "0.0",
-                                            "max_mark": str(max_mark) if max_mark else "0.0"
-                                        })
+        # 7) جلب المواد + الحد الأعلى لكل exam_group دفعة واحدة
+        cursor.execute(
+            """
+            SELECT mark_subject_line_id, subject_id, max
+            FROM subject_mark_line
+            WHERE mark_subject_line_id IN %s
+            """,
+            [tuple(exam_group_ids)],
+        )
+        subject_mark_rows = cursor.fetchall()
+        # (exam_group_id, subject_id, max)
 
-                                    exam_det.append({
-                                        "exam_name_ar": exam[1],
-                                        "exam_name_en": exam[2],
-                                        "subject_det": subject_det
-                                    })
+        subject_lines_by_group = {}
+        subject_ids = set()
+        for eg_id, subject_id, max_mark in subject_mark_rows:
+            subject_lines_by_group.setdefault(eg_id, []).append((subject_id, max_mark))
+            subject_ids.add(subject_id)
 
-                        all_exam.append({
-                            "semester": academic_semesters[semester],
-                            "exam": exam_det
-                        })
-            result = {'all_exam': all_exam, 'code': ''}
+        if not subject_ids:
+            return Response({'all_exam': [], 'code': ''})
 
-        return Response(result)
+        # 8) جلب أسماء المواد دفعة واحدة
+        cursor.execute(
+            "SELECT id, name FROM school_subject WHERE id IN %s",
+            [tuple(subject_ids)],
+        )
+        subject_name_rows = cursor.fetchall()
+        subject_names = {row[0]: row[1] for row in subject_name_rows}
+
+        # 9) جلب جميع mark_mark (لكل المواد + الفصول + الامتحانات + الفصول الدراسية)
+        semester_ids = list(semester_to_exam_ids.keys())
+        cursor.execute(
+            """
+            SELECT id, subject_id, exams, semester_id
+            FROM mark_mark
+            WHERE class_id = %s
+              AND year_id = %s
+              AND branch_id = %s
+              AND semester_id IN %s
+              AND subject_id IN %s
+            """,
+            [class_id, year_id, branch_id, tuple(semester_ids), tuple(subject_ids)],
+        )
+        mark_mark_rows = cursor.fetchall()
+        # (id, subject_id, exams, semester_id)
+
+        mark_mark_map = {}   # (subject_id, exams, semester_id) -> mark_mark_id
+        mark_mark_ids = []
+        for mm_id, subject_id, exams, semester_id in mark_mark_rows:
+            mark_mark_map[(subject_id, exams, semester_id)] = mm_id
+            mark_mark_ids.append(mm_id)
+
+        if not mark_mark_ids:
+            return Response({'all_exam': [], 'code': ''})
+
+        mark_mark_ids = list(set(mark_mark_ids))
+
+        # 10) جلب درجات الطالب لكل mark_mark دفعة واحدة
+        cursor.execute(
+            """
+            SELECT mark_line_id, exams, mark
+            FROM mark_line
+            WHERE student_id = %s
+              AND published_students = TRUE
+              AND mark_line_id IN %s
+            """,
+            [student_id, tuple(mark_mark_ids)],
+        )
+        mark_line_rows = cursor.fetchall()
+        # (mark_mark_id, exams, mark)
+
+        student_marks = {}   # (mark_mark_id, exams) -> mark
+        for mark_line_id, exams, mark in mark_line_rows:
+            # آخر قيمة تغطي السابقة – قريبة من ORDER BY ... DESC LIMIT 1
+            student_marks[(mark_line_id, exams)] = mark
+
+        # 11) بناء all_exam بنفس تركيب الكود القديم
+        all_exam = []
+
+        # academic_semesters متوقع dict: {semester_id: name}
+        for semester_id, semester_name in academic_semesters.items():
+            exam_det = []
+            exam_ids_for_semester = semester_to_exam_ids.get(semester_id, [])
+            if not exam_ids_for_semester:
+                all_exam.append({'semester': semester_name, 'exam': []})
+                continue
+
+            for mark_exam_id in exam_ids_for_semester:
+                exam_groups = exam_groups_by_exam.get(mark_exam_id, [])
+                for eg_row in exam_groups:
+                    eg_id, exam_name_ar, exam_name_en, related_exam, _ = eg_row
+
+                    subject_lines = subject_lines_by_group.get(eg_id, [])
+                    subject_det = []
+
+                    for subject_id, max_mark in subject_lines:
+                        subject_name = subject_names.get(subject_id, '')
+
+                        # نبحث عن mark_mark المناسب: subject + related_exam + semester
+                        mm_id = mark_mark_map.get((subject_id, related_exam, semester_id))
+
+                        student_mark_value = "0.0"
+                        if mm_id:
+                            mark_value = student_marks.get((mm_id, related_exam))
+                            if mark_value is not None:
+                                student_mark_value = str(mark_value)
+
+                        subject_det.append(
+                            {
+                                "subject_name": subject_name,
+                                "student_mark": student_mark_value,
+                                "max_mark": str(max_mark) if max_mark is not None else "0.0",
+                            }
+                        )
+
+                    exam_det.append(
+                        {
+                            "exam_name_ar": exam_name_ar,
+                            "exam_name_en": exam_name_en,
+                            "subject_det": subject_det,
+                        }
+                    )
+
+            all_exam.append(
+                {
+                    "semester": semester_name,
+                    "exam": exam_det,
+                }
+            )
+
+    result = {'all_exam': all_exam, 'code': ''}
+    return Response(result)
 
 @api_view(['GET'])
 def get_time_table(request, student_id):
