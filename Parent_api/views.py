@@ -4560,170 +4560,232 @@ def post_library(request):
         # Marks
 
 
+
 @api_view(['GET'])
 def get_marks(request, student_id):
-    if request.method == 'GET':
-        db_name = get_authenticated_db(request)
-        if not db_name:
-            return Response({'error': 'Unauthorized'}, status=401)
+    if request.method != 'GET':
+        return Response({'error': 'Method not allowed'}, status=405)
 
-        with connections[db_name].cursor() as cursor:
-            # 1) بيانات الطالب الأساسية
-            student_data = get_student_details(cursor, student_id)
-            if not student_data:
-                return Response({'error': 'Student not found'}, status=404)
+    db_name = get_authenticated_db(request)
+    if not db_name:
+        return Response({'error': 'Unauthorized'}, status=401)
 
-            year_id, user_id, branch_id = student_data
-            academic_semesters = get_academic_semesters(cursor, year_id)  # نتوقعها dict: {semester_id: name}
-            all_exam = []
+    with connections[db_name].cursor() as cursor:
+        # 1) بيانات الطالب الأساسية
+        student_data = get_student_details(cursor, student_id)
+        if not student_data:
+            return Response({'error': 'Student not found'}, status=404)
 
-            # 2) محاولة استخراج class_id للطالب بأقصر طريق ممكن
-            #    من خلال student_student -> res_users -> res_partner (اللي فيه class_id)
-            class_id = None
-            cursor.execute(
-                """
-                SELECT rp.class_id
-                FROM student_student ss
-                JOIN res_users ru ON ru.id = ss.user_id
-                JOIN res_partner rp ON rp.id = ru.partner_id
-                WHERE ss.id = %s
-                """,
-                [student_id],
-            )
-            row = cursor.fetchone()
-            if row and row[0]:
-                class_id = row[0]
+        year_id, user_id, branch_id = student_data
+        # نتوقع academic_semesters dict: {semester_id: semester_name}
+        academic_semesters = get_academic_semesters(cursor, year_id)
+        all_exam = []
 
-            # لو ما قدرنا نجيب class_id نرجع نتيجة فاضية بنفس التقسيمة
-            if not class_id:
-                result = {'all_exam': [], 'code': ''}
-                return Response(result)
+        # 2) محاولة استخراج class_id للطالب بأقصر طريق
+        cursor.execute(
+            """
+            SELECT rp.class_id
+            FROM student_student ss
+            JOIN res_users ru ON ru.id = ss.user_id
+            JOIN res_partner rp ON rp.id = ru.partner_id
+            WHERE ss.id = %s
+            """,
+            [student_id],
+        )
+        row = cursor.fetchone()
+        class_id = row[0] if row and row[0] else None
 
-            # 3) جلب علاقة الامتحانات مع الصف
-            cursor.execute(
-                """
-                SELECT mark_exam_id, school_class_id
-                FROM mark_exam_school_class_rel
-                WHERE school_class_id = %s
-                """,
-                [class_id],
-            )
-            mark_eva = cursor.fetchall()
+        # لو ما قدرنا نجيب class_id نرجع نتيجة فاضية بنفس التقسيمة
+        if not class_id:
+            result = {'all_exam': [], 'code': ''}
+            return Response(result)
 
-            if mark_eva:
-                for semester in academic_semesters:
-                    exam_det = []
+        # لو ما في فصول أكاديمية / سمسترات
+        if not academic_semesters:
+            result = {'all_exam': [], 'code': ''}
+            return Response(result)
 
-                    for mark in mark_eva:
-                        # نجيب semester الخاص بالامتحان
-                        cursor.execute(
-                            "SELECT semester_id FROM mark_exam WHERE id=%s",
-                            [mark[0]],
-                        )
-                        mark_exam = cursor.fetchone()
+        semester_ids = list(academic_semesters.keys())
 
-                        if not mark_exam:
-                            continue
+        # 3) جلب كل exam_group مع السمستر بمرّة واحدة
+        cursor.execute(
+            """
+            SELECT 
+                eg.id AS exam_id,
+                eg.exam_name_arabic,
+                eg.exam_name_english,
+                eg.related_exam,
+                me.semester_id
+            FROM mark_exam_school_class_rel mesr
+            JOIN mark_exam me ON me.id = mesr.mark_exam_id
+            JOIN exam_group eg ON eg.mark_exam_id = mesr.mark_exam_id
+            WHERE mesr.school_class_id = %s
+            ORDER BY me.semester_id, eg.id ASC
+            """,
+            [class_id],
+        )
+        exam_rows = cursor.fetchall()
 
-                        if semester != mark_exam[0]:
-                            continue
+        if not exam_rows:
+            # نفس منطقك السابق: لو ما في امتحانات، all_exam فاضية
+            result = {'all_exam': [], 'code': ''}
+            return Response(result)
 
-                        # 4) جلب مجموعات الامتحانات (exam_group)
-                        cursor.execute(
-                            """
-                            SELECT id, exam_name_arabic, exam_name_english, related_exam
-                            FROM exam_group
-                            WHERE mark_exam_id=%s
-                            ORDER BY id ASC
-                            """,
-                            [mark[0]],
-                        )
-                        exam_name_list = cursor.fetchall()
+        # تقسيم الامتحانات حسب السمستر
+        # exam_groups_by_semester: {semester_id: [ {id, exam_name_ar, exam_name_en, related_exam}, ...]}
+        exam_groups_by_semester = {}
+        exam_ids = set()
+        related_exam_values = set()
+        semesters_with_exams = set()
 
-                        for exam in exam_name_list:
-                            exam_id = exam[0]
-                            exam_name_ar = exam[1]
-                            exam_name_en = exam[2]
-                            related_exam = exam[3]
+        for exam_id, exam_name_ar, exam_name_en, related_exam, sem_id in exam_rows:
+            exam_ids.add(exam_id)
+            related_exam_values.add(related_exam)
+            semesters_with_exams.add(sem_id)
 
-                            # 5) جلب المواد والـ max mark
-                            cursor.execute(
-                                """
-                                SELECT subject_id, max
-                                FROM public.subject_mark_line
-                                WHERE mark_subject_line_id=%s
-                                """,
-                                [exam_id],
-                            )
-                            subject_mark_line = cursor.fetchall()
+            exam_groups_by_semester.setdefault(sem_id, []).append({
+                "id": exam_id,
+                "exam_name_ar": exam_name_ar,
+                "exam_name_en": exam_name_en,
+                "related_exam": related_exam,
+            })
 
-                            subject_det = []
-                            for subject_id, max_mark in subject_mark_line:
-                                # اسم المادة
-                                cursor.execute(
-                                    "SELECT name FROM public.school_subject WHERE id=%s",
-                                    [subject_id],
-                                )
-                                subject_name_row = cursor.fetchone()
-                                subject_name = subject_name_row[0] if subject_name_row else ''
+        if not exam_ids:
+            result = {'all_exam': [], 'code': ''}
+            return Response(result)
 
-                                # mark_mark الخاص بالمادة / الصف / الامتحان / الفصل
-                                cursor.execute(
-                                    """
-                                    SELECT id, class_id
-                                    FROM public.mark_mark
-                                    WHERE subject_id=%s
-                                      AND class_id=%s
-                                      AND exams=%s
-                                      AND semester_id=%s
-                                      AND year_id=%s
-                                      AND branch_id=%s
-                                    """,
-                                    [subject_id, class_id, related_exam, semester, year_id, branch_id],
-                                )
-                                mark_mark_x = cursor.fetchone()
+        # 4) جلب المواد والـ max لكل exam_group دفعة واحدة
+        cursor.execute(
+            """
+            SELECT mark_subject_line_id, subject_id, max
+            FROM public.subject_mark_line
+            WHERE mark_subject_line_id IN %s
+            """,
+            [tuple(exam_ids)],
+        )
+        subject_mark_rows = cursor.fetchall()
 
-                                student_mark_value = "0.0"
-                                if mark_mark_x:
-                                    # علامة الطالب
-                                    cursor.execute(
-                                        """
-                                        SELECT mark
-                                        FROM public.mark_line
-                                        WHERE mark_line_id=%s
-                                          AND exams=%s
-                                          AND student_id=%s
-                                          AND published_students=%s
-                                        ORDER BY mark_line_id DESC
-                                        LIMIT 1
-                                        """,
-                                        [mark_mark_x[0], related_exam, student_id, True],
-                                    )
-                                    student_mark_row = cursor.fetchone()
-                                    if student_mark_row:
-                                        student_mark_value = str(student_mark_row[0])
+        # subjects_by_exam: {exam_id: [(subject_id, max_mark), ...]}
+        subjects_by_exam = {}
+        subject_ids = set()
 
-                                subject_det.append({
-                                    "subject_name": subject_name,
-                                    "student_mark": student_mark_value,
-                                    "max_mark": str(max_mark) if max_mark is not None else "0.0",
-                                })
+        for exam_id, subject_id, max_mark in subject_mark_rows:
+            subjects_by_exam.setdefault(exam_id, []).append((subject_id, max_mark))
+            subject_ids.add(subject_id)
 
-                            exam_det.append({
-                                "exam_name_ar": exam_name_ar,
-                                "exam_name_en": exam_name_en,
-                                "subject_det": subject_det,
-                            })
-
-                    all_exam.append({
-                        "semester": academic_semesters[semester],
-                        "exam": exam_det,
-                    })
-
+        # لو ما في مواد، نرجع بنفس التقسيمة
+        if not subject_ids:
+            # نبني structure فاضي لكل سمستر حسب academic_semesters
+            for semester_id, semester_name in academic_semesters.items():
+                all_exam.append({
+                    "semester": semester_name,
+                    "exam": [],
+                })
             result = {'all_exam': all_exam, 'code': ''}
             return Response(result)
 
-    return None
+        # 5) أسماء المواد دفعة واحدة
+        cursor.execute(
+            """
+            SELECT id, name
+            FROM public.school_subject
+            WHERE id IN %s
+            """,
+            [tuple(subject_ids)],
+        )
+        subject_name_rows = cursor.fetchall()
+        subject_name_map = {sid: name for sid, name in subject_name_rows}
+
+        # 6) جلب كل mark_mark لكل المواد/السمسترات/السّنة/الفرع لهذا الصف
+        cursor.execute(
+            """
+            SELECT id, subject_id, exams, semester_id
+            FROM public.mark_mark
+            WHERE class_id = %s
+              AND year_id = %s
+              AND branch_id = %s
+              AND semester_id IN %s
+              AND subject_id IN %s
+            """,
+            [class_id, year_id, branch_id, tuple(semester_ids), tuple(subject_ids)],
+        )
+        mark_mark_rows = cursor.fetchall()
+
+        # mark_mark_map: {(subject_id, semester_id, exams): mark_mark_id}
+        mark_mark_map = {}
+        mark_mark_ids = set()
+
+        for mm_id, subj_id, exams, sem_id in mark_mark_rows:
+            key = (subj_id, sem_id, exams)
+            mark_mark_map[key] = mm_id
+            mark_mark_ids.add(mm_id)
+
+        # 7) جلب كل علامات الطالب mark_line دفعة واحدة
+        mark_map = {}
+        if mark_mark_ids:
+            cursor.execute(
+                """
+                SELECT mark_line_id, exams, mark
+                FROM public.mark_line
+                WHERE mark_line_id IN %s
+                  AND student_id = %s
+                  AND published_students = %s
+                """,
+                [tuple(mark_mark_ids), student_id, True],
+            )
+            mark_line_rows = cursor.fetchall()
+
+            # mark_map: {(mark_line_id, exams): mark_value}
+            # لو في أكثر من صف لنفس (mark_line_id, exams) آخر واحد رح يغطّي، وغالباً ما في تكرار عملياً
+            for mark_line_id, exams, mark in mark_line_rows:
+                mark_map[(mark_line_id, exams)] = str(mark)
+
+        # 8) بناء الناتج النهائي بنفس التقسيمة
+        for semester_id, semester_name in academic_semesters.items():
+            exams_for_semester = exam_groups_by_semester.get(semester_id, [])
+            exam_det = []
+
+            for exam in exams_for_semester:
+                exam_id = exam["id"]
+                exam_name_ar = exam["exam_name_ar"]
+                exam_name_en = exam["exam_name_en"]
+                related_exam = exam["related_exam"]
+
+                subject_det = []
+                for subject_id, max_mark in subjects_by_exam.get(exam_id, []):
+                    subject_name = subject_name_map.get(subject_id, '')
+
+                    # نجيب mark_mark_id لهذه المادة/السمستر/الامتحان
+                    mm_key = (subject_id, semester_id, related_exam)
+                    mm_id = mark_mark_map.get(mm_key)
+
+                    student_mark_value = "0.0"
+                    if mm_id:
+                        # بنستخدم نفس related_exam كـ exams key
+                        mark_value = mark_map.get((mm_id, related_exam))
+                        if mark_value is not None:
+                            student_mark_value = mark_value
+
+                    subject_det.append({
+                        "subject_name": subject_name,
+                        "student_mark": student_mark_value,
+                        "max_mark": str(max_mark) if max_mark is not None else "0.0",
+                    })
+
+                exam_det.append({
+                    "exam_name_ar": exam_name_ar,
+                    "exam_name_en": exam_name_en,
+                    "subject_det": subject_det,
+                })
+
+            all_exam.append({
+                "semester": semester_name,
+                "exam": exam_det,
+            })
+
+        result = {'all_exam': all_exam, 'code': ''}
+        return Response(result)
+
 
 
 @api_view(['GET'])
