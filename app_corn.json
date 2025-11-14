@@ -1,0 +1,24 @@
+{
+  "apps": [
+    {
+      "name": "tracking",
+      "script": "gunicorn",
+      "interpreter": "/var/www/Tracking_python_core/env/bin/python3",
+      "args": "--bind 0.0.0.0:8000 Tracking_python_core.wsgi:application",
+      "cwd": "./",
+      "watch": false,
+      "autorestart": true,
+      "ignore_watch": [
+        "node_modules",
+        ".git",
+        "*.pyc"
+      ],
+      "instances": "1",
+      "exec_mode": "fork",
+      "env": {
+	"DJANGO_SETTINGS_MODULE": "Tracking_python_core.settings",
+        "PYTHONUNBUFFERED": "1"
+      }
+    }
+  ]
+}

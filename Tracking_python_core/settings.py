@@ -86,7 +86,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'USER': 'postgres',
         'PASSWORD': 'P0sTgR3$*981',
-        'HOST': '3.69.79.200',
+        'HOST': 'odoo-db.ccrvo5dlzlxw.eu-central-1.rds.amazonaws.com',
         'PORT': '5432'
     },
     'iks': {
@@ -94,7 +94,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'USER': 'postgres',
         'PASSWORD': 'P0sTgR3$*981',
-        'HOST': '3.69.79.200',
+        'HOST': 'odoo-db.ccrvo5dlzlxw.eu-central-1.rds.amazonaws.com',
         'PORT': '5432',
     },
     'cbis': {
@@ -102,7 +102,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'USER': 'postgres',
         'PASSWORD': 'P0sTgR3$*981',
-        'HOST': '3.69.79.200',
+        'HOST': 'odoo-db.ccrvo5dlzlxw.eu-central-1.rds.amazonaws.com',
         'PORT': '5432',
     },
     'ghs': {
@@ -110,7 +110,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'USER': 'postgres',
         'PASSWORD': 'P0sTgR3$*981',
-        'HOST': '3.69.79.200',
+        'HOST': 'odoo-db.ccrvo5dlzlxw.eu-central-1.rds.amazonaws.com',
         'PORT': '5432',
     },
     'tws': {
@@ -118,7 +118,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'USER': 'postgres',
         'PASSWORD': 'P0sTgR3$*981',
-        'HOST': '3.69.79.200',
+        'HOST': 'odoo-db.ccrvo5dlzlxw.eu-central-1.rds.amazonaws.com',
         'PORT': '5432',
     },
     'twc': {
@@ -126,7 +126,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'USER': 'postgres',
         'PASSWORD': 'P0sTgR3$*981',
-        'HOST': '3.69.79.200',
+        'HOST': 'odoo-db.ccrvo5dlzlxw.eu-central-1.rds.amazonaws.com',
         'PORT': '5432',
     },
     'ics': {
@@ -134,7 +134,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'USER': 'postgres',
         'PASSWORD': 'P0sTgR3$*981',
-        'HOST': '3.69.79.200',
+        'HOST': 'odoo-db.ccrvo5dlzlxw.eu-central-1.rds.amazonaws.com',
         'PORT': '5432',
     },
     'rsi': {
@@ -142,7 +142,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'USER': 'postgres',
         'PASSWORD': 'P0sTgR3$*981',
-        'HOST': '3.69.79.200',
+        'HOST': 'odoo-db.ccrvo5dlzlxw.eu-central-1.rds.amazonaws.com',
         'PORT': '5432',
     },
     'bia': {
@@ -150,7 +150,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'USER': 'postgres',
         'PASSWORD': 'P0sTgR3$*981',
-        'HOST': '3.69.79.200',
+        'HOST': 'odoo-db.ccrvo5dlzlxw.eu-central-1.rds.amazonaws.com',
         'PORT': '5432',
     },
     'twa': {
@@ -158,7 +158,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'USER': 'postgres',
         'PASSWORD': 'P0sTgR3$*981',
-        'HOST': '3.69.79.200',
+        'HOST': 'odoo-db.ccrvo5dlzlxw.eu-central-1.rds.amazonaws.com',
         'PORT': '5432',
     },
     'uis': {
@@ -166,7 +166,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'USER': 'postgres',
         'PASSWORD': 'P0sTgR3$*981',
-        'HOST': '3.69.79.200',
+        'HOST': 'odoo-db.ccrvo5dlzlxw.eu-central-1.rds.amazonaws.com',
         'PORT': '5432',
     },
 

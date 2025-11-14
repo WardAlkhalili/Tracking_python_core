@@ -1,0 +1,19 @@
+{
+  "apps": [
+    {
+      "name": "django_with_pm2",
+      "interpreter": "/var/www/Tracking_python_core/base_env/bin/python3",
+      "script": "/var/www/Tracking_python_core/base_env/bin/gunicorn", 
+      "cwd": "/var/www/Tracking_python_core/", 
+      "args": [
+        "--bind",
+        "0.0.0.0:8080",
+        "--workers",
+        "1",
+        "Tracking_python_core.wsgi:application"
+      ],
+      "autorestart": true,
+      "watch": false 
+    }
+  ]
+}

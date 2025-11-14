@@ -1,0 +1,18 @@
+{
+  "apps": [
+    {
+      "name": "djnago_with_pm2",
+      "interpreter": "/var/www/Tracking_python_core/env/bin/python3",
+      "script": "/home/ec2-user/.local/bin/gunicorn",
+      "args": [
+        "--bind", 
+        "0.0.0.0:8080", 
+        "--workers", 
+        "3", 
+        "Tracking_python_core.wsgi:application"
+      ],
+      "autorestart": true,
+      "watch": true
+    }
+  ]
+}
