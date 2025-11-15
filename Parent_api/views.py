@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from .models import *
 from django.db import connections
+from collections import defaultdict
 
 from pyfcm import FCMNotification
 import pandas as pd
@@ -4294,79 +4295,123 @@ def get_weekly_plan_lines(request, plan_id, student_id, week_name):
 
 @api_view(['GET'])
 def get_data_worksheets(request, student_id):
-    if request.method == 'GET':
-        if request.headers:
-            if request.headers.get('Authorization'):
-                if 'Bearer' in request.headers.get('Authorization'):
-                    au = request.headers.get('Authorization').replace('Bearer', '').strip()
-                    db_name = ManagerParent.objects.filter(token=au).values_list('db_name')
+    # 1) Authorization
+    auth_header = request.headers.get('Authorization', '')
+    if not auth_header.startswith('Bearer '):
+        return Response({'error': 'Authorization header missing or invalid'}, status=401)
 
-                    if db_name:
-                        for e in db_name:
-                            school_name = e[0]
-                        with connections[school_name].cursor() as cursor:
-                            data = []
-                            cursor.execute(
-                                "select user_id,year_id from student_student where id=%s",
-                                [student_id])
-                            user_id_q = cursor.fetchall()
-                            if user_id_q:
-                                cursor.execute(
-                                    " select partner_id,branch_id,year_id from res_users where id=%s",
-                                    [user_id_q[0][0]])
-                                partner_id_q = cursor.fetchall()
-                                cursor.execute(
-                                    "select  worksheet_id  from student_details WHERE student_id = %s  ",
-                                    [student_id])
-                                class_worksheet_id = cursor.fetchall()
-                                worksheet_id = []
-                                for rec in class_worksheet_id:
-                                    if rec[0]:
-                                        worksheet_id.append(rec[0])
-                                if worksheet_id:
-                                    cursor.execute(
-                                        " select id,name,priority,publishing_date,subject_id,deadline from class_worksheet where state='published' and year_id = %s and branch_id =%s and id in %s  ORDER BY publishing_date DESC",
-                                        [partner_id_q[0][2], partner_id_q[0][1], tuple(worksheet_id)])
-                                    class_worksheet = cursor.fetchall()
+    token = auth_header.replace('Bearer', '').strip()
 
-                                    for w in class_worksheet:
-                                        if w[4]:
-                                            cursor.execute(
-                                                "select  name  from school_subject WHERE id = %s ",
-                                                [w[4]])
-                                            subject_name = cursor.fetchall()
-                                            deadline = None
-                                            # cursor.execute(
-                                            #     """select timezone from transport_setting ORDER BY ID DESC LIMIT 1""")
-                                            # transport_setting = cursor.fetchall()
-                                            # date_tz = transport_setting[0][0]
-                                            date_tz = 'Asia/Kuwait'
-                                            new_timezone = pytz.timezone(date_tz)
+    # 2) جلب اسم قاعدة بيانات المدرسة من جدول ManagerParent
+    school_name = (
+        ManagerParent.objects
+        .filter(token=token)
+        .values_list('db_name', flat=True)
+        .first()
+    )
 
-                                            date = w[3].astimezone(new_timezone)
+    if not school_name:
+        return Response({'error': 'Invalid token'}, status=401)
 
-                                            if w[5]:
-                                                deadline = w[5].astimezone(new_timezone)
+    data = []
 
-                                            data.append({'worksheet_id': w[0],
-                                                         'name': w[1],
-                                                         # str(p[2].strftime("%d %b %Y"))
-                                                         'date': str(date.strftime("%d %b %Y")),
-                                                         'priority': w[2],
-                                                         'deadline': str(deadline.strftime("%d %b %Y") + ' ' + str(
-                                                             deadline.hour) + ':' + str(deadline.minute) + ':' + str(
-                                                             deadline.second)) if deadline else '',
-                                                         'subject': subject_name[0][0],
-                                                         'finish': str(deadline < datetime.datetime.now().astimezone(
-                                                             new_timezone)) if deadline else ''
-                                                         })
-                                result = {'result': data}
-                                # print(result)
+    with connections[school_name].cursor() as cursor:
+        # 3) جلب user_id, year_id للطالب
+        cursor.execute(
+            "SELECT user_id, year_id FROM student_student WHERE id = %s",
+            [student_id],
+        )
+        student_row = cursor.fetchone()
+        if not student_row:
+            return Response({'result': data})
 
-                                return Response(result)
-                            result = {'result': data}
-                            return Response(result)
+        user_id, student_year_id = student_row
 
+        # 4) جلب partner_id, branch_id, year_id من res_users
+        cursor.execute(
+            "SELECT partner_id, branch_id, year_id FROM res_users WHERE id = %s",
+            [user_id],
+        )
+        user_row = cursor.fetchone()
+        if not user_row:
+            return Response({'result': data})
+
+        partner_id, branch_id, year_id = user_row
+
+        # 5) جلب worksheet_ids من student_details
+        cursor.execute(
+            "SELECT worksheet_id FROM student_details WHERE student_id = %s",
+            [student_id],
+        )
+        worksheet_rows = cursor.fetchall()
+        worksheet_ids = [row[0] for row in worksheet_rows if row[0]]
+
+        if not worksheet_ids:
+            return Response({'result': data})
+
+        # 6) جلب كل الـ worksheets دفعة وحدة
+        cursor.execute(
+            """
+            SELECT id, name, priority, publishing_date, subject_id, deadline
+            FROM class_worksheet
+            WHERE state = 'published'
+              AND year_id = %s
+              AND branch_id = %s
+              AND id IN %s
+            ORDER BY publishing_date DESC
+            """,
+            [year_id, branch_id, tuple(worksheet_ids)],
+        )
+        class_worksheets = cursor.fetchall()
+
+        if not class_worksheets:
+            return Response({'result': data})
+
+        # 7) تجميع كل subject_id لنجلب أسماء المواد باستعلام واحد
+        subject_ids = [w[4] for w in class_worksheets if w[4]]
+        subjects_by_id = {}
+
+        if subject_ids:
+            cursor.execute(
+                """
+                SELECT id, name
+                FROM school_subject
+                WHERE id IN %s
+                """,
+                [tuple(set(subject_ids))],
+            )
+            subjects = cursor.fetchall()
+            subjects_by_id = {sid: name for sid, name in subjects}
+
+        # 8) تجهيز التواريخ و الـ timezone
+        date_tz = 'Asia/Kuwait'
+        tz = pytz.timezone(date_tz)
+        now = datetime.datetime.now().astimezone(tz)
+
+        # 9) بناء النتيجة
+        for w in class_worksheets:
+            worksheet_id, name, priority, publishing_date, subject_id, deadline = w
+
+            # تحويل التاريخ للتايمزون
+            date_local = publishing_date.astimezone(tz) if publishing_date else None
+            deadline_local = deadline.astimezone(tz) if deadline else None
+
+            subject_name = subjects_by_id.get(subject_id, '') if subject_id else ''
+
+            data.append({
+                'worksheet_id': worksheet_id,
+                'name': name,
+                'date': date_local.strftime("%d %b %Y") if date_local else '',
+                'priority': priority,
+                'deadline': (
+                    deadline_local.strftime("%d %b %Y") + ' '
+                    + f"{deadline_local.hour}:{deadline_local.minute}:{deadline_local.second}"
+                ) if deadline_local else '',
+                'subject': subject_name,
+                'finish': str(deadline_local < now) if deadline_local else '',
+            })
+
+    return Response({'result': data})
 
 @api_view(['GET'])
 def get_event_data(request, student_id):
