@@ -1819,8 +1819,8 @@ def no_show(student_id, student_name, round_id, driver_name, rec, school_name, p
 
 
 def send_notification_student(mobile_token, title, message):
-    push_service = FCMNotification(
-        api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+    # push_service = FCMNotification(
+    #     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
     registration_id = mobile_token
     message_title = title
     message_body = message
@@ -2143,8 +2143,8 @@ def send_notification(mobile_token1, message_title, message_body):
     mobile_token = []
     for e in mobile_token1:
         mobile_token.append(e[0])
-    push_service = FCMNotification(
-        api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+    # push_service = FCMNotification(
+    #     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
     registration_id = mobile_token
     if mobile_token and not ("token" in mobile_token):
         registration_id = list(dict.fromkeys(registration_id))
@@ -2562,8 +2562,8 @@ def notify(request):
                                     for e in mobile_token1:
                                         mobile_token.append(e[0])
 
-                                    push_service = FCMNotification(
-                                        api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+                                    # push_service = FCMNotification(
+                                    #     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
                                 # mobile_token=["ctie8P6PSkibn9n_PL8Cxa:APA91bFXMkn1TM8Kxwa7dyzXOFF_ad5ECy4ng-Qn8Ltf46uXH5r165o6YclP2cE38eccz4UvNunWmEqbrkJ4QUZI97s9rqkaLvf9OXJ6GxOR_3zyMpYxAqA54iUrOlE1hD89pTzHqDti"]
                                 if mobile_token:
                                     registration_id = mobile_token
