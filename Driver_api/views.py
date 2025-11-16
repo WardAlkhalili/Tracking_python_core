@@ -1898,7 +1898,7 @@ def students_bus_checks(request):
                                         if student_name[0][4]:
                                             parent_id.append(student_name[0][4])
                                         parent_id = list(dict.fromkeys(parent_id))
-                                    print("---------------------1832---", parent_id)
+                                    print("---------------------1832---", parent_id,"------------00000")
 
                                     if type(driver_id) is not int:
                                         for e in driver_id:
