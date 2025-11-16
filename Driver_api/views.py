@@ -1547,6 +1547,7 @@ def checked(student_id, round_type, bus_num, student_name, round_id, driver_name
                                                          Q(db_name=school_name),
                                                          Q(is_active=True)).values_list(
                 'mobile_token').order_by('-pk')
+            print("--------------------------------------1550",mobile_token1)
 
             if settings:
                 if (settings[0][0]):
@@ -1923,7 +1924,7 @@ def students_bus_checks(request):
                                                     "INSERT INTO  student_history (round_id,student_id,bus_check_in,datetime,history_id,lat,long,activity_type) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
                                                     [round_id, student_id, datetime.datetime.now(),
                                                      datetime.datetime.now(), round_history[0][0], lat, long, status])
-
+                                                print(status)
                                                 if status == 'in':
                                                     cursor.execute(
                                                         "UPDATE public.round_student_history SET bus_check_in = %s WHERE id =%s ",
@@ -1938,6 +1939,7 @@ def students_bus_checks(request):
                                                             student_name[0][0],
                                                             round_id,
                                                             driver_name[0][0], student_id, school_name, parent_id)
+                                                    print("-----------------------ssss")
                                                     cursor.execute(
                                                         "UPDATE public.transport_round SET total_checkedout_students= %s , total_checkedin_students= %s WHERE id=%s",
                                                         [ch_out, ch_in, round_id])
