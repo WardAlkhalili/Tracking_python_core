@@ -1486,67 +1486,73 @@ def checked(student_id, round_type, bus_num, student_name, round_id, driver_name
     title_ar = "اشعار من الحافلة"
     if round_type != 'pick_up':
         title = "School Departure"
-    message_ar = " صعد إلى الحافلة " + student_name + str(bus_num)
+
+    message_ar = " صعد إلى الحافلة " + student_name + " رقم " + str(bus_num)
     message = student_name + ' has just been checked into the bus'
-    date_string = datetime.datetime.now().strftime(
-        "%Y-%m-%d %H:%M:%S")
-    r = datetime.datetime.strptime(date_string,
-                                   '%Y-%m-%d %H:%M:%S')
-    save_message_wizard(school_name, round_id, r,
-                        'App\Model\sta' + str(rec),
-                        title, title_ar,
-                        message,
-                        message_ar, driver_name,
-                        student_id=student_id)
-    for rec in parent_id:
+
+    date_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    r = datetime.datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
+
+    save_message_wizard(
+        school_name, round_id, r,
+        'App\Model\sta' + str(rec),
+        title, title_ar,
+        message, message_ar, driver_name,
+        student_id=student_id
+    )
+
+    for parent in parent_id:
         with connections[school_name].cursor() as cursor:
-            cursor.execute("select  settings from school_parent WHERE id = %s", [rec])
+            cursor.execute("select settings from school_parent WHERE id = %s", [parent])
             settings = cursor.fetchall()
-            mobile_token = []
 
-            mobile_token1 = ManagerParent.objects.filter(Q(parent_id=rec),
-                                                         Q(db_name=school_name),
-                                                         Q(is_active=True)).values_list(
-                'mobile_token').order_by('-pk')
+        mobile_token = []
+        locale = "en"
+        check_in = True
 
-            if settings:
-                if (settings[0][0]):
+        mobile_token1 = ManagerParent.objects.filter(
+            Q(parent_id=parent),
+            Q(db_name=school_name),
+            Q(is_active=True)
+        ).values_list('mobile_token', flat=True).order_by('-pk')
 
-                    data = json.loads(settings[0][0])
-                    locale = "en"
-
-                    check_in = True
-
-                    if type(data['notifications']) is str:
-                        li = list(data['notifications'].split(","))
+        if settings and settings[0][0]:
+            try:
+                data = json.loads(settings[0][0])
+                notifications = data.get('notifications')
+                if isinstance(notifications, str):
+                    li = notifications.split(",")
+                    if len(li) >= 4:
                         locale = "ar" if "ar" in li[3] else 'en'
-                        check_in = True if "true" in li[1] else False
+                    if len(li) >= 2:
+                        check_in = "true" in li[1].lower()
+                elif isinstance(notifications, dict):
+                    locale = notifications.get('locale', 'en')
+                    check_in = notifications.get('check_in', True)
+            except Exception as e:
+                data = json.loads(settings[0][0])
+                if type(data['notifications']) is str:
+                    li = list(data['notifications'].split(","))
+                    locale = "ar" if "ar" in li[3] else 'en'
+                    check_in = True if "true" in li[1] else False
 
-                    elif type(data['notifications']) is dict:
-                        locale = data['notifications']['locale']
-                        check_in = data['notifications']['check_in']
-                    print("--------------------------------------1569", check_in)
-                    if check_in:
+                elif type(data['notifications']) is dict:
+                    locale = data['notifications']['locale']
+                    check_in = data['notifications']['check_in']
+                print("Error parsing settings JSON:", e)
 
-                        for res in mobile_token1:
-                            mobile_token.append(res[0])
-                        if mobile_token:
-                            send_notification_student(mobile_token, title if locale == 'en' else title_ar,
-                                                      message if locale == 'en' else message_ar)
-                else:
+        if check_in:
+            for token in mobile_token1:
+                if token:  # نتجاهل None
+                    mobile_token.append(token)
 
-                    for res in mobile_token1:
-                        mobile_token.append(res[0])
-                    if mobile_token:
-                        locale = "en"
-                        send_notification_student(mobile_token, title if locale == 'en' else title_ar,
-                                                  message if locale == 'en' else message_ar)
-            else:
-                for res in mobile_token1:
-                    mobile_token.append(res[0])
-                if mobile_token:
-                    send_notification_student(mobile_token, title if locale == 'en' else title_ar,
-                                              message if locale == 'en' else message_ar)
+            if mobile_token:
+                send_notification_student(
+                    mobile_token,
+                    title if locale == 'en' else title_ar,
+                    message if locale == 'en' else message_ar
+                )
+
 
 
 def end_round(student_name, school_name, round_id, rec, driver_name, student_id, parent_id):
