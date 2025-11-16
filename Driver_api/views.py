@@ -1571,6 +1571,7 @@ def checked(student_id, round_type, bus_num, student_name, round_id, driver_name
                         for res in mobile_token1:
                             mobile_token.append(res[0])
                         if mobile_token:
+                            print("-------------------1574")
                             send_notification_student(mobile_token, title if locale == 'en' else title_ar,
                                                       message if locale == 'en' else message_ar)
                 else:
@@ -1578,12 +1579,14 @@ def checked(student_id, round_type, bus_num, student_name, round_id, driver_name
                         mobile_token.append(res[0])
                     if mobile_token:
                         locale = "en"
+                        print("-------------------1582")
                         send_notification_student(mobile_token, title if locale == 'en' else title_ar,
                                                   message if locale == 'en' else message_ar)
             else:
                 for res in mobile_token1:
                     mobile_token.append(res[0])
                 if mobile_token:
+                    print("-------------------1589")
                     send_notification_student(mobile_token, title if locale == 'en' else title_ar,
                                               message if locale == 'en' else message_ar)
 
