@@ -1602,6 +1602,8 @@ def end_round(student_name, school_name, round_id, rec, driver_name, student_id,
                         message_body,
                         message_body_ar, driver_name,
                         student_id=student_id)
+    print("test end round pick up")
+    print(parent_id)
     for rec in parent_id:
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  settings from school_parent WHERE id = %s", [rec])
@@ -1627,6 +1629,7 @@ def end_round(student_name, school_name, round_id, rec, driver_name, student_id,
                         locale = data['notifications']['locale']
                     for res in mobile_token1:
                         mobile_token.append(res[0])
+                    print(message_title if locale == 'en' else message_title_ar)
                     if mobile_token:
                         send_notification_student(mobile_token, message_title if locale == 'en' else message_title_ar,
                                                   message_body if locale == 'en' else message_body_ar)
