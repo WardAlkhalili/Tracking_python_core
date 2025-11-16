@@ -1614,6 +1614,7 @@ def end_round(student_name, school_name, round_id, rec, driver_name, student_id,
                                                          Q(db_name=school_name),
                                                          Q(is_active=True)).values_list(
                 'mobile_token').order_by('-pk')
+            print("------------------------------------------",mobile_token)
 
             if settings:
                 if settings[0] != 'None' and str(settings[0][0]) != 'None':
@@ -1633,6 +1634,11 @@ def end_round(student_name, school_name, round_id, rec, driver_name, student_id,
                     if mobile_token:
                         send_notification_student(mobile_token, message_title if locale == 'en' else message_title_ar,
                                                   message_body if locale == 'en' else message_body_ar)
+            else:
+                print("--------------")
+                if mobile_token:
+                    send_notification_student(mobile_token, message_title ,message_body )
+
 
 
 def check_out(student_id, bus_num, student_name, round_id, driver_name, rec, school_name, parent_id):
