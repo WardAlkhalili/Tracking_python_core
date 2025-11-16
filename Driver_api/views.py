@@ -1546,7 +1546,6 @@ def checked(student_id, round_type, bus_num, student_name, round_id, driver_name
             for token in mobile_token1:
                 if token:  # نتجاهل None
                     mobile_token.append(token)
-            print(mobile_token)
             if mobile_token:
                 send_notification_student(
                     mobile_token,
