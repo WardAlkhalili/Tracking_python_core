@@ -1552,7 +1552,7 @@ def checked(student_id, round_type, bus_num, student_name, round_id, driver_name
             if settings:
                 print("--------------------------------------1553", mobile_token1)
                 if (settings[0][0]):
-                    print("--------------------------------------1555", mobile_token1)
+
                     data = json.loads(settings[0][0])
                     locale = "en"
 
@@ -1566,7 +1566,7 @@ def checked(student_id, round_type, bus_num, student_name, round_id, driver_name
                     elif type(data['notifications']) is dict:
                         locale = data['notifications']['locale']
                         check_in = data['notifications']['check_in']
-
+                    print("--------------------------------------1569", check_in)
                     if check_in:
 
                         for res in mobile_token1:
