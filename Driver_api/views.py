@@ -69,7 +69,6 @@ def send_message(token, body, title, data):
         print("Message sent successfully.")
     else:
         print(f"Failed to send message. Status code: {re.status_code}")
-        print(body)
         print(re.text)
 
 
@@ -1281,10 +1280,6 @@ def set_round_status(request):
                                                                 student_history1[0][0] == 'no-show':
                                                             continue
 
-                                            # save_message_wizard(school_name, round_id, r, 'App\Model\sta' + str(rec),
-                                            #                     message_title, message_title_ar, message_body,
-                                            #                     message_body_ar, driver_name[0][0],student_id=k[0])
-                                            # push_service = FCMNotification(api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
 
                                             if mobile_token and not ("token" in mobile_token):
                                                 registration_id = list(dict.fromkeys(registration_id))
@@ -1294,41 +1289,7 @@ def set_round_status(request):
                                                                  message_title if lang == "en" else message_title_ar,
                                                                  {})
 
-                                                # notify_single_device = push_service.notify_single_device(
-                                                #     registration_id=registration_id[0],
-                                                #     message_title=message_title if lang =="en" else message_title_ar,
-                                                #     message_body=message_body if lang =="en" else message_body_ar,sound='new_beeb.mp3')
-                                                # try:
-                                                #     push_service1 = FCMNotification(
-                                                #         api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                                #     push_service1.notify_single_device(
-                                                #         registration_id=registration_id[0],
-                                                #         message_title=message_title if lang == "en" else message_title_ar,
-                                                #         message_body=message_body if lang == "en" else message_body_ar,
-                                                #         sound='new_beeb.mp3')
-                                                # except Exception as e:
-                                                #     try:
-                                                #         body = json.dumps({"registration_ids": mobile_token,
-                                                #                            "notification": {
-                                                #                                "title": message_title if lang == "en" else message_title_ar,
-                                                #                                "body": message_body if lang == "en" else message_body_ar,
-                                                #
-                                                #                                "mutable_content": True,
-                                                #                                "sound": "new_beeb.mp3"
-                                                #                            }})
-                                                #
-                                                #         headers = {
-                                                #             'Authorization': "key=AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD",
-                                                #             'Content-Type': 'application/json',
-                                                #         }
-                                                #
-                                                #         url = "https://fcm.googleapis.com/fcm/send"
-                                                #         response1 = requests.request("POST", url,
-                                                #                                      headers=headers, data=body)
-                                                #         response = response1.json()
-                                                #         print(response, "------------------")
-                                                #     except Exception as e:
-                                                #         print("-----------1235")
+
                                             notifications_title = 'Pick-up round'
                                             insert_sql_message_student += str(
                                                 (date_string, 'App\Model\drive', message_body, message_body_ar,
@@ -1547,10 +1508,8 @@ def checked(student_id, round_type, bus_num, student_name, round_id, driver_name
                                                          Q(db_name=school_name),
                                                          Q(is_active=True)).values_list(
                 'mobile_token').order_by('-pk')
-            print("--------------------------------------1550",mobile_token1)
 
             if settings:
-                print("--------------------------------------1553", mobile_token1)
                 if (settings[0][0]):
 
                     data = json.loads(settings[0][0])
@@ -1571,26 +1530,21 @@ def checked(student_id, round_type, bus_num, student_name, round_id, driver_name
 
                         for res in mobile_token1:
                             mobile_token.append(res[0])
-                            print("--------------------------------------1574", mobile_token)
                         if mobile_token:
-                            print("-------------------1574")
                             send_notification_student(mobile_token, title if locale == 'en' else title_ar,
                                                       message if locale == 'en' else message_ar)
                 else:
 
                     for res in mobile_token1:
                         mobile_token.append(res[0])
-                    print("--------------------------------------1583", mobile_token)
                     if mobile_token:
                         locale = "en"
-                        print("-------------------1582")
                         send_notification_student(mobile_token, title if locale == 'en' else title_ar,
                                                   message if locale == 'en' else message_ar)
             else:
                 for res in mobile_token1:
                     mobile_token.append(res[0])
                 if mobile_token:
-                    print("-------------------1589")
                     send_notification_student(mobile_token, title if locale == 'en' else title_ar,
                                               message if locale == 'en' else message_ar)
 
@@ -1610,8 +1564,6 @@ def end_round(student_name, school_name, round_id, rec, driver_name, student_id,
                         message_body,
                         message_body_ar, driver_name,
                         student_id=student_id)
-    print("test end round pick up")
-    print(parent_id)
     for rec in parent_id:
         with connections[school_name].cursor() as cursor:
             cursor.execute("select  settings from school_parent WHERE id = %s", [rec])
@@ -1622,7 +1574,7 @@ def end_round(student_name, school_name, round_id, rec, driver_name, student_id,
                                                          Q(db_name=school_name),
                                                          Q(is_active=True)).values_list(
                 'mobile_token').order_by('-pk')
-            print("------------------------------------------",mobile_token)
+
 
             if settings:
                 if settings[0] != 'None' and str(settings[0][0]) != 'None':
@@ -1638,12 +1590,12 @@ def end_round(student_name, school_name, round_id, rec, driver_name, student_id,
                         locale = data['notifications']['locale']
                     for res in mobile_token1:
                         mobile_token.append(res[0])
-                    print(message_title if locale == 'en' else message_title_ar)
+
                     if mobile_token:
                         send_notification_student(mobile_token, message_title if locale == 'en' else message_title_ar,
                                                   message_body if locale == 'en' else message_body_ar)
             else:
-                print("--------------")
+
                 if mobile_token:
                     send_notification_student(mobile_token, message_title ,message_body )
 
@@ -1836,13 +1788,10 @@ def no_show(student_id, student_name, round_id, driver_name, rec, school_name, p
 
 
 def send_notification_student(mobile_token, title, message):
-    # push_service = FCMNotification(
-    #     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
     registration_id = mobile_token
     message_title = title
     message_body = message
-    print("ddddddddddddddddddddddddddddddd", message)
-    print(mobile_token)
+
 
     if mobile_token and not ("token" in mobile_token):
         registration_id = list(dict.fromkeys(registration_id))
@@ -1850,13 +1799,7 @@ def send_notification_student(mobile_token, title, message):
             send_message(token, message_body,
                          message_title, {})
 
-        # try:
-        #      push_service.notify_multiple_devices(
-        #         registration_ids=registration_id,
-        #         message_title=message_title,
-        #         message_body=message_body, sound='new_beeb.mp3')
-        # except:
-        #     print(mobile_token)
+
 
 
 @api_view(['POST'])
@@ -1906,7 +1849,7 @@ def students_bus_checks(request):
                                         if student_name[0][4]:
                                             parent_id.append(student_name[0][4])
                                         parent_id = list(dict.fromkeys(parent_id))
-                                    print("---------------------183122222222---", parent_id,"------------00000")
+
 
                                     if type(driver_id) is not int:
                                         for e in driver_id:
@@ -1931,7 +1874,7 @@ def students_bus_checks(request):
                                                     "INSERT INTO  student_history (round_id,student_id,bus_check_in,datetime,history_id,lat,long,activity_type) VALUES (%s,%s,%s,%s,%s,%s,%s,%s); ",
                                                     [round_id, student_id, datetime.datetime.now(),
                                                      datetime.datetime.now(), round_history[0][0], lat, long, status])
-                                                print(status)
+
                                                 if status == 'in':
                                                     cursor.execute(
                                                         "UPDATE public.round_student_history SET bus_check_in = %s WHERE id =%s ",
@@ -1946,7 +1889,7 @@ def students_bus_checks(request):
                                                             student_name[0][0],
                                                             round_id,
                                                             driver_name[0][0], student_id, school_name, parent_id)
-                                                    print("-----------------------ssss")
+
                                                     cursor.execute(
                                                         "UPDATE public.transport_round SET total_checkedout_students= %s , total_checkedin_students= %s WHERE id=%s",
                                                         [ch_out, ch_in, round_id])
@@ -2161,42 +2104,14 @@ def send_notification(mobile_token1, message_title, message_body):
     mobile_token = []
     for e in mobile_token1:
         mobile_token.append(e[0])
-    # push_service = FCMNotification(
-    #     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
+
     registration_id = mobile_token
     if mobile_token and not ("token" in mobile_token):
         registration_id = list(dict.fromkeys(registration_id))
         for token in registration_id:
             send_message(token, message_body,
                          message_title, {})
-        # try:
-        #     notify_single_device = push_service.notify_single_device(
-        #         registration_id=registration_id[0],
-        #         message_title=message_title,
-        #         message_body=message_body,sound='new_beeb.mp3')
-        # except Exception as e:
-        #     try:
-        #         body = json.dumps({"registration_ids": mobile_token,
-        #                            "notification": {
-        #                                "title": message_title,
-        #                                "body": message_body,
-        #
-        #                                "mutable_content": True,
-        #                                "sound": "new_beeb.mp3"
-        #                            }})
-        #
-        #         headers = {
-        #             'Authorization': "key=AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD",
-        #             'Content-Type': 'application/json',
-        #         }
-        #
-        #         url = "https://fcm.googleapis.com/fcm/send"
-        #         response1 = requests.request("POST", url,
-        #                                      headers=headers, data=body)
-        #         response = response1.json()
-        #         print(response, "------------------")
-        #     except Exception as e:
-        #         print("-----------2050")
+
 
 
 @api_view(['POST'])
@@ -2580,9 +2495,7 @@ def notify(request):
                                     for e in mobile_token1:
                                         mobile_token.append(e[0])
 
-                                    # push_service = FCMNotification(
-                                    #     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
-                                # mobile_token=["ctie8P6PSkibn9n_PL8Cxa:APA91bFXMkn1TM8Kxwa7dyzXOFF_ad5ECy4ng-Qn8Ltf46uXH5r165o6YclP2cE38eccz4UvNunWmEqbrkJ4QUZI97s9rqkaLvf9OXJ6GxOR_3zyMpYxAqA54iUrOlE1hD89pTzHqDti"]
+
                                 if mobile_token:
                                     registration_id = mobile_token
                                     message_title_ar = "اشعار من الحافلة"
@@ -2595,35 +2508,6 @@ def notify(request):
                                     for token in registration_id:
                                         send_message(token, message_body if lang == "en" else message_body_ar,
                                                      message_title if lang == "en" else message_title_ar, {})
-                                    # try:
-                                    #
-                                    #     result = push_service.notify_multiple_devices(
-                                    #         registration_ids=registration_id,
-                                    #                                                message_title=message_title if lang =="en" else message_title_ar,
-                                    #                                                message_body=message_body if lang =="en" else message_body_ar,sound='new_beeb.mp3')
-                                    # except Exception as  e:
-                                    #     try:
-                                    #         body = json.dumps({"registration_ids": mobile_token,
-                                    #                            "notification": {
-                                    #                                "title": message_title if lang == "en" else message_title_ar,
-                                    #                                "body": message_body if lang == "en" else message_body_ar,
-                                    #
-                                    #                                "mutable_content": True,
-                                    #                                "sound": "new_beeb.mp3"
-                                    #                            }})
-                                    #
-                                    #         headers = {
-                                    #             'Authorization': "key=AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD",
-                                    #             'Content-Type': 'application/json',
-                                    #         }
-                                    #
-                                    #         url = "https://fcm.googleapis.com/fcm/send"
-                                    #         response1 = requests.request("POST", url,
-                                    #                                      headers=headers, data=body)
-                                    #         response = response1.json()
-                                    #         print(response, "------------------")
-                                    #     except Exception as e:
-                                    #         print("-----------2459")
 
                                 result = {'status': "ok"}
                                 return Response(result)

@@ -101,7 +101,7 @@ def send_message(token, body, title, data):
         }
     })
     re = requests.post(url, headers=headers, data=payload)
-    print(re)
+    # print(re)
 
 
 @api_view(['POST'])
@@ -1251,7 +1251,7 @@ def kids_list(request):
         'students': studen_list,
         "parent_id": int(parent_id)
     }
-    print(len(studen_list))
+    # print(len(studen_list))
     return Response(result)
 
 
@@ -3113,34 +3113,16 @@ def notify(request):
 
 
 def send_driver_notif(mobile_token, student_id, student_name, round_id, type, when):
-    # print(mobile_token)
 
-    # AAAAXj2DTK0:APA91bFSxi4txQ8WffLYLBrxFVd3JMCSP5n9WfZafPnLpxC2i9cXHi2SofNoNSBgFWt2tgqjEstSeVkre-1FklyKn4NIy0AuYSwafkQt-RhXcVCth3RJdt8GUbTw9aZI70XFmYBshjuy
-    # push_service = FCMNotification(
-    #         api_key="AAAAXj2DTK0:APA91bFSxi4txQ8WffLYLBrxFVd3JMCSP5n9WfZafPnLpxC2i9cXHi2SofNoNSBgFWt2tgqjEstSeVkre-1FklyKn4NIy0AuYSwafkQt-RhXcVCth3RJdt8GUbTw9aZI70XFmYBshjuy")
-    # push_service = FCMNotification(
-    #     api_key="AAAAzysR6fk:APA91bFX6siqzUm-MQdhOWlno2PCOMfFVFIHmcfzRwmStaQYnUUJfDZBkC2kd2_s-4pk0o5jxrK9RsNiQnm6h52pzxDbfLijhXowIvVL2ReK7Y0FdZAYzmRekWTtOwsyG4au7xlRz1zD")
     registration_id = mobile_token
     message_title = ""
     message_body = "Today, the student  " + student_name + " is absent, So please do not pass by for pickup."
-    # message_body = "The student " + student_name + "will be absent on" + str(
-    #     when) + ". So please do not pass by my home for pickup."
-    # if(type=="morning"):
-    #     message_title = "Absent Only Morning"
-    # else:
-    #     message_title = "Absent All Day "
+
     message_title = 'Round\'s Absence'
     send_message(registration_id, message_body, message_title, {"json_data": json.dumps(
         {"student_id": student_id, "status": "absent",
          "student_name": student_name, "round_id": round_id,
          "date_time": ""})})
-    # result = push_service.notify_single_device(registration_id=registration_id, message_title=message_title,
-    #                                            message_body=message_body, message_icon="",
-    #                                            data_message={"json_data": json.dumps(
-    #                                                {"student_id": student_id, "status": "absent",
-    #                                                 "student_name": student_name, "round_id": round_id,
-    #                                                 "date_time": ""})}
-    #                                            )
 
 
 @api_view(['GET'])
