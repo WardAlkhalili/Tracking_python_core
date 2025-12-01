@@ -4901,6 +4901,7 @@ def post_library(request):
 
 @api_view(['GET'])
 def get_marks(request, student_id):
+    print("ssssssssssssssssssssssss",student_id)
     if request.method != 'GET':
         return None
 
@@ -5067,7 +5068,7 @@ def get_marks(request, student_id):
                     for mark_line_id, mark in cursor.fetchall():
                         # آخر قيمة تكتب overwrites السابقة (مقبول، والسلوك القديم كان LIMIT 1 أيضاً)
                         mark_line_map[mark_line_id] = str(mark)
-                    
+
                 # ====== بناء الـ JSON بنفس الشكل القديم ======
                 for semester_id in academic_semesters:
                     exam_det = []
