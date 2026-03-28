@@ -10,8 +10,10 @@ urlpatterns = [
     path('api/send_survey_message_to_parent', views.send_survey_message_to_parent),
     path('api/send-school-message', views.send_school_message),
     path('rt/api/schools/push-notification', views.push_notification),
-    
-
+    path('api/test', views.test_lis),
+    path('api/send_chat_parent', views.send_chat_parent),
+    path('api/send_chat_teacher', views.send_chat_teacher),
+    path('api/get_access_token', views.get_access_token_fierbase),
     # path('api/send_confirmation_message_to_parent', views.send_confirmation_message_to_parent),
     # path('index/', views.index, name='index'),
 ]
