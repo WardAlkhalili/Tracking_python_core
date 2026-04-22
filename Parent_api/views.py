@@ -4989,14 +4989,10 @@ def get_marks(request, student_id):
                 group_ids.append(gid)
                 if related_exam is not None:
                     related_exam_ids.add(related_exam)
-                    print(db_name)
-                    print("4998 line ")
             # لو ما في exam_group نقدر نرجع نفس النتيجة ولكن فاضية
             if group_ids:
                 # 3.3 جلب subject_mark_line لكل exam_group مرّة واحدة
                 if db_name == 'sarmad':
-                    print(db_name)
-                    print("4998 line ")
                     cursor.execute(
                         """
                             SELECT mark_subject_line_id, subject_id, max
@@ -5025,9 +5021,6 @@ def get_marks(request, student_id):
 
                 # 3.4 جلب أسماء المواد مرّة واحدة
                 if subject_ids:
-                    if db_name == 'sarmad':
-                        print(db_name)
-                        print("5030 line ")
                     cursor.execute(
                         """
                         SELECT id, name
