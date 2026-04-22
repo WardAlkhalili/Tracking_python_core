@@ -4901,7 +4901,7 @@ def post_library(request):
 
 @api_view(['GET'])
 def get_marks(request, student_id):
-    print("ssssssssssssssssssssssss",student_id)
+    # print("ssssssssssssssssssssssss",student_id)
     if request.method != 'GET':
         return None
 
@@ -4989,7 +4989,8 @@ def get_marks(request, student_id):
                 group_ids.append(gid)
                 if related_exam is not None:
                     related_exam_ids.add(related_exam)
-
+                    print(db_name)
+                    print("4998 line ")
             # لو ما في exam_group نقدر نرجع نفس النتيجة ولكن فاضية
             if group_ids:
                 # 3.3 جلب subject_mark_line لكل exam_group مرّة واحدة
@@ -5024,6 +5025,9 @@ def get_marks(request, student_id):
 
                 # 3.4 جلب أسماء المواد مرّة واحدة
                 if subject_ids:
+                    if db_name == 'sarmad':
+                        print(db_name)
+                        print("5030 line ")
                     cursor.execute(
                         """
                         SELECT id, name
@@ -5064,7 +5068,7 @@ def get_marks(request, student_id):
                     for mid, subj_id, exams_id, semester_id in cursor.fetchall():
                         mark_mark_map[(subj_id, exams_id, semester_id)] = mid
                         mark_mark_ids.append(mid)
-                print(mark_mark_ids)
+                # print(mark_mark_ids)
 
                 # 3.6 جلب علامات الطالب من mark_line لكل mark_mark_id في استعلام واحد
                 mark_line_map = {}  # {mark_mark_id: str(mark)}
