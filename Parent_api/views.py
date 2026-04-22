@@ -4993,16 +4993,28 @@ def get_marks(request, student_id):
             # لو ما في exam_group نقدر نرجع نفس النتيجة ولكن فاضية
             if group_ids:
                 # 3.3 جلب subject_mark_line لكل exam_group مرّة واحدة
-                cursor.execute(
-                    """
-                    SELECT mark_subject_line_id, subject_id, max
-                    FROM subject_mark_line
-                    WHERE mark_subject_line_id = ANY(%s)
-                    """,
-                    [group_ids],
-                )
-                subject_lines_by_group = defaultdict(list)  # {group_id: [(subject_id, max), ...]}
-                subject_ids = set()
+                if db_name == 'sarmad':
+                    cursor.execute(
+                        """
+                            SELECT mark_subject_line_id, subject_id, max
+                            FROM subject_mark_line
+                            WHERE mark_subject_line_id = ANY(%s) and subject_id != 130
+                        """,
+                        [group_ids],
+                    )
+                    subject_lines_by_group = defaultdict(list)  # {group_id: [(subject_id, max), ...]}
+                    subject_ids = set()
+                else:
+                    cursor.execute(
+                        """
+                        SELECT mark_subject_line_id, subject_id, max
+                        FROM subject_mark_line
+                        WHERE mark_subject_line_id = ANY(%s) 
+                        """,
+                        [group_ids],
+                    )
+                    subject_lines_by_group = defaultdict(list)  # {group_id: [(subject_id, max), ...]}
+                    subject_ids = set()
 
                 for group_id, subject_id, max_mark in cursor.fetchall():
                     subject_lines_by_group[group_id].append((subject_id, max_mark))
