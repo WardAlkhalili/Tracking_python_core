@@ -4994,6 +4994,8 @@ def get_marks(request, student_id):
             if group_ids:
                 # 3.3 جلب subject_mark_line لكل exam_group مرّة واحدة
                 if db_name == 'sarmad':
+                    print(db_name)
+                    print("4998 line ")
                     cursor.execute(
                         """
                             SELECT mark_subject_line_id, subject_id, max
